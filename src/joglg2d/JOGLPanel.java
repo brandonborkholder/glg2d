@@ -49,8 +49,7 @@ public class JOGLPanel extends JPanel {
     public void display(GLAutoDrawable drawable) {
       GL gl = drawable.getGL();
       gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-      paint(getGraphics());
-      gl.glFlush();
+      g2d.paint(JOGLPanel.this);
     }
 
     @Override

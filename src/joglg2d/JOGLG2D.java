@@ -1,6 +1,8 @@
 package joglg2d;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Composite;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -32,11 +34,24 @@ public class JOGLG2D extends Graphics2D {
 
   private final int height;
 
+  protected BasicStroke stroke;
+
+  protected Color color;
+
   public JOGLG2D(GL gl, int height) {
     this.gl = gl;
     this.height = height;
+    setStroke(new BasicStroke());
     setColor(Color.BLACK);
-    gl.glLineWidth(1);
+  }
+
+  protected void paint(Component component) {
+    gl.glPushMatrix();
+    gl.glTranslatef(0, height, 0);
+    gl.glScalef(1, -1, 1);
+    component.paint(this);
+    gl.glPopMatrix();
+    gl.glFlush();
   }
 
   @Override
@@ -130,8 +145,10 @@ public class JOGLG2D extends Graphics2D {
 
   @Override
   public void setStroke(Stroke s) {
-    // TODO Auto-generated method stub
+    assert s instanceof BasicStroke : "Only BasicStroke is supported currently.";
 
+    stroke = (BasicStroke) s;
+    gl.glLineWidth(stroke.getLineWidth());
   }
 
   @Override
@@ -268,14 +285,14 @@ public class JOGLG2D extends Graphics2D {
 
   @Override
   public Color getColor() {
-    // TODO Auto-generated method stub
-    return null;
+    return color;
   }
 
   @Override
   public void setColor(Color c) {
-    int rgb = c.getRGB();
-    gl.glColor4i(rgb >> 16 & 0xFF, rgb >> 8 & 0xFF, rgb & 0xFF, rgb >> 24 & 0xFF);
+    color = c;
+    int rgb = color.getRGB();
+    gl.glColor4f((rgb >> 16 & 0xFF) / 255F, (rgb >> 8 & 0xFF) / 255F, (rgb & 0xFF) / 255F, (rgb >> 24 & 0xFF) / 255F);
   }
 
   @Override
@@ -347,15 +364,19 @@ public class JOGLG2D extends Graphics2D {
   @Override
   public void drawLine(int x1, int y1, int x2, int y2) {
     gl.glBegin(GL.GL_LINES);
-    gl.glVertex2i(x1, height - y1);
-    gl.glVertex2i(x2, height - y2);
+    gl.glVertex2i(x1, y1);
+    gl.glVertex2i(x2, y2);
     gl.glEnd();
   }
 
   @Override
   public void fillRect(int x, int y, int width, int height) {
-    // TODO Auto-generated method stub
-
+    gl.glBegin(GL.GL_QUADS);
+    gl.glVertex2i(x, y);
+    gl.glVertex2i(x + width, y);
+    gl.glVertex2i(x + width, y + height);
+    gl.glVertex2i(x, y + height);
+    gl.glEnd();
   }
 
   @Override

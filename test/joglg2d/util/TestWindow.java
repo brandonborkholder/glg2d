@@ -18,6 +18,8 @@ import javax.swing.Timer;
 
 import joglg2d.JOGLPanel;
 
+import org.junit.Assert;
+
 /**
  * @author borkholder
  * @created Feb 6, 2010
@@ -106,6 +108,15 @@ public class TestWindow extends JFrame {
 
   public void setPainter(Painter painter) {
     this.painter = painter;
+  }
+
+  public void close() {
+    setVisible(false);
+  }
+
+  public void assertSame() throws InterruptedException {
+    int result = waitForInput();
+    Assert.assertEquals("User did not consider the two to be the same.", SAME, result);
   }
 
   public int waitForInput() throws InterruptedException {
