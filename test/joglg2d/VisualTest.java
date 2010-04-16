@@ -23,9 +23,6 @@ public class VisualTest {
       }
     });
 
-    tester.setSize(600, 600);
-    tester.setLocationRelativeTo(null);
-    tester.setVisible(true);
     int result = tester.waitForInput();
     Assert.assertEquals(TestWindow.SAME, result);
   }

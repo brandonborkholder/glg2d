@@ -14,6 +14,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JSplitPane;
+import javax.swing.Timer;
 
 import joglg2d.JOGLPanel;
 
@@ -33,9 +34,11 @@ public class TestWindow extends JFrame {
   private int result = -1;
 
   public TestWindow() {
-    setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-
+    setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    setSize(640, 480);
+    setLocationRelativeTo(null);
     initialize();
+    setVisible(true);
   }
 
   private void initialize() {
@@ -59,7 +62,7 @@ public class TestWindow extends JFrame {
     };
 
     splitPane.setLeftComponent(jogl);
-//    splitPane.setRightComponent(java2d);
+    splitPane.setRightComponent(java2d);
     splitPane.setResizeWeight(0.5);
 
     JButton sameButton = new JButton("Same");
@@ -92,6 +95,13 @@ public class TestWindow extends JFrame {
         result = DIFFERENT;
       }
     });
+
+    new Timer(200, new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        repaint();
+      }
+    }).start();
   }
 
   public void setPainter(Painter painter) {
@@ -99,6 +109,7 @@ public class TestWindow extends JFrame {
   }
 
   public int waitForInput() throws InterruptedException {
+    result = -1;
     while (result == -1) {
       Thread.sleep(100);
     }

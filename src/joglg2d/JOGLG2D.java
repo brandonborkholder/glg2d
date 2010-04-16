@@ -30,9 +30,13 @@ import javax.media.opengl.GL;
 public class JOGLG2D extends Graphics2D {
   private final GL gl;
 
-  public JOGLG2D(GL gl) {
+  private final int height;
+
+  public JOGLG2D(GL gl, int height) {
     this.gl = gl;
-    gl.glClear(GL.GL_COLOR_BUFFER_BIT);
+    this.height = height;
+    setColor(Color.BLACK);
+    gl.glLineWidth(1);
   }
 
   @Override
@@ -270,8 +274,8 @@ public class JOGLG2D extends Graphics2D {
 
   @Override
   public void setColor(Color c) {
-    // TODO Auto-generated method stub
-
+    int rgb = c.getRGB();
+    gl.glColor4i(rgb >> 16 & 0xFF, rgb >> 8 & 0xFF, rgb & 0xFF, rgb >> 24 & 0xFF);
   }
 
   @Override
@@ -342,8 +346,10 @@ public class JOGLG2D extends Graphics2D {
 
   @Override
   public void drawLine(int x1, int y1, int x2, int y2) {
-    // TODO Auto-generated method stub
-
+    gl.glBegin(GL.GL_LINES);
+    gl.glVertex2i(x1, height - y1);
+    gl.glVertex2i(x2, height - y2);
+    gl.glEnd();
   }
 
   @Override
