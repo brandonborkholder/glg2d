@@ -29,7 +29,7 @@ import java.util.Map;
 
 import javax.media.opengl.GL;
 
-public class JOGLG2D extends Graphics2D {
+public class JOGLG2D extends Graphics2D implements Cloneable {
   private final GL gl;
 
   private final int height;
@@ -38,14 +38,25 @@ public class JOGLG2D extends Graphics2D {
 
   protected Color color;
 
+  protected Color background;
+
+  protected AffineTransform transform;
+
+  protected Font font;
+
   public JOGLG2D(GL gl, int height) {
     this.gl = gl;
     this.height = height;
     setStroke(new BasicStroke());
     setColor(Color.BLACK);
+    setBackground(Color.BLACK);
+    setFont(new Font(null, Font.PLAIN, 10));
+    transform = new AffineTransform();
   }
 
   protected void paint(Component component) {
+    setBackground(component.getBackground());
+    gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
     gl.glPushMatrix();
     gl.glTranslatef(0, height, 0);
     gl.glScalef(1, -1, 1);
@@ -68,43 +79,36 @@ public class JOGLG2D extends Graphics2D {
   @Override
   public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
   public void drawRenderedImage(RenderedImage img, AffineTransform xform) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
   public void drawRenderableImage(RenderableImage img, AffineTransform xform) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
   public void drawString(String str, int x, int y) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
   public void drawString(String str, float x, float y) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
   public void drawString(AttributedCharacterIterator iterator, int x, int y) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
   public void drawString(AttributedCharacterIterator iterator, float x, float y) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
@@ -183,62 +187,73 @@ public class JOGLG2D extends Graphics2D {
 
   @Override
   public void translate(int x, int y) {
-    // TODO Auto-generated method stub
-
+    transform.translate(x, y);
+    setTransform(transform);
   }
 
   @Override
   public void translate(double tx, double ty) {
-    // TODO Auto-generated method stub
-
+    transform.translate(tx, ty);
+    setTransform(transform);
   }
 
   @Override
   public void rotate(double theta) {
-    // TODO Auto-generated method stub
-
+    transform.rotate(theta);
+    setTransform(transform);
   }
 
   @Override
   public void rotate(double theta, double x, double y) {
-    // TODO Auto-generated method stub
-
+    transform.rotate(theta, x, y);
+    setTransform(transform);
   }
 
   @Override
   public void scale(double sx, double sy) {
-    // TODO Auto-generated method stub
-
+    transform.scale(sx, sy);
+    setTransform(transform);
   }
 
   @Override
   public void shear(double shx, double shy) {
-    // TODO Auto-generated method stub
-
+    transform.shear(shx, shy);
+    setTransform(transform);
   }
 
   @Override
   public void transform(AffineTransform Tx) {
-    // TODO Auto-generated method stub
-
+    transform.concatenate(Tx);
+    setTransform(Tx);
   }
 
   @Override
   public void setTransform(AffineTransform Tx) {
-    // TODO Auto-generated method stub
+    if (transform != Tx) {
+      transform = (AffineTransform) Tx.clone();
+    }
 
+    double[] matrix = new double[16];
+    matrix[0] = transform.getScaleX();
+    matrix[1] = transform.getShearY();
+    matrix[4] = transform.getShearX();
+    matrix[5] = transform.getScaleY();
+    matrix[10] = 1;
+    matrix[12] = transform.getTranslateX();
+    matrix[13] = transform.getTranslateY();
+    matrix[15] = 1;
+
+    gl.glLoadMatrixd(matrix, 0);
   }
 
   @Override
   public AffineTransform getTransform() {
-    // TODO Auto-generated method stub
-    return null;
+    return (AffineTransform) transform.clone();
   }
 
   @Override
   public Paint getPaint() {
-    // TODO Auto-generated method stub
-    return null;
+    return color;
   }
 
   @Override
@@ -249,20 +264,19 @@ public class JOGLG2D extends Graphics2D {
 
   @Override
   public void setBackground(Color color) {
-    // TODO Auto-generated method stub
-
+    background = color;
+    int rgb = background.getRGB();
+    gl.glClearColor((rgb >> 16 & 0xFF) / 255F, (rgb >> 8 & 0xFF) / 255F, (rgb & 0xFF) / 255F, (rgb >> 24 & 0xFF) / 255F);
   }
 
   @Override
   public Color getBackground() {
-    // TODO Auto-generated method stub
-    return null;
+    return background;
   }
 
   @Override
   public Stroke getStroke() {
-    // TODO Auto-generated method stub
-    return null;
+    return stroke;
   }
 
   @Override
@@ -279,8 +293,7 @@ public class JOGLG2D extends Graphics2D {
 
   @Override
   public Graphics create() {
-    // TODO Auto-generated method stub
-    return null;
+    return clone();
   }
 
   @Override
@@ -309,14 +322,12 @@ public class JOGLG2D extends Graphics2D {
 
   @Override
   public Font getFont() {
-    // TODO Auto-generated method stub
-    return null;
+    return font;
   }
 
   @Override
   public void setFont(Font font) {
-    // TODO Auto-generated method stub
-
+    this.font = font;
   }
 
   @Override
@@ -381,8 +392,10 @@ public class JOGLG2D extends Graphics2D {
 
   @Override
   public void clearRect(int x, int y, int width, int height) {
-    // TODO Auto-generated method stub
-
+    Color origColor = color;
+    setColor(background);
+    drawRect(x, y, width, height);
+    setColor(origColor);
   }
 
   @Override
@@ -423,20 +436,32 @@ public class JOGLG2D extends Graphics2D {
 
   @Override
   public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints) {
-    // TODO Auto-generated method stub
+    gl.glBegin(GL.GL_LINE_STRIP);
+    for (int i = 0; i < nPoints; i++) {
+      gl.glVertex2i(xPoints[i], yPoints[i]);
+    }
 
+    gl.glEnd();
   }
 
   @Override
   public void drawPolygon(int[] xPoints, int[] yPoints, int nPoints) {
-    // TODO Auto-generated method stub
+    gl.glBegin(GL.GL_LINE_LOOP);
+    for (int i = 0; i < nPoints; i++) {
+      gl.glVertex2i(xPoints[i], yPoints[i]);
+    }
 
+    gl.glEnd();
   }
 
   @Override
   public void fillPolygon(int[] xPoints, int[] yPoints, int nPoints) {
-    // TODO Auto-generated method stub
+    gl.glBegin(GL.GL_POLYGON);
+    for (int i = 0; i < nPoints; i++) {
+      gl.glVertex2i(xPoints[i], yPoints[i]);
+    }
 
+    gl.glEnd();
   }
 
   @Override
@@ -482,4 +507,15 @@ public class JOGLG2D extends Graphics2D {
 
   }
 
+  @Override
+  protected JOGLG2D clone() {
+    try {
+      JOGLG2D copy = (JOGLG2D) super.clone();
+      // clone mutable members
+      copy.transform = (AffineTransform) transform.clone();
+      return copy;
+    } catch (CloneNotSupportedException exception) {
+      throw new RuntimeException(exception);
+    }
+  }
 }

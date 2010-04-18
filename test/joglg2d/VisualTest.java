@@ -3,6 +3,7 @@ package joglg2d;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.Rectangle2D;
 
 import joglg2d.util.Painter;
 import joglg2d.util.TestWindow;
@@ -60,6 +61,30 @@ public class VisualTest {
       public void paint(Graphics2D g2d) {
         g2d.setStroke(new BasicStroke(4));
         g2d.drawLine(8, 99, 143, 400);
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void drawRectTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        g2d.drawRect(50, 90, 70, 32);
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void rectangleShapeTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        g2d.draw(new Rectangle2D.Double(48.1, 123, 49.34, 34.1));
       }
     });
 

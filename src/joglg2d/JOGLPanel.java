@@ -1,7 +1,6 @@
 package joglg2d;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Graphics;
 
 import javax.media.opengl.GL;
@@ -32,11 +31,33 @@ public class JOGLPanel extends JPanel {
   }
 
   @Override
-  public void repaint() {
-    super.repaint();
-    if (contentPanel != null) {
-      contentPanel.repaint();
-    }
+  protected void paintComponent(Graphics g) {
+    super.paintComponent(g);
+    contentPanel.display();
+  }
+
+  @Override
+  public void paintAll(Graphics g) {
+    super.paintAll(g);
+    contentPanel.display();
+  }
+
+  @Override
+  public void paintComponents(Graphics g) {
+    super.paintComponents(g);
+    contentPanel.display();
+  }
+
+  @Override
+  protected void paintChildren(Graphics g) {
+    super.paintChildren(g);
+    contentPanel.display();
+  }
+
+  @Override
+  public void paint(Graphics g) {
+    super.paint(g);
+    contentPanel.display();
   }
 
   @Override
@@ -47,18 +68,11 @@ public class JOGLPanel extends JPanel {
   class Listener implements GLEventListener {
     @Override
     public void display(GLAutoDrawable drawable) {
-      GL gl = drawable.getGL();
-      gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
       g2d.paint(JOGLPanel.this);
     }
 
     @Override
     public void init(GLAutoDrawable drawable) {
-      final GL gl = drawable.getGL();
-      Color backgroundColor = getBackground();
-      gl.glClearColor(backgroundColor.getRed() / 255F, backgroundColor.getGreen() / 255F, backgroundColor.getBlue() / 255F, backgroundColor
-          .getAlpha() / 255F);
-
       g2d = new JOGLG2D(contentPanel.getGL(), drawable.getHeight());
     }
 
