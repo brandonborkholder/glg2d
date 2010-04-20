@@ -11,6 +11,9 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.glu.GLU;
 import javax.swing.JPanel;
 
+import com.sun.opengl.util.Animator;
+import com.sun.opengl.util.FPSAnimator;
+
 /**
  * @author borkholder
  * @created Feb 6, 2010
@@ -21,6 +24,8 @@ public class JOGLPanel extends JPanel {
 
   protected JOGLG2D g2d;
 
+  protected Animator animator;
+
   public JOGLPanel() {
     GLCapabilities capabilities = new GLCapabilities();
     contentPanel = new GLCanvas(capabilities);
@@ -28,36 +33,13 @@ public class JOGLPanel extends JPanel {
 
     setLayout(new BorderLayout());
     add(contentPanel, BorderLayout.CENTER);
+
+    animator = new FPSAnimator(contentPanel, 5);
+    animator.start();
   }
 
   @Override
-  protected void paintComponent(Graphics g) {
-    super.paintComponent(g);
-    contentPanel.display();
-  }
-
-  @Override
-  public void paintAll(Graphics g) {
-    super.paintAll(g);
-    contentPanel.display();
-  }
-
-  @Override
-  public void paintComponents(Graphics g) {
-    super.paintComponents(g);
-    contentPanel.display();
-  }
-
-  @Override
-  protected void paintChildren(Graphics g) {
-    super.paintChildren(g);
-    contentPanel.display();
-  }
-
-  @Override
-  public void paint(Graphics g) {
-    super.paint(g);
-    contentPanel.display();
+  public void repaint() {
   }
 
   @Override
@@ -73,6 +55,7 @@ public class JOGLPanel extends JPanel {
 
     @Override
     public void init(GLAutoDrawable drawable) {
+//      contentPanel.setGL(new TraceGL(contentPanel.getGL(), System.out));
       g2d = new JOGLG2D(contentPanel.getGL(), drawable.getHeight());
     }
 

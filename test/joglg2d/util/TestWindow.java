@@ -48,6 +48,7 @@ public class TestWindow extends JFrame {
     JComponent java2d = new JPanel() {
       @Override
       public void paint(Graphics g) {
+        super.paint(g);
         if (painter != null) {
           painter.paint((Graphics2D) g);
         }
@@ -57,6 +58,7 @@ public class TestWindow extends JFrame {
     JComponent jogl = new JOGLPanel() {
       @Override
       public void paint(Graphics g) {
+        super.paint(g);
         if (painter != null) {
           painter.paint((Graphics2D) g);
         }

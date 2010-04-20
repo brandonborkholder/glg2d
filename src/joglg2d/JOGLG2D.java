@@ -44,6 +44,8 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected Font font;
 
+  protected JOGLPathIterator shapeDrawer;
+
   public JOGLG2D(GL gl, int height) {
     this.gl = gl;
     this.height = height;
@@ -52,6 +54,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     setBackground(Color.BLACK);
     setFont(new Font(null, Font.PLAIN, 10));
     transform = new AffineTransform();
+    shapeDrawer = new JOGLPathIterator(gl);
   }
 
   protected void paint(Component component) {
@@ -67,7 +70,10 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void draw(Shape s) {
-    // TODO Auto-generated method stub
+    s = stroke.createStrokedShape(s);
+    gl.glLineWidth(1);
+    shapeDrawer.draw(s, true);
+    setStroke(stroke);
   }
 
   @Override
@@ -119,8 +125,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void fill(Shape s) {
-    // TODO Auto-generated method stub
-
+    shapeDrawer.draw(s, true);
   }
 
   @Override
@@ -412,14 +417,12 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawOval(int x, int y, int width, int height) {
-    // TODO Auto-generated method stub
-
+    shapeDrawer.drawOval(x, y, width, height, false);
   }
 
   @Override
   public void fillOval(int x, int y, int width, int height) {
-    // TODO Auto-generated method stub
-
+    shapeDrawer.drawOval(x, y, width, height, true);
   }
 
   @Override
@@ -504,7 +507,6 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   @Override
   public void dispose() {
     // TODO Auto-generated method stub
-
   }
 
   @Override

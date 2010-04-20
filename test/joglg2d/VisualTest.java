@@ -84,7 +84,7 @@ public class VisualTest {
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
-        g2d.draw(new Rectangle2D.Double(48.1, 123, 49.34, 34.1));
+        g2d.draw(new Rectangle2D.Float(48, 123, 49, 34));
       }
     });
 
