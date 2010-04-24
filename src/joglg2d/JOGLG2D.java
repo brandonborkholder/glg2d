@@ -70,10 +70,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void draw(Shape s) {
-    s = stroke.createStrokedShape(s);
-    gl.glLineWidth(1);
-    shapeDrawer.draw(s, true);
-    setStroke(stroke);
+    shapeDrawer.draw(s, false);
   }
 
   @Override
@@ -405,14 +402,12 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-    // TODO Auto-generated method stub
-
+    shapeDrawer.drawRoundRect(x, y, width, height, arcWidth, arcHeight, false);
   }
 
   @Override
   public void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-    // TODO Auto-generated method stub
-
+    shapeDrawer.drawRoundRect(x, y, width, height, arcWidth, arcHeight, true);
   }
 
   @Override
@@ -427,14 +422,12 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
-    // TODO Auto-generated method stub
-
+    shapeDrawer.drawArc(x, y, width, height, startAngle, arcAngle, false);
   }
 
   @Override
   public void fillArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
-    // TODO Auto-generated method stub
-
+    shapeDrawer.drawArc(x, y, width, height, startAngle, arcAngle, true);
   }
 
   @Override

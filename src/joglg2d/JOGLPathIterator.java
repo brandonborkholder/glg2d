@@ -1,11 +1,16 @@
 package joglg2d;
 
 import java.awt.Shape;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.PathIterator;
-import java.nio.FloatBuffer;
+import java.awt.geom.RoundRectangle2D;
+import java.nio.DoubleBuffer;
+import java.util.Arrays;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.glu.GLU;
+import javax.media.opengl.glu.GLUtessellator;
 
 /**
  * @author borkholder
@@ -15,24 +20,87 @@ import javax.media.opengl.GL;
 public class JOGLPathIterator {
   static final Ellipse2D.Double ELLIPSE = new Ellipse2D.Double();
 
+  static final RoundRectangle2D.Double ROUND_RECT = new RoundRectangle2D.Double();
+
+  static final Arc2D.Double ARC = new Arc2D.Double();
+
   protected final GL gl;
 
-  protected float[] coords = new float[10];
+  protected double[] coords = new double[10];
 
-  protected FloatBuffer buffer = FloatBuffer.allocate(50);
+  protected DoubleBuffer buffer = DoubleBuffer.allocate(50);
 
   public JOGLPathIterator(GL gl) {
     this.gl = gl;
   }
 
+  public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight, boolean fill) {
+    ROUND_RECT.setRoundRect(x, y, width, height, arcWidth, arcHeight);
+    draw(ROUND_RECT, fill);
+  }
+
   public void drawOval(int x, int y, int width, int height, boolean fill) {
+    ELLIPSE.setFrame(x, y, width, height);
+    draw(ELLIPSE, fill);
+  }
+
+  public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle, boolean fill) {
+    ARC.setArc(arcAngle, x, y, width, height, startAngle, fill ? Arc2D.PIE : Arc2D.OPEN);
+    draw(ARC, fill);
+  }
+
+  public void fill(Shape shape) {
+    PathIterator iterator = shape.getPathIterator(null);
+    GLU glu = new GLU();
+    GLUtessellator tesselator = glu.gluNewTess();
+
+    switch (iterator.getWindingRule()) {
+    case PathIterator.WIND_EVEN_ODD:
+      glu.gluTessProperty(tesselator, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_ODD);
+      break;
+
+    case PathIterator.WIND_NON_ZERO:
+      glu.gluTessProperty(tesselator, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_NONZERO);
+      break;
+    }
+
+    glu.gluBeginPolygon(tesselator);
+
+    double[] point = new double[3];
+    for (; !iterator.isDone(); iterator.next()) {
+      Arrays.fill(coords, 0);
+      switch (iterator.currentSegment(coords)) {
+      case PathIterator.SEG_MOVETO:
+        point[0] = coords[0];
+        point[1] = coords[1];
+        glu.gluTessBeginContour(tesselator);
+        glu.gluTessVertex(tesselator, point, 0, null);
+        break;
+
+      case PathIterator.SEG_LINETO:
+        point[0] = coords[0];
+        point[1] = coords[1];
+        glu.gluTessVertex(tesselator, point, 0, null);
+        break;
+
+      case PathIterator.SEG_CLOSE:
+        glu.gluTessEndContour(tesselator);
+      }
+    }
+
+    glu.gluEndPolygon(tesselator);
   }
 
   public void draw(Shape shape, boolean fill) {
+    if (fill) {
+//      fill(shape);
+//      return;
+      fill = false;
+    }
+
     PathIterator iterator = shape.getPathIterator(null);
 
-    iterator.getWindingRule();
-    float[] moveTo = new float[2];
+    double[] moveTo = new double[2];
     int index = 0;
     for (; !iterator.isDone(); iterator.next()) {
       switch (iterator.currentSegment(coords)) {
@@ -54,11 +122,15 @@ public class JOGLPathIterator {
         buffer.rewind();
         // hack until I can figure out vertex buffers
         while (buffer.hasRemaining()) {
-          gl.glVertex2f(buffer.get(), buffer.get());
+          gl.glVertex2d(buffer.get(), buffer.get());
         }
         gl.glEnd();
         index = 0;
         buffer.limit(buffer.capacity());
+        break;
+
+      case PathIterator.SEG_QUADTO:
+
       }
     }
 
@@ -66,7 +138,7 @@ public class JOGLPathIterator {
       assert !fill : "Invalid assumption";
       buffer.limit(index);
       gl.glBegin(GL.GL_LINES);
-      gl.glVertex2fv(buffer);
+      gl.glVertex2dv(buffer);
       gl.glEnd();
       buffer.limit(buffer.capacity());
     }

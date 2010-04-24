@@ -3,6 +3,7 @@ package joglg2d;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Stroke;
 import java.awt.geom.Rectangle2D;
 
 import joglg2d.util.Painter;
@@ -85,6 +86,19 @@ public class VisualTest {
       @Override
       public void paint(Graphics2D g2d) {
         g2d.draw(new Rectangle2D.Float(48, 123, 49, 34));
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void strokedShapeTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        Stroke stroke = new BasicStroke(4, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
+        g2d.fill(stroke.createStrokedShape(new Rectangle2D.Float(48, 123, 49, 34)));
       }
     });
 
