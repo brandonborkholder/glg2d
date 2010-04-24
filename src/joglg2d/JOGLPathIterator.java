@@ -6,11 +6,12 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.RoundRectangle2D;
 import java.nio.DoubleBuffer;
-import java.util.Arrays;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellator;
+import javax.media.opengl.glu.GLUtessellatorCallback;
+import javax.media.opengl.glu.GLUtessellatorCallbackAdapter;
 
 /**
  * @author borkholder
@@ -51,8 +52,43 @@ public class JOGLPathIterator {
 
   public void fill(Shape shape) {
     PathIterator iterator = shape.getPathIterator(null);
-    GLU glu = new GLU();
+    final GLU glu = new GLU();
     GLUtessellator tesselator = glu.gluNewTess();
+    GLUtessellatorCallback callback = new GLUtessellatorCallbackAdapter() {
+      @Override
+      public void begin(int type) {
+        gl.glBegin(type);
+      }
+
+      @Override
+      public void end() {
+        gl.glEnd();
+      }
+
+      @Override
+      public void vertex(Object vertexData) {
+        if (vertexData instanceof double[]) {
+          double[] v = (double[]) vertexData;
+          gl.glVertex3d(v[0], v[1], v[2]);
+        }
+      }
+
+      @Override
+      public void combine(double[] coords, Object[] data, float[] weight, Object[] outData) {
+        outData[0] = coords;
+      }
+
+      @Override
+      public void error(int errnum) {
+        System.err.println("Tessellation Error: " + glu.gluErrorString(errnum));
+      }
+    };
+
+    glu.gluTessCallback(tesselator, GLU.GLU_TESS_VERTEX, callback);
+    glu.gluTessCallback(tesselator, GLU.GLU_TESS_BEGIN, callback);
+    glu.gluTessCallback(tesselator, GLU.GLU_TESS_END, callback);
+    glu.gluTessCallback(tesselator, GLU.GLU_TESS_ERROR, callback);
+    glu.gluTessCallback(tesselator, GLU.GLU_TESS_COMBINE, callback);
 
     switch (iterator.getWindingRule()) {
     case PathIterator.WIND_EVEN_ODD:
@@ -64,23 +100,22 @@ public class JOGLPathIterator {
       break;
     }
 
-    glu.gluBeginPolygon(tesselator);
+    glu.gluTessBeginPolygon(tesselator, null);
 
-    double[] point = new double[3];
     for (; !iterator.isDone(); iterator.next()) {
-      Arrays.fill(coords, 0);
+      double[] point = new double[3];
       switch (iterator.currentSegment(coords)) {
       case PathIterator.SEG_MOVETO:
         point[0] = coords[0];
         point[1] = coords[1];
         glu.gluTessBeginContour(tesselator);
-        glu.gluTessVertex(tesselator, point, 0, null);
+        glu.gluTessVertex(tesselator, point, 0, point);
         break;
 
       case PathIterator.SEG_LINETO:
         point[0] = coords[0];
         point[1] = coords[1];
-        glu.gluTessVertex(tesselator, point, 0, null);
+        glu.gluTessVertex(tesselator, point, 0, point);
         break;
 
       case PathIterator.SEG_CLOSE:
@@ -88,14 +123,14 @@ public class JOGLPathIterator {
       }
     }
 
-    glu.gluEndPolygon(tesselator);
+    glu.gluTessEndPolygon(tesselator);
+    glu.gluDeleteTess(tesselator);
   }
 
   public void draw(Shape shape, boolean fill) {
     if (fill) {
-//      fill(shape);
-//      return;
-      fill = false;
+      fill(shape);
+      return;
     }
 
     PathIterator iterator = shape.getPathIterator(null);
