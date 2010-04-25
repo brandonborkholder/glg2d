@@ -3,8 +3,8 @@ package joglg2d;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Stroke;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RoundRectangle2D;
 
 import joglg2d.util.Painter;
 import joglg2d.util.TestWindow;
@@ -85,7 +85,7 @@ public class VisualTest {
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
-        g2d.fill(new Rectangle2D.Float(48, 123, 49, 34));
+        g2d.draw(new Rectangle2D.Float(48, 123, 49, 34));
       }
     });
 
@@ -97,8 +97,21 @@ public class VisualTest {
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
-        Stroke stroke = new BasicStroke(4, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
-        g2d.fill(stroke.createStrokedShape(new Rectangle2D.Float(48, 123, 49, 34)));
+        g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
+        g2d.draw(new Rectangle2D.Float(48, 123, 49, 34));
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void roundRectShapeTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        g2d.setStroke(new BasicStroke(5));
+        g2d.draw(new RoundRectangle2D.Float(99, 40, 230, 493, 90, 70));
       }
     });
 

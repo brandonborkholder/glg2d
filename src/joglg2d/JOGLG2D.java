@@ -34,8 +34,6 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   private final int height;
 
-  protected BasicStroke stroke;
-
   protected Color color;
 
   protected Color background;
@@ -45,6 +43,8 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   protected Font font;
 
   protected JOGLPathIterator shapeDrawer;
+
+  protected Stroke stroke;
 
   public JOGLG2D(GL gl, int height) {
     this.gl = gl;
@@ -63,6 +63,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     gl.glPushMatrix();
     gl.glTranslatef(0, height, 0);
     gl.glScalef(1, -1, 1);
+    gl.glShadeModel(GL.GL_FLAT);
     component.paint(this);
     gl.glPopMatrix();
     gl.glFlush();
@@ -70,7 +71,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void draw(Shape s) {
-    shapeDrawer.draw(s, false);
+    shapeDrawer.draw(s, stroke);
   }
 
   @Override
@@ -122,7 +123,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void fill(Shape s) {
-    shapeDrawer.draw(s, true);
+    shapeDrawer.fill(s, stroke);
   }
 
   @Override
@@ -151,10 +152,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void setStroke(Stroke s) {
-    assert s instanceof BasicStroke : "Only BasicStroke is supported currently.";
-
-    stroke = (BasicStroke) s;
-    gl.glLineWidth(stroke.getLineWidth());
+    stroke = s;
   }
 
   @Override
@@ -376,58 +374,50 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawLine(int x1, int y1, int x2, int y2) {
-    gl.glBegin(GL.GL_LINES);
-    gl.glVertex2i(x1, y1);
-    gl.glVertex2i(x2, y2);
-    gl.glEnd();
+    shapeDrawer.drawLine(x1, y1, x2, y2, stroke);
   }
 
   @Override
   public void fillRect(int x, int y, int width, int height) {
-    gl.glBegin(GL.GL_QUADS);
-    gl.glVertex2i(x, y);
-    gl.glVertex2i(x + width, y);
-    gl.glVertex2i(x + width, y + height);
-    gl.glVertex2i(x, y + height);
-    gl.glEnd();
+    shapeDrawer.drawRect(x, y, width, height, true, stroke);
   }
 
   @Override
   public void clearRect(int x, int y, int width, int height) {
     Color origColor = color;
     setColor(background);
-    drawRect(x, y, width, height);
+    fillRect(x, y, width, height);
     setColor(origColor);
   }
 
   @Override
   public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-    shapeDrawer.drawRoundRect(x, y, width, height, arcWidth, arcHeight, false);
+    shapeDrawer.drawRoundRect(x, y, width, height, arcWidth, arcHeight, false, stroke);
   }
 
   @Override
   public void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-    shapeDrawer.drawRoundRect(x, y, width, height, arcWidth, arcHeight, true);
+    shapeDrawer.drawRoundRect(x, y, width, height, arcWidth, arcHeight, true, stroke);
   }
 
   @Override
   public void drawOval(int x, int y, int width, int height) {
-    shapeDrawer.drawOval(x, y, width, height, false);
+    shapeDrawer.drawOval(x, y, width, height, false, stroke);
   }
 
   @Override
   public void fillOval(int x, int y, int width, int height) {
-    shapeDrawer.drawOval(x, y, width, height, true);
+    shapeDrawer.drawOval(x, y, width, height, true, stroke);
   }
 
   @Override
   public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
-    shapeDrawer.drawArc(x, y, width, height, startAngle, arcAngle, false);
+    shapeDrawer.drawArc(x, y, width, height, startAngle, arcAngle, false, stroke);
   }
 
   @Override
   public void fillArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
-    shapeDrawer.drawArc(x, y, width, height, startAngle, arcAngle, true);
+    shapeDrawer.drawArc(x, y, width, height, startAngle, arcAngle, true, stroke);
   }
 
   @Override
