@@ -5,6 +5,7 @@ import java.awt.Stroke;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
@@ -67,19 +68,38 @@ public class JOGLPathIterator {
     draw(ARC, stroke, fill);
   }
 
+  public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints, Stroke stroke) {
+    Path2D.Float path = new Path2D.Float(PathIterator.WIND_NON_ZERO, nPoints);
+    path.moveTo(xPoints[0], yPoints[0]);
+    for (int i = 1; i < nPoints; i++) {
+      path.lineTo(xPoints[i], yPoints[i]);
+    }
+
+    fill(stroke.createStrokedShape(path));
+  }
+
+  public void drawPolygon(int[] xPoints, int[] yPoints, int nPoints, boolean fill, Stroke stroke) {
+    gl.glBegin(fill ? GL.GL_POLYGON : GL.GL_LINE_LOOP);
+    for (int i = 0; i < nPoints; i++) {
+      gl.glVertex2i(xPoints[i], yPoints[i]);
+    }
+
+    gl.glEnd();
+  }
+
   private void draw(Shape shape, Stroke stroke, boolean fill) {
     if (fill) {
-      fill(shape, stroke);
+      fill(shape);
     } else {
       draw(shape, stroke);
     }
   }
 
   public void draw(Shape shape, Stroke stroke) {
-    fill(stroke.createStrokedShape(shape), stroke);
+    fill(stroke.createStrokedShape(shape));
   }
 
-  public void fill(Shape shape, Stroke stroke) {
+  public void fill(Shape shape) {
     PathIterator iterator = shape.getPathIterator(null);
     final GLU glu = new GLU();
     GLUtessellator tesselator = glu.gluNewTess();

@@ -26,10 +26,15 @@ import java.awt.image.RenderedImage;
 import java.awt.image.renderable.RenderableImage;
 import java.text.AttributedCharacterIterator;
 import java.util.Map;
+import java.util.WeakHashMap;
 
 import javax.media.opengl.GL;
 
+import com.sun.opengl.util.j2d.TextRenderer;
+
 public class JOGLG2D extends Graphics2D implements Cloneable {
+  private static final Map<Font, TextRenderer> TEXT_RENDER_CACHE = new WeakHashMap<Font, TextRenderer>();
+
   private final GL gl;
 
   private final int height;
@@ -59,6 +64,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected void paint(Component component) {
     setBackground(component.getBackground());
+    setStroke(new BasicStroke());
     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
     gl.glPushMatrix();
     gl.glTranslatef(0, height, 0);
@@ -97,33 +103,41 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawString(String str, int x, int y) {
-    // TODO Auto-generated method stub
+    drawString(str, (float) x, (float) y);
   }
 
   @Override
   public void drawString(String str, float x, float y) {
-    // TODO Auto-generated method stub
+    TextRenderer renderer = TEXT_RENDER_CACHE.get(font);
+    if (renderer == null) {
+      renderer = new TextRenderer(font);
+      TEXT_RENDER_CACHE.put(font, renderer);
+    }
+
+    renderer.setColor(color);
+    renderer.begin3DRendering();
+    renderer.draw3D(str, x, y, 0, 1);
+    renderer.end3DRendering();
   }
 
   @Override
   public void drawString(AttributedCharacterIterator iterator, int x, int y) {
-    // TODO Auto-generated method stub
+    assert false : "Operation not supported";
   }
 
   @Override
   public void drawString(AttributedCharacterIterator iterator, float x, float y) {
-    // TODO Auto-generated method stub
+    assert false : "Operation not supported";
   }
 
   @Override
   public void drawGlyphVector(GlyphVector g, float x, float y) {
-    // TODO Auto-generated method stub
-
+    shapeDrawer.fill(g.getOutline(x, y));
   }
 
   @Override
   public void fill(Shape s) {
-    shapeDrawer.fill(s, stroke);
+    shapeDrawer.fill(s);
   }
 
   @Override
@@ -422,32 +436,17 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints) {
-    gl.glBegin(GL.GL_LINE_STRIP);
-    for (int i = 0; i < nPoints; i++) {
-      gl.glVertex2i(xPoints[i], yPoints[i]);
-    }
-
-    gl.glEnd();
+    shapeDrawer.drawPolyline(xPoints, yPoints, nPoints, stroke);
   }
 
   @Override
   public void drawPolygon(int[] xPoints, int[] yPoints, int nPoints) {
-    gl.glBegin(GL.GL_LINE_LOOP);
-    for (int i = 0; i < nPoints; i++) {
-      gl.glVertex2i(xPoints[i], yPoints[i]);
-    }
-
-    gl.glEnd();
+    shapeDrawer.drawPolygon(xPoints, yPoints, nPoints, false, stroke);
   }
 
   @Override
   public void fillPolygon(int[] xPoints, int[] yPoints, int nPoints) {
-    gl.glBegin(GL.GL_POLYGON);
-    for (int i = 0; i < nPoints; i++) {
-      gl.glVertex2i(xPoints[i], yPoints[i]);
-    }
-
-    gl.glEnd();
+    shapeDrawer.drawPolygon(xPoints, yPoints, nPoints, true, stroke);
   }
 
   @Override
@@ -489,7 +488,12 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void dispose() {
-    // TODO Auto-generated method stub
+    // just set everything to null to allow garbage collection
+    color = null;
+    background = null;
+    shapeDrawer = null;
+    transform = null;
+    stroke = null;
   }
 
   @Override
