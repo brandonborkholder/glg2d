@@ -56,7 +56,7 @@ public class JOGLPanel extends JPanel {
     @Override
     public void init(GLAutoDrawable drawable) {
 //      contentPanel.setGL(new TraceGL(contentPanel.getGL(), System.out));
-      g2d = new JOGLG2D(contentPanel.getGL(), drawable.getHeight());
+      g2d = new JOGLG2D(contentPanel.getGL(), drawable.getWidth(), drawable.getHeight());
     }
 
     @Override
@@ -73,7 +73,7 @@ public class JOGLPanel extends JPanel {
       gl.glLoadIdentity();
       new GLU().gluOrtho2D(0, width, 0, height);
 
-      g2d = new JOGLG2D(gl, height);
+      g2d = new JOGLG2D(gl, width, height);
     }
 
     @Override

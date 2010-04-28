@@ -39,6 +39,8 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   private final int height;
 
+  private final int width;
+
   protected Color color;
 
   protected Color background;
@@ -51,9 +53,10 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected Stroke stroke;
 
-  public JOGLG2D(GL gl, int height) {
+  public JOGLG2D(GL gl, int width, int height) {
     this.gl = gl;
     this.height = height;
+    this.width = width;
     setStroke(new BasicStroke());
     setColor(Color.BLACK);
     setBackground(Color.BLACK);
@@ -103,11 +106,6 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawString(String str, int x, int y) {
-    drawString(str, (float) x, (float) y);
-  }
-
-  @Override
-  public void drawString(String str, float x, float y) {
     TextRenderer renderer = TEXT_RENDER_CACHE.get(font);
     if (renderer == null) {
       renderer = new TextRenderer(font);
@@ -115,9 +113,14 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     }
 
     renderer.setColor(color);
-    renderer.begin3DRendering();
-    renderer.draw3D(str, x, y, 0, 1);
-    renderer.end3DRendering();
+    renderer.beginRendering(width, height);
+    renderer.draw(str, x, height - y);
+    renderer.endRendering();
+  }
+
+  @Override
+  public void drawString(String str, float x, float y) {
+    drawString(str, (int) x, (int) y);
   }
 
   @Override
@@ -257,7 +260,10 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     matrix[13] = transform.getTranslateY();
     matrix[15] = 1;
 
-    gl.glLoadMatrixd(matrix, 0);
+    gl.glLoadIdentity();
+    gl.glTranslatef(0, height, 0);
+    gl.glScalef(1, -1, 1);
+    gl.glMultMatrixd(matrix, 0);
   }
 
   @Override
