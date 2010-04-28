@@ -49,7 +49,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected Font font;
 
-  protected JOGLPathIterator shapeDrawer;
+  protected JOGLShapeDrawer shapeDrawer;
 
   protected Stroke stroke;
 
@@ -62,7 +62,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     setBackground(Color.BLACK);
     setFont(new Font(null, Font.PLAIN, 10));
     transform = new AffineTransform();
-    shapeDrawer = new JOGLPathIterator(gl);
+    shapeDrawer = new JOGLShapeDrawer(gl);
   }
 
   protected void paint(Component component) {
@@ -81,27 +81,6 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   @Override
   public void draw(Shape s) {
     shapeDrawer.draw(s, stroke);
-  }
-
-  @Override
-  public boolean drawImage(Image img, AffineTransform xform, ImageObserver obs) {
-    // TODO Auto-generated method stub
-    return false;
-  }
-
-  @Override
-  public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y) {
-    // TODO Auto-generated method stub
-  }
-
-  @Override
-  public void drawRenderedImage(RenderedImage img, AffineTransform xform) {
-    // TODO Auto-generated method stub
-  }
-
-  @Override
-  public void drawRenderableImage(RenderableImage img, AffineTransform xform) {
-    // TODO Auto-generated method stub
   }
 
   @Override
@@ -453,6 +432,27 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   @Override
   public void fillPolygon(int[] xPoints, int[] yPoints, int nPoints) {
     shapeDrawer.drawPolygon(xPoints, yPoints, nPoints, true, stroke);
+  }
+
+  @Override
+  public boolean drawImage(Image img, AffineTransform xform, ImageObserver obs) {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  @Override
+  public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y) {
+    // TODO Auto-generated method stub
+  }
+
+  @Override
+  public void drawRenderedImage(RenderedImage img, AffineTransform xform) {
+    // TODO Auto-generated method stub
+  }
+
+  @Override
+  public void drawRenderableImage(RenderableImage img, AffineTransform xform) {
+    // TODO Auto-generated method stub
   }
 
   @Override

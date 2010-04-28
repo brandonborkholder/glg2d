@@ -22,7 +22,7 @@ import javax.media.opengl.glu.GLUtessellatorCallbackAdapter;
  * @created Apr 20, 2010
  *
  */
-public class JOGLPathIterator {
+public class JOGLShapeDrawer {
   static final Ellipse2D.Double ELLIPSE = new Ellipse2D.Double();
 
   static final RoundRectangle2D.Double ROUND_RECT = new RoundRectangle2D.Double();
@@ -39,7 +39,7 @@ public class JOGLPathIterator {
 
   protected DoubleBuffer buffer = DoubleBuffer.allocate(50);
 
-  public JOGLPathIterator(GL gl) {
+  public JOGLShapeDrawer(GL gl) {
     this.gl = gl;
   }
 
