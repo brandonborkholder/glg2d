@@ -31,7 +31,7 @@ public class TestWindow extends JFrame {
 
   public static final int DIFFERENT = 1;
 
-  private Painter painter;
+  private CustomPainter painter;
 
   private int result = -1;
 
@@ -50,7 +50,7 @@ public class TestWindow extends JFrame {
       public void paint(Graphics g) {
         super.paint(g);
         if (painter != null) {
-          painter.paint((Graphics2D) g);
+          painter.paint((Graphics2D) g, false);
         }
       }
     };
@@ -60,7 +60,7 @@ public class TestWindow extends JFrame {
       public void paint(Graphics g) {
         super.paint(g);
         if (painter != null) {
-          painter.paint((Graphics2D) g);
+          painter.paint((Graphics2D) g, true);
         }
       }
     };
@@ -108,7 +108,16 @@ public class TestWindow extends JFrame {
     }).start();
   }
 
-  public void setPainter(Painter painter) {
+  public void setPainter(final Painter painter) {
+    this.painter = new CustomPainter() {
+      @Override
+      public void paint(Graphics2D g2d, boolean jogl) {
+        painter.paint(g2d);
+      }
+    };
+  }
+
+  public void setPainter(CustomPainter painter) {
     this.painter = painter;
   }
 
