@@ -8,6 +8,7 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.RectangularShape;
 import java.awt.geom.RoundRectangle2D;
 import java.nio.DoubleBuffer;
 
@@ -20,7 +21,7 @@ import javax.media.opengl.glu.GLUtessellatorCallbackAdapter;
 /**
  * @author borkholder
  * @created Apr 20, 2010
- * 
+ *
  */
 public class JOGLShapeDrawer {
   static final Ellipse2D.Double ELLIPSE = new Ellipse2D.Double();
@@ -45,66 +46,69 @@ public class JOGLShapeDrawer {
 
   public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight, boolean fill, Stroke stroke) {
     ROUND_RECT.setRoundRect(x, y, width, height, arcWidth, arcHeight);
-    draw(ROUND_RECT, stroke, fill);
+    if (fill) {
+      fillPolygon(ROUND_RECT);
+    } else {
+      fill(stroke.createStrokedShape(ROUND_RECT));
+    }
+
   }
 
   public void drawRect(int x, int y, int width, int height, boolean fill, Stroke stroke) {
+    RECT.setRect(x, y, width, height);
     if (fill) {
-      fillRect(x, y, width, height);
+      fillPolygon(RECT);
     } else {
-      RECT.setRect(x, y, width, height);
-      draw(RECT, stroke, fill);
+      fill(stroke.createStrokedShape(RECT));
     }
-  }
-
-  protected void fillRect(double x, double y, double width, double height) {
-    gl.glBegin(GL.GL_QUADS);
-    gl.glVertex2d(x, y);
-    gl.glVertex2d(x, y + height);
-    gl.glVertex2d(x + width, y + height);
-    gl.glVertex2d(x + width, y);
-    gl.glEnd();
   }
 
   public void drawLine(int x1, int y1, int x2, int y2, Stroke stroke) {
     LINE.setLine(x1, y1, x2, y2);
-    draw(LINE, stroke, false);
+    fill(stroke.createStrokedShape(LINE));
   }
 
   public void drawOval(int x, int y, int width, int height, boolean fill, Stroke stroke) {
     ELLIPSE.setFrame(x, y, width, height);
-    draw(ELLIPSE, stroke, fill);
+    if (fill) {
+      fillPolygon(ELLIPSE);
+    } else {
+      fill(stroke.createStrokedShape(ELLIPSE));
+    }
   }
 
   public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle, boolean fill, Stroke stroke) {
     ARC.setArc(arcAngle, x, y, width, height, startAngle, fill ? Arc2D.PIE : Arc2D.OPEN);
-    draw(ARC, stroke, fill);
+    if (fill) {
+      fillPolygon(ARC);
+    } else {
+      fill(stroke.createStrokedShape(ARC));
+    }
   }
 
   public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints, Stroke stroke) {
+    drawPoly(xPoints, yPoints, nPoints, false, false, stroke);
+  }
+
+  public void drawPolygon(int[] xPoints, int[] yPoints, int nPoints, boolean fill, Stroke stroke) {
+    drawPoly(xPoints, yPoints, nPoints, fill, true, stroke);
+  }
+
+  protected void drawPoly(int[] xPoints, int[] yPoints, int nPoints, boolean fill, boolean close, Stroke stroke) {
     Path2D.Float path = new Path2D.Float(PathIterator.WIND_NON_ZERO, nPoints);
     path.moveTo(xPoints[0], yPoints[0]);
     for (int i = 1; i < nPoints; i++) {
       path.lineTo(xPoints[i], yPoints[i]);
     }
 
-    fill(stroke.createStrokedShape(path));
-  }
-
-  public void drawPolygon(int[] xPoints, int[] yPoints, int nPoints, boolean fill, Stroke stroke) {
-    gl.glBegin(fill ? GL.GL_POLYGON : GL.GL_LINE_LOOP);
-    for (int i = 0; i < nPoints; i++) {
-      gl.glVertex2i(xPoints[i], yPoints[i]);
+    if (close) {
+      path.closePath();
     }
 
-    gl.glEnd();
-  }
-
-  private void draw(Shape shape, Stroke stroke, boolean fill) {
     if (fill) {
-      fill(shape);
+      fill(path);
     } else {
-      draw(shape, stroke);
+      fill(stroke.createStrokedShape(path));
     }
   }
 
@@ -112,11 +116,62 @@ public class JOGLShapeDrawer {
     fill(stroke.createStrokedShape(shape));
   }
 
+  protected void fillPolygon(Shape shape) {
+    PathIterator iterator = shape.getPathIterator(null);
+    double[] lastPoint = null;
+    for (; !iterator.isDone(); iterator.next()) {
+      double[] point = new double[3];
+      switch (iterator.currentSegment(coords)) {
+      case PathIterator.SEG_MOVETO:
+        point[0] = coords[0];
+        point[1] = coords[1];
+        gl.glBegin(GL.GL_POLYGON);
+        gl.glVertex2d(point[0], point[1]);
+        break;
+
+      case PathIterator.SEG_LINETO:
+        point[0] = coords[0];
+        point[1] = coords[1];
+        gl.glVertex2d(point[0], point[1]);
+        break;
+
+      case PathIterator.SEG_QUADTO:
+        double stepSize = 0.1;
+        for (double i = 0; i <= 1; i += stepSize) {
+          double[] p = new double[3];
+          p[0] = (1 - i) * (1 - i) * lastPoint[0] + 2 * (1 - i) * i * coords[0] + i * i * coords[2];
+          p[1] = (1 - i) * (1 - i) * lastPoint[1] + 2 * (1 - i) * i * coords[1] + i * i * coords[3];
+          gl.glVertex2d(p[0], p[1]);
+          point = p;
+        }
+        break;
+
+      case PathIterator.SEG_CUBICTO:
+        stepSize = 0.1;
+        for (double i = 0; i <= 1; i += stepSize) {
+          double[] p = new double[3];
+          p[0] = (1 - i) * (1 - i) * (1 - i) * lastPoint[0] + 3 * (1 - i) * (1 - i) * i * coords[0] + 3 * (1 - i) * i * i * coords[2] + i
+              * i * i * coords[4];
+          p[1] = (1 - i) * (1 - i) * (1 - i) * lastPoint[1] + 3 * (1 - i) * (1 - i) * i * coords[1] + 3 * (1 - i) * i * i * coords[3] + i
+              * i * i * coords[5];
+          gl.glVertex2d(p[0], p[1]);
+          point = p;
+        }
+        break;
+
+      case PathIterator.SEG_CLOSE:
+        gl.glEnd();
+        break;
+      }
+
+      lastPoint = point;
+    }
+  }
+
   public void fill(Shape shape) {
     // optimization for some basic shapes
-    if (shape instanceof Rectangle2D) {
-      Rectangle2D rect = (Rectangle2D) shape;
-      fillRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+    if (shape instanceof RectangularShape) {
+      fillPolygon(shape);
       return;
     }
 

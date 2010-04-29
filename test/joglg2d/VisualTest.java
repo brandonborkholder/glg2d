@@ -40,6 +40,8 @@ public class VisualTest {
       @Override
       public void paint(Graphics2D g2d) {
         g2d.drawLine(10, 10, 50, 50);
+        g2d.drawLine(5, 60, 50, 60);
+        g2d.drawLine(70, 90, 70, 140);
       }
     });
 
@@ -128,7 +130,7 @@ public class VisualTest {
       @Override
       public void paint(Graphics2D g2d) {
         g2d.setStroke(new BasicStroke(5, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND));
-        g2d.drawPolyline(new int[] {8, 43, 94, 16}, new int[] {43, 99, 34, 75}, 4);
+        g2d.drawPolyline(new int[] { 8, 43, 94, 16 }, new int[] { 43, 99, 34, 75 }, 4);
       }
     });
 
@@ -140,7 +142,7 @@ public class VisualTest {
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
-        g2d.drawPolygon(new int[] {8, 23, 98, 42}, new int[] {47, 23, 43, 25}, 4);
+        g2d.drawPolygon(new int[] { 8, 23, 98, 42 }, new int[] { 47, 23, 43, 25 }, 4);
       }
     });
 
@@ -153,7 +155,7 @@ public class VisualTest {
       @Override
       public void paint(Graphics2D g2d) {
         g2d.setColor(Color.CYAN);
-        g2d.fillPolygon(new int[] {8, 23, 98, 42}, new int[] {47, 23, 43, 25}, 4);
+        g2d.fillPolygon(new int[] { 8, 23, 98, 42 }, new int[] { 47, 23, 43, 25 }, 4);
       }
     });
 
