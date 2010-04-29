@@ -20,7 +20,7 @@ import javax.media.opengl.glu.GLUtessellatorCallbackAdapter;
 /**
  * @author borkholder
  * @created Apr 20, 2010
- *
+ * 
  */
 public class JOGLShapeDrawer {
   static final Ellipse2D.Double ELLIPSE = new Ellipse2D.Double();
@@ -49,8 +49,21 @@ public class JOGLShapeDrawer {
   }
 
   public void drawRect(int x, int y, int width, int height, boolean fill, Stroke stroke) {
-    RECT.setRect(x, y, width, height);
-    draw(RECT, stroke, fill);
+    if (fill) {
+      fillRect(x, y, width, height);
+    } else {
+      RECT.setRect(x, y, width, height);
+      draw(RECT, stroke, fill);
+    }
+  }
+
+  protected void fillRect(double x, double y, double width, double height) {
+    gl.glBegin(GL.GL_QUADS);
+    gl.glVertex2d(x, y);
+    gl.glVertex2d(x, y + height);
+    gl.glVertex2d(x + width, y + height);
+    gl.glVertex2d(x + width, y);
+    gl.glEnd();
   }
 
   public void drawLine(int x1, int y1, int x2, int y2, Stroke stroke) {
@@ -100,6 +113,13 @@ public class JOGLShapeDrawer {
   }
 
   public void fill(Shape shape) {
+    // optimization for some basic shapes
+    if (shape instanceof Rectangle2D) {
+      Rectangle2D rect = (Rectangle2D) shape;
+      fillRect(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight());
+      return;
+    }
+
     PathIterator iterator = shape.getPathIterator(null);
     final GLU glu = new GLU();
     GLUtessellator tesselator = glu.gluNewTess();

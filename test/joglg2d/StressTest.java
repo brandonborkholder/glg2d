@@ -1,5 +1,6 @@
 package joglg2d;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Random;
@@ -37,6 +38,7 @@ public class StressTest {
     TimedPainter painter = new TimedPainter() {
       @Override
       protected void paint(Graphics2D g2d) {
+        g2d.setColor(Color.red);
         Rectangle2D.Float rect = new Rectangle2D.Float();
         float w = 20;
         float h = 40;
