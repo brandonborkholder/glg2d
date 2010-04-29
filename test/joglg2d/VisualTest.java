@@ -3,8 +3,12 @@ package joglg2d;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.net.URL;
+
+import javax.swing.ImageIcon;
 
 import joglg2d.util.Painter;
 import joglg2d.util.TestWindow;
@@ -162,6 +166,20 @@ public class VisualTest {
       @Override
       public void paint(Graphics2D g2d) {
         g2d.drawString("Hello JOGL", 90, 32);
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void drawImageTest() throws Exception {
+    URL url = VisualTest.class.getClassLoader().getResource("duke.gif");
+    final ImageIcon icon = new ImageIcon(url);
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        g2d.drawImage(icon.getImage(), AffineTransform.getTranslateInstance(50, 90), null);
       }
     });
 

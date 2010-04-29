@@ -436,8 +436,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public boolean drawImage(Image img, AffineTransform xform, ImageObserver obs) {
-    // TODO Auto-generated method stub
-    return false;
+    return new JOGLImageDrawer(gl).drawImage(img, xform, obs);
   }
 
   @Override
