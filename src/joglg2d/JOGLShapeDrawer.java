@@ -39,14 +39,11 @@ public class JOGLShapeDrawer {
 
   protected VertexVisitor simpleShapeFillVisitor;
 
-  protected FastLineDrawingVisitor fastLineVisitor;
-
   public JOGLShapeDrawer(GL gl) {
     this.gl = gl;
     glu = new GLU();
     tesselatingVisitor = new TesselatorVisitor(gl, glu);
     simpleShapeFillVisitor = new FillNonintersectingPolygonVisitor(gl);
-    fastLineVisitor = new FastLineDrawingVisitor(gl);
   }
 
   public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight, boolean fill, Stroke stroke) {
@@ -54,9 +51,8 @@ public class JOGLShapeDrawer {
     if (fill) {
       fillPolygon(ROUND_RECT);
     } else {
-      fill(stroke.createStrokedShape(ROUND_RECT));
+      draw(ROUND_RECT, stroke);
     }
-
   }
 
   public void drawRect(int x, int y, int width, int height, boolean fill, Stroke stroke) {
@@ -64,13 +60,13 @@ public class JOGLShapeDrawer {
     if (fill) {
       fillPolygon(RECT);
     } else {
-      fill(stroke.createStrokedShape(RECT));
+      draw(RECT, stroke);
     }
   }
 
   public void drawLine(int x1, int y1, int x2, int y2, Stroke stroke) {
     LINE.setLine(x1, y1, x2, y2);
-    fill(stroke.createStrokedShape(LINE));
+    draw(LINE, stroke);
   }
 
   public void drawOval(int x, int y, int width, int height, boolean fill, Stroke stroke) {
@@ -78,7 +74,7 @@ public class JOGLShapeDrawer {
     if (fill) {
       fillPolygon(ELLIPSE);
     } else {
-      fill(stroke.createStrokedShape(ELLIPSE));
+      draw(ELLIPSE, stroke);
     }
   }
 
@@ -87,7 +83,7 @@ public class JOGLShapeDrawer {
     if (fill) {
       fillPolygon(ARC);
     } else {
-      fill(stroke.createStrokedShape(ARC));
+      draw(ARC, stroke);
     }
   }
 
@@ -113,16 +109,15 @@ public class JOGLShapeDrawer {
     if (fill) {
       fill(path);
     } else {
-      fill(stroke.createStrokedShape(path));
+      draw(path, stroke);
     }
   }
 
   public void draw(Shape shape, Stroke stroke) {
     if (stroke instanceof BasicStroke) {
       BasicStroke basicStroke = (BasicStroke) stroke;
-      if (basicStroke.getDashArray() == null && basicStroke.getLineWidth() == 1) {
-        fastLineVisitor.setDrawVertices(basicStroke.getEndCap() != BasicStroke.CAP_BUTT);
-        traceShape(shape, fastLineVisitor);
+      if (basicStroke.getDashArray() == null) {
+        traceShape(shape, new FastLineDrawingVisitor(gl, basicStroke));
         return;
       }
     }

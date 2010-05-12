@@ -1,5 +1,6 @@
 package joglg2d;
 
+import java.awt.BasicStroke;
 import java.nio.DoubleBuffer;
 
 import javax.media.opengl.GL;
@@ -12,16 +13,15 @@ import javax.media.opengl.GL;
 public class FastLineDrawingVisitor implements VertexVisitor {
   protected final GL gl;
 
-  protected DoubleBuffer buffer = DoubleBuffer.allocate(100);
+  protected final BasicStroke stroke;
 
-  protected boolean drawVertices;
+  protected DoubleBuffer buffer = DoubleBuffer.allocate(500);
 
-  public FastLineDrawingVisitor(GL gl) {
+  protected double[] lastPoint;
+
+  public FastLineDrawingVisitor(GL gl, BasicStroke stroke) {
     this.gl = gl;
-  }
-
-  public void setDrawVertices(boolean draw) {
-    drawVertices = draw;
+    this.stroke = stroke;
   }
 
   @Override
@@ -31,23 +31,64 @@ public class FastLineDrawingVisitor implements VertexVisitor {
 
   @Override
   public void closeLine() {
-    renderBuffer(GL.GL_LINE_LOOP);
+    double[] tmp = new double[4];
+    int pos = buffer.position();
+    buffer.rewind();
+    buffer.get(tmp);
+    buffer.position(pos);
+    buffer.put(tmp);
+    renderBuffer(GL.GL_QUAD_STRIP);
   }
 
   @Override
   public void endPoly() {
-    renderBuffer(GL.GL_LINE_STRIP);
+    renderBuffer(GL.GL_QUAD_STRIP);
   }
 
   @Override
   public void lineTo(double[] vertex) {
-    buffer.put(vertex, 0, 2);
+    double offset = stroke.getLineWidth() / 2;
+    double[] thisPoint = new double[2];
+    if (vertex[0] == lastPoint[0]) {
+      thisPoint[0] = lastPoint[0] - offset;
+      thisPoint[1] = lastPoint[1];
+      buffer.put(thisPoint);
+      thisPoint[0] = lastPoint[0] + offset;
+      thisPoint[1] = lastPoint[1];
+      buffer.put(thisPoint);
+
+      thisPoint[0] = lastPoint[0] - offset;
+      thisPoint[1] = vertex[1];
+      buffer.put(thisPoint);
+      thisPoint[0] = lastPoint[0] + offset;
+      thisPoint[1] = vertex[1];
+      buffer.put(thisPoint);
+    } else {
+      double angle = Math.atan((vertex[1] - lastPoint[1]) / (vertex[0] - lastPoint[0]));
+      double sin = Math.sin(angle) * offset;
+      double cos = Math.cos(angle) * offset;
+      thisPoint[0] = lastPoint[0] + sin;
+      thisPoint[1] = lastPoint[1] - cos;
+      buffer.put(thisPoint);
+      thisPoint[0] = lastPoint[0] - sin;
+      thisPoint[1] = lastPoint[1] + cos;
+      buffer.put(thisPoint);
+
+      thisPoint[0] = vertex[0] + sin;
+      thisPoint[1] = vertex[1] - cos;
+      buffer.put(thisPoint);
+      thisPoint[0] = vertex[0] - sin;
+      thisPoint[1] = vertex[1] + cos;
+      buffer.put(thisPoint);
+    }
+
+    lastPoint = vertex;
   }
 
   @Override
   public void moveTo(double[] vertex) {
-    renderBuffer(GL.GL_LINE_STRIP);
-    buffer.put(vertex, 0, 2);
+    lastPoint = vertex;
+    renderBuffer(GL.GL_QUAD_STRIP);
   }
 
   protected void renderBuffer(int mode) {
@@ -62,16 +103,6 @@ public class FastLineDrawingVisitor implements VertexVisitor {
       gl.glVertex2d(buffer.get(), buffer.get());
     }
     gl.glEnd();
-
-//    if (drawVertices) {
-//      buffer.rewind();
-//      gl.glPointSize(1);
-//      gl.glBegin(GL.GL_POINTS);
-//      while (buffer.hasRemaining()) {
-//        gl.glVertex2d(buffer.get(), buffer.get());
-//      }
-//      gl.glEnd();
-//    }
 
     buffer.rewind();
     buffer.limit(buffer.capacity());
