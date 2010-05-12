@@ -1,5 +1,6 @@
 package joglg2d;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
@@ -53,6 +54,33 @@ public class StressTest {
 
     tester.setPainter(painter);
     painter.waitAndLogTimes("shapes");
+  }
+
+  @Test
+  public void lineTest() throws Exception {
+    TimedPainter painter = new TimedPainter() {
+      @Override
+      protected void paint(Graphics2D g2d) {
+        g2d.setColor(Color.BLACK);
+        g2d.setStroke(new BasicStroke(3));
+        int x = 300;
+        int y = 400;
+        int numpoints = 5;
+        int[] xarray = new int[numpoints];
+        int[] yarray = new int[numpoints];
+        for (int i = 0; i < 100; i++) {
+          for (int j = 0; j < numpoints; j++) {
+            xarray[j] = rand.nextInt(x);
+            yarray[j] = rand.nextInt(y);
+          }
+
+          g2d.drawPolyline(xarray, yarray, numpoints);
+        }
+      }
+    };
+
+    tester.setPainter(painter);
+    painter.waitAndLogTimes("lines");
   }
 
   static abstract class TimedPainter implements CustomPainter {

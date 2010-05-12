@@ -1,5 +1,6 @@
 package joglg2d;
 
+import java.awt.BasicStroke;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Arc2D;
@@ -10,13 +11,9 @@ import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RectangularShape;
 import java.awt.geom.RoundRectangle2D;
-import java.nio.DoubleBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.glu.GLU;
-import javax.media.opengl.glu.GLUtessellator;
-import javax.media.opengl.glu.GLUtessellatorCallback;
-import javax.media.opengl.glu.GLUtessellatorCallbackAdapter;
 
 /**
  * @author borkholder
@@ -36,12 +33,20 @@ public class JOGLShapeDrawer {
 
   protected final GL gl;
 
-  protected double[] coords = new double[10];
+  protected final GLU glu;
 
-  protected DoubleBuffer buffer = DoubleBuffer.allocate(50);
+  protected VertexVisitor tesselatingVisitor;
+
+  protected VertexVisitor simpleShapeFillVisitor;
+
+  protected FastLineDrawingVisitor fastLineVisitor;
 
   public JOGLShapeDrawer(GL gl) {
     this.gl = gl;
+    glu = new GLU();
+    tesselatingVisitor = new TesselatorVisitor(gl, glu);
+    simpleShapeFillVisitor = new FillNonintersectingPolygonVisitor(gl);
+    fastLineVisitor = new FastLineDrawingVisitor(gl);
   }
 
   public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight, boolean fill, Stroke stroke) {
@@ -113,59 +118,16 @@ public class JOGLShapeDrawer {
   }
 
   public void draw(Shape shape, Stroke stroke) {
-    fill(stroke.createStrokedShape(shape));
-  }
-
-  protected void fillPolygon(Shape shape) {
-    PathIterator iterator = shape.getPathIterator(null);
-    double[] lastPoint = null;
-    for (; !iterator.isDone(); iterator.next()) {
-      double[] point = new double[3];
-      switch (iterator.currentSegment(coords)) {
-      case PathIterator.SEG_MOVETO:
-        point[0] = coords[0];
-        point[1] = coords[1];
-        gl.glBegin(GL.GL_POLYGON);
-        gl.glVertex2d(point[0], point[1]);
-        break;
-
-      case PathIterator.SEG_LINETO:
-        point[0] = coords[0];
-        point[1] = coords[1];
-        gl.glVertex2d(point[0], point[1]);
-        break;
-
-      case PathIterator.SEG_QUADTO:
-        double stepSize = 0.1;
-        for (double i = 0; i <= 1; i += stepSize) {
-          double[] p = new double[3];
-          p[0] = (1 - i) * (1 - i) * lastPoint[0] + 2 * (1 - i) * i * coords[0] + i * i * coords[2];
-          p[1] = (1 - i) * (1 - i) * lastPoint[1] + 2 * (1 - i) * i * coords[1] + i * i * coords[3];
-          gl.glVertex2d(p[0], p[1]);
-          point = p;
-        }
-        break;
-
-      case PathIterator.SEG_CUBICTO:
-        stepSize = 0.1;
-        for (double i = 0; i <= 1; i += stepSize) {
-          double[] p = new double[3];
-          p[0] = (1 - i) * (1 - i) * (1 - i) * lastPoint[0] + 3 * (1 - i) * (1 - i) * i * coords[0] + 3 * (1 - i) * i * i * coords[2] + i
-              * i * i * coords[4];
-          p[1] = (1 - i) * (1 - i) * (1 - i) * lastPoint[1] + 3 * (1 - i) * (1 - i) * i * coords[1] + 3 * (1 - i) * i * i * coords[3] + i
-              * i * i * coords[5];
-          gl.glVertex2d(p[0], p[1]);
-          point = p;
-        }
-        break;
-
-      case PathIterator.SEG_CLOSE:
-        gl.glEnd();
-        break;
+    if (stroke instanceof BasicStroke) {
+      BasicStroke basicStroke = (BasicStroke) stroke;
+      if (basicStroke.getDashArray() == null && basicStroke.getLineWidth() == 1) {
+        fastLineVisitor.setDrawVertices(basicStroke.getEndCap() != BasicStroke.CAP_BUTT);
+        traceShape(shape, fastLineVisitor);
+        return;
       }
-
-      lastPoint = point;
     }
+
+    fill(stroke.createStrokedShape(shape));
   }
 
   public void fill(Shape shape) {
@@ -175,81 +137,43 @@ public class JOGLShapeDrawer {
       return;
     }
 
+    traceShape(shape, new TesselatorVisitor(gl, glu));
+  }
+
+  protected void fillPolygon(Shape shape) {
+    traceShape(shape, new FillNonintersectingPolygonVisitor(gl));
+  }
+
+  protected void traceShape(Shape shape, VertexVisitor visitor) {
     PathIterator iterator = shape.getPathIterator(null);
-    final GLU glu = new GLU();
-    GLUtessellator tesselator = glu.gluNewTess();
-    GLUtessellatorCallback callback = new GLUtessellatorCallbackAdapter() {
-      @Override
-      public void begin(int type) {
-        gl.glBegin(type);
-      }
-
-      @Override
-      public void end() {
-        gl.glEnd();
-      }
-
-      @Override
-      public void vertex(Object vertexData) {
-        if (vertexData instanceof double[]) {
-          double[] v = (double[]) vertexData;
-          gl.glVertex3d(v[0], v[1], v[2]);
-        }
-      }
-
-      @Override
-      public void combine(double[] coords, Object[] data, float[] weight, Object[] outData) {
-        outData[0] = coords;
-      }
-
-      @Override
-      public void error(int errnum) {
-        System.err.println("Tessellation Error: " + glu.gluErrorString(errnum));
-      }
-    };
-
-    glu.gluTessCallback(tesselator, GLU.GLU_TESS_VERTEX, callback);
-    glu.gluTessCallback(tesselator, GLU.GLU_TESS_BEGIN, callback);
-    glu.gluTessCallback(tesselator, GLU.GLU_TESS_END, callback);
-    glu.gluTessCallback(tesselator, GLU.GLU_TESS_ERROR, callback);
-    glu.gluTessCallback(tesselator, GLU.GLU_TESS_COMBINE, callback);
-
-    switch (iterator.getWindingRule()) {
-    case PathIterator.WIND_EVEN_ODD:
-      glu.gluTessProperty(tesselator, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_ODD);
-      break;
-
-    case PathIterator.WIND_NON_ZERO:
-      glu.gluTessProperty(tesselator, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_NONZERO);
-      break;
-    }
-
-    glu.gluTessBeginPolygon(tesselator, null);
+    visitor.beginPoly(iterator.getWindingRule());
 
     double[] lastPoint = null;
+    double[] coords = new double[10];
     for (; !iterator.isDone(); iterator.next()) {
+      // Tesselation keeps reference to the points
       double[] point = new double[3];
       switch (iterator.currentSegment(coords)) {
       case PathIterator.SEG_MOVETO:
         point[0] = coords[0];
         point[1] = coords[1];
-        glu.gluTessBeginContour(tesselator);
-        glu.gluTessVertex(tesselator, point, 0, point);
+        visitor.moveTo(point);
         break;
 
       case PathIterator.SEG_LINETO:
         point[0] = coords[0];
         point[1] = coords[1];
-        glu.gluTessVertex(tesselator, point, 0, point);
+        visitor.lineTo(point);
         break;
 
       case PathIterator.SEG_QUADTO:
         double stepSize = 0.1;
         for (double i = 0; i <= 1; i += stepSize) {
           double[] p = new double[3];
-          p[0] = (1 - i) * (1 - i) * lastPoint[0] + 2 * (1 - i) * i * coords[0] + i * i * coords[2];
-          p[1] = (1 - i) * (1 - i) * lastPoint[1] + 2 * (1 - i) * i * coords[1] + i * i * coords[3];
-          glu.gluTessVertex(tesselator, p, 0, p);
+          double j = 1 - i;
+          p[0] = j * j * lastPoint[0] + 2 * j * i * coords[0] + i * i * coords[2];
+          p[1] = j * j * lastPoint[1] + 2 * j * i * coords[1] + i * i * coords[3];
+          visitor.lineTo(p);
           point = p;
         }
         break;
@@ -258,24 +182,22 @@ public class JOGLShapeDrawer {
         stepSize = 0.1;
         for (double i = 0; i <= 1; i += stepSize) {
           double[] p = new double[3];
-          p[0] = (1 - i) * (1 - i) * (1 - i) * lastPoint[0] + 3 * (1 - i) * (1 - i) * i * coords[0] + 3 * (1 - i) * i * i * coords[2] + i
-              * i * i * coords[4];
-          p[1] = (1 - i) * (1 - i) * (1 - i) * lastPoint[1] + 3 * (1 - i) * (1 - i) * i * coords[1] + 3 * (1 - i) * i * i * coords[3] + i
-              * i * i * coords[5];
-          glu.gluTessVertex(tesselator, p, 0, p);
+          double j = 1 - i;
+          p[0] = j * j * j * lastPoint[0] + 3 * j * j * i * coords[0] + 3 * j * i * i * coords[2] + i * i * i * coords[4];
+          p[1] = j * j * j * lastPoint[1] + 3 * j * j * i * coords[1] + 3 * j * i * i * coords[3] + i * i * i * coords[5];
+          visitor.lineTo(p);
           point = p;
         }
         break;
 
       case PathIterator.SEG_CLOSE:
-        glu.gluTessEndContour(tesselator);
+        visitor.closeLine();
         break;
       }
 
       lastPoint = point;
     }
 
-    glu.gluTessEndPolygon(tesselator);
-    glu.gluDeleteTess(tesselator);
+    visitor.endPoly();
   }
 }
