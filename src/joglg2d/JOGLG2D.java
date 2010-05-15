@@ -65,15 +65,19 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     shapeDrawer = new JOGLShapeDrawer(gl);
   }
 
-  protected void paint(Component component) {
+  protected void prePaint(Component component) {
     setBackground(component.getBackground());
+    setColor(component.getForeground());
+    setFont(component.getFont());
     setStroke(new BasicStroke());
     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
     gl.glPushMatrix();
     gl.glTranslatef(0, height, 0);
     gl.glScalef(1, -1, 1);
     gl.glShadeModel(GL.GL_FLAT);
-    component.paint(this);
+  }
+
+  protected void postPaint() {
     gl.glPopMatrix();
     gl.glFlush();
   }

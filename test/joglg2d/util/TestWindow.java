@@ -1,6 +1,7 @@
 package joglg2d.util;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -55,12 +56,11 @@ public class TestWindow extends JFrame {
       }
     };
 
-    JComponent jogl = new JOGLPanel() {
+    Component jogl = new JOGLPanel() {
       @Override
-      public void paint(Graphics g) {
-        super.paint(g);
+      public void paintGL(Graphics2D g) {
         if (painter != null) {
-          painter.paint((Graphics2D) g, true);
+          painter.paint(g, true);
         }
       }
     };
