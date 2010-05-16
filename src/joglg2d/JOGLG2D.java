@@ -159,6 +159,12 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   }
 
   @Override
+  public Composite getComposite() {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
   public void setComposite(Composite comp) {
     // TODO Auto-generated method stub
 
@@ -168,11 +174,6 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   public void setPaint(Paint paint) {
     // TODO Auto-generated method stub
 
-  }
-
-  @Override
-  public void setStroke(Stroke s) {
-    stroke = s;
   }
 
   @Override
@@ -280,9 +281,15 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   }
 
   @Override
-  public Composite getComposite() {
-    // TODO Auto-generated method stub
-    return null;
+  public Color getColor() {
+    return color;
+  }
+
+  @Override
+  public void setColor(Color c) {
+    color = c;
+    int rgb = color.getRGB();
+    gl.glColor4f((rgb >> 16 & 0xFF) / 255F, (rgb >> 8 & 0xFF) / 255F, (rgb & 0xFF) / 255F, (rgb >> 24 & 0xFF) / 255F);
   }
 
   @Override
@@ -303,26 +310,13 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   }
 
   @Override
-  public FontRenderContext getFontRenderContext() {
-    // TODO Auto-generated method stub
-    return null;
+  public void setStroke(Stroke s) {
+    stroke = s;
   }
 
   @Override
   public Graphics create() {
     return clone();
-  }
-
-  @Override
-  public Color getColor() {
-    return color;
-  }
-
-  @Override
-  public void setColor(Color c) {
-    color = c;
-    int rgb = color.getRGB();
-    gl.glColor4f((rgb >> 16 & 0xFF) / 255F, (rgb >> 8 & 0xFF) / 255F, (rgb & 0xFF) / 255F, (rgb >> 24 & 0xFF) / 255F);
   }
 
   @Override
@@ -349,6 +343,12 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public FontMetrics getFontMetrics(Font f) {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  @Override
+  public FontRenderContext getFontRenderContext() {
     // TODO Auto-generated method stub
     return null;
   }
