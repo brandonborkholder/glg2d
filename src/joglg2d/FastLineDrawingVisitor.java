@@ -32,7 +32,13 @@ public class FastLineDrawingVisitor implements VertexVisitor {
 
   protected double[] lastPoint;
 
+  protected double[] secondLastPoint;
+
   protected double[] firstPoint;
+
+  protected double[] secondPoint;
+
+  protected boolean cappedLine;
 
   public FastLineDrawingVisitor(GL gl, BasicStroke stroke) {
     this.gl = gl;
@@ -46,12 +52,18 @@ public class FastLineDrawingVisitor implements VertexVisitor {
   @Override
   public void closeLine() {
     lineTo(firstPoint);
+    firstPoint = lastPoint = null;
     gl.glEnd();
   }
 
   @Override
   public void endPoly() {
     gl.glEnd();
+
+    if (firstPoint != null) {
+      applyEndCap(firstPoint, secondPoint);
+      applyEndCap(lastPoint, secondLastPoint);
+    }
   }
 
   @Override
@@ -91,14 +103,74 @@ public class FastLineDrawingVisitor implements VertexVisitor {
       gl.glVertex2d(x, y);
     }
 
+    secondLastPoint = lastPoint;
     lastPoint = vertex;
+    if (secondPoint == null) {
+      secondPoint = vertex;
+    }
   }
 
   @Override
   public void moveTo(double[] vertex) {
     gl.glEnd();
+
+    if (firstPoint != null) {
+      applyEndCap(lastPoint, secondLastPoint);
+      applyEndCap(firstPoint, secondPoint);
+    }
+
     gl.glBegin(GL.GL_QUAD_STRIP);
     lastPoint = vertex;
+    secondLastPoint = null;
     firstPoint = vertex;
+    secondPoint = null;
+  }
+
+  protected void applyEndCap(double[] vertex, double[] other) {
+    double offset = stroke.getLineWidth() / 2;
+    switch (stroke.getEndCap()) {
+    case BasicStroke.CAP_BUTT:
+      // do nothing
+      break;
+
+    case BasicStroke.CAP_SQUARE:
+      gl.glBegin(GL.GL_QUADS);
+      if (vertex[0] == other[0]) {
+        double direction = Math.signum(other[1] - vertex[1]);
+        double x, y;
+        x = vertex[0] + offset;
+        y = vertex[1];
+        gl.glVertex2d(x, y);
+        y = vertex[1] - offset * direction;
+        gl.glVertex2d(x, y);
+        x = vertex[0] - offset;
+        gl.glVertex2d(x, y);
+        y = vertex[1];
+        gl.glVertex2d(x, y);
+      } else {
+        double angle = Math.atan((vertex[1] - other[1]) / (vertex[0] - other[0]));
+        double sin = Math.sin(angle) * offset;
+        double cos = Math.cos(angle) * offset;
+        double x, y;
+        x = vertex[0] + sin;
+        y = vertex[1] - cos;
+        gl.glVertex2d(x, y);
+        x = vertex[0] + sin - cos;
+        y = vertex[1] + sin + cos;
+        gl.glVertex2d(x, y);
+        x = vertex[0] - sin - cos;
+        y = vertex[1] + sin - cos;
+        gl.glVertex2d(x, y);
+        x = vertex[0] - sin;
+        y = vertex[1] + cos;
+        gl.glVertex2d(x, y);
+      }
+
+      gl.glEnd();
+      break;
+
+    case BasicStroke.CAP_ROUND:
+      break;
+    }
   }
 }
