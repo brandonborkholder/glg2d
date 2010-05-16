@@ -43,6 +43,7 @@ public class JOGLPanel extends GLCanvas {
     public void init(GLAutoDrawable drawable) {
       // contentPanel.setGL(new TraceGL(contentPanel.getGL(), System.out));
       g2d = new JOGLG2D(drawable.getGL(), drawable.getWidth(), drawable.getHeight());
+      drawable.getGL().glEnable(GL.GL_DOUBLEBUFFER);
     }
 
     @Override

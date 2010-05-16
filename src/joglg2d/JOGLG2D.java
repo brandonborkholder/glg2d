@@ -19,6 +19,7 @@ import java.awt.RenderingHints.Key;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ImageObserver;
@@ -53,6 +54,8 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected Stroke stroke;
 
+  protected Rectangle clip;
+
   public JOGLG2D(GL gl, int width, int height) {
     this.gl = gl;
     this.height = height;
@@ -70,6 +73,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     setColor(component.getForeground());
     setFont(component.getFont());
     setStroke(new BasicStroke());
+    setClip(null);
     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
     gl.glPushMatrix();
     gl.glTranslatef(0, height, 0);
@@ -283,12 +287,6 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   }
 
   @Override
-  public void clip(Shape s) {
-    // TODO Auto-generated method stub
-
-  }
-
-  @Override
   public FontRenderContext getFontRenderContext() {
     // TODO Auto-generated method stub
     return null;
@@ -341,32 +339,57 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public Rectangle getClipBounds() {
-    // TODO Auto-generated method stub
-    return null;
+    return clip;
+  }
+
+  @Override
+  public void clip(Shape s) {
+    Rectangle bounds = transform.createTransformedShape(s).getBounds();
+    clipRect(bounds.x, bounds.y, bounds.width, bounds.height);
   }
 
   @Override
   public void clipRect(int x, int y, int width, int height) {
-    // TODO Auto-generated method stub
-
+    Rectangle rect = new Rectangle(x, y, width, height);
+    if (clip == null) {
+      setClip(rect);
+    } else {
+      setClip(rect.intersection(clip));
+    }
   }
 
   @Override
   public void setClip(int x, int y, int width, int height) {
-    // TODO Auto-generated method stub
-
+    setClip(new Rectangle(x, y, width, height));
   }
 
   @Override
   public Shape getClip() {
-    // TODO Auto-generated method stub
-    return null;
+    return clip;
+  }
+
+  protected void scissor(boolean enable) {
+    if (enable) {
+      gl.glScissor(clip.x, height - clip.y - clip.height, clip.width, clip.height);
+      gl.glEnable(GL.GL_SCISSOR_TEST);
+    } else {
+      clip = null;
+      gl.glDisable(GL.GL_SCISSOR_TEST);
+    }
   }
 
   @Override
   public void setClip(Shape clip) {
-    // TODO Auto-generated method stub
+    if (clip instanceof Rectangle2D) {
+      Rectangle2D clipRect = (Rectangle2D) clip;
+      this.clip = new Rectangle((int) clipRect.getX(), (int) clipRect.getY(), (int) clipRect.getWidth(), (int) clipRect.getHeight());
 
+      scissor(true);
+    } else if (clip == null) {
+      scissor(false);
+    } else {
+      throw new IllegalArgumentException("Illegal shape for clip bounds, only java.awt.geom.Rectangle2D objects are supported");
+    }
   }
 
   @Override
@@ -503,6 +526,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     shapeDrawer = null;
     transform = null;
     stroke = null;
+    clip = null;
   }
 
   @Override

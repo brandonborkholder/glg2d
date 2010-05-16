@@ -3,6 +3,7 @@ package joglg2d;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
@@ -182,6 +183,20 @@ public class VisualTest {
       @Override
       public void paint(Graphics2D g2d) {
         g2d.drawImage(icon.getImage(), AffineTransform.getTranslateInstance(50, 90), null);
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void clipTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        g2d.setClip(new Rectangle(10, 50, 70, 90));
+        g2d.setColor(Color.BLUE);
+        g2d.fill(new Rectangle(40, 60, 60, 150));
       }
     });
 
