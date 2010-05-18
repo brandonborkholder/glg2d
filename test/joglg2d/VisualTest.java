@@ -67,8 +67,8 @@ public class VisualTest {
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
-        g2d.setStroke(new BasicStroke(4));
-        g2d.drawLine(8, 99, 143, 400);
+        g2d.setStroke(new BasicStroke(6));
+        g2d.drawLine(15, 99, 143, 400);
       }
     });
 
@@ -197,6 +197,30 @@ public class VisualTest {
         g2d.setClip(new Rectangle(10, 50, 70, 90));
         g2d.setColor(Color.BLUE);
         g2d.fill(new Rectangle(40, 60, 60, 150));
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void capTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        g2d.setColor(Color.RED);
+        g2d.setStroke(new BasicStroke(8, BasicStroke.CAP_ROUND, BasicStroke.JOIN_BEVEL));
+        g2d.drawLine(19, 239, 98, 42);
+        g2d.setColor(Color.BLUE);
+        g2d.setStroke(new BasicStroke(14, BasicStroke.CAP_ROUND, BasicStroke.JOIN_BEVEL));
+        g2d.drawLine(19, 39, 98, 342);
+
+        g2d.setColor(Color.RED);
+        g2d.setStroke(new BasicStroke(8, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL));
+        g2d.drawLine(149, 274, 118, 142);
+        g2d.setColor(Color.BLUE);
+        g2d.setStroke(new BasicStroke(14, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL));
+        g2d.drawLine(219, 139, 98, 242);
       }
     });
 
