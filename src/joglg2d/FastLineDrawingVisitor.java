@@ -17,6 +17,8 @@
 package joglg2d;
 
 import java.awt.BasicStroke;
+import java.awt.Color;
+import java.nio.DoubleBuffer;
 
 import javax.media.opengl.GL;
 
@@ -40,6 +42,8 @@ public class FastLineDrawingVisitor implements VertexVisitor {
 
   protected boolean cappedLine;
 
+  protected DoubleBuffer buffer = DoubleBuffer.allocate(500);
+
   public FastLineDrawingVisitor(GL gl, BasicStroke stroke) {
     this.gl = gl;
     this.stroke = stroke;
@@ -52,7 +56,9 @@ public class FastLineDrawingVisitor implements VertexVisitor {
   @Override
   public void closeLine() {
     lineTo(firstPoint);
+    connect(secondPoint);
     firstPoint = lastPoint = null;
+    secondPoint = secondLastPoint = null;
     gl.glEnd();
   }
 
@@ -64,6 +70,8 @@ public class FastLineDrawingVisitor implements VertexVisitor {
       applyEndCap(firstPoint, secondPoint);
       applyEndCap(lastPoint, secondLastPoint);
     }
+
+    drawConnections();
   }
 
   @Override
@@ -85,11 +93,108 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     y = vertex[1] + cos;
     gl.glVertex2d(x, y);
 
+    connect(vertex);
     secondLastPoint = lastPoint;
     lastPoint = vertex;
     if (secondPoint == null) {
       secondPoint = vertex;
     }
+  }
+
+  protected void drawConnections() {
+    if (buffer.position() == 0) {
+      return;
+    }
+
+    Color c = Color.red;
+    gl.glPushAttrib(GL.GL_COLOR_BUFFER_BIT | GL.GL_CURRENT_BIT);
+    gl.glColor3ub((byte) c.getRed(), (byte) c.getGreen(), (byte) c.getBlue());
+    gl.glPointSize(2);
+    // gl.glBegin(GL.GL_QUADS);
+    gl.glBegin(GL.GL_POINTS);
+
+    buffer.limit(buffer.position());
+    buffer.rewind();
+    while (buffer.hasRemaining()) {
+      gl.glVertex2d(buffer.get(), buffer.get());
+    }
+    buffer.rewind();
+    buffer.limit(buffer.capacity());
+
+    gl.glEnd();
+    gl.glPopAttrib();
+  }
+
+  protected void connect(double[] vertex) {
+    if (secondLastPoint == null || stroke.getLineJoin() != BasicStroke.JOIN_MITER) {
+      return;
+    }
+
+    double angle1 = angleOf(secondLastPoint, lastPoint);
+    double angle2 = angleOf(lastPoint, vertex);
+    double x1 = secondLastPoint[0];
+    double y1 = secondLastPoint[1];
+    double x2 = lastPoint[0];
+    double y2 = lastPoint[1];
+    double x3 = vertex[0];
+    double y3 = vertex[1];
+    double offset = stroke.getLineWidth() / 2;
+    double a = offset / Math.abs(Math.cos(angle1));
+    double b = offset / Math.abs(Math.cos(angle2));
+    // System.out.println(angle1 + ", " + angle2);
+    // System.out.println(a + ", " + b);
+    double x, y;
+
+    if (x1 == x2 || x2 == x3) {
+      x = x2 + offset;
+      y = y2 + offset;
+    } else {
+      x = ((x2 * x2 - x1 * x2) * y3 + (x1 * x2 - x2 * x3) * y2 + (x2 * x3 - x2 * x2) * y1 + ((-b - a) * x2 + (b + a) * x1) * x3
+          + (b + a) * x2 * x2 + (-b - a) * x1 * x2)
+          / ((x2 - x1) * y3 + (x1 - x3) * y2 + (x3 - x2) * y1);
+      y = (y3 - y2) / (x3 - x2) * (x - x3) + y3 + b;
+    }
+    buffer.put(x);
+    buffer.put(y);
+
+    if (x1 == x2 || x2 == x3) {
+      x = x2 - offset;
+      y = y2 + offset;
+    } else {
+      a = -a;
+      x = ((x2 * x2 - x1 * x2) * y3 + (x1 * x2 - x2 * x3) * y2 + (x2 * x3 - x2 * x2) * y1 + ((-b - a) * x2 + (b + a) * x1) * x3
+          + (b + a) * x2 * x2 + (-b - a) * x1 * x2)
+          / ((x2 - x1) * y3 + (x1 - x3) * y2 + (x3 - x2) * y1);
+      y = (y3 - y2) / (x3 - x2) * (x - x3) + y3 + b;
+    }
+    buffer.put(x);
+    buffer.put(y);
+
+    if (x1 == x2 || x2 == x3) {
+      x = x2 - offset;
+      y = y2 - offset;
+    } else {
+      b = -b;
+      x = ((x2 * x2 - x1 * x2) * y3 + (x1 * x2 - x2 * x3) * y2 + (x2 * x3 - x2 * x2) * y1 + ((-b - a) * x2 + (b + a) * x1) * x3
+          + (b + a) * x2 * x2 + (-b - a) * x1 * x2)
+          / ((x2 - x1) * y3 + (x1 - x3) * y2 + (x3 - x2) * y1);
+      y = (y3 - y2) / (x3 - x2) * (x - x3) + y3 + b;
+    }
+    buffer.put(x);
+    buffer.put(y);
+
+    if (x1 == x2 || x2 == x3) {
+      x = x2 + offset;
+      y = y2 - offset;
+    } else {
+      a = -a;
+      x = ((x2 * x2 - x1 * x2) * y3 + (x1 * x2 - x2 * x3) * y2 + (x2 * x3 - x2 * x2) * y1 + ((-b - a) * x2 + (b + a) * x1) * x3
+          + (b + a) * x2 * x2 + (-b - a) * x1 * x2)
+          / ((x2 - x1) * y3 + (x1 - x3) * y2 + (x3 - x2) * y1);
+      y = (y3 - y2) / (x3 - x2) * (x - x3) + y3 + b;
+    }
+    buffer.put(x);
+    buffer.put(y);
   }
 
   @Override

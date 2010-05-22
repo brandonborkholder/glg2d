@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.net.URL;
@@ -221,6 +222,28 @@ public class VisualTest {
         g2d.setColor(Color.BLUE);
         g2d.setStroke(new BasicStroke(14, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL));
         g2d.drawLine(219, 139, 98, 242);
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void joinTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        g2d.setStroke(new BasicStroke(7, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
+        g2d.draw(new Rectangle2D.Double(50, 100, 120, 90));
+
+        Path2D.Double path = new Path2D.Double();
+        path.moveTo(180, 50);
+        path.lineTo(210, 30);
+        path.lineTo(280, 70);
+        path.lineTo(240, 93);
+        path.closePath();
+
+        g2d.draw(path);
       }
     });
 
