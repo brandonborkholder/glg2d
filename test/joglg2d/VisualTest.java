@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Arc2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
@@ -240,10 +241,20 @@ public class VisualTest {
         path.moveTo(180, 50);
         path.lineTo(210, 30);
         path.lineTo(280, 70);
-        path.lineTo(240, 93);
+        path.lineTo(210, 38);
         path.closePath();
-
         g2d.draw(path);
+
+        path = new Path2D.Double();
+        path.moveTo(180, 250);
+        path.lineTo(180, 230);
+        path.lineTo(280, 209);
+        path.lineTo(240, 283);
+        path.closePath();
+        g2d.draw(path);
+
+        Arc2D.Double arc = new Arc2D.Double(77, 349, 60, 40, 0, 70, Arc2D.OPEN);
+        g2d.draw(arc);
       }
     });
 
