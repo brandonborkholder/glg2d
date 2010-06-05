@@ -17,8 +17,6 @@
 package joglg2d;
 
 import java.awt.BasicStroke;
-import java.awt.Color;
-import java.nio.DoubleBuffer;
 import java.util.Arrays;
 
 import javax.media.opengl.GL;
@@ -43,11 +41,12 @@ public class FastLineDrawingVisitor implements VertexVisitor {
 
   protected boolean cappedLine;
 
-  protected DoubleBuffer buffer = DoubleBuffer.allocate(500);
+  protected float offset;
 
   public FastLineDrawingVisitor(GL gl, BasicStroke stroke) {
     this.gl = gl;
     this.stroke = stroke;
+    offset = stroke.getLineWidth() / 2;
   }
 
   @Override
@@ -56,8 +55,10 @@ public class FastLineDrawingVisitor implements VertexVisitor {
 
   @Override
   public void closeLine() {
+    // force drawing around the corner
     lineTo(firstPoint);
-    connect2(secondPoint);
+    lineTo(secondPoint);
+    drawLineEnd();
     firstPoint = lastPoint = null;
     secondPoint = secondLastPoint = null;
     gl.glEnd();
@@ -65,159 +66,97 @@ public class FastLineDrawingVisitor implements VertexVisitor {
 
   @Override
   public void endPoly() {
-    gl.glEnd();
-
     if (firstPoint != null) {
+      drawLineEnd();
+      gl.glEnd();
       applyEndCap(firstPoint, secondPoint);
       applyEndCap(lastPoint, secondLastPoint);
+    } else {
+      gl.glEnd();
     }
-
-    drawConnections();
   }
 
   @Override
   public void lineTo(double[] vertex) {
-    double angle = angleOf(vertex, lastPoint);
-    double offset = stroke.getLineWidth() / 2;
-    double sin = Math.sin(angle) * offset;
-    double cos = Math.cos(angle) * offset;
-    double x = lastPoint[0] + sin;
-    double y = lastPoint[1] - cos;
-    gl.glVertex2d(x, y);
-    x = lastPoint[0] - sin;
-    y = lastPoint[1] + cos;
-    gl.glVertex2d(x, y);
-    x = vertex[0] + sin;
-    y = vertex[1] - cos;
-    gl.glVertex2d(x, y);
-    x = vertex[0] - sin;
-    y = vertex[1] + cos;
-    gl.glVertex2d(x, y);
+    if (lastPoint[0] == vertex[0] && lastPoint[1] == vertex[1]) {
+      return;
+    }
 
-    connect2(vertex);
-    secondLastPoint = lastPoint;
-    lastPoint = vertex;
     if (secondPoint == null) {
       secondPoint = vertex;
     }
-  }
 
-  protected void drawConnections() {
-    if (buffer.position() == 0) {
-      return;
-    }
-
-    Color c = Color.red;
-    gl.glPushAttrib(GL.GL_COLOR_BUFFER_BIT | GL.GL_CURRENT_BIT);
-    gl.glColor3ub((byte) c.getRed(), (byte) c.getGreen(), (byte) c.getBlue());
-    gl.glPointSize(4);
-    // gl.glBegin(GL.GL_QUADS);
-    gl.glBegin(GL.GL_POINTS);
-
-    buffer.limit(buffer.position());
-    buffer.rewind();
-    while (buffer.hasRemaining()) {
-      gl.glVertex2d(buffer.get(), buffer.get());
-    }
-    buffer.rewind();
-    buffer.limit(buffer.capacity());
-
-    gl.glEnd();
-    gl.glPopAttrib();
-  }
-
-  protected void connect2(double[] vertex) {
-    // connect1(vertex);
-    // connect3(vertex);
-    // connect4(vertex);
-    connect5(vertex);
-  }
-
-  protected void connect4(double[] vertex) {
-    if (secondLastPoint == null || stroke.getLineJoin() != BasicStroke.JOIN_MITER) {
-      return;
-    }
-
-    double angle1 = angleOf(lastPoint, secondLastPoint);
-    double angle2 = angleOf(vertex, lastPoint);
-
-    if (Math.abs(angle1 - Math.PI / 2) < 1e-10) {
-      return;
-    } else if (Math.abs(angle2 - Math.PI / 2) < 1e-10) {
-      return;
-    }
-
-    // double x1 = secondLastPoint[0];
-    // double y1 = secondLastPoint[1];
-    double x2 = lastPoint[0];
-    double y2 = lastPoint[1];
-    // double x3 = vertex[0];
-    // double y3 = vertex[1];
-    double offset = stroke.getLineWidth() / 2;
-    double a1 = y2 - x2 * Math.tan(angle1);
-    double a2 = y2 - x2 * Math.tan(angle2);
-
-    double b1 = offset / Math.cos(angle1);
-    double b2 = offset / Math.cos(angle2);
-
-    double xInt1 = (b2 - b1 + a2 - a1) / (Math.tan(angle1) - Math.tan(angle2));
-    double yInt1 = xInt1 * Math.tan(angle1) + a1 + b1;
-    double xInt2 = (-b2 + b1 + a2 - a1) / (Math.tan(angle1) - Math.tan(angle2));
-    double yInt2 = xInt2 * Math.tan(angle1) + a1 - b1;
-
-    if (yInt1 < 0) {
-      System.out.println(String.format("%.2f, %.2f : %.2f, %.2f", xInt1, yInt1, xInt2, yInt2));
-    }
-
-    if (Math.abs(angle1 - Math.PI / 2) < 1e-10) {
-      if (Math.abs(angle2 - Math.PI / 2) < 1e-10) {
-
-      } else {
-        buffer.put(x2 - Math.sin(angle1) * offset);
-        buffer.put(y2 + Math.cos(angle1) * offset);
-        buffer.put(x2 + Math.sin(angle1) * offset);
-        buffer.put(y2 - Math.cos(angle1) * offset);
-      }
-    } else if (Math.abs(angle1 - angle2) > 1e-10) {
-      buffer.put(xInt1);
-      buffer.put(yInt1);
-      buffer.put(xInt2);
-      buffer.put(yInt2);
+    if (secondLastPoint == null) {
+      drawLineStart();
     } else {
-      buffer.put(x2 - Math.sin(angle1) * offset);
-      buffer.put(y2 + Math.cos(angle1) * offset);
-      buffer.put(x2 + Math.sin(angle1) * offset);
-      buffer.put(y2 - Math.cos(angle1) * offset);
+      drawCorner(vertex);
     }
+
+    secondLastPoint = lastPoint;
+    lastPoint = vertex;
   }
 
-  protected void connect5(double[] vertex) {
-    if (secondLastPoint == null || stroke.getLineJoin() != BasicStroke.JOIN_MITER) {
-      return;
-    }
+  protected void drawLineEnd() {
+    double angle = angleOf(lastPoint, secondLastPoint);
+    double cos = Math.cos(angle) * offset;
+    double sin = Math.sin(angle) * offset;
 
+    gl.glVertex2d(lastPoint[0] + sin, lastPoint[1] - cos);
+    gl.glVertex2d(lastPoint[0] - sin, lastPoint[1] + cos);
+  }
+
+  protected void drawLineStart() {
+    double angle = angleOf(secondPoint, firstPoint);
+    double cos = Math.cos(angle) * offset;
+    double sin = Math.sin(angle) * offset;
+
+    gl.glVertex2d(firstPoint[0] + sin, firstPoint[1] - cos);
+    gl.glVertex2d(firstPoint[0] - sin, firstPoint[1] + cos);
+  }
+
+  protected void drawCorner(double[] vertex) {
     double angle1 = angleOf(lastPoint, secondLastPoint);
     double angle2 = angleOf(vertex, lastPoint);
 
-    double offset = stroke.getLineWidth() / 2;
     double cos1 = Math.cos(angle1) * offset;
     double sin1 = Math.sin(angle1) * offset;
     double cos2 = Math.cos(angle2) * offset;
     double sin2 = Math.sin(angle2) * offset;
 
     if (Arrays.equals(lastPoint, secondLastPoint)) {
-      buffer.put(lastPoint[0] + sin2);
-      buffer.put(lastPoint[1] - cos2);
-      buffer.put(lastPoint[0] - sin2);
-      buffer.put(lastPoint[1] + cos2);
+      gl.glVertex2d(lastPoint[0] + sin2, lastPoint[1] - cos2);
+      gl.glVertex2d(lastPoint[0] - sin2, lastPoint[1] + cos2);
       return;
     } else if (Arrays.equals(lastPoint, vertex)) {
-      buffer.put(lastPoint[0] + sin1);
-      buffer.put(lastPoint[1] - cos1);
-      buffer.put(lastPoint[0] - sin1);
-      buffer.put(lastPoint[1] + cos1);
+      gl.glVertex2d(lastPoint[0] + sin1, lastPoint[1] - cos1);
+      gl.glVertex2d(lastPoint[0] - sin1, lastPoint[1] + cos1);
       return;
     }
+
+    if (stroke.getLineJoin() == BasicStroke.JOIN_BEVEL) {
+      gl.glVertex2d(lastPoint[0] + sin1, lastPoint[1] - cos1);
+      gl.glVertex2d(lastPoint[0] - sin1, lastPoint[1] + cos1);
+      gl.glVertex2d(lastPoint[0] + sin2, lastPoint[1] - cos2);
+      gl.glVertex2d(lastPoint[0] - sin2, lastPoint[1] + cos2);
+      return;
+    } else if (stroke.getLineJoin() == BasicStroke.JOIN_ROUND) {
+      gl.glVertex2d(lastPoint[0] + sin1, lastPoint[1] - cos1);
+      gl.glVertex2d(lastPoint[0] - sin1, lastPoint[1] + cos1);
+      if (angle2 < angle1) {
+        angle2 += Math.PI * 2;
+      }
+
+      for (double angle = angle1; angle < angle2; angle += 0.5) {
+        double sin = Math.sin(angle);
+        double cos = Math.cos(angle);
+        gl.glVertex2d(lastPoint[0] + sin * offset, lastPoint[1] - cos * offset);
+        gl.glVertex2d(lastPoint[0] - sin * offset, lastPoint[1] + cos * offset);
+      }
+      gl.glVertex2d(lastPoint[0] + sin2, lastPoint[1] - cos2);
+      gl.glVertex2d(lastPoint[0] - sin2, lastPoint[1] + cos2);
+      return;
+    }
+    // else BasicStroke.JOIN_MITER and continue
 
     double[] pt1 = new double[] { secondLastPoint[0] + sin1, secondLastPoint[1] - cos1 };
     double[] pt2 = new double[] { lastPoint[0] + sin2, lastPoint[1] - cos2 };
@@ -226,10 +165,9 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     double[] intersect = intersection(pt1, pt2, pt3, pt4);
 
     if (magnitude(pt3) > 0 && magnitude(pt4) > 0) {
-      buffer.put(intersect[0]);
-      buffer.put(intersect[1]);
+      gl.glVertex2d(intersect[0], intersect[1]);
     } else {
-       System.out.println(Arrays.toString(intersect));
+      System.out.println(Arrays.toString(intersect));
     }
 
     pt1 = new double[] { secondLastPoint[0] - sin1, secondLastPoint[1] + cos1 };
@@ -237,15 +175,8 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     pt3 = new double[] { lastPoint[0] - secondLastPoint[0], lastPoint[1] - secondLastPoint[1] };
     pt4 = new double[] { vertex[0] - lastPoint[0], vertex[1] - lastPoint[1] };
     intersect = intersection(pt1, pt2, pt3, pt4);
-    // System.out.println(String.format("(%.2f, %.2f) (%.2f, %.2f) (%.2f, %.2f) = (%.2f, %.2f)",
-    // secondLastPoint[0], secondLastPoint[1],
-    // lastPoint[0], lastPoint[1], vertex[0], vertex[1], intersect[0],
-    // intersect[1]));
     if (magnitude(pt3) > 0 && magnitude(pt4) > 0) {
-      buffer.put(intersect[0]);
-      buffer.put(intersect[1]);
-    } else {
-      System.out.println(Arrays.toString(intersect));
+      gl.glVertex2d(intersect[0], intersect[1]);
     }
   }
 
@@ -263,9 +194,6 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     }
 
     double a = magnitude(crossPV) / magnitude(crossV);
-    if (crossV[2] == 0) {
-      // System.out.println(a);
-    }
 
     double[] pt = new double[] { origin1[0] + a * vect1[0], origin1[1] + a * vect1[1] };
     return pt;
@@ -285,113 +213,12 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     return new double[] { 0, 0, a[0] * b[1] - a[1] * b[0] };
   }
 
-  protected void connect3(double[] vertex) {
-    if (secondLastPoint == null || stroke.getLineJoin() != BasicStroke.JOIN_MITER) {
-      return;
-    }
-
-    angleOf(lastPoint, secondLastPoint);
-    double angle2 = angleOf(lastPoint, vertex);
-
-    double x2 = lastPoint[0];
-    double y2 = lastPoint[1];
-    double offset = stroke.getLineWidth() / 2;
-    double sin2 = Math.sin(angle2) * offset;
-    // topleft
-    buffer.put(x2 - offset);
-    buffer.put(y2 - offset + sin2);
-
-    // topright
-    buffer.put(x2 + offset);
-    buffer.put(y2 - offset);
-
-    // bottomright
-    buffer.put(x2 + offset);
-    buffer.put(y2 + offset);
-
-    // bottomleft
-    buffer.put(x2 - offset);
-    buffer.put(y2 + offset);
-  }
-
-  protected void connect1(double[] vertex) {
-    if (secondLastPoint == null || stroke.getLineJoin() != BasicStroke.JOIN_MITER) {
-      return;
-    }
-
-    double angle1 = angleOf(secondLastPoint, lastPoint);
-    double angle2 = angleOf(lastPoint, vertex);
-    if (Math.abs(Math.abs(angle1 - angle2) - Math.PI) < 0.1) {
-      return;
-    }
-
-    double x1 = secondLastPoint[0];
-    double y1 = secondLastPoint[1];
-    double x2 = lastPoint[0];
-    double y2 = lastPoint[1];
-    double x3 = vertex[0];
-    double y3 = vertex[1];
-    double offset = stroke.getLineWidth() / 2;
-    double a = offset / Math.abs(Math.cos(angle1));
-    double b = offset / Math.abs(Math.cos(angle2));
-    // System.out.println(angle1 + ", " + angle2);
-    // System.out.println(a + ", " + b);
-    double x, y;
-
-    if (x1 == x2 || x2 == x3) {
-      x = x2 + offset;
-      y = y2 + offset;
-    } else {
-      x = ((x2 * x2 - x1 * x2) * y3 + (x1 * x2 - x2 * x3) * y2 + (x2 * x3 - x2 * x2) * y1 + ((-b - a) * x2 + (b + a) * x1) * x3
-          + (b + a) * x2 * x2 + (-b - a) * x1 * x2)
-          / ((x2 - x1) * y3 + (x1 - x3) * y2 + (x3 - x2) * y1);
-      y = (y3 - y2) / (x3 - x2) * (x - x3) + y3 + b;
-    }
-    buffer.put(x);
-    buffer.put(y);
-
-    if (x1 == x2 || x2 == x3) {
-      x = x2 - offset;
-      y = y2 + offset;
-    } else {
-      a = -a;
-      x = ((x2 * x2 - x1 * x2) * y3 + (x1 * x2 - x2 * x3) * y2 + (x2 * x3 - x2 * x2) * y1 + ((-b - a) * x2 + (b + a) * x1) * x3
-          + (b + a) * x2 * x2 + (-b - a) * x1 * x2)
-          / ((x2 - x1) * y3 + (x1 - x3) * y2 + (x3 - x2) * y1);
-      y = (y3 - y2) / (x3 - x2) * (x - x3) + y3 + b;
-    }
-    buffer.put(x);
-    buffer.put(y);
-
-    if (x1 == x2 || x2 == x3) {
-      x = x2 - offset;
-      y = y2 - offset;
-    } else {
-      b = -b;
-      x = ((x2 * x2 - x1 * x2) * y3 + (x1 * x2 - x2 * x3) * y2 + (x2 * x3 - x2 * x2) * y1 + ((-b - a) * x2 + (b + a) * x1) * x3
-          + (b + a) * x2 * x2 + (-b - a) * x1 * x2)
-          / ((x2 - x1) * y3 + (x1 - x3) * y2 + (x3 - x2) * y1);
-      y = (y3 - y2) / (x3 - x2) * (x - x3) + y3 + b;
-    }
-    buffer.put(x);
-    buffer.put(y);
-
-    if (x1 == x2 || x2 == x3) {
-      x = x2 + offset;
-      y = y2 - offset;
-    } else {
-      a = -a;
-      x = ((x2 * x2 - x1 * x2) * y3 + (x1 * x2 - x2 * x3) * y2 + (x2 * x3 - x2 * x2) * y1 + ((-b - a) * x2 + (b + a) * x1) * x3
-          + (b + a) * x2 * x2 + (-b - a) * x1 * x2)
-          / ((x2 - x1) * y3 + (x1 - x3) * y2 + (x3 - x2) * y1);
-      y = (y3 - y2) / (x3 - x2) * (x - x3) + y3 + b;
-    }
-    buffer.put(x);
-    buffer.put(y);
-  }
-
   @Override
   public void moveTo(double[] vertex) {
+    if (firstPoint != null) {
+      drawLineEnd();
+    }
+
     gl.glEnd();
 
     if (firstPoint != null) {
@@ -400,10 +227,8 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     }
 
     gl.glBegin(GL.GL_QUAD_STRIP);
-    lastPoint = vertex;
-    secondLastPoint = null;
-    firstPoint = vertex;
-    secondPoint = null;
+    firstPoint = lastPoint = vertex;
+    secondLastPoint = secondPoint = null;
   }
 
   protected void applyEndCap(double[] vertex, double[] other) {
