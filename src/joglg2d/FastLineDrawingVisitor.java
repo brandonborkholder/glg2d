@@ -16,6 +16,12 @@
 
 package joglg2d;
 
+import static java.lang.Math.abs;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
+
 import java.awt.BasicStroke;
 
 import javax.media.opengl.GL;
@@ -138,15 +144,15 @@ public class FastLineDrawingVisitor implements VertexVisitor {
 
     switch (stroke.getLineJoin()) {
     case BasicStroke.JOIN_BEVEL:
-      drawBevelCorner(angle1, angle2, vertex);
+      drawBevelCorner(angle1, angle2);
       return;
 
     case BasicStroke.JOIN_ROUND:
-      drawRoundCorner(angle1, angle2, vertex);
+      drawRoundCorner(angle1, angle2);
       return;
 
     case BasicStroke.JOIN_MITER:
-      drawMiterCorner(angle1, angle2, vertex);
+      drawMiterCorner(angle1, angle2);
       return;
 
     default:
@@ -154,7 +160,7 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     }
   }
 
-  protected void drawRoundCorner(double angle1, double angle2, double[] vertex) {
+  protected void drawRoundCorner(double angle1, double angle2) {
     double sin1 = sin(angle1) * offset;
     double sin2 = sin(angle2) * offset;
     double cos1 = cos(angle1) * offset;
@@ -176,7 +182,7 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     gl.glVertex2d(lastPoint[0] - sin2, lastPoint[1] + cos2);
   }
 
-  protected void drawBevelCorner(double angle1, double angle2, double[] vertex) {
+  protected void drawBevelCorner(double angle1, double angle2) {
     double sin1 = sin(angle1) * offset;
     double sin2 = sin(angle2) * offset;
     double cos1 = cos(angle1) * offset;
@@ -188,9 +194,13 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     gl.glVertex2d(lastPoint[0] - sin2, lastPoint[1] + cos2);
   }
 
-  protected void drawMiterCorner(double angle1, double angle2, double[] vertex) {
-    if (exceedsMiterLimit(angle1, angle2)) {
-      drawBevelCorner(angle1, angle2, vertex);
+  protected void drawMiterCorner(double angle1, double angle2) {
+    /*
+     * If they are nearly parallel in the same direction, that could cause an
+     * error in computing the intersections.
+     */
+    if (abs(angle1 - angle2) < 1e-10) {
+      drawBevelCorner(angle1, angle2);
       return;
     }
 
@@ -199,19 +209,19 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     double cos1 = cos(angle1) * offset;
     double cos2 = cos(angle2) * offset;
 
-    double[] pt1 = new double[] { secondLastPoint[0] + sin1, secondLastPoint[1] - cos1 };
-    double[] pt2 = new double[] { lastPoint[0] + sin2, lastPoint[1] - cos2 };
-    double[] pt3 = new double[] { lastPoint[0] - secondLastPoint[0], lastPoint[1] - secondLastPoint[1] };
-    double[] pt4 = new double[] { vertex[0] - lastPoint[0], vertex[1] - lastPoint[1] };
-    double[] intersect = intersection(pt1, pt2, pt3, pt4);
-    gl.glVertex2d(intersect[0], intersect[1]);
+    double[] intersect1 = intersection(sin1, cos1, sin2, cos2, true);
+    double[] intersect2 = intersection(sin1, cos1, sin2, cos2, false);
 
-    pt1 = new double[] { secondLastPoint[0] - sin1, secondLastPoint[1] + cos1 };
-    pt2 = new double[] { lastPoint[0] - sin2, lastPoint[1] + cos2 };
-    pt3 = new double[] { lastPoint[0] - secondLastPoint[0], lastPoint[1] - secondLastPoint[1] };
-    pt4 = new double[] { vertex[0] - lastPoint[0], vertex[1] - lastPoint[1] };
-    intersect = intersection(pt1, pt2, pt3, pt4);
-    gl.glVertex2d(intersect[0], intersect[1]);
+    // If we exceed the miter limit, draw beveled corner
+    double diffX = intersect1[0] - intersect2[0];
+    double diffY = intersect1[1] - intersect2[1];
+    double dist = sqrt(diffX * diffX + diffY * diffY);
+    if (dist / stroke.getLineWidth() > stroke.getMiterLimit()) {
+      drawBevelCorner(angle1, angle2);
+    } else {
+      gl.glVertex2d(lastPoint[0] + intersect1[0], lastPoint[1] + intersect1[1]);
+      gl.glVertex2d(lastPoint[0] + intersect2[0], lastPoint[1] + intersect2[1]);
+    }
   }
 
   protected void applyEndCap(double[] vertex, double[] other) {
@@ -259,24 +269,35 @@ public class FastLineDrawingVisitor implements VertexVisitor {
   }
 
   /**
-   * Returns true if the miter join is not appropriate for these angles. This
-   * not only takes into account the miter limit of BasicStroke, but also
-   * determines if <code>angle1</code> and <code>angle2</code> are such that the
-   * derivation of the miter points would encounter an error.
-   */
-  protected boolean exceedsMiterLimit(double angle1, double angle2) {
-    // TODO
-    return false;
-  }
-
-  /**
-   * Finds the intersection of two lines in parametric form. Letting
-   * <code>o1=origin1</code> and <code>v1=vect1</code> (similarly for
-   * <code>origin2, vect2</code>) we have that
+   * Finds the intersection of two lines. This method was written to reduce the
+   * number of array creations and so is quite dense. However, it is easy to
+   * understand the theory behind the computation.
+   *
+   * <p>
+   * We have two lines, the first with angle theta and the second with angle
+   * phi. The angles are relative to the x-axis and computed by
+   * {@link #angleOf(double[], double[])}. The arguments {@code sin1}, {@code
+   * cos1}, {@code sin2}, {@code cos2} are the sin and cos of theta and phi
+   * respectively, multiplied by half the line width. This gives us an easy way
+   * to represent the line in parametric form. For example the first line (with
+   * angle theta) has the form
    *
    * <pre>
-   * P1 = o1 + t * v1
-   * P2 = o2 + s * v2
+   * &lt;x, y&gt; = &lt;sin1, -cos1&gt; + t * &lt;cos1, sin1&gt;
+   * </pre>
+   *
+   * </p>
+   * <p>
+   * <code>&lt;sin1, -cos1&gt;</code> is a point on the line, while
+   * <code>&lt;cos1, sin1&gt;</code> is the direction of the line. The method
+   * for solving for the intersection of these two parametric lines is
+   * straightforward. Let <code>o1</code> and <code>o2</code> be the points on
+   * the lines and <code>v1</code> and <code>v2</code> be the two direction
+   * vectors. Now we have
+   *
+   * <pre>
+   * p1 = o1 + t * v1
+   * p2 = o2 + s * v2
    * </pre>
    *
    * We can solve to find the intersection by
@@ -288,45 +309,35 @@ public class FastLineDrawingVisitor implements VertexVisitor {
    * t * (v1 x v2) = (o2 - o1) x v2             ; to get rid of s term
    * </pre>
    *
-   * Solve for <code>t</code> by finding the ratio of the magnitudes. Now just
-   * put <code>t</code> back into the first equation gives us our point of
-   * intersection. Note that I didn't come up with this, but it's pretty easy to
-   * determine.
+   * Solving for <code>t</code> is easy since we only have the z component. Put
+   * <code>t</code> back into the first equation gives us our point of
+   * intersection.
+   * </p>
+   * <p>
+   * This is certainly not what is shown in the method body. But if you
+   * construct the vectors <code>o1, o2, v1, v2</code> as described above, and
+   * solve for t, you will get the body of the method. The extra parameter
+   * {@code side} specifies which side to find the intersection. This only
+   * affects the vectors <code>o1</code> and <code>o2</code>. If {@code side} is
+   * {@code true}, then <code>o1 = &lt;sin1, -cos1&gt;</code>. If {@code side}
+   * is {@code false}, then <code>o1 = &lt;-sin1, cos1&gt;</code>. Since the
+   * miter join needs to calculate two intersections, one for each side of the
+   * stroke, this enables both.
+   * </p>
    */
-  static double[] intersection(double[] origin1, double[] origin2, double[] vect1, double[] vect2) {
-    // v1 x v2
-    double crossVz = crossProductZ(vect1, vect2);
-    // o2 - o1
-    double[] diffP = new double[] { origin2[0] - origin1[0], origin2[1] - origin1[1] };
-    // (o2 - o1) x v2
-    double crossPVz = crossProductZ(diffP, vect2);
-
-    double t = crossPVz / crossVz;
-    double[] pt = new double[] { origin1[0] + t * vect1[0], origin1[1] + t * vect1[1] };
-    return pt;
-  }
-
-  /**
-   * Since all our drawing is in the x,y plane, the only non-zero component of
-   * the cross-product is z.
-   */
-  protected static double crossProductZ(double[] a, double[] b) {
-    return a[0] * b[1] - a[1] * b[0];
-  }
-
-  /*
-   * XXX I don't know how slow cos is, but given how much I use it, this might
-   * be optimized to the first three terms of the Taylor series.
-   */
-  protected static double cos(double angle) {
-    return Math.cos(angle);
-  }
-
-  protected static double sin(double angle) {
-    return Math.sin(angle);
+  protected double[] intersection(double sin1, double cos1, double sin2, double cos2, boolean side) {
+    if (side) {
+      double t = sin2 * (sin2 - sin1) - cos2 * (cos1 - cos2);
+      t /= sin2 * cos1 - cos2 * sin1;
+      return new double[] { sin1 + t * cos1, -cos1 + t * sin1 };
+    } else {
+      double t = sin2 * (sin1 - sin2) - cos2 * (cos2 - cos1);
+      t /= sin2 * cos1 - cos2 * sin1;
+      return new double[] { -sin1 + t * cos1, cos1 + t * sin1 };
+    }
   }
 
   protected static double angleOf(double[] vertex, double[] other) {
-    return Math.atan2(vertex[1] - other[1], vertex[0] - other[0]);
+    return atan2(vertex[1] - other[1], vertex[0] - other[0]);
   }
 }

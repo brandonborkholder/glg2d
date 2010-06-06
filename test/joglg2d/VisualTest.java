@@ -255,6 +255,15 @@ public class VisualTest {
 
         Arc2D.Double arc = new Arc2D.Double(77, 349, 60, 40, 0, 70, Arc2D.OPEN);
         g2d.draw(arc);
+
+        g2d.setColor(Color.red);
+        path = new Path2D.Double();
+        path.moveTo(240, 383);
+        path.lineTo(280, 309);
+        path.lineTo(180, 330);
+        path.lineTo(180, 350);
+        path.closePath();
+        g2d.draw(path);
       }
     });
 
