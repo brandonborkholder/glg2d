@@ -16,32 +16,38 @@
 
 package joglg2d;
 
+import java.awt.BorderLayout;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.glu.GLU;
-
-import com.sun.opengl.util.Animator;
-import com.sun.opengl.util.FPSAnimator;
+import javax.swing.JPanel;
 
 /**
  * @author borkholder
  * @created Feb 6, 2010
  */
 @SuppressWarnings("serial")
-public class JOGLPanel extends GLCanvas {
+public class JOGLPanel extends JPanel {
   protected JOGLG2D g2d;
 
-  protected Animator animator;
+  protected GLCanvas canvas;
 
   public JOGLPanel() {
-    addGLEventListener(new Listener());
+    canvas = new GLCanvas();
+    canvas.addGLEventListener(new Listener());
 
-    animator = new FPSAnimator(this, 5);
-    animator.start();
+    setLayout(new BorderLayout());
+    add(canvas, BorderLayout.CENTER);
+  }
+
+  @Override
+  public void paint(Graphics g) {
+    super.paint(g);
+    canvas.display();
   }
 
   public void paintGL(Graphics2D g2d) {
@@ -50,14 +56,13 @@ public class JOGLPanel extends GLCanvas {
   class Listener implements GLEventListener {
     @Override
     public void display(GLAutoDrawable drawable) {
-      g2d.prePaint(JOGLPanel.this);
+      g2d.prePaint(canvas);
       paintGL(g2d);
       g2d.postPaint();
     }
 
     @Override
     public void init(GLAutoDrawable drawable) {
-      // contentPanel.setGL(new TraceGL(contentPanel.getGL(), System.out));
       g2d = new JOGLG2D(drawable.getGL(), drawable.getWidth(), drawable.getHeight());
       drawable.getGL().glEnable(GL.GL_DOUBLEBUFFER);
     }
@@ -68,13 +73,6 @@ public class JOGLPanel extends GLCanvas {
       if (height <= 0) {
         height = 1;
       }
-
-      gl.glViewport(0, 0, width, height);
-      gl.glMatrixMode(GL.GL_PROJECTION);
-      gl.glLoadIdentity();
-      gl.glMatrixMode(GL.GL_MODELVIEW);
-      gl.glLoadIdentity();
-      new GLU().gluOrtho2D(0, width, 0, height);
 
       g2d = new JOGLG2D(gl, width, height);
     }

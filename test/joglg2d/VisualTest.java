@@ -12,6 +12,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.net.URL;
 
 import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 
 import joglg2d.util.Painter;
 import joglg2d.util.TestWindow;
@@ -264,6 +265,33 @@ public class VisualTest {
         path.lineTo(180, 350);
         path.closePath();
         g2d.draw(path);
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void labelTest() throws Exception {
+    final JLabel label1 = new JLabel("foo");
+    final JLabel label2 = new JLabel("bar");
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        label1.setBackground(Color.red);
+        label1.setForeground(Color.white);
+        label2.setBackground(Color.blue);
+        label2.setForeground(Color.pink);
+
+//        g2d.setBackground(Color.yellow);
+//        g2d.clearRect(0, 0, 200, 400);
+
+//        g2d.translate(50, 70);
+        label1.paintAll(g2d);
+//        g2d.translate(0, 143);
+        label2.paintAll(g2d);
+
+        g2d.drawString("painted", 10, 90);
       }
     });
 
