@@ -2,6 +2,7 @@ package joglg2d;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
@@ -172,6 +173,14 @@ public class VisualTest {
       @Override
       public void paint(Graphics2D g2d) {
         g2d.drawString("Hello JOGL", 90, 32);
+
+        g2d.setColor(Color.red);
+        g2d.drawString("foo", 120, 50);
+
+        g2d.setFont(new Font("Serif", Font.PLAIN, 36));
+        g2d.rotate(0.5);
+        g2d.setColor(Color.blue);
+        g2d.drawString("bar", 150, 90);
       }
     });
 
@@ -280,18 +289,18 @@ public class VisualTest {
       public void paint(Graphics2D g2d) {
         label1.setBackground(Color.red);
         label1.setForeground(Color.white);
+        label1.setOpaque(true);
         label2.setBackground(Color.blue);
         label2.setForeground(Color.pink);
+        label2.setOpaque(true);
 
-//        g2d.setBackground(Color.yellow);
-//        g2d.clearRect(0, 0, 200, 400);
+        g2d.setBackground(Color.yellow);
+        g2d.clearRect(0, 0, 200, 400);
 
-//        g2d.translate(50, 70);
+        g2d.translate(50, 70);
         label1.paintAll(g2d);
-//        g2d.translate(0, 143);
+        g2d.translate(0, 143);
         label2.paintAll(g2d);
-
-        g2d.drawString("painted", 10, 90);
       }
     });
 

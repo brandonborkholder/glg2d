@@ -29,9 +29,9 @@ import java.awt.Image;
 import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
+import java.awt.RenderingHints.Key;
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.RenderingHints.Key;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
@@ -46,7 +46,6 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.glu.GLU;
 
 import com.sun.opengl.util.j2d.TextRenderer;
 
@@ -91,19 +90,16 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     setFont(component.getFont());
     setStroke(new BasicStroke());
     setClip(null);
+    transform = new AffineTransform();
 
+    gl.glDisable(GL.GL_DEPTH_TEST);
     gl.glShadeModel(GL.GL_FLAT);
-    gl.glViewport(0, 0, width, height);
     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
     gl.glLoadIdentity();
-    gl.glOrtho(0, width, 0, height, -1, 1);
-
-    gl.glMatrixMode(GL.GL_PROJECTION);
-    gl.glPushMatrix();
-    gl.glLoadIdentity();
+    gl.glTranslatef(0, height, 0);
     gl.glScalef(1, -1, 1);
 
     gl.glMatrixMode(GL.GL_TEXTURE);
@@ -134,41 +130,17 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
       TEXT_RENDER_CACHE.put(font, renderer);
     }
 
-    double[] matrix = new double[16];
-    gl.glGetDoublev(GL.GL_PROJECTION_MATRIX, matrix, 0);
-    new GLU();
+    renderer.setColor(color);
 
-    gl.glMatrixMode(GL.GL_PROJECTION);
-    // gl.glPushMatrix();
-    // gl.glLoadIdentity();
-    new GLU().gluOrtho2D(0, width, 0, height);
-    // gl.glTranslated(0, height, 0);
-    // gl.glScaled(1, -1, 1);
-    // gl.glLoadMatrixd(matrix, 0);
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
-    gl.glLoadIdentity();
-    gl.glMatrixMode(GL.GL_TEXTURE);
-    gl.glPushMatrix();
-    gl.glLoadIdentity();
-    // gl.glLoadMatrixd(matrix, 0);
-    // gl.glTranslatef(0, height, 0);
-    // gl.glScalef(1, -1, 1);
+    gl.glScalef(1, -1, 1);
+    gl.glTranslatef(0, -height, 0);
 
-    renderer.setColor(color);
-    // renderer.beginRendering(width, height);
     renderer.begin3DRendering();
-    // renderer.draw(str, x, y);
-    renderer.draw3D(str, x, y, 0, 1);
-    // renderer.draw3D(str, 90, 140, 0, 1);
-    // renderer.endRendering();
+    renderer.draw3D(str, x, height - y, 0, 1);
     renderer.end3DRendering();
 
-    gl.glMatrixMode(GL.GL_TEXTURE);
-    gl.glPopMatrix();
-    gl.glMatrixMode(GL.GL_MODELVIEW);
-    gl.glPopMatrix();
-    gl.glMatrixMode(GL.GL_PROJECTION);
     gl.glPopMatrix();
   }
 
@@ -319,6 +291,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     matrix[13] = transform.getTranslateY();
     matrix[15] = 1;
 
+    gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glLoadIdentity();
     gl.glTranslatef(0, height, 0);
     gl.glScalef(1, -1, 1);

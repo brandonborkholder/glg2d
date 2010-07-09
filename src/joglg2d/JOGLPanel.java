@@ -75,6 +75,11 @@ public class JOGLPanel extends JPanel {
       }
 
       g2d = new JOGLG2D(gl, width, height);
+
+      gl.glViewport(0, 0, width, height);
+      gl.glMatrixMode(GL.GL_PROJECTION);
+      gl.glLoadIdentity();
+      gl.glOrtho(0, width, 0, height, -1, 1);
     }
 
     @Override
