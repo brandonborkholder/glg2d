@@ -18,12 +18,9 @@ package joglg2d;
 
 import java.awt.BorderLayout;
 import java.awt.Graphics;
-import java.awt.Graphics2D;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
-import javax.media.opengl.GLEventListener;
 import javax.swing.JPanel;
 
 /**
@@ -32,58 +29,29 @@ import javax.swing.JPanel;
  */
 @SuppressWarnings("serial")
 public class JOGLPanel extends JPanel {
-  protected JOGLG2D g2d;
-
-  protected GLCanvas canvas;
+  protected GLAutoDrawable drawable;
 
   public JOGLPanel() {
-    canvas = new GLCanvas();
-    canvas.addGLEventListener(new Listener());
+    GLCanvas canvas = new GLCanvas();
+    canvas.addGLEventListener(new Graphics2DListener(canvas) {
+      @Override
+      protected void paintGL(JOGLG2D g2d) {
+        JOGLPanel.this.paintGL(g2d);
+      }
+    });
 
     setLayout(new BorderLayout());
     add(canvas, BorderLayout.CENTER);
+
+    this.drawable = canvas;
   }
 
   @Override
   public void paint(Graphics g) {
+    drawable.display();
     super.paint(g);
-    canvas.display();
   }
 
-  public void paintGL(Graphics2D g2d) {
-  }
-
-  class Listener implements GLEventListener {
-    @Override
-    public void display(GLAutoDrawable drawable) {
-      g2d.prePaint(canvas);
-      paintGL(g2d);
-      g2d.postPaint();
-    }
-
-    @Override
-    public void init(GLAutoDrawable drawable) {
-      g2d = new JOGLG2D(drawable.getGL(), drawable.getWidth(), drawable.getHeight());
-      drawable.getGL().glEnable(GL.GL_DOUBLEBUFFER);
-    }
-
-    @Override
-    public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
-      GL gl = drawable.getGL();
-      if (height <= 0) {
-        height = 1;
-      }
-
-      g2d = new JOGLG2D(gl, width, height);
-
-      gl.glViewport(0, 0, width, height);
-      gl.glMatrixMode(GL.GL_PROJECTION);
-      gl.glLoadIdentity();
-      gl.glOrtho(0, width, 0, height, -1, 1);
-    }
-
-    @Override
-    public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {
-    }
+  protected void paintGL(JOGLG2D g2d) {
   }
 }

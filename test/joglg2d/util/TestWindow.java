@@ -1,7 +1,6 @@
 package joglg2d.util;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -17,6 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.Timer;
 
+import joglg2d.JOGLG2D;
 import joglg2d.JOGLPanel;
 
 import org.junit.Assert;
@@ -56,11 +56,11 @@ public class TestWindow extends JFrame {
       }
     };
 
-    Component jogl = new JOGLPanel() {
+    JOGLPanel jogl = new JOGLPanel() {
       @Override
-      public void paintGL(Graphics2D g) {
+      protected void paintGL(JOGLG2D g2d) {
         if (painter != null) {
-          painter.paint(g, true);
+          painter.paint(g2d, true);
         }
       }
     };
