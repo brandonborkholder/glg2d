@@ -62,8 +62,11 @@ public class FastLineDrawingVisitor implements VertexVisitor {
   public void closeLine() {
     // force drawing around the corner
     lineTo(firstPoint);
-    lineTo(secondPoint);
-    drawLineEnd();
+    if (secondPoint != null) {
+      lineTo(secondPoint);
+      drawLineEnd();
+    }
+
     firstPoint = lastPoint = null;
     secondPoint = secondLastPoint = null;
     gl.glEnd();
@@ -276,11 +279,11 @@ public class FastLineDrawingVisitor implements VertexVisitor {
    * <p>
    * We have two lines, the first with angle theta and the second with angle
    * phi. The angles are relative to the x-axis and computed by
-   * {@link #angleOf(double[], double[])}. The arguments {@code sin1}, {@code
-   * cos1}, {@code sin2}, {@code cos2} are the sin and cos of theta and phi
-   * respectively, multiplied by half the line width. This gives us an easy way
-   * to represent the line in parametric form. For example the first line (with
-   * angle theta) has the form
+   * {@link #angleOf(double[], double[])}. The arguments {@code sin1},
+   * {@code cos1}, {@code sin2}, {@code cos2} are the sin and cos of theta and
+   * phi respectively, multiplied by half the line width. This gives us an easy
+   * way to represent the line in parametric form. For example the first line
+   * (with angle theta) has the form
    *
    * <pre>
    * &lt;x, y&gt; = &lt;sin1, -cos1&gt; + t * &lt;cos1, sin1&gt;
