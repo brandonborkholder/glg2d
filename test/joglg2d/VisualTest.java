@@ -283,7 +283,9 @@ public class VisualTest {
   @Test
   public void labelTest() throws Exception {
     final JLabel label1 = new JLabel("foo");
+    label1.setSize(label1.getPreferredSize());
     final JLabel label2 = new JLabel("bar");
+    label2.setSize(label2.getPreferredSize());
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
@@ -298,9 +300,9 @@ public class VisualTest {
         g2d.clearRect(0, 0, 200, 400);
 
         g2d.translate(50, 70);
-        label1.paintAll(g2d);
+        label1.paint(g2d);
         g2d.translate(0, 143);
-        label2.paintAll(g2d);
+        label2.paint(g2d);
       }
     });
 
