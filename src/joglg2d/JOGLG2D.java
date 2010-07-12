@@ -317,7 +317,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   public void setColor(Color c) {
     color = c;
     int rgb = color.getRGB();
-    gl.glColor4f((rgb >> 16 & 0xFF) / 255F, (rgb >> 8 & 0xFF) / 255F, (rgb & 0xFF) / 255F, (rgb >> 24 & 0xFF) / 255F);
+    gl.glColor4ub((byte) (rgb >> 16 & 0xFF), (byte) (rgb >> 8 & 0xFF), (byte) (rgb & 0xFF), (byte) (rgb >> 24 & 0xFF));
   }
 
   @Override
