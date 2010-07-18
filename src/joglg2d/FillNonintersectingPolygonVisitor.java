@@ -24,7 +24,7 @@ import javax.media.opengl.GL;
  * @author borkholder
  * @created May 11, 2010
  */
-public class FillNonintersectingPolygonVisitor implements VertexVisitor {
+public class FillNonintersectingPolygonVisitor extends SimplePathVisitor {
   protected final GL gl;
 
   public FillNonintersectingPolygonVisitor(GL gl) {
@@ -46,13 +46,13 @@ public class FillNonintersectingPolygonVisitor implements VertexVisitor {
   }
 
   @Override
-  public void lineTo(double[] vertex) {
-    gl.glVertex2d(vertex[0], vertex[1]);
+  public void lineTo(float[] vertex) {
+    gl.glVertex2f(vertex[0], vertex[1]);
   }
 
   @Override
-  public void moveTo(double[] vertex) {
+  public void moveTo(float[] vertex) {
     gl.glBegin(GL.GL_POLYGON);
-    gl.glVertex2d(vertex[0], vertex[1]);
+    gl.glVertex2f(vertex[0], vertex[1]);
   }
 }

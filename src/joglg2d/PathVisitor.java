@@ -21,10 +21,14 @@ package joglg2d;
  * @created May 11, 2010
  *
  */
-public interface VertexVisitor {
-  void moveTo(double[] vertex);
+public interface PathVisitor {
+  void moveTo(float[] vertex);
 
-  void lineTo(double[] vertex);
+  void lineTo(float[] vertex);
+
+  void quadTo(float[] previousVertex, float[] control);
+
+  void cubicTo(float[] previousVertex, float[] control);
 
   void closeLine();
 

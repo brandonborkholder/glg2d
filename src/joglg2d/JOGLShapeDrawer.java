@@ -51,15 +51,18 @@ public class JOGLShapeDrawer {
 
   protected final GLU glu;
 
-  protected VertexVisitor tesselatingVisitor;
+  protected PathVisitor tesselatingVisitor;
 
-  protected VertexVisitor simpleShapeFillVisitor;
+  protected PathVisitor simpleShapeFillVisitor;
+
+  protected FastLineDrawingVisitor simpleStrokeVisitor;
 
   public JOGLShapeDrawer(GL gl) {
     this.gl = gl;
     glu = new GLU();
     tesselatingVisitor = new TesselatorVisitor(gl, glu);
     simpleShapeFillVisitor = new FillNonintersectingPolygonVisitor(gl);
+    simpleStrokeVisitor = new FastLineDrawingVisitor(gl);
   }
 
   public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight, boolean fill, Stroke stroke) {
@@ -133,7 +136,8 @@ public class JOGLShapeDrawer {
     if (stroke instanceof BasicStroke) {
       BasicStroke basicStroke = (BasicStroke) stroke;
       if (basicStroke.getDashArray() == null) {
-        traceShape(shape, new FastLineDrawingVisitor(gl, basicStroke));
+        simpleStrokeVisitor.setStroke(basicStroke);
+        traceShape(shape, simpleStrokeVisitor);
         return;
       }
     }
@@ -148,57 +152,35 @@ public class JOGLShapeDrawer {
       return;
     }
 
-    traceShape(shape, new TesselatorVisitor(gl, glu));
+    traceShape(shape, tesselatingVisitor);
   }
 
   protected void fillPolygon(Shape shape) {
-    traceShape(shape, new FillNonintersectingPolygonVisitor(gl));
+    traceShape(shape, simpleShapeFillVisitor);
   }
 
-  protected void traceShape(Shape shape, VertexVisitor visitor) {
+  protected void traceShape(Shape shape, PathVisitor visitor) {
     PathIterator iterator = shape.getPathIterator(null);
     visitor.beginPoly(iterator.getWindingRule());
 
-    double[] lastPoint = null;
-    double[] coords = new double[10];
+    float[] coords = new float[10];
+    float[] previousVertex = new float[2];
     for (; !iterator.isDone(); iterator.next()) {
-      // Tesselation keeps reference to the points
-      double[] point = new double[3];
       switch (iterator.currentSegment(coords)) {
       case PathIterator.SEG_MOVETO:
-        point[0] = coords[0];
-        point[1] = coords[1];
-        visitor.moveTo(point);
+        visitor.moveTo(coords);
         break;
 
       case PathIterator.SEG_LINETO:
-        point[0] = coords[0];
-        point[1] = coords[1];
-        visitor.lineTo(point);
+        visitor.lineTo(coords);
         break;
 
       case PathIterator.SEG_QUADTO:
-        double stepSize = 0.1;
-        for (double i = 0; i <= 1; i += stepSize) {
-          double[] p = new double[3];
-          double j = 1 - i;
-          p[0] = j * j * lastPoint[0] + 2 * j * i * coords[0] + i * i * coords[2];
-          p[1] = j * j * lastPoint[1] + 2 * j * i * coords[1] + i * i * coords[3];
-          visitor.lineTo(p);
-          point = p;
-        }
+        visitor.quadTo(previousVertex, coords);
         break;
 
       case PathIterator.SEG_CUBICTO:
-        stepSize = 0.1;
-        for (double i = 0; i <= 1; i += stepSize) {
-          double[] p = new double[3];
-          double j = 1 - i;
-          p[0] = j * j * j * lastPoint[0] + 3 * j * j * i * coords[0] + 3 * j * i * i * coords[2] + i * i * i * coords[4];
-          p[1] = j * j * j * lastPoint[1] + 3 * j * j * i * coords[1] + 3 * j * i * i * coords[3] + i * i * i * coords[5];
-          visitor.lineTo(p);
-          point = p;
-        }
+        visitor.cubicTo(previousVertex, coords);
         break;
 
       case PathIterator.SEG_CLOSE:
@@ -206,7 +188,8 @@ public class JOGLShapeDrawer {
         break;
       }
 
-      lastPoint = point;
+      previousVertex[0] = coords[0];
+      previousVertex[1] = coords[1];
     }
 
     visitor.endPoly();

@@ -19,8 +19,10 @@ package joglg2d;
 import java.awt.geom.PathIterator;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GLException;
 import javax.media.opengl.glu.GLU;
 import javax.media.opengl.glu.GLUtessellator;
+import javax.media.opengl.glu.GLUtessellatorCallback;
 import javax.media.opengl.glu.GLUtessellatorCallbackAdapter;
 
 /**
@@ -28,16 +30,19 @@ import javax.media.opengl.glu.GLUtessellatorCallbackAdapter;
  * @created May 11, 2010
  *
  */
-public class TesselatorVisitor extends GLUtessellatorCallbackAdapter implements VertexVisitor {
+public class TesselatorVisitor extends SimplePathVisitor {
   protected final GLU glu;
 
   protected final GL gl;
 
   protected GLUtessellator tesselator;
 
+  protected GLUtessellatorCallback callback;
+
   public TesselatorVisitor(GL gl, GLU glu) {
     this.gl = gl;
     this.glu = glu;
+    callback = new TessellatorCallback();
   }
 
   @Override
@@ -54,25 +59,27 @@ public class TesselatorVisitor extends GLUtessellatorCallbackAdapter implements 
       break;
     }
 
-    glu.gluTessCallback(tesselator, GLU.GLU_TESS_VERTEX, this);
-    glu.gluTessCallback(tesselator, GLU.GLU_TESS_BEGIN, this);
-    glu.gluTessCallback(tesselator, GLU.GLU_TESS_END, this);
-    glu.gluTessCallback(tesselator, GLU.GLU_TESS_ERROR, this);
-    glu.gluTessCallback(tesselator, GLU.GLU_TESS_COMBINE, this);
+    glu.gluTessCallback(tesselator, GLU.GLU_TESS_VERTEX, callback);
+    glu.gluTessCallback(tesselator, GLU.GLU_TESS_BEGIN, callback);
+    glu.gluTessCallback(tesselator, GLU.GLU_TESS_END, callback);
+    glu.gluTessCallback(tesselator, GLU.GLU_TESS_ERROR, callback);
+    glu.gluTessCallback(tesselator, GLU.GLU_TESS_COMBINE, callback);
     glu.gluTessNormal(tesselator, 0, 0, -1);
 
     glu.gluTessBeginPolygon(tesselator, null);
   }
 
   @Override
-  public void lineTo(double[] vertex) {
-    glu.gluTessVertex(tesselator, vertex, 0, vertex);
+  public void lineTo(float[] vertex) {
+    double[] v = new double[] { vertex[0], vertex[1], 0 };
+    glu.gluTessVertex(tesselator, v, 0, v);
   }
 
   @Override
-  public void moveTo(double[] vertex) {
+  public void moveTo(float[] vertex) {
     glu.gluTessBeginContour(tesselator);
-    glu.gluTessVertex(tesselator, vertex, 0, vertex);
+    double[] v = new double[] { vertex[0], vertex[1], 0 };
+    glu.gluTessVertex(tesselator, v, 0, v);
   }
 
   @Override
@@ -86,30 +93,32 @@ public class TesselatorVisitor extends GLUtessellatorCallbackAdapter implements 
     glu.gluDeleteTess(tesselator);
   }
 
-  @Override
-  public void begin(int type) {
-    gl.glBegin(type);
-  }
+  protected class TessellatorCallback extends GLUtessellatorCallbackAdapter {
+    @Override
+    public void begin(int type) {
+      gl.glBegin(type);
+    }
 
-  @Override
-  public void end() {
-    gl.glEnd();
-  }
+    @Override
+    public void end() {
+      gl.glEnd();
+    }
 
-  @Override
-  public void vertex(Object vertexData) {
-    assert vertexData instanceof double[] : "Invalid assumption";
-    double[] v = (double[]) vertexData;
-    gl.glVertex2d(v[0], v[1]);
-  }
+    @Override
+    public void vertex(Object vertexData) {
+      assert vertexData instanceof double[] : "Invalid assumption";
+      double[] v = (double[]) vertexData;
+      gl.glVertex2d(v[0], v[1]);
+    }
 
-  @Override
-  public void combine(double[] coords, Object[] data, float[] weight, Object[] outData) {
-    outData[0] = coords;
-  }
+    @Override
+    public void combine(double[] coords, Object[] data, float[] weight, Object[] outData) {
+      outData[0] = coords;
+    }
 
-  @Override
-  public void error(int errnum) {
-    System.err.println("Tessellation Error: " + glu.gluErrorString(errnum));
+    @Override
+    public void error(int errnum) {
+      throw new GLException("Tesselation Error: " + glu.gluErrorString(errnum));
+    }
   }
 }

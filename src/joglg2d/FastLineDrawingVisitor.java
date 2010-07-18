@@ -31,31 +31,40 @@ import javax.media.opengl.GL;
  * @created May 11, 2010
  *
  */
-public class FastLineDrawingVisitor implements VertexVisitor {
+public class FastLineDrawingVisitor extends SimplePathVisitor {
   protected final GL gl;
 
-  protected final BasicStroke stroke;
+  protected int lineJoin;
 
-  protected double[] lastPoint;
+  protected int endCap;
 
-  protected double[] secondLastPoint;
+  protected float lineOffset;
 
-  protected double[] firstPoint;
+  protected float miterLimit;
 
-  protected double[] secondPoint;
+  protected float[] lastPoint;
 
-  protected boolean cappedLine;
+  protected float[] secondLastPoint;
 
-  protected float offset;
+  protected float[] firstPoint;
 
-  public FastLineDrawingVisitor(GL gl, BasicStroke stroke) {
+  protected float[] secondPoint;
+
+  public FastLineDrawingVisitor(GL gl) {
     this.gl = gl;
-    this.stroke = stroke;
-    offset = stroke.getLineWidth() / 2;
+  }
+
+  public void setStroke(BasicStroke stroke) {
+    lineJoin = stroke.getLineJoin();
+    lineOffset = stroke.getLineWidth() / 2;
+    endCap = stroke.getEndCap();
+    miterLimit = stroke.getMiterLimit();
   }
 
   @Override
   public void beginPoly(int windingRule) {
+    firstPoint = secondPoint = null;
+    lastPoint = secondLastPoint = null;
   }
 
   @Override
@@ -85,7 +94,7 @@ public class FastLineDrawingVisitor implements VertexVisitor {
   }
 
   @Override
-  public void moveTo(double[] vertex) {
+  public void moveTo(float[] vertex) {
     if (firstPoint != null) {
       drawLineEnd();
     }
@@ -98,12 +107,12 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     }
 
     gl.glBegin(GL.GL_QUAD_STRIP);
-    firstPoint = lastPoint = vertex;
+    firstPoint = lastPoint = vertex.clone();
     secondLastPoint = secondPoint = null;
   }
 
   @Override
-  public void lineTo(double[] vertex) {
+  public void lineTo(float[] vertex) {
     // ignore 0-length lines
     if (lastPoint[0] == vertex[0] && lastPoint[1] == vertex[1]) {
       return;
@@ -120,13 +129,29 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     }
 
     secondLastPoint = lastPoint;
-    lastPoint = vertex;
+    lastPoint = vertex.clone();
+  }
+
+  @Override
+  public void quadTo(float[] previousVertex, float[] control) {
+    int originalJoin = lineJoin;
+    lineJoin = BasicStroke.JOIN_BEVEL;
+    super.quadTo(previousVertex, control);
+    lineJoin = originalJoin;
+  }
+
+  @Override
+  public void cubicTo(float[] previousVertex, float[] control) {
+    int originalJoin = lineJoin;
+    lineJoin = BasicStroke.JOIN_BEVEL;
+    super.cubicTo(previousVertex, control);
+    lineJoin = originalJoin;
   }
 
   protected void drawLineEnd() {
     double angle = angleOf(lastPoint, secondLastPoint);
-    double cos = cos(angle) * offset;
-    double sin = sin(angle) * offset;
+    double cos = cos(angle) * lineOffset;
+    double sin = sin(angle) * lineOffset;
 
     gl.glVertex2d(lastPoint[0] + sin, lastPoint[1] - cos);
     gl.glVertex2d(lastPoint[0] - sin, lastPoint[1] + cos);
@@ -134,18 +159,18 @@ public class FastLineDrawingVisitor implements VertexVisitor {
 
   protected void drawLineStart() {
     double angle = angleOf(secondPoint, firstPoint);
-    double cos = cos(angle) * offset;
-    double sin = sin(angle) * offset;
+    double cos = cos(angle) * lineOffset;
+    double sin = sin(angle) * lineOffset;
 
     gl.glVertex2d(firstPoint[0] + sin, firstPoint[1] - cos);
     gl.glVertex2d(firstPoint[0] - sin, firstPoint[1] + cos);
   }
 
-  protected void drawCorner(double[] vertex) {
+  protected void drawCorner(float[] vertex) {
     double angle1 = angleOf(lastPoint, secondLastPoint);
     double angle2 = angleOf(vertex, lastPoint);
 
-    switch (stroke.getLineJoin()) {
+    switch (lineJoin) {
     case BasicStroke.JOIN_BEVEL:
       drawBevelCorner(angle1, angle2);
       return;
@@ -164,10 +189,10 @@ public class FastLineDrawingVisitor implements VertexVisitor {
   }
 
   protected void drawRoundCorner(double angle1, double angle2) {
-    double sin1 = sin(angle1) * offset;
-    double sin2 = sin(angle2) * offset;
-    double cos1 = cos(angle1) * offset;
-    double cos2 = cos(angle2) * offset;
+    double sin1 = sin(angle1) * lineOffset;
+    double sin2 = sin(angle2) * lineOffset;
+    double cos1 = cos(angle1) * lineOffset;
+    double cos2 = cos(angle2) * lineOffset;
 
     gl.glVertex2d(lastPoint[0] + sin1, lastPoint[1] - cos1);
     gl.glVertex2d(lastPoint[0] - sin1, lastPoint[1] + cos1);
@@ -178,18 +203,18 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     for (double angle = angle1; angle < angle2; angle += 0.5) {
       double sin = sin(angle);
       double cos = cos(angle);
-      gl.glVertex2d(lastPoint[0] + sin * offset, lastPoint[1] - cos * offset);
-      gl.glVertex2d(lastPoint[0] - sin * offset, lastPoint[1] + cos * offset);
+      gl.glVertex2d(lastPoint[0] + sin * lineOffset, lastPoint[1] - cos * lineOffset);
+      gl.glVertex2d(lastPoint[0] - sin * lineOffset, lastPoint[1] + cos * lineOffset);
     }
     gl.glVertex2d(lastPoint[0] + sin2, lastPoint[1] - cos2);
     gl.glVertex2d(lastPoint[0] - sin2, lastPoint[1] + cos2);
   }
 
   protected void drawBevelCorner(double angle1, double angle2) {
-    double sin1 = sin(angle1) * offset;
-    double sin2 = sin(angle2) * offset;
-    double cos1 = cos(angle1) * offset;
-    double cos2 = cos(angle2) * offset;
+    double sin1 = sin(angle1) * lineOffset;
+    double sin2 = sin(angle2) * lineOffset;
+    double cos1 = cos(angle1) * lineOffset;
+    double cos2 = cos(angle2) * lineOffset;
 
     gl.glVertex2d(lastPoint[0] + sin1, lastPoint[1] - cos1);
     gl.glVertex2d(lastPoint[0] - sin1, lastPoint[1] + cos1);
@@ -207,10 +232,10 @@ public class FastLineDrawingVisitor implements VertexVisitor {
       return;
     }
 
-    double sin1 = sin(angle1) * offset;
-    double sin2 = sin(angle2) * offset;
-    double cos1 = cos(angle1) * offset;
-    double cos2 = cos(angle2) * offset;
+    double sin1 = sin(angle1) * lineOffset;
+    double sin2 = sin(angle2) * lineOffset;
+    double cos1 = cos(angle1) * lineOffset;
+    double cos2 = cos(angle2) * lineOffset;
 
     double[] intersect1 = intersection(sin1, cos1, sin2, cos2, true);
     double[] intersect2 = intersection(sin1, cos1, sin2, cos2, false);
@@ -219,7 +244,9 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     double diffX = intersect1[0] - intersect2[0];
     double diffY = intersect1[1] - intersect2[1];
     double dist = sqrt(diffX * diffX + diffY * diffY);
-    if (dist / stroke.getLineWidth() > stroke.getMiterLimit()) {
+
+    float lineWidth = lineOffset * 2;
+    if (dist / lineWidth > miterLimit) {
       drawBevelCorner(angle1, angle2);
     } else {
       gl.glVertex2d(lastPoint[0] + intersect1[0], lastPoint[1] + intersect1[1]);
@@ -227,9 +254,8 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     }
   }
 
-  protected void applyEndCap(double[] vertex, double[] other) {
-    double offset = stroke.getLineWidth() / 2;
-    switch (stroke.getEndCap()) {
+  protected void applyEndCap(float[] vertex, float[] other) {
+    switch (endCap) {
     case BasicStroke.CAP_BUTT:
       // do nothing
       break;
@@ -237,8 +263,8 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     case BasicStroke.CAP_SQUARE:
       gl.glBegin(GL.GL_QUADS);
       double angle = angleOf(vertex, other);
-      double sin = sin(angle) * offset;
-      double cos = cos(angle) * offset;
+      double sin = sin(angle) * lineOffset;
+      double cos = cos(angle) * lineOffset;
       double x = vertex[0] + sin;
       double y = vertex[1] - cos;
       gl.glVertex2d(x, y);
@@ -262,8 +288,8 @@ public class FastLineDrawingVisitor implements VertexVisitor {
       double step = 0.5;
       double maxAngle = angle + Math.PI + step;
       for (double theta = angle; theta < maxAngle; theta += step) {
-        x = vertex[0] + sin(theta) * offset;
-        y = vertex[1] - cos(theta) * offset;
+        x = vertex[0] + sin(theta) * lineOffset;
+        y = vertex[1] - cos(theta) * lineOffset;
         gl.glVertex2d(x, y);
       }
       gl.glEnd();
@@ -340,7 +366,7 @@ public class FastLineDrawingVisitor implements VertexVisitor {
     }
   }
 
-  protected static double angleOf(double[] vertex, double[] other) {
+  protected static double angleOf(float[] vertex, float[] other) {
     return atan2(vertex[1] - other[1], vertex[0] - other[0]);
   }
 }
