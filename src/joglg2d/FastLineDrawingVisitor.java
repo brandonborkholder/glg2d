@@ -118,8 +118,9 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
       return;
     }
 
+    float[] vClone = vertex.clone();
     if (secondPoint == null) {
-      secondPoint = vertex;
+      secondPoint = vClone;
     }
 
     if (secondLastPoint == null) {
@@ -129,7 +130,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     }
 
     secondLastPoint = lastPoint;
-    lastPoint = vertex.clone();
+    lastPoint = vClone;
   }
 
   @Override
