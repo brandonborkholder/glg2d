@@ -62,8 +62,6 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected Color background;
 
-  protected AffineTransform transform;
-
   protected Font font;
 
   protected JOGLShapeDrawer shapeDrawer;
@@ -80,7 +78,6 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     setColor(Color.BLACK);
     setBackground(Color.BLACK);
     setFont(new Font(null, Font.PLAIN, 10));
-    transform = new AffineTransform();
     shapeDrawer = new JOGLShapeDrawer(gl);
   }
 
@@ -90,7 +87,6 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     setFont(component.getFont());
     setStroke(new BasicStroke());
     setClip(null);
-    transform = new AffineTransform();
 
     gl.glDisable(GL.GL_DEPTH_TEST);
     gl.glShadeModel(GL.GL_FLAT);
@@ -235,52 +231,62 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void translate(int x, int y) {
-    transform.translate(x, y);
-    setTransform(transform);
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glTranslatef(x, y, 0);
   }
 
   @Override
   public void translate(double tx, double ty) {
-    transform.translate(tx, ty);
-    setTransform(transform);
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glTranslated(tx, ty, 0);
   }
 
   @Override
   public void rotate(double theta) {
-    transform.rotate(theta);
-    setTransform(transform);
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glRotated(theta / Math.PI * 180, 0, 0, 1);
   }
 
   @Override
   public void rotate(double theta, double x, double y) {
-    transform.rotate(theta, x, y);
-    setTransform(transform);
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glTranslated(x, y, 0);
+    gl.glRotated(theta / Math.PI * 180, 0, 0, 1);
+    gl.glTranslated(-x, -y, 0);
   }
 
   @Override
   public void scale(double sx, double sy) {
-    transform.scale(sx, sy);
-    setTransform(transform);
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glScaled(sx, sy, 1);
   }
 
   @Override
   public void shear(double shx, double shy) {
-    transform.shear(shx, shy);
-    setTransform(transform);
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    double[] shear = new double[] {
+        1, shy, 0, 0,
+        shx, 1, 0, 0,
+          0, 0, 1, 0,
+          0, 0, 0, 1 };
+    gl.glMultMatrixd(shear, 0);
   }
 
   @Override
   public void transform(AffineTransform Tx) {
-    transform.concatenate(Tx);
-    setTransform(Tx);
+    multMatrix(Tx);
   }
 
   @Override
-  public void setTransform(AffineTransform Tx) {
-    if (transform != Tx) {
-      transform = (AffineTransform) Tx.clone();
-    }
+  public void setTransform(AffineTransform transform) {
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glLoadIdentity();
+    gl.glTranslatef(0, height, 0);
+    gl.glScalef(1, -1, 1);
+    multMatrix(transform);
+  }
 
+  protected void multMatrix(AffineTransform transform) {
     double[] matrix = new double[16];
     matrix[0] = transform.getScaleX();
     matrix[1] = transform.getShearY();
@@ -291,16 +297,15 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     matrix[13] = transform.getTranslateY();
     matrix[15] = 1;
 
-    gl.glMatrixMode(GL.GL_MODELVIEW);
-    gl.glLoadIdentity();
-    gl.glTranslatef(0, height, 0);
-    gl.glScalef(1, -1, 1);
     gl.glMultMatrixd(matrix, 0);
   }
 
   @Override
   public AffineTransform getTransform() {
-    return (AffineTransform) transform.clone();
+    double[] m = new double[16];
+    gl.glGetDoublev(GL.GL_MODELVIEW_MATRIX, m, 0);
+
+    return new AffineTransform(m[0], -m[1], m[4], -m[5], m[12], height - m[13]);
   }
 
   @Override
@@ -391,28 +396,47 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void clip(Shape s) {
-    Rectangle bounds = transform.createTransformedShape(s).getBounds();
-    clipRect(bounds.x, bounds.y, bounds.width, bounds.height);
+    setClip(s.getBounds(), true);
   }
 
   @Override
   public void clipRect(int x, int y, int width, int height) {
-    Rectangle rect = new Rectangle(x, y, width, height);
-    if (clip == null) {
-      setClip(rect);
-    } else {
-      setClip(rect.intersection(clip));
-    }
+    setClip(new Rectangle(x, y, width, height), true);
   }
 
   @Override
   public void setClip(int x, int y, int width, int height) {
-    setClip(new Rectangle(x, y, width, height));
+    setClip(new Rectangle(x, y, width, height), false);
   }
 
   @Override
   public Shape getClip() {
     return clip;
+  }
+
+  @Override
+  public void setClip(Shape clipShape) {
+    if (clipShape instanceof Rectangle2D) {
+      setClip((Rectangle2D)clipShape, false);
+    } else if (clipShape == null) {
+      setClip(null, false);
+    } else {
+      throw new IllegalArgumentException("Illegal shape for clip bounds, only java.awt.geom.Rectangle2D objects are supported");
+    }
+  }
+
+  protected void setClip(Rectangle2D clipShape, boolean intersect) {
+    if (clipShape == null) {
+      clip = null;
+      scissor(false);
+    } else if (intersect && clip != null) {
+      Rectangle rect = getTransform().createTransformedShape(clipShape).getBounds();
+      clip = rect.intersection(clip);
+      scissor(true);
+    } else {
+      clip = getTransform().createTransformedShape(clipShape).getBounds();
+      scissor(true);
+    }
   }
 
   protected void scissor(boolean enable) {
@@ -425,18 +449,6 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     }
   }
 
-  @Override
-  public void setClip(Shape clip) {
-    if (clip instanceof Rectangle2D) {
-      this.clip = (Rectangle)transform.createTransformedShape(clip).getBounds().clone();
-
-      scissor(true);
-    } else if (clip == null) {
-      scissor(false);
-    } else {
-      throw new IllegalArgumentException("Illegal shape for clip bounds, only java.awt.geom.Rectangle2D objects are supported");
-    }
-  }
 
   @Override
   public void copyArea(int x, int y, int width, int height, int dx, int dy) {
@@ -570,7 +582,6 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     color = null;
     background = null;
     shapeDrawer = null;
-    transform = null;
     stroke = null;
     clip = null;
 
@@ -582,10 +593,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   @Override
   protected JOGLG2D clone() {
     try {
-      JOGLG2D copy = (JOGLG2D) super.clone();
-      // clone mutable members
-      copy.transform = (AffineTransform) transform.clone();
-      return copy;
+      return (JOGLG2D) super.clone();
     } catch (CloneNotSupportedException exception) {
       throw new RuntimeException(exception);
     }
