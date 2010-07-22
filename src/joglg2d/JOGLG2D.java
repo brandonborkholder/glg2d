@@ -344,6 +344,9 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public Graphics create() {
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glPushMatrix();
+    gl.glPushAttrib(GL.GL_CURRENT_BIT | GL.GL_TRANSFORM_BIT | GL.GL_SCISSOR_BIT | GL.GL_HINT_BIT);
     return clone();
   }
 
@@ -425,8 +428,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   @Override
   public void setClip(Shape clip) {
     if (clip instanceof Rectangle2D) {
-      Rectangle2D clipRect = (Rectangle2D) clip;
-      this.clip = new Rectangle((int) clipRect.getX(), (int) clipRect.getY(), (int) clipRect.getWidth(), (int) clipRect.getHeight());
+      this.clip = (Rectangle)transform.createTransformedShape(clip).getBounds().clone();
 
       scissor(true);
     } else if (clip == null) {
@@ -571,6 +573,10 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     transform = null;
     stroke = null;
     clip = null;
+
+    gl.glPopAttrib();
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glPopMatrix();
   }
 
   @Override

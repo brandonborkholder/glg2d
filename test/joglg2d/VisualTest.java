@@ -281,6 +281,37 @@ public class VisualTest {
   }
 
   @Test
+  public void createTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        g2d.setColor(Color.red);
+        g2d.fillRect(0, 0, 5, 5);
+        g2d.translate(50, 9);
+        g2d.setColor(Color.blue);
+        g2d.fillRect(0, 0, 5, 5);
+
+        Graphics2D g = (Graphics2D) g2d.create();
+        g.setColor(Color.orange);
+        g.fillRect(10, 10, 5, 5);
+        g.translate(10, 50);
+        g.setColor(Color.yellow);
+        g.fillRect(0, 0, 5, 5);
+
+        g.clipRect(50, 50, 10, 10);
+        g.setBackground(Color.black);
+        g.clearRect(0, 0, 90, 90);
+        g.dispose();
+
+        g2d.setColor(Color.blue);
+        g2d.fillRect(5, 5, 5, 5);
+      }
+    });
+
+    tester.waitForInput();
+  }
+
+  @Test
   public void labelTest() throws Exception {
     final JLabel label1 = new JLabel("foo");
     label1.setSize(label1.getPreferredSize());
