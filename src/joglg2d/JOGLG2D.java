@@ -66,6 +66,8 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected JOGLShapeDrawer shapeDrawer;
 
+  protected AffineTransform transform;
+
   protected Stroke stroke;
 
   protected Rectangle clip;
@@ -87,6 +89,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     setFont(component.getFont());
     setStroke(new BasicStroke());
     setClip(null);
+    transform = new AffineTransform();
 
     gl.glDisable(GL.GL_DEPTH_TEST);
     gl.glShadeModel(GL.GL_FLAT);
@@ -231,24 +234,26 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void translate(int x, int y) {
-    gl.glMatrixMode(GL.GL_MODELVIEW);
-    gl.glTranslatef(x, y, 0);
+    translate((double) x, (double) y);
   }
 
   @Override
   public void translate(double tx, double ty) {
+    transform.translate(tx, ty);
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glTranslated(tx, ty, 0);
   }
 
   @Override
   public void rotate(double theta) {
+    transform.rotate(theta);
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glRotated(theta / Math.PI * 180, 0, 0, 1);
   }
 
   @Override
   public void rotate(double theta, double x, double y) {
+    transform.rotate(theta, x, y);
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glTranslated(x, y, 0);
     gl.glRotated(theta / Math.PI * 180, 0, 0, 1);
@@ -257,12 +262,14 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void scale(double sx, double sy) {
+    transform.scale(sx, sy);
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glScaled(sx, sy, 1);
   }
 
   @Override
   public void shear(double shx, double shy) {
+    transform.shear(shx, shy);
     gl.glMatrixMode(GL.GL_MODELVIEW);
     double[] shear = new double[] {
         1, shy, 0, 0,
@@ -274,11 +281,14 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void transform(AffineTransform Tx) {
+    transform.concatenate(Tx);
+    gl.glMatrixMode(GL.GL_MODELVIEW);
     multMatrix(Tx);
   }
 
   @Override
   public void setTransform(AffineTransform transform) {
+    this.transform = (AffineTransform) transform.clone();
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glLoadIdentity();
     gl.glTranslatef(0, height, 0);
@@ -302,10 +312,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public AffineTransform getTransform() {
-    double[] m = new double[16];
-    gl.glGetDoublev(GL.GL_MODELVIEW_MATRIX, m, 0);
-
-    return new AffineTransform(m[0], -m[1], m[4], -m[5], m[12], height - m[13]);
+    return (AffineTransform) transform.clone();
   }
 
   @Override
@@ -417,7 +424,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   @Override
   public void setClip(Shape clipShape) {
     if (clipShape instanceof Rectangle2D) {
-      setClip((Rectangle2D)clipShape, false);
+      setClip((Rectangle2D) clipShape, false);
     } else if (clipShape == null) {
       setClip(null, false);
     } else {
@@ -430,11 +437,11 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
       clip = null;
       scissor(false);
     } else if (intersect && clip != null) {
-      Rectangle rect = getTransform().createTransformedShape(clipShape).getBounds();
+      Rectangle rect = transform.createTransformedShape(clipShape).getBounds();
       clip = rect.intersection(clip);
       scissor(true);
     } else {
-      clip = getTransform().createTransformedShape(clipShape).getBounds();
+      clip = transform.createTransformedShape(clipShape).getBounds();
       scissor(true);
     }
   }
@@ -448,7 +455,6 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
       gl.glDisable(GL.GL_SCISSOR_TEST);
     }
   }
-
 
   @Override
   public void copyArea(int x, int y, int width, int height, int dx, int dy) {
@@ -584,6 +590,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     shapeDrawer = null;
     stroke = null;
     clip = null;
+    transform = null;
 
     gl.glPopAttrib();
     gl.glMatrixMode(GL.GL_MODELVIEW);
@@ -593,7 +600,10 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   @Override
   protected JOGLG2D clone() {
     try {
-      return (JOGLG2D) super.clone();
+      JOGLG2D copy = (JOGLG2D) super.clone();
+      // clone mutable members
+      copy.transform = (AffineTransform) transform.clone();
+      return copy;
     } catch (CloneNotSupportedException exception) {
       throw new RuntimeException(exception);
     }
