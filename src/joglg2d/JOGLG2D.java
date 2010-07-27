@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.Threading;
 
 import com.sun.opengl.util.j2d.TextRenderer;
 
@@ -57,6 +58,8 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   private final int height;
 
   private final int width;
+
+  protected boolean isDisposed;
 
   protected Color color;
 
@@ -274,6 +277,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void transform(AffineTransform Tx) {
+    gl.glMatrixMode(GL.GL_MODELVIEW);
     multMatrix(Tx);
   }
 
@@ -305,6 +309,10 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     double[] m = new double[16];
     gl.glGetDoublev(GL.GL_MODELVIEW_MATRIX, m, 0);
 
+    /*
+     * Since the MODELVIEW matrix includes the transform from Java2D to OpenGL
+     * coords, we remove that transform inline here.
+     */
     return new AffineTransform(m[0], -m[1], m[4], -m[5], m[12], height - m[13]);
   }
 
@@ -417,7 +425,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   @Override
   public void setClip(Shape clipShape) {
     if (clipShape instanceof Rectangle2D) {
-      setClip((Rectangle2D)clipShape, false);
+      setClip((Rectangle2D) clipShape, false);
     } else if (clipShape == null) {
       setClip(null, false);
     } else {
@@ -448,7 +456,6 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
       gl.glDisable(GL.GL_SCISSOR_TEST);
     }
   }
-
 
   @Override
   public void copyArea(int x, int y, int width, int height, int dx, int dy) {
@@ -578,16 +585,16 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void dispose() {
-    // just set everything to null to allow garbage collection
-    color = null;
-    background = null;
-    shapeDrawer = null;
-    stroke = null;
-    clip = null;
-
-    gl.glPopAttrib();
-    gl.glMatrixMode(GL.GL_MODELVIEW);
-    gl.glPopMatrix();
+    /*
+     * This is also called on the finalizer thread, which should not make OpenGL
+     * calls. We also want to make sure that this only executes once.
+     */
+    if (!isDisposed && Threading.isOpenGLThread()) {
+      isDisposed = true;
+      gl.glPopAttrib();
+      gl.glMatrixMode(GL.GL_MODELVIEW);
+      gl.glPopMatrix();
+    }
   }
 
   @Override
