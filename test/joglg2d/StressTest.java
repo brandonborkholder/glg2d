@@ -83,6 +83,25 @@ public class StressTest {
     painter.waitAndLogTimes("lines");
   }
 
+  @Test
+  public void curvedLineTest() throws Exception {
+    TimedPainter painter = new TimedPainter() {
+      @Override
+      protected void paint(Graphics2D g2d) {
+        g2d.setColor(Color.BLACK);
+        g2d.setStroke(new BasicStroke(3));
+        int x = 300;
+        int y = 400;
+        for (int i = 0; i < 100; i++) {
+          g2d.drawArc(rand.nextInt(x), rand.nextInt(y), rand.nextInt(x / 2), rand.nextInt(y / 2), rand.nextInt(180), rand.nextInt(360));
+        }
+      }
+    };
+
+    tester.setPainter(painter);
+    painter.waitAndLogTimes("arcs");
+  }
+
   static abstract class TimedPainter implements CustomPainter {
     long[] times = new long[2];
 

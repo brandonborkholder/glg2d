@@ -83,7 +83,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
 
   @Override
   public void endPoly() {
-    if (firstPoint != null) {
+    if (firstPoint != null && secondPoint != null) {
       drawLineEnd();
       gl.glEnd();
       applyEndCap(firstPoint, secondPoint);

@@ -98,7 +98,7 @@ public class JOGLShapeDrawer {
   }
 
   public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle, boolean fill, Stroke stroke) {
-    ARC.setArc(arcAngle, x, y, width, height, startAngle, fill ? Arc2D.PIE : Arc2D.OPEN);
+    ARC.setArc(x, y, width, height, startAngle, arcAngle, fill ? Arc2D.PIE : Arc2D.OPEN);
     if (fill) {
       fillPolygon(ARC);
     } else {

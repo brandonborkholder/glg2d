@@ -24,10 +24,17 @@ public abstract class SimplePathVisitor implements PathVisitor {
   @Override
   public void quadTo(float[] previousVertex, float[] control) {
     float[] p = new float[2];
-    for (float i = 0; i <= 1; i += stepSize) {
+    float i = 0;
+    for (; i <= 1; i += stepSize) {
       float j = 1 - i;
       p[0] = j * j * previousVertex[0] + 2 * j * i * control[0] + i * i * control[2];
       p[1] = j * j * previousVertex[1] + 2 * j * i * control[1] + i * i * control[3];
+      lineTo(p);
+    }
+
+    if (i != 1) {
+      p[0] = control[2];
+      p[1] = control[3];
       lineTo(p);
     }
   }
@@ -35,10 +42,17 @@ public abstract class SimplePathVisitor implements PathVisitor {
   @Override
   public void cubicTo(float[] previousVertex, float[] control) {
     float[] p = new float[2];
-    for (float i = 0; i <= 1; i += stepSize) {
+    float i = 0;
+    for (; i <= 1; i += stepSize) {
       float j = 1 - i;
       p[0] = j * j * j * previousVertex[0] + 3 * j * j * i * control[0] + 3 * j * i * i * control[2] + i * i * i * control[4];
       p[1] = j * j * j * previousVertex[1] + 3 * j * j * i * control[1] + 3 * j * i * i * control[3] + i * i * i * control[5];
+      lineTo(p);
+    }
+
+    if (i != 1) {
+      p[0] = control[4];
+      p[1] = control[5];
       lineTo(p);
     }
   }
