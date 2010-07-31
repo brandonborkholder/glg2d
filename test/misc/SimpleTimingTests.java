@@ -2,12 +2,15 @@ package misc;
 
 import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
+import java.util.Random;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLJPanel;
 import javax.swing.JFrame;
+
+import joglg2d.SimplePathVisitor;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -68,6 +71,78 @@ public class SimpleTimingTests {
 
     double perCycle = (stop - start) / (double) NUM_TESTS;
     System.out.println("Clone AffineTransform: " + perCycle + "ns per call");
+  }
+
+  @Test
+  public void naiveQuadraticBezier() {
+    Random rand = new Random();
+    float[] control = new float[6];
+
+    long start = System.nanoTime();
+    for (int i = 0; i < NUM_TESTS; i++) {
+      for (int j = 0; j < 6; j++) {
+        control[j] = rand.nextFloat();
+      }
+
+      float stepSize = 1F / 15;
+      float[] p = new float[2];
+      for (float t = 0; t <= 1; t += stepSize ) {
+        float tt = t * t;
+        float tMinusT = t * (1-t);
+        float minusTminusT = (1-t) * (1-t);
+
+        p[0] = minusTminusT * control[0] + 2 * tMinusT * control[2] + tt * control[4];
+        p[1] = minusTminusT * control[1] + 2 * tMinusT * control[3] + tt * control[5];
+      }
+    }
+    long stop = System.nanoTime();
+
+    double perCycle = (stop - start) / (double) NUM_TESTS;
+    System.out.println("Naive quadratic Bezier: " + perCycle + "ns per call");
+  }
+
+  @Test
+  public void forwardDifferencingBezier() {
+    SimplePathVisitor visitor = new SimplePathVisitor() {
+      @Override
+      public void moveTo(float[] vertex) {
+      }
+
+      @Override
+      public void lineTo(float[] vertex) {
+      }
+
+      @Override
+      public void endPoly() {
+      }
+
+      @Override
+      public void closeLine() {
+      }
+
+      @Override
+      public void beginPoly(int windingRule) {
+      }
+    };
+
+    Random rand = new Random();
+    float[] previous = new float[2];
+    float[] control = new float[4];
+
+    long start = System.nanoTime();
+    for (int i = 0; i < NUM_TESTS; i++) {
+      previous[0] = rand.nextFloat();
+      previous[1] = rand.nextFloat();
+      for (int j = 0; j < 4; j++) {
+        control[j] = rand.nextFloat();
+      }
+
+      visitor.quadTo(previous, control);
+    }
+    long stop = System.nanoTime();
+
+    double perCycle = (stop - start) / (double) NUM_TESTS;
+    System.out.println("Forward differencing Bezier: " + perCycle + "ns per call");
   }
 
   static abstract class Drawer implements GLEventListener {

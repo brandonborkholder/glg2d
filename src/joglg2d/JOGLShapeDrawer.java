@@ -166,7 +166,8 @@ public class JOGLShapeDrawer {
     float[] coords = new float[10];
     float[] previousVertex = new float[2];
     for (; !iterator.isDone(); iterator.next()) {
-      switch (iterator.currentSegment(coords)) {
+      int type = iterator.currentSegment(coords);
+      switch (type) {
       case PathIterator.SEG_MOVETO:
         visitor.moveTo(coords);
         break;
@@ -188,8 +189,23 @@ public class JOGLShapeDrawer {
         break;
       }
 
-      previousVertex[0] = coords[0];
-      previousVertex[1] = coords[1];
+      switch (type) {
+      case PathIterator.SEG_LINETO:
+      case PathIterator.SEG_MOVETO:
+        previousVertex[0] = coords[0];
+        previousVertex[1] = coords[1];
+        break;
+
+      case PathIterator.SEG_QUADTO:
+        previousVertex[0] = coords[2];
+        previousVertex[1] = coords[3];
+        break;
+
+      case PathIterator.SEG_CUBICTO:
+        previousVertex[0] = coords[4];
+        previousVertex[1] = coords[5];
+        break;
+      }
     }
 
     visitor.endPoly();

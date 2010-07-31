@@ -16,44 +16,97 @@
 
 package joglg2d;
 
+/**
+ * This is a fast bezier curve implementation. I can't use OpenGL's built-in
+ * evaluators because subclasses need to do something with the points, not just
+ * pass them directly to glVertex2f. This algorithm uses forward differencing.
+ * Most of this is taken from <a
+ * href="http://www.niksula.hut.fi/~hkankaan/Homepages/bezierfast.html"
+ * >http://www.niksula.hut.fi/~hkankaan/Homepages/bezierfast.html</a>. I derived
+ * the implementation for the quadratic on my own, but it's simple.
+ */
 public abstract class SimplePathVisitor implements PathVisitor {
-  public static final float CURVE_STEP_SIZE = 0.1F;
+  public static final int CURVE_STEPS = 15;
 
-  protected float stepSize = CURVE_STEP_SIZE;
+  protected int steps = CURVE_STEPS;
 
   @Override
   public void quadTo(float[] previousVertex, float[] control) {
     float[] p = new float[2];
-    float i = 0;
-    for (; i <= 1; i += stepSize) {
-      float j = 1 - i;
-      p[0] = j * j * previousVertex[0] + 2 * j * i * control[0] + i * i * control[2];
-      p[1] = j * j * previousVertex[1] + 2 * j * i * control[1] + i * i * control[3];
+
+    float xd, xdd, xdd_per_2;
+    float yd, ydd, ydd_per_2;
+    float t = 1F / steps;
+    float tt = t * t;
+
+    // x
+    p[0] = previousVertex[0];
+    xd = 2 * (control[0] - previousVertex[0]) * t;
+    xdd_per_2 = 1 * (previousVertex[0] - 2 * control[0] + control[2]) * tt;
+    xdd = xdd_per_2 + xdd_per_2;
+
+    // y
+    p[1] = previousVertex[1];
+    yd = 2 * (control[1] - previousVertex[1]) * t;
+    ydd_per_2 = 1 * (previousVertex[1] - 2 * control[1] + control[3]) * tt;
+    ydd = ydd_per_2 + ydd_per_2;
+
+    for (int loop = 0; loop < steps; loop++) {
       lineTo(p);
+
+      p[0] = p[0] + xd + xdd_per_2;
+      xd = xd + xdd;
+
+      p[1] = p[1] + yd + ydd_per_2;
+      yd = yd + ydd;
     }
 
-    if (i != 1) {
-      p[0] = control[2];
-      p[1] = control[3];
-      lineTo(p);
-    }
+    lineTo(p);
   }
 
   @Override
   public void cubicTo(float[] previousVertex, float[] control) {
     float[] p = new float[2];
-    float i = 0;
-    for (; i <= 1; i += stepSize) {
-      float j = 1 - i;
-      p[0] = j * j * j * previousVertex[0] + 3 * j * j * i * control[0] + 3 * j * i * i * control[2] + i * i * i * control[4];
-      p[1] = j * j * j * previousVertex[1] + 3 * j * j * i * control[1] + 3 * j * i * i * control[3] + i * i * i * control[5];
+
+    float xd, xdd, xddd, xdd_per_2, xddd_per_2, xddd_per_6;
+    float yd, ydd, yddd, ydd_per_2, yddd_per_2, yddd_per_6;
+    float t = 1F / steps;
+    float tt = t * t;
+
+    // x
+    p[0] = previousVertex[0];
+    xd = 3 * (control[0] - previousVertex[0]) * t;
+    xdd_per_2 = 3 * (previousVertex[0] - 2 * control[0] + control[2]) * tt;
+    xddd_per_2 = 3 * (3 * (control[0] - control[2]) + control[4] - previousVertex[0]) * tt * t;
+
+    xddd = xddd_per_2 + xddd_per_2;
+    xdd = xdd_per_2 + xdd_per_2;
+    xddd_per_6 = xddd_per_2 / 3;
+
+    // y
+    p[1] = previousVertex[1];
+    yd = 3 * (control[1] - previousVertex[1]) * t;
+    ydd_per_2 = 3 * (previousVertex[1] - 2 * control[1] + control[3]) * tt;
+    yddd_per_2 = 3 * (3 * (control[1] - control[3]) + control[5] - previousVertex[1]) * tt * t;
+
+    yddd = yddd_per_2 + yddd_per_2;
+    ydd = ydd_per_2 + ydd_per_2;
+    yddd_per_6 = yddd_per_2 / 3;
+
+    for (int loop = 0; loop < steps; loop++) {
       lineTo(p);
+
+      p[0] = p[0] + xd + xdd_per_2 + xddd_per_6;
+      xd = xd + xdd + xddd_per_2;
+      xdd = xdd + xddd;
+      xdd_per_2 = xdd_per_2 + xddd_per_2;
+
+      p[1] = p[1] + yd + ydd_per_2 + yddd_per_6;
+      yd = yd + ydd + yddd_per_2;
+      ydd = ydd + yddd;
+      ydd_per_2 = ydd_per_2 + yddd_per_2;
     }
 
-    if (i != 1) {
-      p[0] = control[4];
-      p[1] = control[5];
-      lineTo(p);
-    }
+    lineTo(p);
   }
 }

@@ -7,7 +7,10 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
+import java.awt.geom.CubicCurve2D;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
+import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
 import java.net.URL;
@@ -334,6 +337,30 @@ public class VisualTest {
         label1.paint(g2d);
         g2d.translate(0, 143);
         label2.paint(g2d);
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void curveTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        QuadCurve2D quad = new QuadCurve2D.Double(5, 5, 50, 20, 20, 25);
+        g2d.draw(quad);
+
+        g2d.scale(2, 2);
+        Arc2D arc = new Arc2D.Double(10, 149, 40, 73, 43, 123, Arc2D.CHORD);
+        g2d.draw(arc);
+        g2d.scale(.5, .5);
+
+        CubicCurve2D cubic = new CubicCurve2D.Double(249, 99, 212, 298, 140, 250, 10, 140);
+        g2d.draw(cubic);
+
+        Ellipse2D ellipse = new Ellipse2D.Double(70, 134, 49, 73);
+        g2d.draw(ellipse);
       }
     });
 
