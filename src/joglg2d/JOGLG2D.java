@@ -419,7 +419,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public Shape getClip() {
-    return clip;
+    return (Shape)clip.clone();
   }
 
   @Override
@@ -460,7 +460,6 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   @Override
   public void copyArea(int x, int y, int width, int height, int dx, int dy) {
     // TODO Auto-generated method stub
-
   }
 
   @Override
