@@ -13,9 +13,10 @@ import java.awt.geom.Path2D;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
 import java.net.URL;
 
-import javax.swing.ImageIcon;
+import javax.imageio.ImageIO;
 import javax.swing.JLabel;
 
 import joglg2d.util.Painter;
@@ -193,11 +194,11 @@ public class VisualTest {
   @Test
   public void drawImageTest() throws Exception {
     URL url = VisualTest.class.getClassLoader().getResource("duke.gif");
-    final ImageIcon icon = new ImageIcon(url);
+    final BufferedImage image = ImageIO.read(url);
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
-        g2d.drawImage(icon.getImage(), AffineTransform.getTranslateInstance(50, 90), null);
+        g2d.drawImage(image, AffineTransform.getTranslateInstance(50, 90), null);
       }
     });
 

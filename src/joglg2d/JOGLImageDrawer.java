@@ -16,22 +16,16 @@
 
 package joglg2d;
 
-import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Transparency;
-import java.awt.color.ColorSpace;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.awt.image.ComponentColorModel;
-import java.awt.image.DataBuffer;
-import java.awt.image.DataBufferByte;
 import java.awt.image.ImageObserver;
-import java.awt.image.Raster;
-import java.awt.image.WritableRaster;
-import java.nio.ByteBuffer;
 
 import javax.media.opengl.GL;
+
+import com.sun.opengl.util.texture.Texture;
+import com.sun.opengl.util.texture.TextureCoords;
+import com.sun.opengl.util.texture.TextureIO;
 
 /**
  * @author borkholder
@@ -52,28 +46,42 @@ public class JOGLImageDrawer {
       xform = IDENTITY;
     }
 
-    int width = img.getWidth(null);
-    int height = img.getHeight(null);
-    WritableRaster raster = Raster.createInterleavedRaster(DataBuffer.TYPE_BYTE, width, height, 4, null);
-    ComponentColorModel colorModel = new ComponentColorModel(ColorSpace.getInstance(ColorSpace.CS_sRGB), new int[] { 8, 8, 8, 8 }, true,
-        false, Transparency.TRANSLUCENT, DataBuffer.TYPE_BYTE);
-    BufferedImage renderedImg = new BufferedImage(colorModel, raster, false, null);
+    BufferedImage bufferedImage = null;
+    if (img instanceof BufferedImage) {
+      bufferedImage = (BufferedImage) img;
+    } else {
+      bufferedImage = new BufferedImage(img.getHeight(obs), img.getWidth(obs), BufferedImage.TYPE_INT_RGB);
+      bufferedImage.createGraphics().drawImage(img, xform, obs);
+    }
 
-    Graphics2D g2d = renderedImg.createGraphics();
-    AffineTransform transform = AffineTransform.getTranslateInstance(0, height);
-    transform.scale(1, -1);
+    Texture texture = TextureIO.newTexture(bufferedImage, true);
+    texture.enable();
+    texture.bind();
 
-    g2d.setTransform(transform);
-    g2d.drawImage(img, null, null);
-
-    Point2D.Float pt = new Point2D.Float(0, height);
-    xform.transform(pt, pt);
-
+    texture.setTexParameterf(GL.GL_TEXTURE_ENV_MODE, GL.GL_DECAL);
+    gl.glColor3f(1, 1, 1);
+//    gl.glEnable(GL.GL_BLEND);
+    gl.glDisable(GL.GL_BLEND);
     gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-    gl.glEnable(GL.GL_BLEND);
-    DataBufferByte buffer = (DataBufferByte) raster.getDataBuffer();
-    gl.glRasterPos2f(pt.x, pt.y);
-    gl.glDrawPixels(width, height, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(buffer.getData()));
+
+    TextureCoords coords = texture.getImageTexCoords();
+
+    gl.glBegin(GL.GL_QUADS);
+
+    gl.glTexCoord2f(coords.left(), coords.bottom());
+    gl.glVertex2d(0, bufferedImage.getHeight());
+    gl.glTexCoord2f(coords.right(), coords.bottom());
+    gl.glVertex2d(bufferedImage.getWidth(), bufferedImage.getHeight());
+    gl.glTexCoord2f(coords.right(), coords.top());
+    gl.glVertex2d(bufferedImage.getWidth(), 0);
+    gl.glTexCoord2f(coords.left(), coords.top());
+    gl.glVertex2d(0, 0);
+
+    gl.glEnd();
+
+    texture.disable();
+    texture.dispose();
+
     return true;
   }
 }
