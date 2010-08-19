@@ -20,6 +20,10 @@ import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
 
 import javax.media.opengl.GL;
 
@@ -33,55 +37,121 @@ import com.sun.opengl.util.texture.TextureIO;
  *
  */
 public class JOGLImageDrawer {
-  private static final AffineTransform IDENTITY = new AffineTransform();
-
   private final GL gl;
+
+  private TextureCache cache = new TextureCache();
 
   public JOGLImageDrawer(GL gl) {
     this.gl = gl;
+
+    gl.glEnable(GL.GL_TEXTURE_2D);
+    gl.glTexParameterf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_DECAL);
   }
 
   public boolean drawImage(Image img, AffineTransform xform, ImageObserver obs) {
-    if (xform == null) {
-      xform = IDENTITY;
-    }
+    int width = img.getWidth(null);
+    int height = img.getHeight(null);
 
-    BufferedImage bufferedImage = null;
-    if (img instanceof BufferedImage) {
-      bufferedImage = (BufferedImage) img;
-    } else {
-      bufferedImage = new BufferedImage(img.getHeight(obs), img.getWidth(obs), BufferedImage.TYPE_INT_RGB);
-      bufferedImage.createGraphics().drawImage(img, xform, obs);
-    }
-
-    Texture texture = TextureIO.newTexture(bufferedImage, true);
-    texture.enable();
+    Texture texture = getTexture(img);
     texture.bind();
 
-    texture.setTexParameterf(GL.GL_TEXTURE_ENV_MODE, GL.GL_DECAL);
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glPushMatrix();
+
+    JOGLG2D.multMatrix(gl, xform);
+
     gl.glColor3f(1, 1, 1);
-//    gl.glEnable(GL.GL_BLEND);
-    gl.glDisable(GL.GL_BLEND);
-    gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
 
     TextureCoords coords = texture.getImageTexCoords();
 
     gl.glBegin(GL.GL_QUADS);
 
     gl.glTexCoord2f(coords.left(), coords.bottom());
-    gl.glVertex2d(0, bufferedImage.getHeight());
+    gl.glVertex2d(0, height);
     gl.glTexCoord2f(coords.right(), coords.bottom());
-    gl.glVertex2d(bufferedImage.getWidth(), bufferedImage.getHeight());
+    gl.glVertex2d(width, height);
     gl.glTexCoord2f(coords.right(), coords.top());
-    gl.glVertex2d(bufferedImage.getWidth(), 0);
+    gl.glVertex2d(width, 0);
     gl.glTexCoord2f(coords.left(), coords.top());
     gl.glVertex2d(0, 0);
 
     gl.glEnd();
-
-    texture.disable();
-    texture.dispose();
+    gl.glPopMatrix();
 
     return true;
+  }
+
+  protected Texture getTexture(Image image) {
+    Texture texture = cache.get(image);
+    if (texture == null) {
+      texture = createTexture(image);
+      cache.put(image, texture);
+    }
+
+    return texture;
+  }
+
+  protected Texture createTexture(Image image) {
+    BufferedImage bufferedImage;
+    if (image instanceof BufferedImage) {
+      bufferedImage = (BufferedImage) image;
+    } else {
+      bufferedImage = new BufferedImage(image.getHeight(null), image.getWidth(null), BufferedImage.TYPE_3BYTE_BGR);
+      bufferedImage.createGraphics().drawImage(image, null, null);
+    }
+
+    Texture texture = TextureIO.newTexture(bufferedImage, false);
+    return texture;
+  }
+
+  @SuppressWarnings("serial")
+  protected static class TextureCache extends HashMap<WeakKey<Image>, Texture> {
+    private ReferenceQueue<Image> queue = new ReferenceQueue<Image>();
+
+    public void expungeStaleEntries() {
+      Reference<? extends Image> ref = queue.poll();
+      while (ref != null) {
+        remove(ref).dispose();
+        ref = queue.poll();
+      }
+    }
+
+    public Texture get(Image image) {
+      expungeStaleEntries();
+      WeakKey<Image> key = new WeakKey<Image>(image, null);
+      return get(key);
+    }
+
+    public Texture put(Image image, Texture texture) {
+      expungeStaleEntries();
+      WeakKey<Image> key = new WeakKey<Image>(image, queue);
+      return put(key, texture);
+    }
+  }
+
+  protected static class WeakKey<T> extends WeakReference<T> {
+    private final int hash;
+
+    public WeakKey(T value, ReferenceQueue<T> queue) {
+      super(value, queue);
+      hash = value.hashCode();
+    }
+
+    @Override
+    public int hashCode() {
+      return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      } else if (obj instanceof WeakKey) {
+        WeakKey<?> other = (WeakKey<?>) obj;
+        return other.hash == hash && get() == other.get();
+      } else {
+        return false;
+      }
+    }
   }
 }

@@ -69,6 +69,8 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected JOGLShapeDrawer shapeDrawer;
 
+  protected JOGLImageDrawer imageDrawer;
+
   protected Stroke stroke;
 
   protected Rectangle clip;
@@ -82,6 +84,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     setBackground(Color.BLACK);
     setFont(new Font(null, Font.PLAIN, 10));
     shapeDrawer = new JOGLShapeDrawer(gl);
+    imageDrawer = new JOGLImageDrawer(gl);
   }
 
   protected void prePaint(Component component) {
@@ -278,7 +281,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   @Override
   public void transform(AffineTransform Tx) {
     gl.glMatrixMode(GL.GL_MODELVIEW);
-    multMatrix(Tx);
+    multMatrix(gl, Tx);
   }
 
   @Override
@@ -287,10 +290,10 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     gl.glLoadIdentity();
     gl.glTranslatef(0, height, 0);
     gl.glScalef(1, -1, 1);
-    multMatrix(transform);
+    multMatrix(gl, transform);
   }
 
-  protected void multMatrix(AffineTransform transform) {
+  public static void multMatrix(GL gl, AffineTransform transform) {
     double[] matrix = new double[16];
     matrix[0] = transform.getScaleX();
     matrix[1] = transform.getShearY();
@@ -527,7 +530,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public boolean drawImage(Image img, AffineTransform xform, ImageObserver obs) {
-    return new JOGLImageDrawer(gl).drawImage(img, xform, obs);
+    return imageDrawer.drawImage(img, xform, obs);
   }
 
   @Override
