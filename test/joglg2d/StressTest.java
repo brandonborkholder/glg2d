@@ -3,8 +3,12 @@ package joglg2d;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.geom.CubicCurve2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Random;
+
+import javax.imageio.ImageIO;
 
 import joglg2d.util.CustomPainter;
 import joglg2d.util.TestWindow;
@@ -84,7 +88,7 @@ public class StressTest {
   }
 
   @Test
-  public void curvedLineTest() throws Exception {
+  public void quadCurvedLineTest() throws Exception {
     TimedPainter painter = new TimedPainter() {
       @Override
       protected void paint(Graphics2D g2d) {
@@ -99,7 +103,45 @@ public class StressTest {
     };
 
     tester.setPainter(painter);
-    painter.waitAndLogTimes("arcs");
+    painter.waitAndLogTimes("quad arcs");
+  }
+
+  @Test
+  public void cubicCurvedLineTest() throws Exception {
+    TimedPainter painter = new TimedPainter() {
+      @Override
+      protected void paint(Graphics2D g2d) {
+        g2d.setColor(Color.BLACK);
+        g2d.setStroke(new BasicStroke(3));
+        int x = 300;
+        int y = 400;
+        for (int i = 0; i < 100; i++) {
+          g2d.draw(new CubicCurve2D.Double(rand.nextDouble() * x, rand.nextDouble() * y, rand.nextDouble() * x, rand.nextDouble() * y,
+              rand.nextDouble() * x, rand.nextDouble() * y, rand.nextDouble() * x, rand.nextDouble() * y));
+        }
+      }
+    };
+
+    tester.setPainter(painter);
+    painter.waitAndLogTimes("cubic arcs");
+  }
+
+  @Test
+  public void imageTest() throws Exception {
+    final Image image = ImageIO.read(StressTest.class.getClassLoader().getResource("duke.gif"));
+    TimedPainter painter = new TimedPainter() {
+      @Override
+      protected void paint(Graphics2D g2d) {
+        int x = 300;
+        int y = 400;
+        for (int i = 0; i < 100; i++) {
+          g2d.drawImage(image, rand.nextInt(x), rand.nextInt(y), rand.nextInt(x), rand.nextInt(y), null);
+        }
+      }
+    };
+
+    tester.setPainter(painter);
+    painter.waitAndLogTimes("images");
   }
 
   static abstract class TimedPainter implements CustomPainter {

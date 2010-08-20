@@ -556,8 +556,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer) {
-    // TODO Auto-generated method stub
-    return false;
+    return imageDrawer.drawImage(img, x, y, width, height, observer);
   }
 
   @Override
