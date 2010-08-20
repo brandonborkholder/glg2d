@@ -76,4 +76,21 @@ public class JOGLImageDrawer {
     gl.glDrawPixels(width, height, GL.GL_RGBA, GL.GL_UNSIGNED_BYTE, ByteBuffer.wrap(buffer.getData()));
     return true;
   }
+
+  public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer) {
+    if (!isImageReady(img)) {
+      return false;
+    }
+
+    double imgHeight = img.getHeight(null);
+    double imgWidth = img.getWidth(null);
+
+    AffineTransform transform = AffineTransform.getScaleInstance(width / imgWidth, height / imgHeight);
+    transform.translate(x, y);
+    return drawImage(img, transform, observer);
+  }
+
+  protected boolean isImageReady(Image img) {
+    return img.getHeight(null) >= 0 && img.getWidth(null) >= 0;
+  }
 }

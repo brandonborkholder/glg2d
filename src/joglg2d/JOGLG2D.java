@@ -69,6 +69,8 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected JOGLShapeDrawer shapeDrawer;
 
+  protected JOGLImageDrawer imageDrawer;
+
   protected Stroke stroke;
 
   protected Rectangle clip;
@@ -82,6 +84,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     setBackground(Color.BLACK);
     setFont(new Font(null, Font.PLAIN, 10));
     shapeDrawer = new JOGLShapeDrawer(gl);
+    imageDrawer = new JOGLImageDrawer(gl);
   }
 
   protected void prePaint(Component component) {
@@ -527,7 +530,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public boolean drawImage(Image img, AffineTransform xform, ImageObserver obs) {
-    return new JOGLImageDrawer(gl).drawImage(img, xform, obs);
+    return imageDrawer.drawImage(img, xform, obs);
   }
 
   @Override
@@ -553,8 +556,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer) {
-    // TODO Auto-generated method stub
-    return false;
+    return imageDrawer.drawImage(img, x, y, width, height, observer);
   }
 
   @Override
