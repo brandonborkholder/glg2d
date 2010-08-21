@@ -16,40 +16,21 @@
 
 package joglg2d;
 
-import java.awt.BorderLayout;
-import java.awt.Graphics;
-
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
-import javax.swing.JPanel;
+import javax.media.opengl.GLJPanel;
 
 /**
  * @author borkholder
  * @created Feb 6, 2010
  */
 @SuppressWarnings("serial")
-public class JOGLPanel extends JPanel {
-  protected GLAutoDrawable drawable;
-
+public class JOGLPanel extends GLJPanel {
   public JOGLPanel() {
-    GLCanvas canvas = new GLCanvas();
-    canvas.addGLEventListener(new Graphics2DListener(canvas) {
+    addGLEventListener(new Graphics2DListener(this) {
       @Override
       protected void paintGL(JOGLG2D g2d) {
         JOGLPanel.this.paintGL(g2d);
       }
     });
-
-    setLayout(new BorderLayout());
-    add(canvas, BorderLayout.CENTER);
-
-    this.drawable = canvas;
-  }
-
-  @Override
-  public void paint(Graphics g) {
-    drawable.display();
-    super.paint(g);
   }
 
   protected void paintGL(JOGLG2D g2d) {
