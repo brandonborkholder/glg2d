@@ -25,11 +25,8 @@
       h3 { text-align: center; color: #2f6fbf; }
       a { color: #2f6fbf; }
       .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-      .download { float: right; }
       pre { background: #000; color: #fff; padding: 15px;}
-      hr { border: 0; width: 80%; border-bottom: 1px solid #aaa}
-      .footer { text-align:center; padding-top:30px; font-style: italic; }
-      .code { font-size: 0.8em; font-family: "Monospace"; }
+      .code { font-size: 0.9em; font-family: "Monospace"; }
     </style>
 
   </head>
@@ -65,29 +62,32 @@
       </p>
 
       <p>
-      We use 
+      We use the JOGL <a href=http://jogl.dev.java.net/">1.1.1a</a> libraries for making OpenGL calls.  As soon as the
+      <a href="http://jogamp.org/jogl/www/">jogamp</a> project hits a major release, we will move to the updated JOGL
+      libraries.
       </p>
 
       <h2>Implementation Status</h2>
 
       <p>
-      Not all Graphics2D methods have been implemented and accelerated using JOGL calls.
+      Not all Graphics2D methods have been implemented and accelerated using JOGL calls.  In general, we try to implement
+      the most commonly-used functions first.  If you have a request for a feature or want to report a bug, send me an email
+      at
+      <span id="email">borkhobs+joglj2d (at) gmail</span>.
+      <script type="text/javascript">
+        var anchor = '<a href="mailto:';
+          anchor += 'borkhobs+joglj2d';
+          anchor += '@gmail.com';
+          anchor += '">borkhobs+joglj2d';
+          anchor += '@gmail.com</a>';
+        document.getElementById('email').innerHTML = anchor;
+      </script>
       </p>
 
-      <h2>Download</h2>
+      <h2>Source</h2>
       <p>
-      You can download this project in either
-      <a href="http://github.com/brandonborkholder/joglj2d/zipball/master">zip</a> or
-      <a href="http://github.com/brandonborkholder/joglj2d/tarball/master">tar</a> formats.
+      You can find the source on GitHub at <a href="http://github.com/brandonborkholder/joglj2d/">http://github.com/brandonborkholder/joglj2d/</a>.
       </p>
-      <p>You can also clone the project with <a href="http://git-scm.com">Git</a>
-      by running:
-      <pre>$ git clone git://github.com/brandonborkholder/joglj2d</pre>
-      </p>
-
-      <div class="footer">
-        get the source code on GitHub : <a href="http://github.com/brandonborkholder/joglj2d">brandonborkholder/joglj2d</a>
-      </div>
 
     </div>
 
@@ -99,6 +99,7 @@
       try {
         var pageTracker = _gat._getTracker("UA-16069207-1");
         pageTracker._trackPageview();
-        } catch(err) {}</script>
-    </body>
-  </html>
+        } catch(err) {}
+    </script>
+  </body>
+</html>
