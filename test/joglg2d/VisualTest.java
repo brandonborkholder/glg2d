@@ -1,5 +1,6 @@
 package joglg2d;
 
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
@@ -9,6 +10,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.CubicCurve2D;
 import java.awt.geom.Ellipse2D;
+import java.awt.geom.GeneralPath;
 import java.awt.geom.Path2D;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
@@ -362,6 +364,45 @@ public class VisualTest {
 
         Ellipse2D ellipse = new Ellipse2D.Double(70, 134, 49, 73);
         g2d.draw(ellipse);
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void srcOverRuleTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        BufferedImage source = new BufferedImage(250, 200, BufferedImage.TYPE_INT_ARGB);
+
+        GeneralPath dest = new GeneralPath();
+        dest.moveTo(50, 0);
+        dest.lineTo(250, 0);
+        dest.lineTo(250, 100);
+        dest.closePath();
+        g2d.setColor(g2d.getBackground());
+        g2d.setComposite(AlphaComposite.SrcOver);
+        g2d.setColor(new Color(255, 0, 0, 190));
+        g2d.fill(dest);
+
+        GeneralPath src = new GeneralPath();
+        src.moveTo(0, 0);
+        src.lineTo(200, 0);
+        src.lineTo(0, 100);
+        src.closePath();
+        Graphics2D srcg2d = (Graphics2D) source.getGraphics();
+        srcg2d.setComposite(AlphaComposite.Clear);
+        srcg2d.fillRect(0, 0, 250, 200);
+        srcg2d.setComposite(AlphaComposite.SrcOver);
+        srcg2d.setColor(new Color(0, 255, 0, 190));
+        srcg2d.fill(src);
+        srcg2d.dispose();
+
+        g2d.setComposite(AlphaComposite.SrcIn);
+        g2d.setColor(new Color(0, 255, 0, 100));
+        g2d.fill(src);
       }
     });
 

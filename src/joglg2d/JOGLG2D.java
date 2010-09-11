@@ -16,6 +16,7 @@
 
 package joglg2d;
 
+import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Component;
@@ -75,6 +76,8 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected Rectangle clip;
 
+  protected Composite composite;
+
   public JOGLG2D(GL gl, int width, int height) {
     this.gl = gl;
     this.height = height;
@@ -92,8 +95,11 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     setColor(component.getForeground());
     setFont(component.getFont());
     setStroke(new BasicStroke());
+    setComposite(AlphaComposite.SrcOver);
     setClip(null);
 
+    gl.glEnable(GL.GL_BLEND);
+    gl.glDisable(GL.GL_ALPHA_TEST);
     gl.glDisable(GL.GL_DEPTH_TEST);
     gl.glShadeModel(GL.GL_FLAT);
     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
@@ -185,14 +191,66 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public Composite getComposite() {
-    // TODO Auto-generated method stub
-    return null;
+    return composite;
   }
 
   @Override
   public void setComposite(Composite comp) {
-    // TODO Auto-generated method stub
+    if (comp instanceof AlphaComposite) {
+      switch (((AlphaComposite) comp).getRule()) {
+      case AlphaComposite.CLEAR:
+        gl.glBlendFunc(GL.GL_ZERO, GL.GL_ZERO);
+        break;
 
+      case AlphaComposite.SRC:
+        gl.glBlendFunc(GL.GL_ONE, GL.GL_ZERO);
+        break;
+
+      case AlphaComposite.SRC_OVER:
+        gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+        break;
+
+      case AlphaComposite.SRC_IN:
+        gl.glBlendFunc(GL.GL_DST_ALPHA, GL.GL_ZERO);
+        break;
+
+      case AlphaComposite.SRC_OUT:
+        gl.glBlendFunc(GL.GL_ONE_MINUS_DST_ALPHA, GL.GL_ZERO);
+        break;
+
+      case AlphaComposite.SRC_ATOP:
+        gl.glBlendFunc(GL.GL_DST_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+        break;
+
+      case AlphaComposite.DST:
+        gl.glBlendFunc(GL.GL_ZERO, GL.GL_ONE);
+        break;
+
+      case AlphaComposite.DST_OVER:
+        gl.glBlendFunc(GL.GL_ONE_MINUS_DST_ALPHA, GL.GL_ONE);
+        break;
+
+      case AlphaComposite.DST_IN:
+        gl.glBlendFunc(GL.GL_ZERO, GL.GL_SRC_ALPHA);
+        break;
+
+      case AlphaComposite.DST_OUT:
+        gl.glBlendFunc(GL.GL_ZERO, GL.GL_ONE_MINUS_SRC_ALPHA);
+        break;
+
+      case AlphaComposite.DST_ATOP:
+        gl.glBlendFunc(GL.GL_ONE_MINUS_DST_ALPHA, GL.GL_SRC_ALPHA);
+        break;
+
+      case AlphaComposite.XOR:
+        gl.glBlendFunc(GL.GL_ONE_MINUS_DST_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+        break;
+      }
+
+      composite = comp;
+    } else {
+      throw new UnsupportedOperationException();
+    }
   }
 
   @Override
@@ -422,7 +480,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public Shape getClip() {
-    return (Shape)clip.clone();
+    return (Shape) clip.clone();
   }
 
   @Override
