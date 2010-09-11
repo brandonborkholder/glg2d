@@ -46,8 +46,7 @@ public abstract class Graphics2DListener implements GLEventListener {
 
   @Override
   public void init(GLAutoDrawable drawable) {
-    g2d = new JOGLG2D(drawable.getGL(), drawable.getWidth(), drawable.getHeight());
-    drawable.getGL().glEnable(GL.GL_DOUBLEBUFFER);
+    reshape(drawable, 0, 0, drawable.getWidth(), drawable.getWidth());
   }
 
   @Override

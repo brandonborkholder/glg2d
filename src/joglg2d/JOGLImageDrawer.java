@@ -45,7 +45,7 @@ public class JOGLImageDrawer {
     this.gl = gl;
 
     gl.glEnable(GL.GL_TEXTURE_2D);
-    gl.glTexParameterf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_DECAL);
+    gl.glTexParameterf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_BLEND);
   }
 
   public boolean drawImage(Image img, AffineTransform xform, ImageObserver obs) {
@@ -57,10 +57,12 @@ public class JOGLImageDrawer {
 
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
+    
+    if (xform != null) {
+      JOGLG2D.multMatrix(gl, xform);
+    }
 
-    JOGLG2D.multMatrix(gl, xform);
-
-    gl.glColor3f(1, 1, 1);
+    gl.glColor4f(1, 1, 1, 1);
 
     TextureCoords coords = texture.getImageTexCoords();
 
@@ -77,6 +79,8 @@ public class JOGLImageDrawer {
 
     gl.glEnd();
     gl.glPopMatrix();
+    
+    texture.dispose();
 
     return true;
   }
@@ -85,7 +89,7 @@ public class JOGLImageDrawer {
     Texture texture = cache.get(image);
     if (texture == null) {
       texture = createTexture(image);
-      cache.put(image, texture);
+//      cache.put(image, texture);
     }
 
     return texture;
