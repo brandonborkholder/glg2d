@@ -16,6 +16,7 @@
 
 package joglg2d;
 
+import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLJPanel;
 
 /**
@@ -24,7 +25,22 @@ import javax.media.opengl.GLJPanel;
  */
 @SuppressWarnings("serial")
 public class JOGLPanel extends GLJPanel {
+  public static GLCapabilities getDefaultCapabalities() {
+    GLCapabilities caps = new GLCapabilities();
+    caps.setRedBits(8);
+    caps.setGreenBits(8);
+    caps.setBlueBits(8);
+    caps.setAlphaBits(8);
+    caps.setDoubleBuffered(true);
+    caps.setHardwareAccelerated(true);
+    return caps;
+  }
+    
   public JOGLPanel() {
+    this(getDefaultCapabalities());
+  }
+  
+  public JOGLPanel(GLCapabilities caps) {
     addGLEventListener(new Graphics2DListener(this) {
       @Override
       protected void paintGL(JOGLG2D g2d) {
