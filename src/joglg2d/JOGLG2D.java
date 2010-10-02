@@ -44,16 +44,11 @@ import java.awt.image.RenderedImage;
 import java.awt.image.renderable.RenderableImage;
 import java.text.AttributedCharacterIterator;
 import java.util.Map;
-import java.util.WeakHashMap;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.Threading;
 
-import com.sun.opengl.util.j2d.TextRenderer;
-
 public class JOGLG2D extends Graphics2D implements Cloneable {
-  private static final Map<Font, TextRenderer> TEXT_RENDER_CACHE = new WeakHashMap<Font, TextRenderer>();
-
   private final GL gl;
 
   private final int height;
@@ -66,11 +61,11 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected Color background;
 
-  protected Font font;
-
   protected JOGLShapeDrawer shapeDrawer;
 
   protected JOGLImageDrawer imageDrawer;
+
+  protected StringDrawer stringDrawer;
 
   protected Stroke stroke;
 
@@ -78,16 +73,20 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected Composite composite;
 
+  protected GraphicsConfiguration graphicsConfig;
+
   public JOGLG2D(GL gl, int width, int height) {
     this.gl = gl;
     this.height = height;
     this.width = width;
+    shapeDrawer = new JOGLShapeDrawer(gl);
+    imageDrawer = new JOGLImageDrawer(gl);
+    stringDrawer = new StringDrawer(this);
+
     setStroke(new BasicStroke());
     setColor(Color.BLACK);
     setBackground(Color.BLACK);
     setFont(new Font(null, Font.PLAIN, 10));
-    shapeDrawer = new JOGLShapeDrawer(gl);
-    imageDrawer = new JOGLImageDrawer(gl);
   }
 
   protected void prePaint(Component component) {
@@ -97,6 +96,8 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     setStroke(new BasicStroke());
     setComposite(AlphaComposite.SrcOver);
     setClip(null);
+    setRenderingHints(null);
+    graphicsConfig = component.getGraphicsConfiguration();
 
     gl.glEnable(GL.GL_BLEND);
     gl.glDisable(GL.GL_ALPHA_TEST);
@@ -125,6 +126,23 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     gl.glFlush();
   }
 
+  public GL getGL() {
+    return gl;
+  }
+
+  public int getHeight() {
+    return height;
+  }
+
+  public int getWidth() {
+    return width;
+  }
+
+  protected void glDispose() {
+    stringDrawer.dispose();
+    imageDrawer.dispose();
+  }
+
   @Override
   public void draw(Shape s) {
     shapeDrawer.draw(s, stroke);
@@ -132,39 +150,22 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawString(String str, int x, int y) {
-    TextRenderer renderer = TEXT_RENDER_CACHE.get(font);
-    if (renderer == null) {
-      renderer = new TextRenderer(font);
-      TEXT_RENDER_CACHE.put(font, renderer);
-    }
-
-    renderer.setColor(color);
-
-    gl.glMatrixMode(GL.GL_MODELVIEW);
-    gl.glPushMatrix();
-    gl.glScalef(1, -1, 1);
-    gl.glTranslatef(0, -height, 0);
-
-    renderer.begin3DRendering();
-    renderer.draw3D(str, x, height - y, 0, 1);
-    renderer.end3DRendering();
-
-    gl.glPopMatrix();
+    stringDrawer.drawString(str, color, x, y);
   }
 
   @Override
   public void drawString(String str, float x, float y) {
-    drawString(str, (int) x, (int) y);
+    stringDrawer.drawString(str, color, x, y);
   }
 
   @Override
   public void drawString(AttributedCharacterIterator iterator, int x, int y) {
-    assert false : "Operation not supported";
+    stringDrawer.drawString(iterator, x, y);
   }
 
   @Override
   public void drawString(AttributedCharacterIterator iterator, float x, float y) {
-    assert false : "Operation not supported";
+    stringDrawer.drawString(iterator, x, y);
   }
 
   @Override
@@ -179,14 +180,25 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public boolean hit(Rectangle rect, Shape s, boolean onStroke) {
-    // TODO Auto-generated method stub
-    return false;
+    if (clip != null) {
+      rect = clip.intersection(rect);
+    }
+
+    if (rect.isEmpty()) {
+      return false;
+    }
+
+    if (onStroke) {
+      s = stroke.createStrokedShape(s);
+    }
+
+    s = getTransform().createTransformedShape(s);
+    return s.intersects(rect);
   }
 
   @Override
   public GraphicsConfiguration getDeviceConfiguration() {
-    // TODO Auto-generated method stub
-    return null;
+    return graphicsConfig;
   }
 
   @Override
@@ -438,24 +450,22 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public Font getFont() {
-    return font;
+    return stringDrawer.getFont();
   }
 
   @Override
   public void setFont(Font font) {
-    this.font = font;
+    stringDrawer.setFont(font);
   }
 
   @Override
   public FontMetrics getFontMetrics(Font f) {
-    // TODO Auto-generated method stub
-    return null;
+    return stringDrawer.getFontMetrics(f);
   }
 
   @Override
   public FontRenderContext getFontRenderContext() {
-    // TODO Auto-generated method stub
-    return null;
+    return stringDrawer.getFontRenderContext();
   }
 
   @Override
@@ -480,7 +490,11 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public Shape getClip() {
-    return (Shape) clip.clone();
+    if (clip == null) {
+      return null;
+    } else {
+      return (Shape) clip.clone();
+    }
   }
 
   @Override

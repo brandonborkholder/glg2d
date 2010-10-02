@@ -57,7 +57,7 @@ public class JOGLImageDrawer {
 
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
-    
+
     if (xform != null) {
       JOGLG2D.multMatrix(gl, xform);
     }
@@ -79,7 +79,7 @@ public class JOGLImageDrawer {
 
     gl.glEnd();
     gl.glPopMatrix();
-    
+
     texture.dispose();
 
     return true;
@@ -174,5 +174,11 @@ public class JOGLImageDrawer {
 
   protected boolean isImageReady(Image img) {
     return img.getHeight(null) >= 0 && img.getWidth(null) >= 0;
+  }
+
+  public void dispose() {
+    for (Texture texture : cache.values()) {
+      texture.dispose();
+    }
   }
 }
