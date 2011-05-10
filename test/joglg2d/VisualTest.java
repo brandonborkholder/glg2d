@@ -200,7 +200,9 @@ public class VisualTest {
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
-        g2d.drawImage(image, AffineTransform.getTranslateInstance(50, 90), null);
+        AffineTransform xform = AffineTransform.getTranslateInstance(50, 90);
+        xform.rotate(0.1);
+        g2d.drawImage(image,xform, null);
       }
     });
 

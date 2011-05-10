@@ -80,7 +80,7 @@ public class JOGLImageDrawer {
     gl.glEnd();
     gl.glPopMatrix();
 
-    texture.dispose();
+//    texture.dispose();
 
     return true;
   }
@@ -89,7 +89,7 @@ public class JOGLImageDrawer {
     Texture texture = cache.get(image);
     if (texture == null) {
       texture = createTexture(image);
-//      cache.put(image, texture);
+      cache.put(image, texture);
     }
 
     return texture;
@@ -170,6 +170,14 @@ public class JOGLImageDrawer {
     AffineTransform transform = AffineTransform.getScaleInstance(width / imgWidth, height / imgHeight);
     transform.translate(x, y);
     return drawImage(img, transform, observer);
+  }
+
+  public boolean drawImage(Image img, int x, int y, ImageObserver observer) {
+    if (!isImageReady(img)) {
+      return false;
+    }
+
+    return drawImage(img, AffineTransform.getTranslateInstance(x, y), observer);
   }
 
   protected boolean isImageReady(Image img) {
