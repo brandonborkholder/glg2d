@@ -277,8 +277,9 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void setRenderingHint(Key hintKey, Object hintValue) {
-    // TODO Auto-generated method stub
-
+    if (hintKey == RenderingHints.KEY_TEXT_ANTIALIASING) {
+      stringDrawer.setAntiAlias(hintValue != RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+    }
   }
 
   @Override
@@ -402,7 +403,11 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   @Override
   public void setColor(Color c) {
     color = c;
-    int rgb = color.getRGB();
+    setColor(gl, c);
+  }
+
+  public static void setColor(GL gl, Color c) {
+    int rgb = c.getRGB();
     gl.glColor4ub((byte) (rgb >> 16 & 0xFF), (byte) (rgb >> 8 & 0xFF), (byte) (rgb & 0xFF), (byte) (rgb >> 24 & 0xFF));
   }
 
@@ -539,7 +544,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawLine(int x1, int y1, int x2, int y2) {
-    shapeDrawer.drawLine(x1, y1, x2, y2, stroke);
+    shapeDrawer.drawLine(x1+0, y1+0, x2+0, y2+0, stroke);
   }
 
   @Override
@@ -622,37 +627,33 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public boolean drawImage(Image img, int x, int y, ImageObserver observer) {
-    return imageDrawer.drawImage(img, x, y, observer);
-  }
-
-  @Override
-  public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer) {
-    return imageDrawer.drawImage(img, x, y, width, height, observer);
+    return imageDrawer.drawImage(img, x, y, null, observer);
   }
 
   @Override
   public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer) {
-    // TODO Auto-generated method stub
-    return false;
+    return imageDrawer.drawImage(img, x, y, bgcolor, observer);
+  }
+
+  @Override
+  public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer) {
+    return imageDrawer.drawImage(img, x, y, width, height, null, observer);
   }
 
   @Override
   public boolean drawImage(Image img, int x, int y, int width, int height, Color bgcolor, ImageObserver observer) {
-    // TODO Auto-generated method stub
-    return false;
+    return imageDrawer.drawImage(img, x, y, width, height, bgcolor, observer);
   }
 
   @Override
   public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, ImageObserver observer) {
-    // TODO Auto-generated method stub
-    return false;
+    return imageDrawer.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null, observer);
   }
 
   @Override
   public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, Color bgcolor,
       ImageObserver observer) {
-    // TODO Auto-generated method stub
-    return false;
+    return imageDrawer.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, bgcolor, observer);
   }
 
   @Override

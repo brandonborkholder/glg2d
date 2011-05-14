@@ -138,6 +138,7 @@ public class JOGLShapeDrawer {
       if (basicStroke.getDashArray() == null) {
         simpleStrokeVisitor.setStroke(basicStroke);
         traceShape(shape, simpleStrokeVisitor);
+//        traceShape(shape, new FasterLineDrawingVisitor(gl, basicStroke));
         return;
       }
     }

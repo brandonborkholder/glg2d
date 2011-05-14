@@ -16,6 +16,7 @@
 
 package joglg2d;
 
+import java.awt.Color;
 import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
@@ -48,11 +49,68 @@ public class JOGLImageDrawer {
     gl.glTexParameterf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_BLEND);
   }
 
-  public boolean drawImage(Image img, AffineTransform xform, ImageObserver obs) {
-    int width = img.getWidth(null);
-    int height = img.getHeight(null);
+  public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer) {
+    if (!isImageReady(img)) {
+      return false;
+    }
+
+    return drawImage(img, AffineTransform.getTranslateInstance(x, y), bgcolor);
+  }
+
+  public boolean drawImage(Image img, AffineTransform xform, ImageObserver observer) {
+    if (!isImageReady(img)) {
+      return false;
+    }
+
+    return drawImage(img, xform, (Color) null);
+  }
+
+  public boolean drawImage(Image img, int x, int y, int width, int height, Color bgcolor, ImageObserver observer) {
+    if (!isImageReady(img)) {
+      return false;
+    }
+
+    double imgHeight = img.getHeight(null);
+    double imgWidth = img.getWidth(null);
+
+    AffineTransform transform = AffineTransform.getScaleInstance(width / imgWidth, height / imgHeight);
+    transform.translate(x, y);
+    return drawImage(img, transform, bgcolor);
+  }
+
+  public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, Color bgcolor,
+      ImageObserver observer) {
+    if (!isImageReady(img)) {
+      return false;
+    }
 
     Texture texture = getTexture(img);
+    float height = texture.getHeight();
+    float width = texture.getWidth();
+    begin(texture, null, bgcolor);
+    applyTexture(texture, dx1, dy1, dx2, dy2, sx1 / width, sy1 / height, sx2 / width, sy2 / height);
+    end(texture);
+
+    return true;
+  }
+
+  public void dispose() {
+    for (Texture texture : cache.values()) {
+      texture.dispose();
+    }
+  }
+
+  protected boolean drawImage(Image img, AffineTransform xform, Color color) {
+    Texture texture = getTexture(img);
+
+    begin(texture, xform, color);
+    applyTexture(texture);
+    end(texture);
+
+    return true;
+  }
+
+  protected void begin(Texture texture, AffineTransform xform, Color bgcolor) {
     texture.bind();
 
     gl.glMatrixMode(GL.GL_MODELVIEW);
@@ -62,27 +120,41 @@ public class JOGLImageDrawer {
       JOGLG2D.multMatrix(gl, xform);
     }
 
-    gl.glColor4f(1, 1, 1, 1);
+    if (bgcolor != null) {
+      JOGLG2D.setColor(gl, bgcolor);
+    }
+  }
 
-    TextureCoords coords = texture.getImageTexCoords();
-
-    gl.glBegin(GL.GL_QUADS);
-
-    gl.glTexCoord2f(coords.left(), coords.bottom());
-    gl.glVertex2d(0, height);
-    gl.glTexCoord2f(coords.right(), coords.bottom());
-    gl.glVertex2d(width, height);
-    gl.glTexCoord2f(coords.right(), coords.top());
-    gl.glVertex2d(width, 0);
-    gl.glTexCoord2f(coords.left(), coords.top());
-    gl.glVertex2d(0, 0);
-
+  protected void end(Texture texture) {
     gl.glEnd();
     gl.glPopMatrix();
+  }
 
-//    texture.dispose();
+  protected void applyTexture(Texture texture) {
+    int width = texture.getWidth();
+    int height = texture.getHeight();
+    TextureCoords coords = texture.getImageTexCoords();
 
-    return true;
+    applyTexture(texture, 0, 0, width, height, coords.left(), coords.top(), coords.right(), coords.bottom());
+  }
+
+  protected void applyTexture(Texture texture, int dx1, int dy1, int dx2, int dy2, float sx1, float sy1, float sx2, float sy2) {
+    gl.glBegin(GL.GL_QUADS);
+
+    // SW
+    gl.glTexCoord2f(sx1, sy2);
+    gl.glVertex2i(dx1, dy2);
+    // SE
+    gl.glTexCoord2f(sx2, sy2);
+    gl.glVertex2i(dx2, dy2);
+    // NE
+    gl.glTexCoord2f(sx2, sy1);
+    gl.glVertex2i(dx2, dy1);
+    // NW
+    gl.glTexCoord2f(sx1, sy1);
+    gl.glVertex2i(dx1, dy1);
+
+    gl.glEnd();
   }
 
   protected Texture getTexture(Image image) {
@@ -106,6 +178,10 @@ public class JOGLImageDrawer {
 
     Texture texture = TextureIO.newTexture(bufferedImage, false);
     return texture;
+  }
+
+  protected boolean isImageReady(Image img) {
+    return img.getHeight(null) >= 0 && img.getWidth(null) >= 0;
   }
 
   @SuppressWarnings("serial")
@@ -156,37 +232,6 @@ public class JOGLImageDrawer {
       } else {
         return false;
       }
-    }
-  }
-
-  public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer) {
-    if (!isImageReady(img)) {
-      return false;
-    }
-
-    double imgHeight = img.getHeight(null);
-    double imgWidth = img.getWidth(null);
-
-    AffineTransform transform = AffineTransform.getScaleInstance(width / imgWidth, height / imgHeight);
-    transform.translate(x, y);
-    return drawImage(img, transform, observer);
-  }
-
-  public boolean drawImage(Image img, int x, int y, ImageObserver observer) {
-    if (!isImageReady(img)) {
-      return false;
-    }
-
-    return drawImage(img, AffineTransform.getTranslateInstance(x, y), observer);
-  }
-
-  protected boolean isImageReady(Image img) {
-    return img.getHeight(null) >= 0 && img.getWidth(null) >= 0;
-  }
-
-  public void dispose() {
-    for (Texture texture : cache.values()) {
-      texture.dispose();
     }
   }
 }

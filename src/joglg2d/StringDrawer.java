@@ -19,7 +19,6 @@ package joglg2d;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
-import java.awt.RenderingHints.Key;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.text.AttributedCharacterIterator;
@@ -36,6 +35,8 @@ public class StringDrawer {
   protected Font font;
 
   protected JOGLG2D g2d;
+
+  protected boolean antiAlias;
 
   public StringDrawer(JOGLG2D g2d) {
     this.g2d = g2d;
@@ -57,7 +58,13 @@ public class StringDrawer {
     return new FontRenderContext(g2d.getTransform(), true, false);
   }
 
-  public void setHint(Key key, Object value) {
+  public void setAntiAlias(boolean alias) {
+    if (antiAlias == alias) {
+      return;
+    }
+
+    antiAlias = alias;
+    resetCache();
   }
 
   public void drawString(AttributedCharacterIterator iterator, int x, int y) {
@@ -73,7 +80,7 @@ public class StringDrawer {
   protected TextRenderer getRenderer(Font font) {
     TextRenderer renderer = cache.get(font);
     if (renderer == null) {
-      renderer = new TextRenderer(font);
+      renderer = new TextRenderer(font, antiAlias, false);
       cache.put(font, renderer);
     }
 
@@ -97,10 +104,16 @@ public class StringDrawer {
     gl.glPopMatrix();
   }
 
-  public void dispose() {
+  protected void resetCache() {
     for (TextRenderer renderer : cache.values()) {
       renderer.dispose();
     }
+
+    cache.clear();
+  }
+
+  public void dispose() {
+    resetCache();
   }
 
   /**
