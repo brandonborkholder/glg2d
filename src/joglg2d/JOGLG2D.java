@@ -437,7 +437,8 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   public Graphics create() {
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
-    gl.glPushAttrib(GL.GL_CURRENT_BIT | GL.GL_TRANSFORM_BIT | GL.GL_SCISSOR_BIT | GL.GL_HINT_BIT);
+    gl.glPushAttrib(GL.GL_CURRENT_BIT | GL.GL_ENABLE_BIT | GL.GL_COLOR_BUFFER_BIT
+        | GL.GL_TRANSFORM_BIT | GL.GL_SCISSOR_BIT | GL.GL_HINT_BIT);
     return clone();
   }
 
@@ -544,7 +545,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawLine(int x1, int y1, int x2, int y2) {
-    shapeDrawer.drawLine(x1+0, y1+0, x2+0, y2+0, stroke);
+    shapeDrawer.drawLine(x1, y1, x2, y2, stroke);
   }
 
   @Override

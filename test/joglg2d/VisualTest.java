@@ -3,6 +3,7 @@ package joglg2d;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
+import java.awt.Composite;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -19,7 +20,11 @@ import java.awt.image.BufferedImage;
 import java.net.URL;
 
 import javax.imageio.ImageIO;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.plaf.metal.MetalIconFactory;
 
 import joglg2d.util.Painter;
 import joglg2d.util.TestWindow;
@@ -405,6 +410,34 @@ public class VisualTest {
         g2d.setComposite(AlphaComposite.SrcIn);
         g2d.setColor(new Color(0, 255, 0, 100));
         g2d.fill(src);
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void panelPaintOverTest() throws Exception {
+    URL url = VisualTest.class.getClassLoader().getResource("duke.gif");
+    final BufferedImage image = ImageIO.read(url);
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        JComponent b = new JRadioButton("Foo");
+        
+        b.setSize(50, 20);
+        
+        Color c = new Color(250, 240, 220);
+        c = new Color(255, 255,255, 255);
+        g2d.setColor(c);
+        g2d.fillRect(50, 50, 50, 40);
+        
+        MetalIconFactory.getRadioButtonIcon().paintIcon(b, g2d, 60, 260);
+        g2d.drawImage(image, 1, 300, 60, 50, null);
+        image.getHeight();
+
+        g2d.setColor(c);
+        g2d.fillRect(100, 100, 50, 40);
       }
     });
 
