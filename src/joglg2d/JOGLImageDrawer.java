@@ -35,7 +35,7 @@ import com.sun.opengl.util.texture.TextureIO;
 /**
  * @author borkholder
  * @created Apr 27, 2010
- *
+ * 
  */
 public class JOGLImageDrawer {
   private final GL gl;
@@ -73,8 +73,8 @@ public class JOGLImageDrawer {
     double imgHeight = img.getHeight(null);
     double imgWidth = img.getWidth(null);
 
-    AffineTransform transform = AffineTransform.getScaleInstance(width / imgWidth, height / imgHeight);
-    transform.translate(x, y);
+    AffineTransform transform = AffineTransform.getTranslateInstance(x, y);
+    transform.scale(width / imgWidth, height / imgHeight);
     return drawImage(img, transform, bgcolor);
   }
 
@@ -120,7 +120,9 @@ public class JOGLImageDrawer {
       JOGLG2D.multMatrix(gl, xform);
     }
 
-    if (bgcolor != null) {
+    if (bgcolor == null) {
+      gl.glColor4f(1F, 1F, 1F, 1F);
+    } else {
       JOGLG2D.setColor(gl, bgcolor);
     }
   }
