@@ -433,7 +433,7 @@ public class VisualTest {
         g2d.fillRect(50, 50, 50, 40);
         
         MetalIconFactory.getRadioButtonIcon().paintIcon(b, g2d, 60, 260);
-        g2d.drawImage(image, 1, 300, 60, 50, null);
+//        g2d.drawImage(image, 1, 300, 60, 50, null);
         image.getHeight();
 
         g2d.setColor(c);
