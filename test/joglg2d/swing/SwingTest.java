@@ -29,14 +29,14 @@ public class SwingTest {
   }
 
   protected static void configureFrame(JFrame frame) {
-//    frame.add(new JLabel("<html><h3><em>hi!</em></h3></html>"), BorderLayout.NORTH);
+    frame.add(new JLabel("<html><h3><em>hi!</em></h3></html>"), BorderLayout.NORTH);
     URL url = SwingTest.class.getClassLoader().getResource("duke.gif");
-//    frame.add(new JButton("Foo", new ImageIcon(url)), BorderLayout.WEST);
+    frame.add(new JButton("Foo", new ImageIcon(url)), BorderLayout.WEST);
 
-//    JPanel panel = new JPanel(new GridLayout(2, 1));
-//    panel.add(new JRadioButton("press"));
-//    panel.add(new JCheckBox("press"));
-    frame.add(new JRadioButton("foo"), BorderLayout.NORTH);
+    JPanel panel = new JPanel(new GridLayout(2, 1));
+    panel.add(new JRadioButton("press"));
+    panel.add(new JCheckBox("press"));
+    frame.add(panel, BorderLayout.CENTER);
 
     frame.setPreferredSize(new Dimension(800, 400));
     frame.pack();

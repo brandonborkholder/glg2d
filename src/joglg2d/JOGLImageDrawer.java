@@ -49,41 +49,33 @@ public class JOGLImageDrawer {
   }
 
   public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer) {
-    if (!isImageReady(img)) {
-      return false;
-    }
-
-    return drawImage(img, AffineTransform.getTranslateInstance(x, y), bgcolor);
+    return drawImage(img, AffineTransform.getTranslateInstance(x, y), bgcolor, observer);
   }
 
   public boolean drawImage(Image img, AffineTransform xform, ImageObserver observer) {
-    if (!isImageReady(img)) {
-      return false;
-    }
-
-    return drawImage(img, xform, (Color) null);
+    return drawImage(img, xform, (Color) null, observer);
   }
 
   public boolean drawImage(Image img, int x, int y, int width, int height, Color bgcolor, ImageObserver observer) {
-    if (!isImageReady(img)) {
-      return false;
-    }
-
     double imgHeight = img.getHeight(null);
     double imgWidth = img.getWidth(null);
 
+    if (imgHeight < 0 || imgWidth < 0) {
+      return false;
+    }
+
     AffineTransform transform = AffineTransform.getTranslateInstance(x, y);
     transform.scale(width / imgWidth, height / imgHeight);
-    return drawImage(img, transform, bgcolor);
+    return drawImage(img, transform, bgcolor, observer);
   }
 
   public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, Color bgcolor,
       ImageObserver observer) {
-    if (!isImageReady(img)) {
+    Texture texture = getTexture(img, observer);
+    if (texture == null) {
       return false;
     }
 
-    Texture texture = getTexture(img);
     float height = texture.getHeight();
     float width = texture.getWidth();
     begin(texture, null, bgcolor);
@@ -99,8 +91,8 @@ public class JOGLImageDrawer {
     }
   }
 
-  protected boolean drawImage(Image img, AffineTransform xform, Color color) {
-    Texture texture = getTexture(img);
+  protected boolean drawImage(Image img, AffineTransform xform, Color color, ImageObserver observer) {
+    Texture texture = getTexture(img, observer);
 
     begin(texture, xform, color);
     applyTexture(texture);
@@ -160,31 +152,57 @@ public class JOGLImageDrawer {
     gl.glEnd();
   }
 
-  protected Texture getTexture(Image image) {
+  /**
+   * Cache the texture if possible. I have a feeling this will run into issues
+   * later as images change. Just not sure how to handle it if they do. I
+   * suspect I should be using the ImageConsumer class and dumping pixels to the
+   * screen as I receive them.
+   * 
+   * <p>
+   * If an image is a BufferedImage, turn it into a texture and cache it. If
+   * it's not, draw it to a BufferedImage and see if all the image data is
+   * available. If it is, cache it. If it's not, don't cache it. But if not all
+   * the image data is available, we will draw it what we have, since we draw
+   * anything in the image to a BufferedImage.
+   * </p>
+   */
+  protected Texture getTexture(Image image, ImageObserver observer) {
     Texture texture = cache.get(image);
     if (texture == null) {
-      texture = createTexture(image);
-      cache.put(image, texture);
+      boolean imageIsComplete;
+      BufferedImage bufferedImage;
+      if (image instanceof BufferedImage) {
+        bufferedImage = (BufferedImage) image;
+        imageIsComplete = true;
+      } else {
+        CompleteImageObserver obs = new CompleteImageObserver(observer);
+        bufferedImage = toBufferedImage(image, obs);
+        imageIsComplete = obs.isComplete;
+      }
+
+      if (bufferedImage == null) {
+        return null;
+      } else {
+        texture = TextureIO.newTexture(bufferedImage, false);
+        if (imageIsComplete) {
+          cache.put(image, texture);
+        }
+      }
     }
 
     return texture;
   }
 
-  protected Texture createTexture(Image image) {
-    BufferedImage bufferedImage;
-    if (image instanceof BufferedImage) {
-      bufferedImage = (BufferedImage) image;
-    } else {
-      bufferedImage = new BufferedImage(image.getHeight(null), image.getWidth(null), BufferedImage.TYPE_3BYTE_BGR);
-      bufferedImage.createGraphics().drawImage(image, null, null);
+  protected BufferedImage toBufferedImage(Image image, ImageObserver observer) {
+    int width = image.getWidth(observer);
+    int height = image.getHeight(observer);
+    if (width < 0 || height < 0) {
+      return null;
     }
 
-    Texture texture = TextureIO.newTexture(bufferedImage, false);
-    return texture;
-  }
-
-  protected boolean isImageReady(Image img) {
-    return img.getHeight(null) >= 0 && img.getWidth(null) >= 0;
+    BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+    bufferedImage.createGraphics().drawImage(image, null, observer);
+    return bufferedImage;
   }
 
   @SuppressWarnings("serial")
@@ -234,6 +252,26 @@ public class JOGLImageDrawer {
         return other.hash == hash && get() == other.get();
       } else {
         return false;
+      }
+    }
+  }
+
+  private static class CompleteImageObserver implements ImageObserver {
+    private final ImageObserver inner;
+
+    boolean isComplete;
+
+    CompleteImageObserver(ImageObserver inner) {
+      this.inner = inner;
+    }
+
+    @Override
+    public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
+      isComplete = (infoflags & ImageObserver.ALLBITS) != 0;
+      if (inner == null) {
+        return false;
+      } else {
+        return inner.imageUpdate(img, infoflags, x, y, width, height);
       }
     }
   }
