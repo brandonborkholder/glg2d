@@ -437,8 +437,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   public Graphics create() {
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
-    gl.glPushAttrib(GL.GL_CURRENT_BIT | GL.GL_ENABLE_BIT | GL.GL_COLOR_BUFFER_BIT
-        | GL.GL_TRANSFORM_BIT | GL.GL_SCISSOR_BIT | GL.GL_HINT_BIT);
+    gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
     return clone();
   }
 

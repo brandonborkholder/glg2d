@@ -35,7 +35,7 @@ import com.sun.opengl.util.texture.TextureIO;
 /**
  * @author borkholder
  * @created Apr 27, 2010
- * 
+ *
  */
 public class JOGLImageDrawer {
   private final GL gl;
@@ -111,6 +111,8 @@ public class JOGLImageDrawer {
   }
 
   protected void begin(Texture texture, AffineTransform xform, Color bgcolor) {
+    gl.glPushClientAttrib(GL.GL_ALL_ATTRIB_BITS);
+
     texture.bind();
 
     gl.glMatrixMode(GL.GL_MODELVIEW);
@@ -130,6 +132,7 @@ public class JOGLImageDrawer {
   protected void end(Texture texture) {
     gl.glEnd();
     gl.glPopMatrix();
+    gl.glPopAttrib();
   }
 
   protected void applyTexture(Texture texture) {
