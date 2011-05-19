@@ -90,6 +90,9 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   }
 
   protected void prePaint(Component component) {
+    gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
+    gl.glPushClientAttrib((int) GL.GL_ALL_CLIENT_ATTRIB_BITS);
+
     setBackground(component.getBackground());
     setColor(component.getForeground());
     setFont(component.getFont());
@@ -123,6 +126,9 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     gl.glPopMatrix();
     gl.glMatrixMode(GL.GL_TEXTURE);
     gl.glPopMatrix();
+
+    gl.glPopClientAttrib();
+    gl.glPopAttrib();
     gl.glFlush();
   }
 
