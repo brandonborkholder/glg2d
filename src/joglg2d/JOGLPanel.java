@@ -16,13 +16,11 @@
 
 package joglg2d;
 
-import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.LayoutManager;
 
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLJPanel;
-import javax.swing.JComponent;
 import javax.swing.RepaintManager;
 
 /**
@@ -44,26 +42,7 @@ public class JOGLPanel extends GLJPanel {
 
   public JOGLPanel() {
     this(getDefaultCapabalities());
-
-    RepaintManager.setCurrentManager(new RepaintManager() {
-      @Override
-      public void addDirtyRegion(JComponent comp, int x, int y, int w, int h) {
-        super.addDirtyRegion(comp, x, y, w, h);
-        JComponent root = getRootJComponent(comp);
-        // to avoid a recursive infinite loop
-        if (comp != root) {
-          super.addDirtyRegion(root, 0, 0, root.getWidth(), root.getHeight());
-        }
-      }
-
-      public JComponent getRootJComponent(JComponent comp) {
-        Component parent = comp.getParent();
-        if (parent instanceof JComponent) {
-          return getRootJComponent((JComponent) parent);
-        }
-        return comp;
-      }
-    });
+    registerJOGLRepaintManager();
   }
 
   public JOGLPanel(LayoutManager layout) {
@@ -82,6 +61,10 @@ public class JOGLPanel extends GLJPanel {
     });
   }
 
+  protected void registerJOGLRepaintManager() {
+    RepaintManager.setCurrentManager(JOGLAwareRepaintManager.INSTANCE);
+  }
+
   @Override
   protected void paintChildren(Graphics g) {
     if (g instanceof JOGLG2D) {
@@ -89,6 +72,11 @@ public class JOGLPanel extends GLJPanel {
     } else {
       // ignore
     }
+  }
+
+  @Override
+  public void paint(Graphics g) {
+    paintComponent(g);
   }
 
   /**
