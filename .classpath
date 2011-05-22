@@ -8,11 +8,11 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="lib/jogl-1.1.1-windows-i586/gluegen-rt.jar" sourcepath="lib/sources/jogl-1.1.1a-src.zip">
+	<classpathentry kind="lib" path="lib/jogl-1.1.1/gluegen-rt.jar" sourcepath="lib/jogl-1.1.1/jogl-1.1.1a-src.zip"/>
+	<classpathentry kind="lib" path="lib/jogl-1.1.1/jogl.jar" sourcepath="lib/jogl-1.1.1/jogl-1.1.1a-src.zip">
 		<attributes>
-			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="JOGLG2D/lib/jogl-1.1.1-windows-i586"/>
+			<attribute name="org.eclipse.jdt.launching.CLASSPATH_ATTR_LIBRARY_PATH_ENTRY" value="JOGLG2D/lib/jogl-1.1.1-windows-amd64"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry kind="lib" path="lib/jogl-1.1.1-windows-i586/jogl.jar" sourcepath="lib/sources/jogl-1.1.1a-src.zip"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
