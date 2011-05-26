@@ -3,7 +3,6 @@ package joglg2d;
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Composite;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -22,7 +21,6 @@ import java.net.URL;
 import javax.imageio.ImageIO;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.plaf.metal.MetalIconFactory;
 
@@ -207,7 +205,7 @@ public class VisualTest {
       public void paint(Graphics2D g2d) {
         AffineTransform xform = AffineTransform.getTranslateInstance(50, 90);
         xform.rotate(0.1);
-        g2d.drawImage(image,xform, null);
+        g2d.drawImage(image, xform, null);
       }
     });
 
@@ -219,9 +217,28 @@ public class VisualTest {
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
-        g2d.setClip(new Rectangle(10, 50, 70, 90));
+        Rectangle2D inf = new Rectangle2D.Double(-100, -100, 1000, 1000);
+        g2d.setClip(new Rectangle(50, 50, 50, 50));
         g2d.setColor(Color.BLUE);
-        g2d.fill(new Rectangle(40, 60, 60, 150));
+        g2d.fill(inf);
+
+        Graphics2D g2 = (Graphics2D) g2d.create(10, 10, 10, 10);
+        g2.setColor(Color.RED);
+        g2.fill(inf);
+        g2.dispose();
+
+        g2 = (Graphics2D) g2d.create(60, 60, 20, 20);
+        g2.setColor(Color.YELLOW);
+        g2.fill(inf);
+
+        g2.translate(30, 30);
+        g2.setColor(Color.CYAN);
+        g2.fill(inf);
+
+        g2.setClip(10, 10, 90, 90);
+        g2.setColor(Color.ORANGE);
+        g2.fill(inf);
+        g2.dispose();
       }
     });
 
@@ -424,16 +441,16 @@ public class VisualTest {
       @Override
       public void paint(Graphics2D g2d) {
         JComponent b = new JRadioButton("Foo");
-        
+
         b.setSize(50, 20);
-        
+
         Color c = new Color(250, 240, 220);
-        c = new Color(255, 255,255, 255);
+        c = new Color(255, 255, 255, 255);
         g2d.setColor(c);
         g2d.fillRect(50, 50, 50, 40);
-        
+
         MetalIconFactory.getRadioButtonIcon().paintIcon(b, g2d, 60, 260);
-//        g2d.drawImage(image, 1, 300, 60, 50, null);
+        // g2d.drawImage(image, 1, 300, 60, 50, null);
         image.getHeight();
 
         g2d.setColor(c);

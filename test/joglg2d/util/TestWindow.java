@@ -46,7 +46,7 @@ public class TestWindow extends JFrame {
 
   private void initialize() {
     JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-    JComponent java2d = new JPanel() {
+    final JComponent java2d = new JPanel() {
       @Override
       public void paint(Graphics g) {
         super.paint(g);
@@ -56,7 +56,7 @@ public class TestWindow extends JFrame {
       }
     };
 
-    JOGLPanel jogl = new JOGLPanel() {
+    final JOGLPanel jogl = new JOGLPanel() {
       @Override
       protected void paintGL(JOGLG2D g2d) {
         if (painter != null) {
@@ -100,10 +100,12 @@ public class TestWindow extends JFrame {
       }
     });
 
-    new Timer(200, new ActionListener() {
+    new Timer(500, new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        repaint();
+        // XXX fix double-buffering
+        jogl.repaint();
+        java2d.repaint();
       }
     }).start();
   }
