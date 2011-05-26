@@ -36,6 +36,7 @@ import java.awt.Stroke;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -481,7 +482,15 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public Rectangle getClipBounds() {
-    return clip;
+    if (clip == null) {
+      return null;
+    } else {
+      try {
+        return getTransform().createInverse().createTransformedShape(clip).getBounds();
+      } catch (NoninvertibleTransformException e) {
+        throw new RuntimeException(e);
+      }
+    }
   }
 
   @Override
@@ -501,11 +510,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public Shape getClip() {
-    if (clip == null) {
-      return null;
-    } else {
-      return (Shape) clip.clone();
-    }
+    return getClipBounds();
   }
 
   @Override
@@ -535,7 +540,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected void scissor(boolean enable) {
     if (enable) {
-      gl.glScissor(clip.x, height - clip.y - clip.height, clip.width, clip.height);
+      gl.glScissor(clip.x, height - clip.y - clip.height, Math.max(clip.width, 0), Math.max(clip.height, 0));
       gl.glEnable(GL.GL_SCISSOR_TEST);
     } else {
       clip = null;
