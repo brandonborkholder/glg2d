@@ -29,10 +29,6 @@ public class JOGLAwareRepaintManager extends RepaintManager {
 
   private List<GLAutoDrawable> glDrawables = new ArrayList<GLAutoDrawable>();
 
-  public JOGLAwareRepaintManager() {
-    setDoubleBufferingEnabled(false);
-  }
-
   @Override
   public void addDirtyRegion(JComponent c, int x, int y, int w, int h) {
     GLAutoDrawable glDrawable = getGLParent(c);
@@ -75,6 +71,10 @@ public class JOGLAwareRepaintManager extends RepaintManager {
   }
 
   public void paintGLDirtyRegions() {
+    // all children should paint directly
+    boolean isDoubleBuffered = isDoubleBufferingEnabled();
+    setDoubleBufferingEnabled(false);
+
     List<GLAutoDrawable> drawables;
     synchronized (glDrawables) {
       drawables = new ArrayList<GLAutoDrawable>(glDrawables);
@@ -84,5 +84,7 @@ public class JOGLAwareRepaintManager extends RepaintManager {
     for (GLAutoDrawable drawable : drawables) {
       drawable.display();
     }
+
+    setDoubleBufferingEnabled(isDoubleBuffered);
   }
 }

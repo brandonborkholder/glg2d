@@ -24,7 +24,7 @@ import org.junit.Assert;
 /**
  * @author borkholder
  * @created Feb 6, 2010
- *
+ * 
  */
 @SuppressWarnings("serial")
 public class TestWindow extends JFrame {
@@ -100,12 +100,10 @@ public class TestWindow extends JFrame {
       }
     });
 
-    new Timer(500, new ActionListener() {
+    new Timer(100, new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        // XXX fix double-buffering
-        jogl.repaint();
-        java2d.repaint();
+        repaint();
       }
     }).start();
   }
