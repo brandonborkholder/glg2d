@@ -5,6 +5,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.geom.CubicCurve2D;
+import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Random;
 
@@ -22,7 +23,7 @@ import org.junit.Test;
  * @created Apr 28, 2010
  */
 public class StressTest {
-  static final long TESTINGTIME = 3000;
+  static final long TESTINGTIME = 10000;
 
   static TestWindow tester;
 
@@ -40,6 +41,7 @@ public class StressTest {
 
   @Test
   public void shapeTest() throws Exception {
+    final int numshapes = 10000;
     TimedPainter painter = new TimedPainter() {
       @Override
       protected void paint(Graphics2D g2d) {
@@ -49,7 +51,7 @@ public class StressTest {
         float h = 40;
         float x = 300;
         float y = 400;
-        for (int i = 0; i < 1000; i++) {
+        for (int i = 0; i < numshapes; i++) {
           rect.setRect(rand.nextFloat() * x, rand.nextFloat() * y, rand.nextFloat() * w, rand.nextFloat() * h);
           g2d.fill(rect);
         }
@@ -62,6 +64,7 @@ public class StressTest {
 
   @Test
   public void lineTest() throws Exception {
+    final int numlines = 10000;
     TimedPainter painter = new TimedPainter() {
       @Override
       protected void paint(Graphics2D g2d) {
@@ -72,7 +75,7 @@ public class StressTest {
         int numpoints = 5;
         int[] xarray = new int[numpoints];
         int[] yarray = new int[numpoints];
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < numlines; i++) {
           for (int j = 0; j < numpoints; j++) {
             xarray[j] = rand.nextInt(x);
             yarray[j] = rand.nextInt(y);
@@ -89,6 +92,7 @@ public class StressTest {
 
   @Test
   public void quadCurvedLineTest() throws Exception {
+    final int numcurves = 10000;
     TimedPainter painter = new TimedPainter() {
       @Override
       protected void paint(Graphics2D g2d) {
@@ -96,18 +100,44 @@ public class StressTest {
         g2d.setStroke(new BasicStroke(3));
         int x = 300;
         int y = 400;
-        for (int i = 0; i < 100; i++) {
-          g2d.drawArc(rand.nextInt(x), rand.nextInt(y), rand.nextInt(x / 2), rand.nextInt(y / 2), rand.nextInt(180), rand.nextInt(360));
+        for (int i = 0; i < numcurves; i++) {
+          g2d.draw(new QuadCurve2D.Double(
+              rand.nextDouble() * x, rand.nextDouble() * y,
+              rand.nextDouble() * x, rand.nextDouble() * y,
+              rand.nextDouble() * x, rand.nextDouble() * y));
         }
       }
     };
 
     tester.setPainter(painter);
-    painter.waitAndLogTimes("quad arcs");
+    painter.waitAndLogTimes("quad curves");
+  }
+
+  @Test
+  public void arcTest() throws Exception {
+    final int numarcs = 10000;
+    TimedPainter painter = new TimedPainter() {
+      @Override
+      protected void paint(Graphics2D g2d) {
+        g2d.setColor(Color.BLACK);
+        g2d.setStroke(new BasicStroke(3));
+        int x = 300;
+        int y = 400;
+        for (int i = 0; i < numarcs; i++) {
+          g2d.drawArc(rand.nextInt(x), rand.nextInt(y),
+              rand.nextInt(x / 2), rand.nextInt(y / 2),
+              rand.nextInt(180), rand.nextInt(360));
+        }
+      }
+    };
+
+    tester.setPainter(painter);
+    painter.waitAndLogTimes("arcs");
   }
 
   @Test
   public void cubicCurvedLineTest() throws Exception {
+    final int numcurves = 10000;
     TimedPainter painter = new TimedPainter() {
       @Override
       protected void paint(Graphics2D g2d) {
@@ -115,26 +145,30 @@ public class StressTest {
         g2d.setStroke(new BasicStroke(3));
         int x = 300;
         int y = 400;
-        for (int i = 0; i < 100; i++) {
-          g2d.draw(new CubicCurve2D.Double(rand.nextDouble() * x, rand.nextDouble() * y, rand.nextDouble() * x, rand.nextDouble() * y,
-              rand.nextDouble() * x, rand.nextDouble() * y, rand.nextDouble() * x, rand.nextDouble() * y));
+        for (int i = 0; i < numcurves; i++) {
+          g2d.draw(new CubicCurve2D.Double(
+              rand.nextDouble() * x, rand.nextDouble() * y,
+              rand.nextDouble() * x, rand.nextDouble() * y,
+              rand.nextDouble() * x, rand.nextDouble() * y,
+              rand.nextDouble() * x, rand.nextDouble() * y));
         }
       }
     };
 
     tester.setPainter(painter);
-    painter.waitAndLogTimes("cubic arcs");
+    painter.waitAndLogTimes("cubic curves");
   }
 
   @Test
   public void imageTest() throws Exception {
+    final int numimages = 1000;
     final Image image = ImageIO.read(StressTest.class.getClassLoader().getResource("duke.gif"));
     TimedPainter painter = new TimedPainter() {
       @Override
       protected void paint(Graphics2D g2d) {
         int x = 300;
         int y = 400;
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < numimages; i++) {
           g2d.drawImage(image, rand.nextInt(x), rand.nextInt(y), rand.nextInt(x), rand.nextInt(y), null);
         }
       }

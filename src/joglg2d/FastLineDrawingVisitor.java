@@ -25,7 +25,7 @@ import javax.media.opengl.GL;
 /**
  * @author borkholder
  * @created May 11, 2010
- *
+ * 
  */
 public class FastLineDrawingVisitor extends SimplePathVisitor {
   protected final GL gl;
@@ -62,7 +62,11 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     firstPoint = secondPoint = null;
     lastPoint = secondLastPoint = null;
 
-    // TODO this is a workaround for a bug I can't figure out
+    /*
+     * pen hangs down and to the right. See java.awt.Graphics
+     */
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glPushMatrix();
     gl.glTranslatef(1, 1, 0);
   }
 
@@ -92,8 +96,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
       gl.glEnd();
     }
 
-    // TODO this is a workaround for a bug I can't figure out
-    gl.glTranslatef(-1, -1, 0);
+    gl.glPopMatrix();
   }
 
   @Override
@@ -302,7 +305,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
    * Finds the intersection of two lines. This method was written to reduce the
    * number of array creations and so is quite dense. However, it is easy to
    * understand the theory behind the computation.
-   *
+   * 
    * <p>
    * We have two lines, the first with angle theta and the second with angle
    * phi. The angles are relative to the x-axis and computed by
@@ -311,11 +314,11 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
    * phi respectively, multiplied by half the line width. This gives us an easy
    * way to represent the line in parametric form. For example the first line
    * (with angle theta) has the form
-   *
+   * 
    * <pre>
    * &lt;x, y&gt; = &lt;sin1, -cos1&gt; + t * &lt;cos1, sin1&gt;
    * </pre>
-   *
+   * 
    * </p>
    * <p>
    * <code>&lt;sin1, -cos1&gt;</code> is a point on the line, while
@@ -324,21 +327,21 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
    * straightforward. Let <code>o1</code> and <code>o2</code> be the points on
    * the lines and <code>v1</code> and <code>v2</code> be the two direction
    * vectors. Now we have
-   *
+   * 
    * <pre>
    * p1 = o1 + t * v1
    * p2 = o2 + s * v2
    * </pre>
-   *
+   * 
    * We can solve to find the intersection by
-   *
+   * 
    * <pre>
    * o1 + t * v1 = o2 + s * v2
    * t * v1 = o2 - o1 + s * v2
    * (t * v1) x v2 = (o2 - o1 + s * v2) x v2    ; cross product by v2
    * t * (v1 x v2) = (o2 - o1) x v2             ; to get rid of s term
    * </pre>
-   *
+   * 
    * Solving for <code>t</code> is easy since we only have the z component. Put
    * <code>t</code> back into the first equation gives us our point of
    * intersection.

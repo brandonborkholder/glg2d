@@ -34,7 +34,7 @@ import javax.media.opengl.glu.GLU;
 /**
  * @author borkholder
  * @created Apr 20, 2010
- *
+ * 
  */
 public class JOGLShapeDrawer {
   static final Ellipse2D.Double ELLIPSE = new Ellipse2D.Double();
@@ -138,7 +138,6 @@ public class JOGLShapeDrawer {
       if (basicStroke.getDashArray() == null) {
         simpleStrokeVisitor.setStroke(basicStroke);
         traceShape(shape, simpleStrokeVisitor);
-//        traceShape(shape, new FasterLineDrawingVisitor(gl, basicStroke));
         return;
       }
     }
