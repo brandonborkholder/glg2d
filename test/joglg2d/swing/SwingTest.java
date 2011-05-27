@@ -4,11 +4,11 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.net.URL;
-import java.text.NumberFormat;
 
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -17,18 +17,21 @@ import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 
 import joglg2d.JOGLPanel;
 
 public class SwingTest {
   public static void main(String[] args) throws Exception {
+    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
     JFrame frame = new JFrame("JOGLG2D");
     frame.setContentPane(new JOGLPanel(new BorderLayout()));
     configureFrame(frame);
 
-    frame = new JFrame("Graphics2D");
-    frame.setContentPane(new JPanel(new BorderLayout()));
-    configureFrame(frame);
+     frame = new JFrame("Graphics2D");
+     frame.setContentPane(new JPanel(new BorderLayout()));
+     configureFrame(frame);
   }
 
   protected static void configureFrame(JFrame frame) {
@@ -41,6 +44,7 @@ public class SwingTest {
     panel.add(new JCheckBox("press"));
     panel.add(new JSpinner());
     panel.add(new JTextField());
+    panel.add(new JComboBox(new Object[] { "foo", "bar" }));
     panel.add(new JTextArea());
     panel.add(new JScrollPane(new JTextArea()));
     frame.add(panel, BorderLayout.CENTER);
