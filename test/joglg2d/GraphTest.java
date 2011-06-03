@@ -3,15 +3,18 @@ package joglg2d;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
@@ -19,6 +22,7 @@ import java.util.List;
 import java.util.Random;
 
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 
 @SuppressWarnings("serial")
 public class GraphTest extends JFrame {
@@ -30,10 +34,16 @@ public class GraphTest extends JFrame {
     final List<Vertex> vertices = makeVertices(1000, new Rectangle(1024, 768));
     final List<Edge> edges = makeEdges(vertices, 2);
 
-    setContentPane(new JOGLPanel() {
+    // setContentPane(new JOGLPanel() {
+    // @Override
+    // protected void paintGL(JOGLG2D g2d) {
+    // GraphTest.this.paint(vertices, edges, g2d);
+    // }
+    // });
+    setContentPane(new JPanel() {
       @Override
-      protected void paintGL(JOGLG2D g2d) {
-        GraphTest.this.paint(vertices, edges, (Graphics2D) g2d);
+      protected void paintComponent(Graphics g) {
+        GraphTest.this.paint(vertices, edges, (Graphics2D) g);
       }
     });
 
@@ -54,9 +64,8 @@ public class GraphTest extends JFrame {
   }
 
   public void paint(List<Vertex> vertices, List<Edge> edges, Graphics2D g2d) {
-    AffineTransform old = g2d.getTransform();
-    g2d.setTransform(transform);
-    
+    g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
     for (Edge edge : edges) {
       edge.paint(g2d);
     }
@@ -64,8 +73,6 @@ public class GraphTest extends JFrame {
     for (Vertex vertex : vertices) {
       vertex.paint(g2d);
     }
-    
-    g2d.setTransform(old);
   }
 
   List<Vertex> makeVertices(int count, Rectangle bounds) {
@@ -103,7 +110,7 @@ public class GraphTest extends JFrame {
     return edges;
   }
 
-  static class Vertex {
+  class Vertex {
     String name;
 
     Point position;
@@ -111,6 +118,12 @@ public class GraphTest extends JFrame {
     Vertex(String name, Point position) {
       this.name = name;
       this.position = position;
+    }
+
+    Point getPosition() {
+      Point pt = new Point();
+      transform.transform(position, pt);
+      return pt;
     }
 
     void paint(Graphics2D g2d) {
@@ -121,9 +134,10 @@ public class GraphTest extends JFrame {
 
       int border = 5;
 
+      Point pt = getPosition();
       RoundRectangle2D shape = new RoundRectangle2D.Float(
-          position.x - width / 2 - border,
-          position.y - height - border,
+          pt.x - width / 2 - border,
+          pt.y - height - border,
           width + border * 2,
           height + border * 2,
           border, border);
@@ -134,7 +148,7 @@ public class GraphTest extends JFrame {
       g2d.setColor(Color.DARK_GRAY);
       g2d.draw(shape);
 
-      g2d.drawString(name, position.x - width / 2, position.y);
+      g2d.drawString(name, pt.x - width / 2, pt.y);
     }
   }
 
@@ -149,10 +163,12 @@ public class GraphTest extends JFrame {
     }
 
     void paint(Graphics2D g2d) {
-      AffineTransform xform = AffineTransform.getTranslateInstance(from.position.x, from.position.y);
+      Point fromPt = from.getPosition();
+      Point toPt = to.getPosition();
+      AffineTransform xform = AffineTransform.getTranslateInstance(fromPt.x, fromPt.y);
 
-      float dx = to.position.x - from.position.x;
-      float dy = to.position.y - from.position.y;
+      float dx = toPt.x - fromPt.x;
+      float dy = toPt.y - fromPt.y;
       float thetaRadians = (float) Math.atan2(dy, dx);
       xform.rotate(thetaRadians);
       float dist = (float) Math.sqrt(dx * dx + dy * dy);
@@ -168,18 +184,27 @@ public class GraphTest extends JFrame {
   }
 
   class MouseHandler extends MouseAdapter implements MouseWheelListener {
+    Point firstPoint;
+
     @Override
     public void mouseWheelMoved(MouseWheelEvent e) {
-      int scale = e.getWheelRotation();
-      if (scale < 0) {
-        scale = -1 / scale;
+      double scale = e.getWheelRotation() * 1.5;
+      if (scale > 0) {
+        scale = 1 / scale;
+      } else {
+        scale = -scale;
       }
 
-      transform.scale(scale, scale);
+      Point dst = e.getPoint();
+      transform.transform(e.getPoint(), dst);
+
+      AffineTransform xform = AffineTransform.getTranslateInstance(dst.x, dst.y);
+      xform.scale(scale, scale);
+      xform.translate(-dst.x, -dst.y);
+      transform.preConcatenate(xform);
+
       repaint();
     }
-
-    Point firstPoint;
 
     @Override
     public void mousePressed(MouseEvent e) {
@@ -193,8 +218,16 @@ public class GraphTest extends JFrame {
     @Override
     public void mouseDragged(MouseEvent e) {
       if (firstPoint != null && (e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0) {
-        int dx = e.getPoint().x - firstPoint.x;
-        int dy = e.getPoint().y - firstPoint.y;
+        Point dst = new Point();
+        try {
+          transform.inverseTransform(firstPoint, firstPoint);
+          transform.inverseTransform(e.getPoint(), dst);
+        } catch (NoninvertibleTransformException ex) {
+          ex.printStackTrace();
+        }
+
+        int dx = dst.x - firstPoint.x;
+        int dy = dst.y - firstPoint.y;
         transform.translate(dx, dy);
 
         firstPoint = e.getPoint();
