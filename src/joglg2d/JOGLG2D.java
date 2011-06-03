@@ -44,7 +44,9 @@ import java.awt.image.ImageObserver;
 import java.awt.image.RenderedImage;
 import java.awt.image.renderable.RenderableImage;
 import java.text.AttributedCharacterIterator;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.Threading;
@@ -68,13 +70,13 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected StringDrawer stringDrawer;
 
-  protected Stroke stroke;
-
   protected Rectangle clip;
 
   protected Composite composite;
 
   protected GraphicsConfiguration graphicsConfig;
+
+  protected RenderingHints hints;
 
   public JOGLG2D(GL gl, int width, int height) {
     this.gl = gl;
@@ -83,6 +85,8 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     shapeDrawer = new JOGLShapeDrawer(gl);
     imageDrawer = new JOGLImageDrawer(gl);
     stringDrawer = new StringDrawer(this);
+
+    hints = new RenderingHints(Collections.<Key, Object> emptyMap());
 
     setStroke(new BasicStroke());
     setColor(Color.BLACK);
@@ -152,7 +156,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void draw(Shape s) {
-    shapeDrawer.draw(s, stroke);
+    shapeDrawer.draw(s);
   }
 
   @Override
@@ -196,7 +200,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     }
 
     if (onStroke) {
-      s = stroke.createStrokedShape(s);
+      s = shapeDrawer.getStroke().createStrokedShape(s);
     }
 
     s = getTransform().createTransformedShape(s);
@@ -286,31 +290,42 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   public void setRenderingHint(Key hintKey, Object hintValue) {
     if (hintKey == RenderingHints.KEY_TEXT_ANTIALIASING) {
       stringDrawer.setAntiAlias(hintValue != RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+    } else if (hintKey == RenderingHints.KEY_ANTIALIASING) {
+      shapeDrawer.setAntiAlias(hintValue == RenderingHints.VALUE_ANTIALIAS_ON);
     }
   }
 
   @Override
   public Object getRenderingHint(Key hintKey) {
-    // TODO Auto-generated method stub
-    return null;
+    return hints.get(hintKey);
   }
 
   @Override
   public void setRenderingHints(Map<?, ?> hints) {
-    // TODO Auto-generated method stub
+    resetRenderingHints();
+    if (hints != null) {
+      addRenderingHints(hints);
+    }
+  }
 
+  protected void resetRenderingHints() {
+    hints = new RenderingHints(Collections.<Key, Object> emptyMap());
+    stringDrawer.setAntiAlias(false);
+    shapeDrawer.setAntiAlias(false);
   }
 
   @Override
   public void addRenderingHints(Map<?, ?> hints) {
-    // TODO Auto-generated method stub
-
+    for (Entry<?, ?> entry : hints.entrySet()) {
+      if (entry.getKey() instanceof Key) {
+        setRenderingHint((Key) entry.getKey(), entry.getValue());
+      }
+    }
   }
 
   @Override
   public RenderingHints getRenderingHints() {
-    // TODO Auto-generated method stub
-    return null;
+    return (RenderingHints) hints.clone();
   }
 
   @Override
@@ -432,12 +447,12 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public Stroke getStroke() {
-    return stroke;
+    return shapeDrawer.getStroke();
   }
 
   @Override
   public void setStroke(Stroke s) {
-    stroke = s;
+    shapeDrawer.setStroke(s);
   }
 
   @Override
@@ -555,12 +570,12 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawLine(int x1, int y1, int x2, int y2) {
-    shapeDrawer.drawLine(x1, y1, x2, y2, stroke);
+    shapeDrawer.drawLine(x1, y1, x2, y2);
   }
 
   @Override
   public void fillRect(int x, int y, int width, int height) {
-    shapeDrawer.drawRect(x, y, width, height, true, stroke);
+    shapeDrawer.drawRect(x, y, width, height, true);
   }
 
   @Override
@@ -573,47 +588,47 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-    shapeDrawer.drawRoundRect(x, y, width, height, arcWidth, arcHeight, false, stroke);
+    shapeDrawer.drawRoundRect(x, y, width, height, arcWidth, arcHeight, false);
   }
 
   @Override
   public void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-    shapeDrawer.drawRoundRect(x, y, width, height, arcWidth, arcHeight, true, stroke);
+    shapeDrawer.drawRoundRect(x, y, width, height, arcWidth, arcHeight, true);
   }
 
   @Override
   public void drawOval(int x, int y, int width, int height) {
-    shapeDrawer.drawOval(x, y, width, height, false, stroke);
+    shapeDrawer.drawOval(x, y, width, height, false);
   }
 
   @Override
   public void fillOval(int x, int y, int width, int height) {
-    shapeDrawer.drawOval(x, y, width, height, true, stroke);
+    shapeDrawer.drawOval(x, y, width, height, true);
   }
 
   @Override
   public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
-    shapeDrawer.drawArc(x, y, width, height, startAngle, arcAngle, false, stroke);
+    shapeDrawer.drawArc(x, y, width, height, startAngle, arcAngle, false);
   }
 
   @Override
   public void fillArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
-    shapeDrawer.drawArc(x, y, width, height, startAngle, arcAngle, true, stroke);
+    shapeDrawer.drawArc(x, y, width, height, startAngle, arcAngle, true);
   }
 
   @Override
   public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints) {
-    shapeDrawer.drawPolyline(xPoints, yPoints, nPoints, stroke);
+    shapeDrawer.drawPolyline(xPoints, yPoints, nPoints);
   }
 
   @Override
   public void drawPolygon(int[] xPoints, int[] yPoints, int nPoints) {
-    shapeDrawer.drawPolygon(xPoints, yPoints, nPoints, false, stroke);
+    shapeDrawer.drawPolygon(xPoints, yPoints, nPoints, false);
   }
 
   @Override
   public void fillPolygon(int[] xPoints, int[] yPoints, int nPoints) {
-    shapeDrawer.drawPolygon(xPoints, yPoints, nPoints, true, stroke);
+    shapeDrawer.drawPolygon(xPoints, yPoints, nPoints, true);
   }
 
   @Override
@@ -684,7 +699,9 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   @Override
   protected JOGLG2D clone() {
     try {
-      return (JOGLG2D) super.clone();
+      JOGLG2D clone = (JOGLG2D) super.clone();
+      clone.hints = (RenderingHints) hints.clone();
+      return clone;
     } catch (CloneNotSupportedException exception) {
       throw new RuntimeException(exception);
     }

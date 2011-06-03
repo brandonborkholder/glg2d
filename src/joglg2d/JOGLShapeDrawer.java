@@ -57,6 +57,8 @@ public class JOGLShapeDrawer {
 
   protected FastLineDrawingVisitor simpleStrokeVisitor;
 
+  protected Stroke stroke;
+
   public JOGLShapeDrawer(GL gl) {
     this.gl = gl;
     glu = new GLU();
@@ -65,56 +67,79 @@ public class JOGLShapeDrawer {
     simpleStrokeVisitor = new FastLineDrawingVisitor(gl);
   }
 
-  public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight, boolean fill, Stroke stroke) {
+  public void setAntiAlias(boolean antiAlias) {
+    if (antiAlias) {
+      gl.glEnable(GL.GL_LINE_SMOOTH);
+      gl.glEnable(GL.GL_POINT_SMOOTH);
+      gl.glEnable(GL.GL_POLYGON_SMOOTH);
+      gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
+      gl.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
+      gl.glHint(GL.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST);
+    } else {
+      gl.glDisable(GL.GL_LINE_SMOOTH);
+      gl.glDisable(GL.GL_POINT_SMOOTH);
+      gl.glDisable(GL.GL_POLYGON_SMOOTH);
+    }
+  }
+
+  public void setStroke(Stroke stroke) {
+    this.stroke = stroke;
+  }
+
+  public Stroke getStroke() {
+    return stroke;
+  }
+
+  public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight, boolean fill) {
     ROUND_RECT.setRoundRect(x, y, width, height, arcWidth, arcHeight);
     if (fill) {
       fillPolygon(ROUND_RECT);
     } else {
-      draw(ROUND_RECT, stroke);
+      draw(ROUND_RECT);
     }
   }
 
-  public void drawRect(int x, int y, int width, int height, boolean fill, Stroke stroke) {
+  public void drawRect(int x, int y, int width, int height, boolean fill) {
     RECT.setRect(x, y, width, height);
     if (fill) {
-      fillPolygon(RECT);
+      gl.glRecti(x, y, x + width, y + height);
     } else {
-      draw(RECT, stroke);
+      draw(RECT);
     }
   }
 
-  public void drawLine(int x1, int y1, int x2, int y2, Stroke stroke) {
+  public void drawLine(int x1, int y1, int x2, int y2) {
     LINE.setLine(x1, y1, x2, y2);
-    draw(LINE, stroke);
+    draw(LINE);
   }
 
-  public void drawOval(int x, int y, int width, int height, boolean fill, Stroke stroke) {
+  public void drawOval(int x, int y, int width, int height, boolean fill) {
     ELLIPSE.setFrame(x, y, width, height);
     if (fill) {
       fillPolygon(ELLIPSE);
     } else {
-      draw(ELLIPSE, stroke);
+      draw(ELLIPSE);
     }
   }
 
-  public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle, boolean fill, Stroke stroke) {
+  public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle, boolean fill) {
     ARC.setArc(x, y, width, height, startAngle, arcAngle, fill ? Arc2D.PIE : Arc2D.OPEN);
     if (fill) {
       fillPolygon(ARC);
     } else {
-      draw(ARC, stroke);
+      draw(ARC);
     }
   }
 
-  public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints, Stroke stroke) {
-    drawPoly(xPoints, yPoints, nPoints, false, false, stroke);
+  public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints) {
+    drawPoly(xPoints, yPoints, nPoints, false, false);
   }
 
-  public void drawPolygon(int[] xPoints, int[] yPoints, int nPoints, boolean fill, Stroke stroke) {
-    drawPoly(xPoints, yPoints, nPoints, fill, true, stroke);
+  public void drawPolygon(int[] xPoints, int[] yPoints, int nPoints, boolean fill) {
+    drawPoly(xPoints, yPoints, nPoints, fill, true);
   }
 
-  protected void drawPoly(int[] xPoints, int[] yPoints, int nPoints, boolean fill, boolean close, Stroke stroke) {
+  protected void drawPoly(int[] xPoints, int[] yPoints, int nPoints, boolean fill, boolean close) {
     Path2D.Float path = new Path2D.Float(PathIterator.WIND_NON_ZERO, nPoints);
     path.moveTo(xPoints[0], yPoints[0]);
     for (int i = 1; i < nPoints; i++) {
@@ -128,11 +153,11 @@ public class JOGLShapeDrawer {
     if (fill) {
       fill(path);
     } else {
-      draw(path, stroke);
+      draw(path);
     }
   }
 
-  public void draw(Shape shape, Stroke stroke) {
+  public void draw(Shape shape) {
     if (stroke instanceof BasicStroke) {
       BasicStroke basicStroke = (BasicStroke) stroke;
       if (basicStroke.getDashArray() == null) {
