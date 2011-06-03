@@ -565,7 +565,14 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void copyArea(int x, int y, int width, int height, int dx, int dy) {
-    // TODO Auto-generated method stub
+    // glRasterPos* is transformed, but CopyPixels is not
+    int x2 = x + dx;
+    int y2 = y + dy + height;
+    gl.glRasterPos2i(x2, y2);
+
+    int x1 = x;
+    int y1 = this.height - (y + height);
+    gl.glCopyPixels(x1, y1, width, height, GL.GL_COLOR);
   }
 
   @Override

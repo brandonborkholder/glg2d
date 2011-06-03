@@ -460,4 +460,21 @@ public class VisualTest {
 
     tester.assertSame();
   }
+  
+  @Test
+  public void copyPixelsTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        g2d.setColor(Color.red);
+        g2d.fillRect(50, 50, 30, 35);
+        g2d.setColor(Color.blue);
+        g2d.fillRect(70, 70, 20, 20);
+        
+        g2d.copyArea(60, 60, 25, 15, 50, 30);
+      }
+    });
+    
+    tester.assertSame();
+  }
 }
