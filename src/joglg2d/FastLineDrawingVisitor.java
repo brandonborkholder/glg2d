@@ -16,16 +16,22 @@
 
 package joglg2d;
 
-import static java.lang.Math.*;
+import static java.lang.Math.abs;
+import static java.lang.Math.atan2;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
 
 import java.awt.BasicStroke;
+import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
+
+import com.sun.opengl.util.BufferUtil;
 
 /**
  * @author borkholder
  * @created May 11, 2010
- * 
  */
 public class FastLineDrawingVisitor extends SimplePathVisitor {
   protected final GL gl;
@@ -45,6 +51,8 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
   protected float[] firstPoint;
 
   protected float[] secondPoint;
+
+  protected FloatBuffer buffer = BufferUtil.newFloatBuffer(300);
 
   public FastLineDrawingVisitor(GL gl) {
     this.gl = gl;
@@ -68,6 +76,9 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
     gl.glTranslatef(1, 1, 0);
+
+    // use vertex arrays
+    gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
   }
 
   @Override
@@ -77,40 +88,39 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     if (secondPoint != null) {
       lineTo(secondPoint);
       drawLineEnd();
+      drawBuffer();
     }
 
     firstPoint = lastPoint = null;
     secondPoint = secondLastPoint = null;
-    gl.glEnd();
   }
 
   @Override
   public void endPoly() {
     if (firstPoint != null && secondPoint != null) {
       drawLineEnd();
-      gl.glEnd();
+      drawBuffer();
 
       applyEndCap(firstPoint, secondPoint);
       applyEndCap(lastPoint, secondLastPoint);
-    } else {
-      gl.glEnd();
     }
 
     gl.glPopMatrix();
+    gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
   }
 
   @Override
   public void moveTo(float[] vertex) {
     if (firstPoint != null) {
       drawLineEnd();
-      gl.glEnd();
+      drawBuffer();
 
       applyEndCap(lastPoint, secondLastPoint);
       applyEndCap(firstPoint, secondPoint);
     }
 
-    gl.glBegin(GL.GL_QUAD_STRIP);
-    firstPoint = lastPoint = vertex.clone();
+    lastPoint = new float[] { vertex[0], vertex[1] };
+    firstPoint = lastPoint;
     secondLastPoint = secondPoint = null;
   }
 
@@ -121,7 +131,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
       return;
     }
 
-    float[] vClone = vertex.clone();
+    float[] vClone = new float[] { vertex[0], vertex[1] };
     if (secondPoint == null) {
       secondPoint = vClone;
     }
@@ -157,8 +167,8 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     float cos = (float) cos(angle) * lineOffset;
     float sin = (float) sin(angle) * lineOffset;
 
-    gl.glVertex2f(lastPoint[0] + sin, lastPoint[1] - cos);
-    gl.glVertex2f(lastPoint[0] - sin, lastPoint[1] + cos);
+    addVertex(lastPoint[0] + sin, lastPoint[1] - cos);
+    addVertex(lastPoint[0] - sin, lastPoint[1] + cos);
   }
 
   protected void drawLineStart() {
@@ -166,8 +176,8 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     float cos = (float) cos(angle) * lineOffset;
     float sin = (float) sin(angle) * lineOffset;
 
-    gl.glVertex2f(firstPoint[0] + sin, firstPoint[1] - cos);
-    gl.glVertex2f(firstPoint[0] - sin, firstPoint[1] + cos);
+    addVertex(firstPoint[0] + sin, firstPoint[1] - cos);
+    addVertex(firstPoint[0] - sin, firstPoint[1] + cos);
   }
 
   protected void drawCorner(float[] vertex) {
@@ -198,8 +208,8 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     float cos1 = (float) cos(angle1) * lineOffset;
     float cos2 = (float) cos(angle2) * lineOffset;
 
-    gl.glVertex2f(lastPoint[0] + sin1, lastPoint[1] - cos1);
-    gl.glVertex2f(lastPoint[0] - sin1, lastPoint[1] + cos1);
+    addVertex(lastPoint[0] + sin1, lastPoint[1] - cos1);
+    addVertex(lastPoint[0] - sin1, lastPoint[1] + cos1);
     if (angle2 < angle1) {
       angle2 += Math.PI * 2;
     }
@@ -207,11 +217,11 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     for (double angle = angle1; angle < angle2; angle += 0.5) {
       float sin = (float) sin(angle);
       float cos = (float) cos(angle);
-      gl.glVertex2f(lastPoint[0] + sin * lineOffset, lastPoint[1] - cos * lineOffset);
-      gl.glVertex2f(lastPoint[0] - sin * lineOffset, lastPoint[1] + cos * lineOffset);
+      addVertex(lastPoint[0] + sin * lineOffset, lastPoint[1] - cos * lineOffset);
+      addVertex(lastPoint[0] - sin * lineOffset, lastPoint[1] + cos * lineOffset);
     }
-    gl.glVertex2f(lastPoint[0] + sin2, lastPoint[1] - cos2);
-    gl.glVertex2f(lastPoint[0] - sin2, lastPoint[1] + cos2);
+    addVertex(lastPoint[0] + sin2, lastPoint[1] - cos2);
+    addVertex(lastPoint[0] - sin2, lastPoint[1] + cos2);
   }
 
   protected void drawBevelCorner(double angle1, double angle2) {
@@ -220,10 +230,27 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     float cos1 = (float) cos(angle1) * lineOffset;
     float cos2 = (float) cos(angle2) * lineOffset;
 
-    gl.glVertex2f(lastPoint[0] + sin1, lastPoint[1] - cos1);
-    gl.glVertex2f(lastPoint[0] - sin1, lastPoint[1] + cos1);
-    gl.glVertex2f(lastPoint[0] + sin2, lastPoint[1] - cos2);
-    gl.glVertex2f(lastPoint[0] - sin2, lastPoint[1] + cos2);
+    addVertex(lastPoint[0] + sin1, lastPoint[1] - cos1);
+    addVertex(lastPoint[0] - sin1, lastPoint[1] + cos1);
+    addVertex(lastPoint[0] + sin2, lastPoint[1] - cos2);
+    addVertex(lastPoint[0] - sin2, lastPoint[1] + cos2);
+  }
+
+  protected float[] lineCorners(float[] linePoint1, float[] linePoint2, float[] vertex, float offset) {
+    float[] translated = new float[2];
+    translated[0] = linePoint2[0] - linePoint1[0];
+    translated[1] = linePoint2[1] - linePoint1[1];
+
+    float norm = translated[0] * translated[0] + translated[1] * translated[1];
+    norm = (float) Math.sqrt(norm);
+
+    float scale = offset / norm;
+    float[] corners = new float[4];
+    corners[0] = -translated[1] * scale + vertex[0];
+    corners[1] = translated[0] * scale + vertex[1];
+    corners[2] = translated[1] * scale + vertex[0];
+    corners[3] = -translated[0] * scale + vertex[1];
+    return corners;
   }
 
   protected void drawMiterCorner(double angle1, double angle2) {
@@ -253,8 +280,8 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     if (dist / lineWidth > miterLimit) {
       drawBevelCorner(angle1, angle2);
     } else {
-      gl.glVertex2f(lastPoint[0] + intersect1[0], lastPoint[1] + intersect1[1]);
-      gl.glVertex2f(lastPoint[0] + intersect2[0], lastPoint[1] + intersect2[1]);
+      addVertex(lastPoint[0] + intersect1[0], lastPoint[1] + intersect1[1]);
+      addVertex(lastPoint[0] + intersect2[0], lastPoint[1] + intersect2[1]);
     }
   }
 
@@ -372,5 +399,28 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
 
   protected static double angleOf(float[] vertex, float[] other) {
     return atan2(vertex[1] - other[1], vertex[0] - other[0]);
+  }
+
+  protected void addVertex(float x, float y) {
+    if (buffer.position() == buffer.capacity()) {
+      FloatBuffer larger = BufferUtil.newFloatBuffer(buffer.position() * 2);
+      buffer.rewind();
+      larger.put(buffer);
+      buffer = larger;
+    }
+
+    buffer.put(x);
+    buffer.put(y);
+  }
+
+  protected void drawBuffer() {
+    if (buffer.position() == 0) {
+      return;
+    }
+
+    int size = buffer.position() / 2;
+    buffer.rewind();
+    gl.glVertexPointer(2, GL.GL_FLOAT, 0, buffer);
+    gl.glDrawArrays(GL.GL_QUAD_STRIP, 0, size);
   }
 }
