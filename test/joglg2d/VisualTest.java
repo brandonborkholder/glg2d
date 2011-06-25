@@ -399,34 +399,59 @@ public class VisualTest {
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
-        BufferedImage source = new BufferedImage(250, 200, BufferedImage.TYPE_INT_ARGB);
+        g2d.setBackground(Color.white);
+        g2d.clearRect(0, 0, 500, 500);
 
+        draw(g2d, AlphaComposite.Src, "Src");
+        g2d.translate(100, 0);
+        draw(g2d, AlphaComposite.SrcIn, "SrcIn");
+        g2d.translate(100, 0);
+        draw(g2d, AlphaComposite.SrcOut, "SrcOut");
+        g2d.translate(-200, 100);
+        draw(g2d, AlphaComposite.SrcOver, "SrcOver");
+        g2d.translate(100, 0);
+        draw(g2d, AlphaComposite.SrcAtop, "SrcAtop");
+        g2d.translate(100, 0);
+        draw(g2d, AlphaComposite.Dst, "Dst");
+        g2d.translate(-200, 100);
+        draw(g2d, AlphaComposite.DstIn, "DstIn");
+        g2d.translate(100, 0);
+        draw(g2d, AlphaComposite.DstOut, "DstOut");
+        g2d.translate(100, 0);
+        draw(g2d, AlphaComposite.DstOver, "DstOver");
+        g2d.translate(-200, 100);
+        draw(g2d, AlphaComposite.DstAtop, "DstAtop");
+        g2d.translate(100, 0);
+        draw(g2d, AlphaComposite.Xor, "Xor");
+        g2d.translate(100, 0);
+        draw(g2d, AlphaComposite.Clear, "Clear");
+      }
+
+      void draw(Graphics2D g2d, AlphaComposite composite, String name) {
         GeneralPath dest = new GeneralPath();
-        dest.moveTo(50, 0);
-        dest.lineTo(250, 0);
-        dest.lineTo(250, 100);
+        dest.moveTo(0, 0);
+        dest.lineTo(100, 0);
+        dest.lineTo(100, 100);
         dest.closePath();
         g2d.setColor(g2d.getBackground());
         g2d.setComposite(AlphaComposite.SrcOver);
         g2d.setColor(new Color(255, 0, 0, 190));
         g2d.fill(dest);
 
+        g2d.setComposite(composite);
+        g2d.setColor(new Color(0, 255, 0, 100));
         GeneralPath src = new GeneralPath();
         src.moveTo(0, 0);
-        src.lineTo(200, 0);
+        src.lineTo(100, 0);
         src.lineTo(0, 100);
         src.closePath();
-        Graphics2D srcg2d = (Graphics2D) source.getGraphics();
-        srcg2d.setComposite(AlphaComposite.Clear);
-        srcg2d.fillRect(0, 0, 250, 200);
-        srcg2d.setComposite(AlphaComposite.SrcOver);
-        srcg2d.setColor(new Color(0, 255, 0, 190));
-        srcg2d.fill(src);
-        srcg2d.dispose();
-
-        g2d.setComposite(AlphaComposite.SrcIn);
-        g2d.setColor(new Color(0, 255, 0, 100));
         g2d.fill(src);
+
+        g2d.setComposite(AlphaComposite.Src);
+        g2d.setColor(Color.white);
+        g2d.fillRect(40, 90, 60, 10);
+        g2d.setColor(Color.black);
+        g2d.drawString(name, 45, 100);
       }
     });
 
@@ -460,7 +485,7 @@ public class VisualTest {
 
     tester.assertSame();
   }
-  
+
   @Test
   public void copyPixelsTest() throws Exception {
     tester.setPainter(new Painter() {
@@ -470,11 +495,11 @@ public class VisualTest {
         g2d.fillRect(50, 50, 30, 35);
         g2d.setColor(Color.blue);
         g2d.fillRect(70, 70, 20, 20);
-        
+
         g2d.copyArea(60, 60, 25, 15, 50, 30);
       }
     });
-    
+
     tester.assertSame();
   }
 }
