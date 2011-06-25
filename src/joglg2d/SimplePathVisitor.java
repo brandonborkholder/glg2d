@@ -17,10 +17,10 @@
 package joglg2d;
 
 /**
- * This is a fast bezier curve implementation. I can't use OpenGL's built-in
- * evaluators because subclasses need to do something with the points, not just
- * pass them directly to glVertex2f. This algorithm uses forward differencing.
- * Most of this is taken from <a
+ * This is a fast B&eacute;zier curve implementation. I can't use OpenGL's
+ * built-in evaluators because subclasses need to do something with the points,
+ * not just pass them directly to glVertex2f. This algorithm uses forward
+ * differencing. Most of this is taken from <a
  * href="http://www.niksula.hut.fi/~hkankaan/Homepages/bezierfast.html"
  * >http://www.niksula.hut.fi/~hkankaan/Homepages/bezierfast.html</a>. I derived
  * the implementation for the quadratic on my own, but it's simple.
@@ -61,6 +61,9 @@ public abstract class SimplePathVisitor implements PathVisitor {
       yd = yd + ydd;
     }
 
+    // use exactly the last point
+    p[0] = control[2];
+    p[1] = control[3];
     lineTo(p);
   }
 
@@ -107,6 +110,9 @@ public abstract class SimplePathVisitor implements PathVisitor {
       ydd_per_2 = ydd_per_2 + yddd_per_2;
     }
 
+    // use exactly the last point
+    p[0] = control[4];
+    p[1] = control[5];
     lineTo(p);
   }
 }
