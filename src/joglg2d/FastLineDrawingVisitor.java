@@ -16,11 +16,8 @@
 
 package joglg2d;
 
-import static java.lang.Math.abs;
-import static java.lang.Math.atan2;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
-import static java.lang.Math.sqrt;
 
 import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
@@ -193,28 +190,6 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     }
   }
 
-  protected void drawRoundCorner(double angle1, double angle2) {
-    float sin1 = (float) sin(angle1) * lineOffset;
-    float sin2 = (float) sin(angle2) * lineOffset;
-    float cos1 = (float) cos(angle1) * lineOffset;
-    float cos2 = (float) cos(angle2) * lineOffset;
-
-    addVertex(lastPoint[0] + sin1, lastPoint[1] - cos1);
-    addVertex(lastPoint[0] - sin1, lastPoint[1] + cos1);
-    if (angle2 < angle1) {
-      angle2 += Math.PI * 2;
-    }
-
-    for (double angle = angle1; angle < angle2; angle += 0.5) {
-      float sin = (float) sin(angle);
-      float cos = (float) cos(angle);
-      addVertex(lastPoint[0] + sin * lineOffset, lastPoint[1] - cos * lineOffset);
-      addVertex(lastPoint[0] - sin * lineOffset, lastPoint[1] + cos * lineOffset);
-    }
-    addVertex(lastPoint[0] + sin2, lastPoint[1] - cos2);
-    addVertex(lastPoint[0] - sin2, lastPoint[1] + cos2);
-  }
-
   protected void drawCornerRound(float[] secondLastPoint, float[] lastPoint, float[] point) {
     float step = 0.5f;
     float cos = (float) cos(step);
@@ -254,16 +229,21 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     addVertex(corners[2], corners[3]);
   }
 
-  protected void drawBevelCorner(double angle1, double angle2) {
-    float sin1 = (float) sin(angle1) * lineOffset;
-    float sin2 = (float) sin(angle2) * lineOffset;
-    float cos1 = (float) cos(angle1) * lineOffset;
-    float cos2 = (float) cos(angle2) * lineOffset;
+  protected void drawCornerMiter(float[] secondLastPoint, float[] lastPoint, float[] point) {
+    float[] intersection = getMiterIntersections(secondLastPoint, lastPoint, point);
 
-    addVertex(lastPoint[0] + sin1, lastPoint[1] - cos1);
-    addVertex(lastPoint[0] - sin1, lastPoint[1] + cos1);
-    addVertex(lastPoint[0] + sin2, lastPoint[1] - cos2);
-    addVertex(lastPoint[0] - sin2, lastPoint[1] + cos2);
+    // If we exceed the miter limit, draw beveled corner
+    double diffX = intersection[0] - intersection[2];
+    double diffY = intersection[1] - intersection[3];
+    double distSq = diffX * diffX + diffY * diffY;
+
+    float lineWidth = lineOffset * 2;
+    if (distSq / (lineWidth * lineWidth) > miterLimit * miterLimit) {
+      drawCornerBevel(secondLastPoint, lastPoint, point);
+    } else {
+      addVertex(intersection[0], intersection[1]);
+      addVertex(intersection[2], intersection[3]);
+    }
   }
 
   protected float[] lineCorners(float[] linePoint1, float[] linePoint2, float[] vertex, float offset) {
@@ -283,23 +263,59 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     return corners;
   }
 
-  protected void drawCornerMiter(float[] secondLastPoint, float[] lastPoint, float[] point) {
-    float[] intersection = getMiterIntersections(secondLastPoint, lastPoint, point);
-
-    // If we exceed the miter limit, draw beveled corner
-    double diffX = intersection[0] - intersection[2];
-    double diffY = intersection[1] - intersection[3];
-    double distSq = diffX * diffX + diffY * diffY;
-
-    float lineWidth = lineOffset * 2;
-    if (distSq / (lineWidth * lineWidth) > miterLimit * miterLimit) {
-      drawCornerBevel(secondLastPoint, lastPoint, point);
-    } else {
-      addVertex(intersection[0], intersection[1]);
-      addVertex(intersection[2], intersection[3]);
-    }
-  }
-
+  /**
+   * Finds the intersection of two lines. This method was written to reduce the
+   * number of array creations and so is quite dense. However, it is easy to
+   * understand the theory behind the computation. I found this at <a
+   * href="http://mathforum.org/library/drmath/view/62814.html"
+   * >http://mathforum.org/library/drmath/view/62814.html</a>.
+   * 
+   * <p>
+   * We have two lines, specified by three points (P1, P2, P3). They share the
+   * second point. This gives us an easy way to represent the line in parametric
+   * form. For example the first line has the form
+   * 
+   * <pre>
+   * &lt;x, y&gt; = &lt;P1<sub>x</sub>, P1<sub>y</sub>&gt; + t * &lt;P2<sub>x</sub>-P1<sub>x</sub>, P2<sub>y</sub>-P1<sub>y</sub>&gt;
+   * </pre>
+   * 
+   * </p>
+   * <p>
+   * <code>&lt;P1<sub>x</sub>, P1<sub>y</sub>&gt;</code> is a point on the line,
+   * while
+   * <code>&lt;P2<sub>x</sub>-P1<sub>x</sub>, P2<sub>y</sub>-P1<sub>y</sub>&gt;</code>
+   * is the direction of the line. The method for solving for the intersection
+   * of these two parametric lines is straightforward. Let <code>o1</code> and
+   * <code>o2</code> be the points on the lines and <code>v1</code> and
+   * <code>v2</code> be the two direction vectors. Now we have
+   * 
+   * <pre>
+   * p1 = o1 + t * v1
+   * p2 = o2 + s * v2
+   * </pre>
+   * 
+   * We can solve to find the intersection by
+   * 
+   * <pre>
+   * o1 + t * v1 = o2 + s * v2
+   * t * v1 = o2 - o1 + s * v2
+   * (t * v1) x v2 = (o2 - o1 + s * v2) x v2    ; cross product by v2
+   * t * (v1 x v2) = (o2 - o1) x v2             ; to get rid of s term
+   * </pre>
+   * 
+   * Solving for <code>t</code> is easy since we only have the z component. Put
+   * <code>t</code> back into the first equation gives us our point of
+   * intersection.
+   * </p>
+   * <p>
+   * This method solves for <code>t</code>, but not directly for lines
+   * intersecting the point parameters. Since we're trying to use this for the
+   * miter corners, we want to solve for the intersections of the two outside
+   * edges of the lines that go from <code>secondLastPoint</code> to
+   * <code>lastPoint</code> and from <code>lastPoint</code> to
+   * <code>point</code>.
+   * </p>
+   */
   protected float[] getMiterIntersections(float[] secondLastPoint, float[] lastPoint, float[] point) {
     float[] o1 = lineCorners(secondLastPoint, lastPoint, lastPoint, lineOffset);
     float[] o2 = lineCorners(lastPoint, point, lastPoint, lineOffset);
@@ -331,81 +347,6 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     intersections[3] = o1[3] + t * v1[1];
 
     return intersections;
-  }
-
-  /**
-   * <a href=
-   * "http://www.softsurfer.com/Archive/algorithm_0104/algorithm_0104B.htm#Line%20Intersections"
-   * >http://www.softsurfer.com/Archive/algorithm_0104/algorithm_0104B.htm#Line%
-   * 20Intersections</a>
-   */
-  protected float[] intersection2(float[] secondLastPoint, float[] lastPoint, float[] point) {
-    float[] v1 = lineCorners(secondLastPoint, lastPoint, lastPoint, lineOffset);
-    float[] v2 = lineCorners(lastPoint, point, lastPoint, lineOffset);
-
-    float[] u = new float[2];
-    u[0] = lastPoint[0] - secondLastPoint[0];
-    u[1] = lastPoint[1] - secondLastPoint[1];
-    float[] v = new float[2];
-    v[0] = lastPoint[0] - point[0];
-    v[1] = lastPoint[1] - point[1];
-
-    float norm = (float) Math.sqrt(u[0] * u[0] + u[1] * u[1]);
-    u[0] /= norm;
-    u[1] /= norm;
-    norm = (float) Math.sqrt(v[0] * v[0] + v[1] * v[1]);
-    v[0] /= norm;
-    v[1] /= norm;
-
-    float[] w = new float[] { v1[0] - v2[0], v1[1] - v2[1] };
-
-    float t = (v1[1] - v2[1]) * u[0] - (v1[0] - v2[0]) * u[1];
-    t /= u[0] * v[1] - u[1] * v[0];
-
-    float[] intersections = new float[4];
-    intersections[0] = v2[0] + t * v[0];
-    intersections[1] = v2[1] + t * v[1];
-
-    w = new float[] { v1[2] - v2[2], v1[3] - v2[3] };
-    t = u[0] * w[1] - u[1] * w[0];
-    t /= u[0] * v[1] - u[1] * v[0];
-
-    intersections[2] = v2[2] + t * v[0];
-    intersections[3] = v2[3] + t * v[1];
-
-    return intersections;
-  }
-
-  protected void drawMiterCorner(double angle1, double angle2) {
-    /*
-     * If they are nearly parallel in the same direction, that could cause an
-     * error in computing the intersections.
-     */
-    if (abs(angle1 - angle2) < 1e-10) {
-      drawBevelCorner(angle1, angle2);
-      return;
-    }
-
-    float sin1 = (float) sin(angle1) * lineOffset;
-    float sin2 = (float) sin(angle2) * lineOffset;
-    float cos1 = (float) cos(angle1) * lineOffset;
-    float cos2 = (float) cos(angle2) * lineOffset;
-
-    float[] intersect1 = intersection(sin1, cos1, sin2, cos2, true);
-    float[] intersect2 = intersection(sin1, cos1, sin2, cos2, false);
-
-    // If we exceed the miter limit, draw beveled corner
-    double diffX = intersect1[0] - intersect2[0];
-    double diffY = intersect1[1] - intersect2[1];
-    double dist = sqrt(diffX * diffX + diffY * diffY);
-
-    float lineWidth = lineOffset * 2;
-    if (dist / lineWidth > miterLimit) {
-      drawBevelCorner(angle1, angle2);
-    } else {
-      addVertex(lastPoint[0] + intersect1[0], lastPoint[1] + intersect1[1]);
-      addVertex(lastPoint[0] + intersect2[0], lastPoint[1] + intersect2[1]);
-    }
   }
 
   protected void applyEndCap(float[] lastPoint, float[] vertex) {
@@ -470,79 +411,6 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
       gl.glVertex2f(point[0] + corner[0], point[1] + corner[1]);
     }
     gl.glEnd();
-  }
-
-  /**
-   * Finds the intersection of two lines. This method was written to reduce the
-   * number of array creations and so is quite dense. However, it is easy to
-   * understand the theory behind the computation.
-   * 
-   * <p>
-   * We have two lines, the first with angle theta and the second with angle
-   * phi. The angles are relative to the x-axis and computed by
-   * {@link #angleOf(double[], double[])}. The arguments {@code sin1},
-   * {@code cos1}, {@code sin2}, {@code cos2} are the sin and cos of theta and
-   * phi respectively, multiplied by half the line width. This gives us an easy
-   * way to represent the line in parametric form. For example the first line
-   * (with angle theta) has the form
-   * 
-   * <pre>
-   * &lt;x, y&gt; = &lt;sin1, -cos1&gt; + t * &lt;cos1, sin1&gt;
-   * </pre>
-   * 
-   * </p>
-   * <p>
-   * <code>&lt;sin1, -cos1&gt;</code> is a point on the line, while
-   * <code>&lt;cos1, sin1&gt;</code> is the direction of the line. The method
-   * for solving for the intersection of these two parametric lines is
-   * straightforward. Let <code>o1</code> and <code>o2</code> be the points on
-   * the lines and <code>v1</code> and <code>v2</code> be the two direction
-   * vectors. Now we have
-   * 
-   * <pre>
-   * p1 = o1 + t * v1
-   * p2 = o2 + s * v2
-   * </pre>
-   * 
-   * We can solve to find the intersection by
-   * 
-   * <pre>
-   * o1 + t * v1 = o2 + s * v2
-   * t * v1 = o2 - o1 + s * v2
-   * (t * v1) x v2 = (o2 - o1 + s * v2) x v2    ; cross product by v2
-   * t * (v1 x v2) = (o2 - o1) x v2             ; to get rid of s term
-   * </pre>
-   * 
-   * Solving for <code>t</code> is easy since we only have the z component. Put
-   * <code>t</code> back into the first equation gives us our point of
-   * intersection.
-   * </p>
-   * <p>
-   * This is certainly not what is shown in the method body. But if you
-   * construct the vectors <code>o1, o2, v1, v2</code> as described above, and
-   * solve for t, you will get the body of the method. The extra parameter
-   * {@code side} specifies which side to find the intersection. This only
-   * affects the vectors <code>o1</code> and <code>o2</code>. If {@code side} is
-   * {@code true}, then <code>o1 = &lt;sin1, -cos1&gt;</code>. If {@code side}
-   * is {@code false}, then <code>o1 = &lt;-sin1, cos1&gt;</code>. Since the
-   * miter join needs to calculate two intersections, one for each side of the
-   * stroke, this enables both.
-   * </p>
-   */
-  protected float[] intersection(float sin1, float cos1, float sin2, float cos2, boolean side) {
-    if (side) {
-      float t = sin2 * (sin2 - sin1) - cos2 * (cos1 - cos2);
-      t /= sin2 * cos1 - cos2 * sin1;
-      return new float[] { sin1 + t * cos1, -cos1 + t * sin1 };
-    } else {
-      float t = sin2 * (sin1 - sin2) - cos2 * (cos2 - cos1);
-      t /= sin2 * cos1 - cos2 * sin1;
-      return new float[] { -sin1 + t * cos1, cos1 + t * sin1 };
-    }
-  }
-
-  protected static double angleOf(float[] vertex, float[] other) {
-    return atan2(vertex[1] - other[1], vertex[0] - other[0]);
   }
 
   protected void addVertex(float x, float y) {
