@@ -87,7 +87,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     lineTo(firstPoint);
     if (secondPoint != null) {
       lineTo(secondPoint);
-      drawLineEnd();
+      endLine();
       drawBuffer();
     }
 
@@ -98,11 +98,11 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
   @Override
   public void endPoly() {
     if (firstPoint != null && secondPoint != null) {
-      drawLineEnd();
+      endLine();
       drawBuffer();
 
-      applyEndCap(firstPoint, secondPoint);
-      applyEndCap(lastPoint, secondLastPoint);
+      applyEndCap(secondPoint, firstPoint);
+      applyEndCap(secondLastPoint, lastPoint);
     }
 
     gl.glPopMatrix();
@@ -112,11 +112,11 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
   @Override
   public void moveTo(float[] vertex) {
     if (firstPoint != null) {
-      drawLineEnd();
+      endLine();
       drawBuffer();
 
-      applyEndCap(lastPoint, secondLastPoint);
-      applyEndCap(firstPoint, secondPoint);
+      applyEndCap(secondLastPoint, lastPoint);
+      applyEndCap(secondPoint, firstPoint);
     }
 
     lastPoint = new float[] { vertex[0], vertex[1] };
@@ -137,7 +137,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     }
 
     if (secondLastPoint == null) {
-      drawLineStart();
+      startLine();
     } else {
       drawCorner(vertex);
     }
@@ -162,39 +162,30 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     lineJoin = originalJoin;
   }
 
-  protected void drawLineEnd() {
-    double angle = angleOf(lastPoint, secondLastPoint);
-    float cos = (float) cos(angle) * lineOffset;
-    float sin = (float) sin(angle) * lineOffset;
-
-    addVertex(lastPoint[0] + sin, lastPoint[1] - cos);
-    addVertex(lastPoint[0] - sin, lastPoint[1] + cos);
+  protected void endLine() {
+    float[] corners = lineCorners(secondLastPoint, lastPoint, lastPoint, lineOffset);
+    addVertex(corners[0], corners[1]);
+    addVertex(corners[2], corners[3]);
   }
 
-  protected void drawLineStart() {
-    double angle = angleOf(secondPoint, firstPoint);
-    float cos = (float) cos(angle) * lineOffset;
-    float sin = (float) sin(angle) * lineOffset;
-
-    addVertex(firstPoint[0] + sin, firstPoint[1] - cos);
-    addVertex(firstPoint[0] - sin, firstPoint[1] + cos);
+  protected void startLine() {
+    float[] corners = lineCorners(firstPoint, secondPoint, firstPoint, lineOffset);
+    addVertex(corners[0], corners[1]);
+    addVertex(corners[2], corners[3]);
   }
 
   protected void drawCorner(float[] vertex) {
-    double angle1 = angleOf(lastPoint, secondLastPoint);
-    double angle2 = angleOf(vertex, lastPoint);
-
     switch (lineJoin) {
     case BasicStroke.JOIN_BEVEL:
-      drawBevelCorner(angle1, angle2);
+      drawCornerBevel(secondLastPoint, lastPoint, vertex);
       return;
 
     case BasicStroke.JOIN_ROUND:
-      drawRoundCorner(angle1, angle2);
+      drawCornerRound(secondLastPoint, lastPoint, vertex);
       return;
 
     case BasicStroke.JOIN_MITER:
-      drawMiterCorner(angle1, angle2);
+      drawCornerMiter(secondLastPoint, lastPoint, vertex);
       return;
 
     default:
@@ -224,6 +215,45 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     addVertex(lastPoint[0] - sin2, lastPoint[1] + cos2);
   }
 
+  protected void drawCornerRound(float[] secondLastPoint, float[] lastPoint, float[] point) {
+    float step = 0.5f;
+    float cos = (float) cos(step);
+    float sin = (float) sin(step);
+
+    // translate to 0,0
+    float[] corner = lineCorners(secondLastPoint, lastPoint, new float[2], lineOffset);
+
+    addVertex(lastPoint[0] + corner[0], lastPoint[1] + corner[1]);
+    addVertex(lastPoint[0] - corner[0], lastPoint[1] - corner[1]);
+
+    float max = 2 * (float) Math.PI / step + 1;
+    for (int i = 0; i < max; i++) {
+      // rotate it
+      float x = cos * corner[0] - sin * corner[1];
+      float y = sin * corner[0] + cos * corner[1];
+      corner[0] = x;
+      corner[1] = y;
+
+      // translate back
+      addVertex(lastPoint[0] + corner[0], lastPoint[1] + corner[1]);
+      addVertex(lastPoint[0] - corner[0], lastPoint[1] - corner[1]);
+    }
+
+    corner = lineCorners(lastPoint, point, lastPoint, lineOffset);
+    addVertex(corner[0], corner[1]);
+    addVertex(corner[2], corner[3]);
+  }
+
+  protected void drawCornerBevel(float[] secondLastPoint, float[] lastPoint, float[] point) {
+    float[] corners = lineCorners(secondLastPoint, lastPoint, lastPoint, lineOffset);
+    addVertex(corners[0], corners[1]);
+    addVertex(corners[2], corners[3]);
+
+    corners = lineCorners(lastPoint, point, lastPoint, lineOffset);
+    addVertex(corners[0], corners[1]);
+    addVertex(corners[2], corners[3]);
+  }
+
   protected void drawBevelCorner(double angle1, double angle2) {
     float sin1 = (float) sin(angle1) * lineOffset;
     float sin2 = (float) sin(angle2) * lineOffset;
@@ -246,11 +276,104 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
 
     float scale = offset / norm;
     float[] corners = new float[4];
-    corners[0] = -translated[1] * scale + vertex[0];
-    corners[1] = translated[0] * scale + vertex[1];
-    corners[2] = translated[1] * scale + vertex[0];
-    corners[3] = -translated[0] * scale + vertex[1];
+    corners[0] = translated[1] * scale + vertex[0];
+    corners[1] = -translated[0] * scale + vertex[1];
+    corners[2] = -translated[1] * scale + vertex[0];
+    corners[3] = translated[0] * scale + vertex[1];
     return corners;
+  }
+
+  protected void drawCornerMiter(float[] secondLastPoint, float[] lastPoint, float[] point) {
+    float[] intersection = getMiterIntersections(secondLastPoint, lastPoint, point);
+
+    // If we exceed the miter limit, draw beveled corner
+    double diffX = intersection[0] - intersection[2];
+    double diffY = intersection[1] - intersection[3];
+    double distSq = diffX * diffX + diffY * diffY;
+
+    float lineWidth = lineOffset * 2;
+    if (distSq / (lineWidth * lineWidth) > miterLimit * miterLimit) {
+      drawCornerBevel(secondLastPoint, lastPoint, point);
+    } else {
+      addVertex(intersection[0], intersection[1]);
+      addVertex(intersection[2], intersection[3]);
+    }
+  }
+
+  protected float[] getMiterIntersections(float[] secondLastPoint, float[] lastPoint, float[] point) {
+    float[] o1 = lineCorners(secondLastPoint, lastPoint, lastPoint, lineOffset);
+    float[] o2 = lineCorners(lastPoint, point, lastPoint, lineOffset);
+
+    float[] v1 = new float[2];
+    v1[0] = lastPoint[0] - secondLastPoint[0];
+    v1[1] = lastPoint[1] - secondLastPoint[1];
+    float[] v2 = new float[2];
+    v2[0] = lastPoint[0] - point[0];
+    v2[1] = lastPoint[1] - point[1];
+
+    float norm = (float) Math.sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
+    v1[0] /= norm;
+    v1[1] /= norm;
+    norm = (float) Math.sqrt(v2[0] * v2[0] + v2[1] * v2[1]);
+    v2[0] /= norm;
+    v2[1] /= norm;
+
+    float[] intersections = new float[4];
+
+    float t = (o2[0] - o1[0]) * v2[1] - (o2[1] - o1[1]) * v2[0];
+    t /= v1[0] * v2[1] - v1[1] * v2[0];
+    intersections[0] = o1[0] + t * v1[0];
+    intersections[1] = o1[1] + t * v1[1];
+
+    t = (o2[2] - o1[2]) * v2[1] - (o2[3] - o1[3]) * v2[0];
+    t /= v1[0] * v2[1] - v1[1] * v2[0];
+    intersections[2] = o1[2] + t * v1[0];
+    intersections[3] = o1[3] + t * v1[1];
+
+    return intersections;
+  }
+
+  /**
+   * <a href=
+   * "http://www.softsurfer.com/Archive/algorithm_0104/algorithm_0104B.htm#Line%20Intersections"
+   * >http://www.softsurfer.com/Archive/algorithm_0104/algorithm_0104B.htm#Line%
+   * 20Intersections</a>
+   */
+  protected float[] intersection2(float[] secondLastPoint, float[] lastPoint, float[] point) {
+    float[] v1 = lineCorners(secondLastPoint, lastPoint, lastPoint, lineOffset);
+    float[] v2 = lineCorners(lastPoint, point, lastPoint, lineOffset);
+
+    float[] u = new float[2];
+    u[0] = lastPoint[0] - secondLastPoint[0];
+    u[1] = lastPoint[1] - secondLastPoint[1];
+    float[] v = new float[2];
+    v[0] = lastPoint[0] - point[0];
+    v[1] = lastPoint[1] - point[1];
+
+    float norm = (float) Math.sqrt(u[0] * u[0] + u[1] * u[1]);
+    u[0] /= norm;
+    u[1] /= norm;
+    norm = (float) Math.sqrt(v[0] * v[0] + v[1] * v[1]);
+    v[0] /= norm;
+    v[1] /= norm;
+
+    float[] w = new float[] { v1[0] - v2[0], v1[1] - v2[1] };
+
+    float t = (v1[1] - v2[1]) * u[0] - (v1[0] - v2[0]) * u[1];
+    t /= u[0] * v[1] - u[1] * v[0];
+
+    float[] intersections = new float[4];
+    intersections[0] = v2[0] + t * v[0];
+    intersections[1] = v2[1] + t * v[1];
+
+    w = new float[] { v1[2] - v2[2], v1[3] - v2[3] };
+    t = u[0] * w[1] - u[1] * w[0];
+    t /= u[0] * v[1] - u[1] * v[0];
+
+    intersections[2] = v2[2] + t * v[0];
+    intersections[3] = v2[3] + t * v[1];
+
+    return intersections;
   }
 
   protected void drawMiterCorner(double angle1, double angle2) {
@@ -285,47 +408,68 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     }
   }
 
-  protected void applyEndCap(float[] vertex, float[] other) {
+  protected void applyEndCap(float[] lastPoint, float[] vertex) {
     switch (endCap) {
     case BasicStroke.CAP_BUTT:
-      // do nothing
+      drawCapButt(lastPoint, vertex);
       break;
 
     case BasicStroke.CAP_SQUARE:
-      gl.glBegin(GL.GL_QUADS);
-      double angle = angleOf(vertex, other);
-      float sin = (float) sin(angle) * lineOffset;
-      float cos = (float) cos(angle) * lineOffset;
-      float x = vertex[0] + sin;
-      float y = vertex[1] - cos;
-      gl.glVertex2f(x, y);
-      x = vertex[0] - sin;
-      y = vertex[1] + cos;
-      gl.glVertex2f(x, y);
-      x = vertex[0] - sin + cos;
-      y = vertex[1] + sin + cos;
-      gl.glVertex2f(x, y);
-      x = vertex[0] + sin + cos;
-      y = vertex[1] + sin - cos;
-      gl.glVertex2f(x, y);
-
-      gl.glEnd();
+      drawCapSquare(lastPoint, vertex);
       break;
 
     case BasicStroke.CAP_ROUND:
-      gl.glBegin(GL.GL_TRIANGLE_FAN);
-      angle = angleOf(vertex, other);
-      gl.glVertex2f(vertex[0] + (float) cos(angle) * 0.1F, vertex[1] + (float) sin(angle) * 0.1F);
-      double step = 0.5;
-      double maxAngle = angle + Math.PI + step;
-      for (double theta = angle; theta < maxAngle; theta += step) {
-        x = vertex[0] + (float) sin(theta) * lineOffset;
-        y = vertex[1] - (float) cos(theta) * lineOffset;
-        gl.glVertex2f(x, y);
-      }
-      gl.glEnd();
+      drawCapRound(lastPoint, vertex);
       break;
     }
+  }
+
+  protected void drawCapButt(float[] lastPoint, float[] point) {
+    // do nothing
+  }
+
+  protected void drawCapSquare(float[] lastPoint, float[] point) {
+    float v_x = point[0] - lastPoint[0];
+    float v_y = point[1] - lastPoint[1];
+
+    float norm = (float) Math.sqrt(v_x * v_x + v_y * v_y);
+    v_x *= lineOffset / norm;
+    v_y *= lineOffset / norm;
+
+    float[] corners = lineCorners(lastPoint, point, point, lineOffset);
+
+    gl.glBegin(GL.GL_QUADS);
+    gl.glVertex2f(corners[0], corners[1]);
+    gl.glVertex2f(corners[0] + v_x, corners[1] + v_y);
+    gl.glVertex2f(corners[2] + v_x, corners[3] + v_y);
+    gl.glVertex2f(corners[2], corners[3]);
+    gl.glEnd();
+  }
+
+  protected void drawCapRound(float[] lastPoint, float[] point) {
+    float step = 0.5f;
+    float cos = (float) cos(step);
+    float sin = (float) sin(step);
+
+    // put the corner around 0,0
+    float[] corner = lineCorners(lastPoint, point, new float[2], lineOffset);
+
+    gl.glBegin(GL.GL_TRIANGLE_FAN);
+    gl.glVertex2f(point[0], point[1]);
+    gl.glVertex2f(point[0] + corner[0], point[1] + corner[1]);
+
+    float max = (float) Math.PI / step + 1;
+    for (int i = 0; i < max; i++) {
+      // rotate it
+      float x = cos * corner[0] - sin * corner[1];
+      float y = sin * corner[0] + cos * corner[1];
+      corner[0] = x;
+      corner[1] = y;
+
+      // translate back
+      gl.glVertex2f(point[0] + corner[0], point[1] + corner[1]);
+    }
+    gl.glEnd();
   }
 
   /**
