@@ -29,7 +29,6 @@ import java.awt.geom.RectangularShape;
 import java.awt.geom.RoundRectangle2D;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.glu.GLU;
 
 /**
  * @author borkholder
@@ -49,8 +48,6 @@ public class JOGLShapeDrawer {
 
   protected final GL gl;
 
-  protected final GLU glu;
-
   protected PathVisitor tesselatingVisitor;
 
   protected PathVisitor simpleShapeFillVisitor;
@@ -61,10 +58,9 @@ public class JOGLShapeDrawer {
 
   public JOGLShapeDrawer(GL gl) {
     this.gl = gl;
-    glu = new GLU();
-    tesselatingVisitor = new TesselatorVisitor(gl, glu);
-    simpleShapeFillVisitor = new FillNonintersectingPolygonVisitor(gl);
-    simpleStrokeVisitor = new FastLineDrawingVisitor(gl);
+    tesselatingVisitor = new TesselatorVisitor();
+    simpleShapeFillVisitor = new FillNonintersectingPolygonVisitor();
+    simpleStrokeVisitor = new FastLineDrawingVisitor();
   }
 
   public void setAntiAlias(boolean antiAlias) {
@@ -185,6 +181,7 @@ public class JOGLShapeDrawer {
   }
 
   protected void traceShape(Shape shape, PathVisitor visitor) {
+    visitor.setGLContext(gl);
     PathIterator iterator = shape.getPathIterator(null);
     visitor.beginPoly(iterator.getWindingRule());
 

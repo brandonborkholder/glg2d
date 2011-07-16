@@ -16,6 +16,8 @@
 
 package joglg2d;
 
+import javax.media.opengl.GL;
+
 /**
  * Receives the calls from a {@link java.awt.geom.PathIterator} and draws the
  * shape as it is visited. The form of this interface and the documentation
@@ -32,6 +34,14 @@ package joglg2d;
  * @see java.awt.geom.PathIterator
  */
 public interface PathVisitor {
+  /**
+   * Sets the GL context to be used for the next drawing session.
+   * 
+   * @param context
+   *          The GL context
+   */
+  void setGLContext(GL context);
+
   /**
    * Specifies the starting location for a new subpath.
    * 

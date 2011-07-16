@@ -19,6 +19,7 @@ import java.awt.image.BufferedImage;
 import java.net.URL;
 
 import javax.imageio.ImageIO;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
@@ -117,7 +118,7 @@ public class VisualTest {
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
-        g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
+        g2d.setStroke(new BasicStroke(3, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
         g2d.draw(new Rectangle2D.Float(48, 123, 49, 34));
       }
     });
@@ -497,6 +498,45 @@ public class VisualTest {
         g2d.fillRect(70, 70, 20, 20);
 
         g2d.copyArea(60, 60, 25, 15, 50, 30);
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void doLinesScaleTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        g2d.setStroke(new BasicStroke(3));
+        g2d.setColor(Color.red);
+        g2d.drawLine(3, 3, 50, 50);
+
+        g2d.scale(10, 10);
+        g2d.setStroke(new BasicStroke(3));
+        g2d.setColor(Color.blue);
+        g2d.drawLine(8, 3, 55, 50);
+
+        g2d.scale(0.1, 0.1);
+        g2d.setStroke(new BasicStroke(3));
+        g2d.setColor(Color.green);
+        g2d.drawLine(-2, 3, 45, 50);
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void drawCheckboxIconTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        JCheckBox box = new JCheckBox();
+        box.setSize(box.getPreferredSize());
+        box.setSelected(true);
+        box.paint(g2d);
       }
     });
 

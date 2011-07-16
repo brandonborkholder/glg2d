@@ -25,10 +25,13 @@ import javax.media.opengl.GL;
  * @created May 11, 2010
  */
 public class FillNonintersectingPolygonVisitor extends SimplePathVisitor {
-  protected final GL gl;
+  protected GL gl;
 
-  public FillNonintersectingPolygonVisitor(GL gl) {
-    this.gl = gl;
+  protected VertexBuffer vBuffer = new VertexBuffer();
+
+  @Override
+  public void setGLContext(GL context) {
+    gl = context;
   }
 
   @Override
@@ -38,7 +41,7 @@ public class FillNonintersectingPolygonVisitor extends SimplePathVisitor {
 
   @Override
   public void closeLine() {
-    gl.glEnd();
+    vBuffer.drawBuffer(gl, GL.GL_POLYGON);
   }
 
   @Override
@@ -47,12 +50,11 @@ public class FillNonintersectingPolygonVisitor extends SimplePathVisitor {
 
   @Override
   public void lineTo(float[] vertex) {
-    gl.glVertex2f(vertex[0], vertex[1]);
+    vBuffer.addVertex(vertex[0], vertex[1]);
   }
 
   @Override
   public void moveTo(float[] vertex) {
-    gl.glBegin(GL.GL_POLYGON);
-    gl.glVertex2f(vertex[0], vertex[1]);
+    vBuffer.addVertex(vertex[0], vertex[1]);
   }
 }

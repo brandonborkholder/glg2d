@@ -28,21 +28,25 @@ import javax.media.opengl.glu.GLUtessellatorCallbackAdapter;
 /**
  * @author borkholder
  * @created May 11, 2010
- *
+ * 
  */
 public class TesselatorVisitor extends SimplePathVisitor {
-  protected final GLU glu;
+  protected GLU glu;
 
-  protected final GL gl;
+  protected GL gl;
 
   protected GLUtessellator tesselator;
 
   protected GLUtessellatorCallback callback;
 
-  public TesselatorVisitor(GL gl, GLU glu) {
-    this.gl = gl;
-    this.glu = glu;
+  public TesselatorVisitor() {
+    glu = new GLU();
     callback = new TessellatorCallback();
+  }
+
+  @Override
+  public void setGLContext(GL context) {
+    gl = context;
   }
 
   @Override

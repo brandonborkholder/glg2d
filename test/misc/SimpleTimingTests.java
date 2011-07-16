@@ -105,6 +105,10 @@ public class SimpleTimingTests {
   public void forwardDifferencingBezier() {
     SimplePathVisitor visitor = new SimplePathVisitor() {
       @Override
+      public void setGLContext(GL context) {
+      }
+      
+      @Override
       public void moveTo(float[] vertex) {
       }
 

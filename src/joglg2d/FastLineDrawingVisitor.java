@@ -20,18 +20,15 @@ import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 
 import java.awt.BasicStroke;
-import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
-
-import com.sun.opengl.util.BufferUtil;
 
 /**
  * @author borkholder
  * @created May 11, 2010
  */
 public class FastLineDrawingVisitor extends SimplePathVisitor {
-  protected final GL gl;
+  protected GL gl;
 
   protected int lineJoin;
 
@@ -49,10 +46,11 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
 
   protected float[] secondPoint;
 
-  protected FloatBuffer buffer = BufferUtil.newFloatBuffer(300);
-
-  public FastLineDrawingVisitor(GL gl) {
-    this.gl = gl;
+  protected VertexBuffer vBuffer = new VertexBuffer();
+  
+  @Override
+  public void setGLContext(GL context) {
+    gl = context;
   }
 
   public void setStroke(BasicStroke stroke) {
@@ -64,6 +62,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
 
   @Override
   public void beginPoly(int windingRule) {
+    vBuffer.clear();
     firstPoint = secondPoint = null;
     lastPoint = secondLastPoint = null;
 
@@ -72,7 +71,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
      */
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
-    gl.glTranslatef(1, 1, 0);
+//    gl.glTranslatef(0.5f, 0.5f, 0);
 
     // use vertex arrays
     gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
@@ -85,7 +84,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     if (secondPoint != null) {
       lineTo(secondPoint);
       endLine();
-      drawBuffer();
+      drawBuffer(GL.GL_QUAD_STRIP);
     }
 
     firstPoint = lastPoint = null;
@@ -96,7 +95,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
   public void endPoly() {
     if (firstPoint != null && secondPoint != null) {
       endLine();
-      drawBuffer();
+      drawBuffer(GL.GL_QUAD_STRIP);
 
       applyEndCap(secondPoint, firstPoint);
       applyEndCap(secondLastPoint, lastPoint);
@@ -110,7 +109,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
   public void moveTo(float[] vertex) {
     if (firstPoint != null) {
       endLine();
-      drawBuffer();
+      drawBuffer(GL.GL_QUAD_STRIP);
 
       applyEndCap(secondLastPoint, lastPoint);
       applyEndCap(secondPoint, firstPoint);
@@ -379,12 +378,11 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
 
     float[] corners = lineCorners(lastPoint, point, point, lineOffset);
 
-    gl.glBegin(GL.GL_QUADS);
-    gl.glVertex2f(corners[0], corners[1]);
-    gl.glVertex2f(corners[0] + v_x, corners[1] + v_y);
-    gl.glVertex2f(corners[2] + v_x, corners[3] + v_y);
-    gl.glVertex2f(corners[2], corners[3]);
-    gl.glEnd();
+    addVertex(corners[0], corners[1]);
+    addVertex(corners[0] + v_x, corners[1] + v_y);
+    addVertex(corners[2] + v_x, corners[3] + v_y);
+    addVertex(corners[2], corners[3]);
+    drawBuffer(GL.GL_QUADS);
   }
 
   protected void drawCapRound(float[] lastPoint, float[] point) {
@@ -395,9 +393,8 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     // put the corner around 0,0
     float[] corner = lineCorners(lastPoint, point, new float[2], lineOffset);
 
-    gl.glBegin(GL.GL_TRIANGLE_FAN);
-    gl.glVertex2f(point[0], point[1]);
-    gl.glVertex2f(point[0] + corner[0], point[1] + corner[1]);
+    addVertex(point[0], point[1]);
+    addVertex(point[0] + corner[0], point[1] + corner[1]);
 
     float max = (float) Math.PI / step + 1;
     for (int i = 0; i < max; i++) {
@@ -408,31 +405,16 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
       corner[1] = y;
 
       // translate back
-      gl.glVertex2f(point[0] + corner[0], point[1] + corner[1]);
+      addVertex(point[0] + corner[0], point[1] + corner[1]);
     }
-    gl.glEnd();
+    drawBuffer(GL.GL_TRIANGLE_FAN);
   }
 
   protected void addVertex(float x, float y) {
-    if (buffer.position() == buffer.capacity()) {
-      FloatBuffer larger = BufferUtil.newFloatBuffer(buffer.position() * 2);
-      buffer.rewind();
-      larger.put(buffer);
-      buffer = larger;
-    }
-
-    buffer.put(x);
-    buffer.put(y);
+    vBuffer.addVertex(x, y);
   }
 
-  protected void drawBuffer() {
-    if (buffer.position() == 0) {
-      return;
-    }
-
-    int size = buffer.position() / 2;
-    buffer.rewind();
-    gl.glVertexPointer(2, GL.GL_FLOAT, 0, buffer);
-    gl.glDrawArrays(GL.GL_QUAD_STRIP, 0, size);
+  protected void drawBuffer(int mode) {
+    vBuffer.drawBuffer(gl, mode);
   }
 }
