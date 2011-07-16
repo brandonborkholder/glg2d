@@ -71,7 +71,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
      */
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
-//    gl.glTranslatef(0.5f, 0.5f, 0);
+    gl.glTranslatef(0.5f, 0.5f, 0);
 
     // use vertex arrays
     gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
