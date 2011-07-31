@@ -221,52 +221,41 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   public void setComposite(Composite comp) {
     if (comp instanceof AlphaComposite) {
       switch (((AlphaComposite) comp).getRule()) {
+        /*
+         * Since the destination _always_ covers the entire canvas (i.e. there
+         * are always color components for every pixel), some of these
+         * composites can be collapsed into each other. They matter when Java2D
+         * is drawing into an image and the destination may not take up the
+         * entire canvas.
+         */
+      case AlphaComposite.SRC:
+      case AlphaComposite.SRC_IN:
+        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ZERO);
+        break;
+
+      case AlphaComposite.SRC_OVER:
+      case AlphaComposite.SRC_ATOP:
+        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+        break;
+
+      case AlphaComposite.SRC_OUT:
       case AlphaComposite.CLEAR:
         gl.glBlendFunc(GL.GL_ZERO, GL.GL_ZERO);
         break;
 
-      case AlphaComposite.SRC:
-        gl.glBlendFunc(GL.GL_ONE, GL.GL_ZERO);
-        break;
-
-      case AlphaComposite.SRC_OVER:
-        gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
-        break;
-
-      case AlphaComposite.SRC_IN:
-        gl.glBlendFunc(GL.GL_DST_ALPHA, GL.GL_ZERO);
-        break;
-
-      case AlphaComposite.SRC_OUT:
-        gl.glBlendFunc(GL.GL_ONE_MINUS_DST_ALPHA, GL.GL_ZERO);
-        break;
-
-      case AlphaComposite.SRC_ATOP:
-        gl.glBlendFunc(GL.GL_DST_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-        break;
-
       case AlphaComposite.DST:
+      case AlphaComposite.DST_OVER:
         gl.glBlendFunc(GL.GL_ZERO, GL.GL_ONE);
         break;
 
-      case AlphaComposite.DST_OVER:
-        gl.glBlendFunc(GL.GL_ONE_MINUS_DST_ALPHA, GL.GL_ONE);
-        break;
-
       case AlphaComposite.DST_IN:
+      case AlphaComposite.DST_ATOP:
         gl.glBlendFunc(GL.GL_ZERO, GL.GL_SRC_ALPHA);
         break;
 
       case AlphaComposite.DST_OUT:
-        gl.glBlendFunc(GL.GL_ZERO, GL.GL_ONE_MINUS_SRC_ALPHA);
-        break;
-
-      case AlphaComposite.DST_ATOP:
-        gl.glBlendFunc(GL.GL_ONE_MINUS_DST_ALPHA, GL.GL_SRC_ALPHA);
-        break;
-
       case AlphaComposite.XOR:
-        gl.glBlendFunc(GL.GL_ONE_MINUS_DST_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+        gl.glBlendFunc(GL.GL_ZERO, GL.GL_ONE_MINUS_SRC_ALPHA);
         break;
       }
 
@@ -587,10 +576,9 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   @Override
   public void clearRect(int x, int y, int width, int height) {
-    Color origColor = color;
-    setColor(background);
+    setColor(gl, background);
     fillRect(x, y, width, height);
-    setColor(origColor);
+    setColor(gl, color);
   }
 
   @Override

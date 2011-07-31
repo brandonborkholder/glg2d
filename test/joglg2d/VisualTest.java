@@ -396,7 +396,7 @@ public class VisualTest {
   }
 
   @Test
-  public void srcOverRuleTest() throws Exception {
+  public void compositeTest() throws Exception {
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
@@ -434,7 +434,6 @@ public class VisualTest {
         dest.lineTo(100, 0);
         dest.lineTo(100, 100);
         dest.closePath();
-        g2d.setColor(g2d.getBackground());
         g2d.setComposite(AlphaComposite.SrcOver);
         g2d.setColor(new Color(255, 0, 0, 190));
         g2d.fill(dest);
