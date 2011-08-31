@@ -32,10 +32,12 @@ public class FillNonintersectingPolygonVisitor extends SimplePathVisitor {
   @Override
   public void setGLContext(GL context) {
     gl = context;
+    gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
   }
 
   @Override
   public void beginPoly(int windingRule) {
+    vBuffer.clear();
     assert windingRule == PathIterator.WIND_NON_ZERO : "Invalid assumption";
   }
 

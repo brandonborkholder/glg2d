@@ -110,6 +110,7 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     gl.glEnable(GL.GL_BLEND);
     gl.glDisable(GL.GL_ALPHA_TEST);
     gl.glDisable(GL.GL_DEPTH_TEST);
+    gl.glDisable(GL.GL_CULL_FACE);
     gl.glShadeModel(GL.GL_FLAT);
     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
@@ -221,13 +222,12 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   public void setComposite(Composite comp) {
     if (comp instanceof AlphaComposite) {
       switch (((AlphaComposite) comp).getRule()) {
-        /*
-         * Since the destination _always_ covers the entire canvas (i.e. there
-         * are always color components for every pixel), some of these
-         * composites can be collapsed into each other. They matter when Java2D
-         * is drawing into an image and the destination may not take up the
-         * entire canvas.
-         */
+      /*
+       * Since the destination _always_ covers the entire canvas (i.e. there are
+       * always color components for every pixel), some of these composites can
+       * be collapsed into each other. They matter when Java2D is drawing into
+       * an image and the destination may not take up the entire canvas.
+       */
       case AlphaComposite.SRC:
       case AlphaComposite.SRC_IN:
         gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ZERO);

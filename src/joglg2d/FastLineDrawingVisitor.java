@@ -51,6 +51,9 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
   @Override
   public void setGLContext(GL context) {
     gl = context;
+
+    // use vertex arrays
+    gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
   }
 
   public void setStroke(BasicStroke stroke) {
@@ -72,9 +75,6 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
     gl.glTranslatef(0.5f, 0.5f, 0);
-
-    // use vertex arrays
-    gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
   }
 
   @Override
