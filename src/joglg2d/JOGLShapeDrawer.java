@@ -17,6 +17,7 @@
 package joglg2d;
 
 import java.awt.BasicStroke;
+import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Arc2D;
@@ -35,18 +36,18 @@ import javax.media.opengl.GL;
  * @created Apr 20, 2010
  * 
  */
-public class JOGLShapeDrawer {
-  static final Ellipse2D.Double ELLIPSE = new Ellipse2D.Double();
+public class JOGLShapeDrawer implements G2DDrawingHelper {
+  protected static final Ellipse2D.Double ELLIPSE = new Ellipse2D.Double();
 
-  static final RoundRectangle2D.Double ROUND_RECT = new RoundRectangle2D.Double();
+  protected static final RoundRectangle2D.Double ROUND_RECT = new RoundRectangle2D.Double();
 
-  static final Arc2D.Double ARC = new Arc2D.Double();
+  protected static final Arc2D.Double ARC = new Arc2D.Double();
 
-  static final Rectangle2D.Double RECT = new Rectangle2D.Double();
+  protected static final Rectangle2D.Double RECT = new Rectangle2D.Double();
 
-  static final Line2D.Double LINE = new Line2D.Double();
+  protected static final Line2D.Double LINE = new Line2D.Double();
 
-  protected final GL gl;
+  protected GL gl;
 
   protected PathVisitor tesselatingVisitor;
 
@@ -56,15 +57,33 @@ public class JOGLShapeDrawer {
 
   protected Stroke stroke;
 
-  public JOGLShapeDrawer(GL gl) {
-    this.gl = gl;
+  public JOGLShapeDrawer() {
     tesselatingVisitor = new TesselatorVisitor();
     simpleShapeFillVisitor = new FillNonintersectingPolygonVisitor();
     simpleStrokeVisitor = new FastLineDrawingVisitor();
   }
 
-  public void setAntiAlias(boolean antiAlias) {
-    if (antiAlias) {
+  @Override
+  public void setG2D(GLGraphics2D g2d) {
+    gl = g2d.getGLContext().getGL();
+  }
+
+  @Override
+  public void push(GLGraphics2D newG2d) {
+  }
+
+  @Override
+  public void pop(GLGraphics2D parentG2d) {
+    setStroke(parentG2d.getStroke());
+    setAntiAlias(parentG2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING));
+  }
+
+  @Override
+  public void dispose() {
+  }
+
+  public void setAntiAlias(Object hintValue) {
+    if (hintValue == RenderingHints.VALUE_ANTIALIAS_ON) {
       gl.glEnable(GL.GL_LINE_SMOOTH);
       gl.glEnable(GL.GL_POINT_SMOOTH);
       gl.glEnable(GL.GL_POLYGON_SMOOTH);
@@ -96,10 +115,10 @@ public class JOGLShapeDrawer {
   }
 
   public void drawRect(int x, int y, int width, int height, boolean fill) {
-    RECT.setRect(x, y, width, height);
     if (fill) {
       gl.glRecti(x, y, x + width, y + height);
     } else {
+      RECT.setRect(x, y, width, height);
       draw(RECT);
     }
   }

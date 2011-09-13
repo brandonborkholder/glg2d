@@ -37,15 +37,27 @@ import com.sun.opengl.util.texture.TextureIO;
  * @created Apr 27, 2010
  * 
  */
-public class JOGLImageDrawer {
-  private final GL gl;
+public class JOGLImageDrawer implements G2DDrawingHelper {
+  protected TextureCache cache = new TextureCache();
 
-  private TextureCache cache = new TextureCache();
+  protected GL gl;
 
-  public JOGLImageDrawer(GL gl) {
-    this.gl = gl;
+  @Override
+  public void setG2D(GLGraphics2D g2d) {
+    gl = g2d.getGLContext().getGL();
+  }
 
-    gl.glTexParameterf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_BLEND);
+  @Override
+  public void push(GLGraphics2D newG2d) {
+  }
+
+  @Override
+  public void pop(GLGraphics2D parentG2d) {
+  }
+
+  @Override
+  public void dispose() {
+    cache.clear();
   }
 
   public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer) {
@@ -85,13 +97,9 @@ public class JOGLImageDrawer {
     return true;
   }
 
-  public void dispose() {
-    for (Texture texture : cache.values()) {
-      texture.dispose();
-    }
-  }
-
   protected boolean drawImage(Image img, AffineTransform xform, Color color, ImageObserver observer) {
+    gl.glTexParameterf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_BLEND);
+
     Texture texture = getTexture(img, observer);
 
     begin(texture, xform, color);
@@ -109,13 +117,13 @@ public class JOGLImageDrawer {
     gl.glPushMatrix();
 
     if (xform != null) {
-      JOGLG2D.multMatrix(gl, xform);
+      GLGraphics2D.multMatrix(gl, xform);
     }
 
     if (bgcolor == null) {
-      gl.glColor4f(1F, 1F, 1F, 1F);
+      gl.glColor4f(1f, 1f, 1f, 1f);
     } else {
-      JOGLG2D.setColor(gl, bgcolor);
+      GLGraphics2D.setColor(gl, bgcolor);
     }
   }
 
@@ -212,7 +220,7 @@ public class JOGLImageDrawer {
     public void expungeStaleEntries() {
       Reference<? extends Image> ref = queue.poll();
       while (ref != null) {
-        remove(ref).dispose();
+        remove(ref);
         ref = queue.poll();
       }
     }

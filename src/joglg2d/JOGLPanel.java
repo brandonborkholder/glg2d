@@ -52,9 +52,9 @@ public class JOGLPanel extends GLJPanel {
 
   public JOGLPanel(GLCapabilities caps) {
     super.setDoubleBuffered(false);
-    addGLEventListener(new Graphics2DListener(this) {
+    addGLEventListener(new G2DGLEventListener(this) {
       @Override
-      protected void paintGL(JOGLG2D g2d) {
+      protected void paintGL(GLGraphics2D g2d) {
         JOGLPanel.this.paintGL(g2d);
         paintChildren(g2d);
       }
@@ -62,12 +62,12 @@ public class JOGLPanel extends GLJPanel {
   }
 
   protected void registerJOGLRepaintManager() {
-    RepaintManager.setCurrentManager(JOGLAwareRepaintManager.INSTANCE);
+    RepaintManager.setCurrentManager(GLAwareRepaintManager.INSTANCE);
   }
 
   @Override
   protected void paintChildren(Graphics g) {
-    if (g instanceof JOGLG2D) {
+    if (g instanceof GLGraphics2D) {
       super.paintChildren(g);
     } else {
       // ignore
@@ -92,6 +92,6 @@ public class JOGLPanel extends GLJPanel {
     return false;
   }
 
-  protected void paintGL(JOGLG2D g2d) {
+  protected void paintGL(GLGraphics2D g2d) {
   }
 }

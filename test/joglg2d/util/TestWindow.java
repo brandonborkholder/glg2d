@@ -16,7 +16,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.Timer;
 
-import joglg2d.JOGLG2D;
+import joglg2d.GLGraphics2D;
 import joglg2d.JOGLPanel;
 
 import org.junit.Assert;
@@ -58,7 +58,7 @@ public class TestWindow extends JFrame {
 
     final JOGLPanel jogl = new JOGLPanel() {
       @Override
-      protected void paintGL(JOGLG2D g2d) {
+      protected void paintGL(GLGraphics2D g2d) {
         if (painter != null) {
           painter.paint(g2d, true);
         }

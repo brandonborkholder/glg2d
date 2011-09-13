@@ -49,10 +49,16 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLContext;
 import javax.media.opengl.Threading;
 
-public class JOGLG2D extends Graphics2D implements Cloneable {
-  private final GL gl;
+public class GLGraphics2D extends Graphics2D implements Cloneable {
+  protected static final double RAD_TO_DEG = 180d / Math.PI;
+
+  protected GLContext glContext;
+
+  protected GL gl;
 
   private final int height;
 
@@ -78,20 +84,23 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected RenderingHints hints;
 
-  public JOGLG2D(GL gl, int width, int height) {
-    this.gl = gl;
+  public GLGraphics2D(int width, int height) {
     this.height = height;
     this.width = width;
-    shapeDrawer = new JOGLShapeDrawer(gl);
-    imageDrawer = new JOGLImageDrawer(gl);
-    stringDrawer = new StringDrawer(this);
+    shapeDrawer = new JOGLShapeDrawer();
+    imageDrawer = new JOGLImageDrawer();
+    stringDrawer = new StringDrawer();
 
     hints = new RenderingHints(Collections.<Key, Object> emptyMap());
+  }
 
-    setStroke(new BasicStroke());
-    setColor(Color.BLACK);
-    setBackground(Color.BLACK);
-    setFont(new Font(null, Font.PLAIN, 10));
+  protected void setCanvas(GLAutoDrawable drawable) {
+    glContext = drawable.getContext();
+    gl = glContext.getGL();
+
+    shapeDrawer.setG2D(this);
+    imageDrawer.setG2D(this);
+    stringDrawer.setG2D(this);
   }
 
   protected void prePaint(Component component) {
@@ -138,8 +147,8 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     gl.glFlush();
   }
 
-  public GL getGL() {
-    return gl;
+  public GLContext getGLContext() {
+    return glContext;
   }
 
   public int getHeight() {
@@ -278,9 +287,9 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   @Override
   public void setRenderingHint(Key hintKey, Object hintValue) {
     if (hintKey == RenderingHints.KEY_TEXT_ANTIALIASING) {
-      stringDrawer.setAntiAlias(hintValue != RenderingHints.VALUE_TEXT_ANTIALIAS_OFF);
+      stringDrawer.setAntiAlias(hintValue);
     } else if (hintKey == RenderingHints.KEY_ANTIALIASING) {
-      shapeDrawer.setAntiAlias(hintValue == RenderingHints.VALUE_ANTIALIAS_ON);
+      shapeDrawer.setAntiAlias(hintValue);
     }
   }
 
@@ -299,8 +308,8 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
 
   protected void resetRenderingHints() {
     hints = new RenderingHints(Collections.<Key, Object> emptyMap());
-    stringDrawer.setAntiAlias(false);
-    shapeDrawer.setAntiAlias(false);
+    stringDrawer.setAntiAlias(RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT);
+    shapeDrawer.setAntiAlias(RenderingHints.VALUE_ANTIALIAS_DEFAULT);
   }
 
   @Override
@@ -332,14 +341,14 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   @Override
   public void rotate(double theta) {
     gl.glMatrixMode(GL.GL_MODELVIEW);
-    gl.glRotated(theta / Math.PI * 180, 0, 0, 1);
+    gl.glRotated(theta * RAD_TO_DEG, 0, 0, 1);
   }
 
   @Override
   public void rotate(double theta, double x, double y) {
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glTranslated(x, y, 0);
-    gl.glRotated(theta / Math.PI * 180, 0, 0, 1);
+    gl.glRotated(theta * RAD_TO_DEG, 0, 0, 1);
     gl.glTranslated(-x, -y, 0);
   }
 
@@ -355,8 +364,8 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
     double[] shear = new double[] {
         1, shy, 0, 0,
         shx, 1, 0, 0,
-          0, 0, 1, 0,
-          0, 0, 0, 1 };
+        0, 0, 1, 0,
+        0, 0, 0, 1 };
     gl.glMultMatrixd(shear, 0);
   }
 
@@ -692,9 +701,9 @@ public class JOGLG2D extends Graphics2D implements Cloneable {
   }
 
   @Override
-  protected JOGLG2D clone() {
+  protected GLGraphics2D clone() {
     try {
-      JOGLG2D clone = (JOGLG2D) super.clone();
+      GLGraphics2D clone = (GLGraphics2D) super.clone();
       clone.hints = (RenderingHints) hints.clone();
       return clone;
     } catch (CloneNotSupportedException exception) {

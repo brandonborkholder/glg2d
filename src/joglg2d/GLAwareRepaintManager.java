@@ -24,8 +24,8 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.swing.JComponent;
 import javax.swing.RepaintManager;
 
-public class JOGLAwareRepaintManager extends RepaintManager {
-  public static RepaintManager INSTANCE = new JOGLAwareRepaintManager();
+public class GLAwareRepaintManager extends RepaintManager {
+  public static RepaintManager INSTANCE = new GLAwareRepaintManager();
 
   private List<GLAutoDrawable> glDrawables = new ArrayList<GLAutoDrawable>();
 

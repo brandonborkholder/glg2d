@@ -19,6 +19,7 @@ package joglg2d;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.text.AttributedCharacterIterator;
@@ -29,17 +30,33 @@ import javax.media.opengl.GL;
 
 import com.sun.opengl.util.j2d.TextRenderer;
 
-public class StringDrawer {
+public class StringDrawer implements G2DDrawingHelper {
   protected Map<Font, TextRenderer> cache = new HashMap<Font, TextRenderer>();
 
   protected Font font;
 
-  protected JOGLG2D g2d;
+  protected GLGraphics2D g2d;
 
   protected boolean antiAlias;
 
-  public StringDrawer(JOGLG2D g2d) {
+  @Override
+  public void setG2D(GLGraphics2D g2d) {
     this.g2d = g2d;
+  }
+
+  @Override
+  public void push(GLGraphics2D newG2d) {
+  }
+
+  @Override
+  public void pop(GLGraphics2D parentG2d) {
+    font = parentG2d.getFont();
+    setAntiAlias(parentG2d.getRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING));
+  }
+
+  @Override
+  public void dispose() {
+    resetCache();
   }
 
   public void setFont(Font font) {
@@ -58,12 +75,16 @@ public class StringDrawer {
     return new FontRenderContext(g2d.getTransform(), true, false);
   }
 
-  public void setAntiAlias(boolean alias) {
-    if (antiAlias == alias) {
+  public void setAntiAlias(Object value) {
+    boolean doAlias = true;
+    if (value == null || value == RenderingHints.VALUE_TEXT_ANTIALIAS_OFF || value == RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT) {
+      doAlias = false;
+    }
+    if (antiAlias == doAlias) {
       return;
     }
 
-    antiAlias = alias;
+    antiAlias = doAlias;
     resetCache();
   }
 
@@ -91,7 +112,7 @@ public class StringDrawer {
     TextRenderer renderer = getRenderer(getFont());
     renderer.setColor(color);
 
-    GL gl = g2d.getGL();
+    GL gl = g2d.getGLContext().getGL();
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
     gl.glScalef(1, -1, 1);
@@ -112,10 +133,6 @@ public class StringDrawer {
     cache.clear();
   }
 
-  public void dispose() {
-    resetCache();
-  }
-
   /**
    * The default implementation is good enough for now.
    */
@@ -131,7 +148,7 @@ public class StringDrawer {
     public GLFontMetrics(Font font, FontRenderContext frc, TextRenderer renderer) {
       super(font);
       this.renderer = renderer;
-      this.fontRenderContext = frc;
+      fontRenderContext = frc;
     }
 
     @Override

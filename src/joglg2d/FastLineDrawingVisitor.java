@@ -18,6 +18,7 @@ package joglg2d;
 
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
+import static java.lang.Math.sqrt;
 
 import java.awt.BasicStroke;
 
@@ -47,7 +48,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
   protected float[] secondPoint;
 
   protected VertexBuffer vBuffer = new VertexBuffer();
-  
+
   @Override
   public void setGLContext(GL context) {
     gl = context;
@@ -251,7 +252,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     translated[1] = linePoint2[1] - linePoint1[1];
 
     float norm = translated[0] * translated[0] + translated[1] * translated[1];
-    norm = (float) Math.sqrt(norm);
+    norm = (float) sqrt(norm);
 
     float scale = offset / norm;
     float[] corners = new float[4];
@@ -326,10 +327,10 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     v2[0] = lastPoint[0] - point[0];
     v2[1] = lastPoint[1] - point[1];
 
-    float norm = (float) Math.sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
+    float norm = (float) sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
     v1[0] /= norm;
     v1[1] /= norm;
-    norm = (float) Math.sqrt(v2[0] * v2[0] + v2[1] * v2[1]);
+    norm = (float) sqrt(v2[0] * v2[0] + v2[1] * v2[1]);
     v2[0] /= norm;
     v2[1] /= norm;
 
@@ -372,7 +373,7 @@ public class FastLineDrawingVisitor extends SimplePathVisitor {
     float v_x = point[0] - lastPoint[0];
     float v_y = point[1] - lastPoint[1];
 
-    float norm = (float) Math.sqrt(v_x * v_x + v_y * v_y);
+    float norm = (float) sqrt(v_x * v_x + v_y * v_y);
     v_x *= lineOffset / norm;
     v_y *= lineOffset / norm;
 

@@ -8,6 +8,7 @@ import java.awt.geom.CubicCurve2D;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Random;
+import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 

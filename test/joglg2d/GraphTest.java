@@ -34,18 +34,18 @@ public class GraphTest extends JFrame {
     final List<Vertex> vertices = makeVertices(1000, new Rectangle(1024, 768));
     final List<Edge> edges = makeEdges(vertices, 2);
 
-    // setContentPane(new JOGLPanel() {
-    // @Override
-    // protected void paintGL(JOGLG2D g2d) {
-    // GraphTest.this.paint(vertices, edges, g2d);
-    // }
-    // });
-    setContentPane(new JPanel() {
-      @Override
-      protected void paintComponent(Graphics g) {
-        GraphTest.this.paint(vertices, edges, (Graphics2D) g);
-      }
-    });
+     setContentPane(new JOGLPanel() {
+     @Override
+     protected void paintGL(GLGraphics2D g2d) {
+     GraphTest.this.paint(vertices, edges, g2d);
+     }
+     });
+//    setContentPane(new JPanel() {
+//      @Override
+//      protected void paintComponent(Graphics g) {
+//        GraphTest.this.paint(vertices, edges, (Graphics2D) g);
+//      }
+//    });
 
     MouseHandler handler = new MouseHandler();
     getContentPane().addMouseListener(handler);

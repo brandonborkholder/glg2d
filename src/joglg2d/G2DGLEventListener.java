@@ -26,23 +26,24 @@ import javax.media.opengl.GLEventListener;
  * @author borkholder
  * @created Jul 11, 2010
  */
-public abstract class Graphics2DListener implements GLEventListener {
-  protected JOGLG2D g2d;
+public abstract class G2DGLEventListener implements GLEventListener {
+  protected GLGraphics2D g2d;
 
   protected Component baseComponent;
 
-  public Graphics2DListener(Component baseComponent) {
+  public G2DGLEventListener(Component baseComponent) {
     this.baseComponent = baseComponent;
   }
 
   @Override
   public void display(GLAutoDrawable drawable) {
+    g2d.setCanvas(drawable);
     g2d.prePaint(baseComponent);
     paintGL(g2d);
     g2d.postPaint();
   }
 
-  protected abstract void paintGL(JOGLG2D g2d);
+  protected abstract void paintGL(GLGraphics2D g2d);
 
   @Override
   public void init(GLAutoDrawable drawable) {
@@ -56,7 +57,7 @@ public abstract class Graphics2DListener implements GLEventListener {
       height = 1;
     }
 
-    g2d = new JOGLG2D(gl, width, height);
+    g2d = createGraphics2D(drawable);
 
     gl.glViewport(0, 0, width, height);
     gl.glMatrixMode(GL.GL_PROJECTION);
@@ -66,5 +67,11 @@ public abstract class Graphics2DListener implements GLEventListener {
 
   @Override
   public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {
+    // reinitialize
+    g2d = createGraphics2D(drawable);
+  }
+
+  protected GLGraphics2D createGraphics2D(GLAutoDrawable drawable) {
+    return new GLGraphics2D(drawable.getWidth(), drawable.getHeight());
   }
 }
