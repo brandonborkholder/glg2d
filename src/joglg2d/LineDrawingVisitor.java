@@ -25,10 +25,11 @@ import java.awt.BasicStroke;
 import javax.media.opengl.GL;
 
 /**
- * @author borkholder
- * @created May 11, 2010
+ * Draws a line, as outlined by a {@link BasicStroke}. The current
+ * implementation supports everything except dashes. This class draws a series
+ * of quads for each line segment, joins corners and endpoints as appropriate.
  */
-public class FastLineDrawingVisitor extends SimplePathVisitor {
+public class LineDrawingVisitor extends SimplePathVisitor {
   protected GL gl;
 
   protected int lineJoin;

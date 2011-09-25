@@ -18,19 +18,27 @@ package joglg2d;
 
 import java.awt.Component;
 
-import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 
 /**
- * @author borkholder
- * @created Jul 11, 2010
+ * Helps wrap the {@code GLGraphics2D} object within the JOGL framework.
  */
 public abstract class G2DGLEventListener implements GLEventListener {
   protected GLGraphics2D g2d;
 
   protected Component baseComponent;
 
+  /**
+   * Creates a new listener that will paint using the {@code GLGraphics2D}
+   * object on each call to {@link #display(GLAutoDrawable)}. The provided
+   * {@code baseComponent} is used to provide default font, backgroundColor,
+   * etc. to the {@code GLGraphics2D} object. It is also used for width, height
+   * of the viewport in OpenGL.
+   * 
+   * @param baseComponent
+   *          The component to use for default settings.
+   */
   public G2DGLEventListener(Component baseComponent) {
     this.baseComponent = baseComponent;
   }
@@ -43,6 +51,10 @@ public abstract class G2DGLEventListener implements GLEventListener {
     g2d.postPaint();
   }
 
+  /**
+   * Paints using the {@code GLGraphics2D} object. This could be forwarded to
+   * any code that expects to draw using the Java2D framework.
+   */
   protected abstract void paintGL(GLGraphics2D g2d);
 
   @Override
@@ -52,23 +64,16 @@ public abstract class G2DGLEventListener implements GLEventListener {
 
   @Override
   public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
-    GL gl = drawable.getGL();
     if (height <= 0) {
       height = 1;
     }
 
     g2d = createGraphics2D(drawable);
-
-    gl.glViewport(0, 0, width, height);
-    gl.glMatrixMode(GL.GL_PROJECTION);
-    gl.glLoadIdentity();
-    gl.glOrtho(0, width, 0, height, -1, 1);
   }
 
   @Override
   public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {
-    // reinitialize
-    g2d = createGraphics2D(drawable);
+    reshape(drawable, 0, 0, drawable.getWidth(), drawable.getWidth());
   }
 
   protected GLGraphics2D createGraphics2D(GLAutoDrawable drawable) {

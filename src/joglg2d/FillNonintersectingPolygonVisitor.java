@@ -21,8 +21,8 @@ import java.awt.geom.PathIterator;
 import javax.media.opengl.GL;
 
 /**
- * @author borkholder
- * @created May 11, 2010
+ * Fills a convex polygon. This class does not test to determine if the polygon
+ * is convex.
  */
 public class FillNonintersectingPolygonVisitor extends SimplePathVisitor {
   protected GL gl;

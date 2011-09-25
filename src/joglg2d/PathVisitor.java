@@ -29,8 +29,6 @@ import javax.media.opengl.GL;
  * mutation.
  * </p>
  * 
- * @author borkholder
- * @created May 11, 2010
  * @see java.awt.geom.PathIterator
  */
 public interface PathVisitor {

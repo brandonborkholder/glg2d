@@ -26,9 +26,9 @@ import javax.media.opengl.glu.GLUtessellatorCallback;
 import javax.media.opengl.glu.GLUtessellatorCallbackAdapter;
 
 /**
- * @author borkholder
- * @created May 11, 2010
- * 
+ * Fills a shape by tesselating it with the GLU library. This is a slower
+ * implementation and {@code FillNonintersectingPolygonVisitor} should be used
+ * when possible.
  */
 public class TesselatorVisitor extends SimplePathVisitor {
   protected GLU glu;

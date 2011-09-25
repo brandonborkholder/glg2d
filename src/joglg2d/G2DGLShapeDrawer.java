@@ -32,11 +32,9 @@ import java.awt.geom.RoundRectangle2D;
 import javax.media.opengl.GL;
 
 /**
- * @author borkholder
- * @created Apr 20, 2010
- * 
+ * Draws shapes for the {@code GLGraphics2D} class.
  */
-public class JOGLShapeDrawer implements G2DDrawingHelper {
+public class G2DGLShapeDrawer implements G2DDrawingHelper {
   protected static final Ellipse2D.Double ELLIPSE = new Ellipse2D.Double();
 
   protected static final RoundRectangle2D.Double ROUND_RECT = new RoundRectangle2D.Double();
@@ -53,14 +51,14 @@ public class JOGLShapeDrawer implements G2DDrawingHelper {
 
   protected PathVisitor simpleShapeFillVisitor;
 
-  protected FastLineDrawingVisitor simpleStrokeVisitor;
+  protected LineDrawingVisitor simpleStrokeVisitor;
 
   protected Stroke stroke;
 
-  public JOGLShapeDrawer() {
+  public G2DGLShapeDrawer() {
     tesselatingVisitor = new TesselatorVisitor();
     simpleShapeFillVisitor = new FillNonintersectingPolygonVisitor();
-    simpleStrokeVisitor = new FastLineDrawingVisitor();
+    simpleStrokeVisitor = new LineDrawingVisitor();
   }
 
   @Override

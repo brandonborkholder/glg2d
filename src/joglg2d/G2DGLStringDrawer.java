@@ -30,7 +30,10 @@ import javax.media.opengl.GL;
 
 import com.sun.opengl.util.j2d.TextRenderer;
 
-public class StringDrawer implements G2DDrawingHelper {
+/**
+ * Draws text for the {@code GLGraphics2D} class.
+ */
+public class G2DGLStringDrawer implements G2DDrawingHelper {
   protected Map<Font, TextRenderer> cache = new HashMap<Font, TextRenderer>();
 
   protected Font font;

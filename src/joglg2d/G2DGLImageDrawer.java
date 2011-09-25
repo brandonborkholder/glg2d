@@ -33,11 +33,9 @@ import com.sun.opengl.util.texture.TextureCoords;
 import com.sun.opengl.util.texture.TextureIO;
 
 /**
- * @author borkholder
- * @created Apr 27, 2010
- * 
+ * Draws images for the {@code GLGraphics2D} class.
  */
-public class JOGLImageDrawer implements G2DDrawingHelper {
+public class G2DGLImageDrawer implements G2DDrawingHelper {
   protected TextureCache cache = new TextureCache();
 
   protected GL gl;

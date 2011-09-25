@@ -53,6 +53,10 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.Threading;
 
+/**
+ * Implements the standards {@code Graphics2D} functionality, but instead draws
+ * to an OpenGL canvas.
+ */
 public class GLGraphics2D extends Graphics2D implements Cloneable {
   protected static final double RAD_TO_DEG = 180d / Math.PI;
 
@@ -60,9 +64,9 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   protected GL gl;
 
-  private final int height;
+  protected int height;
 
-  private final int width;
+  protected int width;
 
   protected boolean isDisposed;
 
@@ -70,11 +74,11 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   protected Color background;
 
-  protected JOGLShapeDrawer shapeDrawer;
+  protected G2DGLShapeDrawer shapeDrawer;
 
-  protected JOGLImageDrawer imageDrawer;
+  protected G2DGLImageDrawer imageDrawer;
 
-  protected StringDrawer stringDrawer;
+  protected G2DGLStringDrawer stringDrawer;
 
   protected Rectangle clip;
 
@@ -87,9 +91,9 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   public GLGraphics2D(int width, int height) {
     this.height = height;
     this.width = width;
-    shapeDrawer = new JOGLShapeDrawer();
-    imageDrawer = new JOGLImageDrawer();
-    stringDrawer = new StringDrawer();
+    shapeDrawer = new G2DGLShapeDrawer();
+    imageDrawer = new G2DGLImageDrawer();
+    stringDrawer = new G2DGLStringDrawer();
 
     hints = new RenderingHints(Collections.<Key, Object> emptyMap());
   }
@@ -104,9 +108,11 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   protected void prePaint(Component component) {
+    // push all GL states
     gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
     gl.glPushClientAttrib((int) GL.GL_ALL_CLIENT_ATTRIB_BITS);
 
+    // set the GL state to use defaults from the component
     setBackground(component.getBackground());
     setColor(component.getForeground());
     setFont(component.getFont());
@@ -116,6 +122,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     setRenderingHints(null);
     graphicsConfig = component.getGraphicsConfiguration();
 
+    // now enable some flags we'll use
     gl.glEnable(GL.GL_BLEND);
     gl.glDisable(GL.GL_ALPHA_TEST);
     gl.glDisable(GL.GL_DEPTH_TEST);
@@ -123,9 +130,20 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     gl.glShadeModel(GL.GL_FLAT);
     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
 
+    // push all the matrices
+    gl.glMatrixMode(GL.GL_PROJECTION);
+    gl.glPushMatrix();
+
+    // and setup the viewport
+    gl.glViewport(0, 0, width, height);
+    gl.glLoadIdentity();
+    gl.glOrtho(0, width, 0, height, -1, 1);
+
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
     gl.glLoadIdentity();
+
+    // do the transform from Graphics2D coords to openGL coords
     gl.glTranslatef(0, height, 0);
     gl.glScalef(1, -1, 1);
 

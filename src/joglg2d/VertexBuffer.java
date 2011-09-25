@@ -22,6 +22,12 @@ import javax.media.opengl.GL;
 
 import com.sun.opengl.util.BufferUtil;
 
+/**
+ * Wraps a simple {@code FloatBuffer} and makes it easier to push 2-D vertices
+ * into the buffer and then draw them using any mode desired. The default
+ * constructor uses a global buffer since drawing in OpenGL is not
+ * multi-threaded.
+ */
 public class VertexBuffer {
   protected static FloatBuffer globalBuffer = BufferUtil.newFloatBuffer(300);
 
