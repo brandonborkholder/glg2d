@@ -20,11 +20,12 @@ import java.awt.Component;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
+import javax.swing.RepaintManager;
 
 /**
  * Helps wrap the {@code GLGraphics2D} object within the JOGL framework.
  */
-public abstract class G2DGLEventListener implements GLEventListener {
+public class G2DGLEventListener implements GLEventListener {
   protected GLGraphics2D g2d;
 
   protected Component baseComponent;
@@ -35,7 +36,7 @@ public abstract class G2DGLEventListener implements GLEventListener {
    * {@code baseComponent} is used to provide default font, backgroundColor,
    * etc. to the {@code GLGraphics2D} object. It is also used for width, height
    * of the viewport in OpenGL.
-   * 
+   *
    * @param baseComponent
    *          The component to use for default settings.
    */
@@ -54,8 +55,19 @@ public abstract class G2DGLEventListener implements GLEventListener {
   /**
    * Paints using the {@code GLGraphics2D} object. This could be forwarded to
    * any code that expects to draw using the Java2D framework.
+   * <p>
+   * Currently is paints the component provided, turning off double-buffering in
+   * the {@code RepaintManager} to force drawing directly to the
+   * {@code Graphics2D} object.
+   * </p>
    */
-  protected abstract void paintGL(GLGraphics2D g2d);
+  protected void paintGL(GLGraphics2D g2d) {
+    RepaintManager mgr = RepaintManager.currentManager(baseComponent);
+    boolean doubleBuffer = mgr.isDoubleBufferingEnabled();
+    mgr.setDoubleBufferingEnabled(false);
+    baseComponent.paint(g2d);
+    mgr.setDoubleBufferingEnabled(doubleBuffer);
+  }
 
   @Override
   public void init(GLAutoDrawable drawable) {

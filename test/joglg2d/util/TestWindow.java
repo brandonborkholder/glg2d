@@ -16,15 +16,14 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.Timer;
 
-import joglg2d.GLGraphics2D;
-import joglg2d.JOGLPanel;
+import joglg2d.G2DGLCanvas;
 
 import org.junit.Assert;
 
 /**
  * @author borkholder
  * @created Feb 6, 2010
- * 
+ *
  */
 @SuppressWarnings("serial")
 public class TestWindow extends JFrame {
@@ -56,16 +55,17 @@ public class TestWindow extends JFrame {
       }
     };
 
-    final JOGLPanel jogl = new JOGLPanel() {
+    final JComponent jogl = new JPanel() {
       @Override
-      protected void paintGL(GLGraphics2D g2d) {
+      public void paint(Graphics g) {
+        super.paint(g);
         if (painter != null) {
-          painter.paint(g2d, true);
+          painter.paint((Graphics2D) g, true);
         }
       }
     };
 
-    splitPane.setLeftComponent(jogl);
+    splitPane.setLeftComponent(new G2DGLCanvas(jogl));
     splitPane.setRightComponent(java2d);
     splitPane.setResizeWeight(0.5);
 

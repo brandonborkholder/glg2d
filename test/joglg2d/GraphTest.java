@@ -9,6 +9,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
@@ -34,18 +35,15 @@ public class GraphTest extends JFrame {
     final List<Vertex> vertices = makeVertices(1000, new Rectangle(1024, 768));
     final List<Edge> edges = makeEdges(vertices, 2);
 
-     setContentPane(new JOGLPanel() {
-     @Override
-     protected void paintGL(GLGraphics2D g2d) {
-     GraphTest.this.paint(vertices, edges, g2d);
-     }
-     });
-//    setContentPane(new JPanel() {
-//      @Override
-//      protected void paintComponent(Graphics g) {
-//        GraphTest.this.paint(vertices, edges, (Graphics2D) g);
-//      }
-//    });
+    JPanel paintingComponent = new JPanel() {
+      @Override
+      protected void paintComponent(Graphics g) {
+        GraphTest.this.paint(vertices, edges, (Graphics2D) g);
+      }
+    };
+
+//    setContentPane(paintingComponent);
+    setContentPane(new G2DGLCanvas(paintingComponent));
 
     MouseHandler handler = new MouseHandler();
     getContentPane().addMouseListener(handler);
@@ -210,14 +208,14 @@ public class GraphTest extends JFrame {
     public void mousePressed(MouseEvent e) {
       firstPoint = null;
 
-      if ((e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0) {
+      if ((e.getModifiersEx() & InputEvent.BUTTON1_DOWN_MASK) != 0) {
         firstPoint = e.getPoint();
       }
     }
 
     @Override
     public void mouseDragged(MouseEvent e) {
-      if (firstPoint != null && (e.getModifiersEx() & MouseEvent.BUTTON1_DOWN_MASK) != 0) {
+      if (firstPoint != null && (e.getModifiersEx() & InputEvent.BUTTON1_DOWN_MASK) != 0) {
         Point dst = new Point();
         try {
           transform.inverseTransform(firstPoint, firstPoint);

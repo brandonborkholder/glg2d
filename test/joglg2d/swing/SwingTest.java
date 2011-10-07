@@ -19,19 +19,19 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 
-import joglg2d.JOGLPanel;
+import joglg2d.G2DGLCanvas;
 
 public class SwingTest {
   public static void main(String[] args) throws Exception {
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
     JFrame frame = new JFrame("JOGLG2D");
-    frame.setContentPane(new JOGLPanel(new BorderLayout()));
+    frame.setContentPane(new G2DGLCanvas(new JPanel(new BorderLayout())));
     configureFrame(frame);
 
-     frame = new JFrame("Graphics2D");
-     frame.setContentPane(new JPanel(new BorderLayout()));
-     configureFrame(frame);
+    frame = new JFrame("Graphics2D");
+    frame.setContentPane(new JPanel(new BorderLayout()));
+    configureFrame(frame);
   }
 
   protected static void configureFrame(JFrame frame) {
