@@ -16,6 +16,7 @@
 
 package joglg2d;
 
+import java.awt.Component;
 import java.awt.Graphics;
 
 import javax.media.opengl.GLCanvas;
@@ -50,8 +51,16 @@ public class G2DGLCanvas extends JComponent {
 
   public G2DGLCanvas(GLCapabilities capabilities) {
     canvas = new GLCanvas(capabilities);
+
+    /*
+     * Set both canvas and drawableComponent to be the same size, but we never
+     * draw the drawableComponent except into the canvas.
+     */
     setLayout(new OverlayLayout(this));
     add(canvas);
+
+    // don't take click events
+    canvas.setEnabled(false);
   }
 
   public G2DGLCanvas(JComponent drawableComponent) {
@@ -81,7 +90,7 @@ public class G2DGLCanvas extends JComponent {
     if (drawableComponent != null) {
       g2dglListener = new G2DGLEventListener(drawableComponent);
       canvas.addGLEventListener(g2dglListener);
-      add(drawableComponent);
+      add(component);
     }
   }
 
@@ -97,13 +106,18 @@ public class G2DGLCanvas extends JComponent {
 
   @Override
   protected void paintChildren(Graphics g) {
-    if (drawableComponent == null || !drawableComponent.isVisible()) {
-      super.paintChildren(g);
+    /*
+     * Don't paint the drawableComponent. If we'd use a GLJPanel instead of a
+     * GLCanvas, we'd have to paint it here.
+     */
+  }
+
+  @Override
+  protected void addImpl(Component comp, Object constraints, int index) {
+    if (comp == canvas || comp == drawableComponent) {
+      super.addImpl(comp, constraints, index);
     } else {
-      // won't work, will continually call paint()
-      drawableComponent.setVisible(false);
-      super.paintChildren(g);
-      drawableComponent.setVisible(true);
+      throw new IllegalArgumentException("Do not add component to this. Add them to the object in getDrawableComponent()");
     }
   }
 }
