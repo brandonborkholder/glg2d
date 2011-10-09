@@ -60,7 +60,9 @@ public class TestWindow extends JFrame implements Tester {
       }
     };
 
-    splitPane.setLeftComponent(new G2DGLCanvas(jogl));
+    G2DGLCanvas canvas = new G2DGLCanvas(jogl);
+    canvas.setGLDrawing(true);
+    splitPane.setLeftComponent(canvas);
     splitPane.setRightComponent(java2d);
     splitPane.setResizeWeight(0.5);
 

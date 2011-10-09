@@ -33,6 +33,8 @@ public class G2DGLCanvas extends JComponent {
 
   protected GLCanvas canvas;
 
+  protected boolean drawGL = true;
+
   /**
    * @see #removeNotify()
    */
@@ -79,6 +81,26 @@ public class G2DGLCanvas extends JComponent {
   public G2DGLCanvas(GLCapabilities capabilities, JComponent drawableComponent) {
     this(capabilities);
     setDrawableComponent(drawableComponent);
+  }
+
+  /**
+   * Returns {@code true} if the {@code drawableComonent} is drawn using OpenGL
+   * libraries. If {@code false}, it is using normal Java2D drawing routines.
+   */
+  public boolean isGLDrawing() {
+    return drawGL;
+  }
+
+  /**
+   * Sets the drawing path, {@code true} for OpenGL, {@code false} for normal
+   * Java2D.
+   * 
+   * @see #isGLDrawing()
+   */
+  public void setGLDrawing(boolean drawGL) {
+    this.drawGL = drawGL;
+    canvas.setVisible(drawGL);
+    repaint();
   }
 
   public void setDrawableComponent(JComponent component) {
@@ -162,7 +184,10 @@ public class G2DGLCanvas extends JComponent {
   @Override
   public void paint(Graphics g) {
     super.paint(g);
-    canvas.display();
+
+    if (drawGL) {
+      canvas.display();
+    }
   }
 
   @Override
@@ -171,6 +196,9 @@ public class G2DGLCanvas extends JComponent {
      * Don't paint the drawableComponent. If we'd use a GLJPanel instead of a
      * GLCanvas, we'd have to paint it here.
      */
+    if (!drawGL) {
+      super.paintChildren(g);
+    }
   }
 
   @Override
