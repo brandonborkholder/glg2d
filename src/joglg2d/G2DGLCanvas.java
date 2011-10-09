@@ -21,7 +21,10 @@ import java.awt.Graphics;
 
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLPbuffer;
+import javax.media.opengl.Threading;
 import javax.swing.JComponent;
 import javax.swing.OverlayLayout;
 
@@ -29,6 +32,11 @@ public class G2DGLCanvas extends JComponent {
   private static final long serialVersionUID = -471481443599019888L;
 
   protected GLCanvas canvas;
+
+  /**
+   * @see #removeNotify()
+   */
+  protected GLPbuffer sideContext;
 
   protected GLEventListener g2dglListener;
 
@@ -96,6 +104,59 @@ public class G2DGLCanvas extends JComponent {
 
   public JComponent getDrawableComponent() {
     return drawableComponent;
+  }
+
+  /**
+   * Calling {@link GLCanvas#removeNotify()} destroys the GLContext. We could
+   * mess with that internally, but this is slightly easier.
+   * <p>
+   * This method is particularly important for docking frameworks and moving the
+   * panel from one window to another. This is simple for normal Swing
+   * components, but GL contexts are destroyed when {@code removeNotify()} is
+   * called.
+   * </p>
+   * <p>
+   * Our workaround is to use context sharing. The pbuffer is initialized and by
+   * drawing into it at least once, we automatically share all textures, etc.
+   * with the new pbuffer. This pbuffer holds the data until we can initialize
+   * our new JOGL canvas. We share the pbuffer canvas with the new JOGL canvas
+   * and everything works nicely from then on.
+   * </p>
+   * <p>
+   * This has the unfortunate side-effect of leaking memory. I'm not sure how to
+   * fix this yet.
+   * </p>
+   */
+  @Override
+  public void removeNotify() {
+    prepareSideContext();
+
+    remove(canvas);
+    super.removeNotify();
+
+    canvas = new GLCanvas(sideContext.getChosenGLCapabilities(), null, sideContext.getContext(), null);
+    canvas.addGLEventListener(g2dglListener);
+    add(canvas, 0);
+  }
+
+  protected void prepareSideContext() {
+    if (sideContext == null) {
+      sideContext = GLDrawableFactory.getFactory().createGLPbuffer(canvas.getChosenGLCapabilities(), null, 1, 1, canvas.getContext());
+      sideContext.addGLEventListener(g2dglListener);
+    }
+
+    Runnable work = new Runnable() {
+      @Override
+      public void run() {
+        sideContext.display();
+      }
+    };
+
+    if (Threading.isOpenGLThread()) {
+      work.run();
+    } else {
+      Threading.invokeOnOpenGLThread(work);
+    }
   }
 
   @Override
