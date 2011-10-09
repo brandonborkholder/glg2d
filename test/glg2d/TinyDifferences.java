@@ -1,9 +1,9 @@
-package joglg2d;
+package glg2d;
 
 import java.awt.Graphics2D;
 
-import joglg2d.util.Painter;
-import joglg2d.util.TestWindow;
+import glg2d.util.Painter;
+import glg2d.util.TestWindow;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;

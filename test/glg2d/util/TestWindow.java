@@ -1,4 +1,4 @@
-package joglg2d.util;
+package glg2d.util;
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
@@ -16,15 +16,10 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.Timer;
 
-import joglg2d.G2DGLCanvas;
+import glg2d.G2DGLCanvas;
 
 import org.junit.Assert;
 
-/**
- * @author borkholder
- * @created Feb 6, 2010
- *
- */
 @SuppressWarnings("serial")
 public class TestWindow extends JFrame {
   public static final int SAME = 0;

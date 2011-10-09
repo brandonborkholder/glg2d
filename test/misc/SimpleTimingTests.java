@@ -10,7 +10,7 @@ import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLJPanel;
 import javax.swing.JFrame;
 
-import joglg2d.SimplePathVisitor;
+import glg2d.SimplePathVisitor;
 
 import org.junit.BeforeClass;
 import org.junit.Test;

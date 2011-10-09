@@ -14,7 +14,7 @@
    limitations under the License.
  ***************************************************************************/
 
-package joglg2d;
+package glg2d;
 
 /**
  * Assists in the drawing of a particular aspect of the Graphics2D object. This

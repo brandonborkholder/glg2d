@@ -1,4 +1,4 @@
-package joglg2d;
+package glg2d;
 
 import java.awt.BasicStroke;
 import java.awt.Color;

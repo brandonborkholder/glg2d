@@ -14,7 +14,7 @@
    limitations under the License.
  ***************************************************************************/
 
-package joglg2d;
+package glg2d;
 
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;

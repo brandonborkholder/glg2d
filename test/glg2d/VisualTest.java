@@ -1,4 +1,4 @@
-package joglg2d;
+package glg2d;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -25,17 +25,13 @@ import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.plaf.metal.MetalIconFactory;
 
-import joglg2d.util.Painter;
-import joglg2d.util.TestWindow;
+import glg2d.util.Painter;
+import glg2d.util.TestWindow;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-/**
- * @author borkholder
- * @created Feb 6, 2010
- */
 public class VisualTest {
   static TestWindow tester;
 

@@ -14,7 +14,7 @@
    limitations under the License.
  ***************************************************************************/
 
-package joglg2d;
+package glg2d;
 
 /**
  * This is a fast B&eacute;zier curve implementation. I can't use OpenGL's

@@ -1,4 +1,4 @@
-package joglg2d.swing;
+package glg2d.swing;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -19,7 +19,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.UIManager;
 
-import joglg2d.G2DGLCanvas;
+import glg2d.G2DGLCanvas;
 
 public class SwingTest {
   public static void main(String[] args) throws Exception {

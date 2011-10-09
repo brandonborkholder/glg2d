@@ -1,4 +1,4 @@
-package joglg2d.util;
+package glg2d.util;
 
 import java.util.LinkedList;
 import java.util.Queue;

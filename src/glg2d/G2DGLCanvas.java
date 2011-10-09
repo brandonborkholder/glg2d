@@ -14,7 +14,7 @@
    limitations under the License.
  ***************************************************************************/
 
-package joglg2d;
+package glg2d;
 
 import java.awt.Component;
 import java.awt.Graphics;

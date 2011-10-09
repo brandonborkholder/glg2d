@@ -1,4 +1,4 @@
-package joglg2d;
+package glg2d;
 
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -10,7 +10,7 @@ import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import joglg2d.util.Painter;
+import glg2d.util.Painter;
 
 public class WWSD {
   public static void main(String[] args) throws Exception {

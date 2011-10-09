@@ -1,4 +1,4 @@
-package joglg2d;
+package glg2d;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -8,21 +8,16 @@ import java.awt.geom.CubicCurve2D;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Random;
-import java.util.Scanner;
 
 import javax.imageio.ImageIO;
 
-import joglg2d.util.CustomPainter;
-import joglg2d.util.TestWindow;
+import glg2d.util.CustomPainter;
+import glg2d.util.TestWindow;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-/**
- * @author borkholder
- * @created Apr 28, 2010
- */
 public class StressTest {
   static final long TESTINGTIME = 10000;
 
