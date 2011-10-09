@@ -32,7 +32,7 @@ public class StressTest {
 
   @AfterClass
   public static void close() {
-    tester.close();
+    tester.finish();
   }
 
   @Test

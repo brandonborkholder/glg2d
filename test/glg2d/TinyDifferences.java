@@ -19,7 +19,7 @@ public class TinyDifferences {
 
   @AfterClass
   public static void close() {
-    tester.close();
+    tester.finish();
   }
 
   @Test

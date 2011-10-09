@@ -25,24 +25,29 @@ import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.plaf.metal.MetalIconFactory;
 
+import glg2d.util.AutoTester;
 import glg2d.util.Painter;
 import glg2d.util.TestWindow;
+import glg2d.util.Tester;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class VisualTest {
-  static TestWindow tester;
+  static Tester tester;
 
   @BeforeClass
   public static void initialize() {
+    // XXX if doing visual inspection
     tester = new TestWindow();
+    // if automated pixel comparison
+//    tester = new AutoTester();
   }
 
   @AfterClass
   public static void close() {
-    tester.close();
+    tester.finish();
   }
 
   @Test
@@ -335,7 +340,7 @@ public class VisualTest {
       }
     });
 
-    tester.waitForInput();
+    tester.assertSame();
   }
 
   @Test

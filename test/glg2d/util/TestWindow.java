@@ -1,5 +1,7 @@
 package glg2d.util;
 
+import glg2d.G2DGLCanvas;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.Graphics;
@@ -16,12 +18,10 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 import javax.swing.Timer;
 
-import glg2d.G2DGLCanvas;
-
 import org.junit.Assert;
 
 @SuppressWarnings("serial")
-public class TestWindow extends JFrame {
+public class TestWindow extends JFrame implements Tester {
   public static final int SAME = 0;
 
   public static final int DIFFERENT = 1;
@@ -103,6 +103,7 @@ public class TestWindow extends JFrame {
     }).start();
   }
 
+  @Override
   public void setPainter(final Painter painter) {
     this.painter = new CustomPainter() {
       @Override
@@ -116,10 +117,12 @@ public class TestWindow extends JFrame {
     this.painter = painter;
   }
 
-  public void close() {
+  @Override
+  public void finish() {
     setVisible(false);
   }
 
+  @Override
   public void assertSame() throws InterruptedException {
     int result = waitForInput();
     Assert.assertEquals("User did not consider the two to be the same.", SAME, result);
