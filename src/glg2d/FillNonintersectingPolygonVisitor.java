@@ -16,6 +16,7 @@
 
 package glg2d;
 
+import java.awt.BasicStroke;
 import java.awt.geom.PathIterator;
 
 import javax.media.opengl.GL;
@@ -32,7 +33,11 @@ public class FillNonintersectingPolygonVisitor extends SimplePathVisitor {
   @Override
   public void setGLContext(GL context) {
     gl = context;
-    gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+  }
+
+  @Override
+  public void setStroke(BasicStroke stroke) {
+    // nop
   }
 
   @Override

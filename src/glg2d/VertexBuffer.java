@@ -116,6 +116,9 @@ public class VertexBuffer {
       return;
     }
 
+    // use vertex arrays
+    gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+
     int size = buffer.position() / 2;
     buffer.rewind();
     gl.glVertexPointer(2, GL.GL_FLOAT, 0, buffer);

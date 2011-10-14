@@ -16,6 +16,7 @@
 
 package glg2d;
 
+import java.awt.BasicStroke;
 import java.awt.geom.PathIterator;
 
 import javax.media.opengl.GL;
@@ -47,6 +48,11 @@ public class TesselatorVisitor extends SimplePathVisitor {
   @Override
   public void setGLContext(GL context) {
     gl = context;
+  }
+  
+  @Override
+  public void setStroke(BasicStroke stroke) {
+    // nop
   }
 
   @Override

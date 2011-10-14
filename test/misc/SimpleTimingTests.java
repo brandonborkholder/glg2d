@@ -1,5 +1,8 @@
 package misc;
 
+import glg2d.SimplePathVisitor;
+
+import java.awt.BasicStroke;
 import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 import java.util.Random;
@@ -9,8 +12,6 @@ import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLJPanel;
 import javax.swing.JFrame;
-
-import glg2d.SimplePathVisitor;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -86,10 +87,10 @@ public class SimpleTimingTests {
 
       float stepSize = 1F / 15;
       float[] p = new float[2];
-      for (float t = 0; t <= 1; t += stepSize ) {
+      for (float t = 0; t <= 1; t += stepSize) {
         float tt = t * t;
-        float tMinusT = t * (1-t);
-        float minusTminusT = (1-t) * (1-t);
+        float tMinusT = t * (1 - t);
+        float minusTminusT = (1 - t) * (1 - t);
 
         p[0] = minusTminusT * control[0] + 2 * tMinusT * control[2] + tt * control[4];
         p[1] = minusTminusT * control[1] + 2 * tMinusT * control[3] + tt * control[5];
@@ -107,7 +108,11 @@ public class SimpleTimingTests {
       @Override
       public void setGLContext(GL context) {
       }
-      
+
+      @Override
+      public void setStroke(BasicStroke stroke) {
+      }
+
       @Override
       public void moveTo(float[] vertex) {
       }

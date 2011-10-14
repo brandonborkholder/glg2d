@@ -53,11 +53,9 @@ public class LineDrawingVisitor extends SimplePathVisitor {
   @Override
   public void setGLContext(GL context) {
     gl = context;
-
-    // use vertex arrays
-    gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
   }
 
+  @Override
   public void setStroke(BasicStroke stroke) {
     lineJoin = stroke.getLineJoin();
     lineOffset = stroke.getLineWidth() / 2;

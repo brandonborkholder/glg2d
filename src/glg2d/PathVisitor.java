@@ -16,6 +16,8 @@
 
 package glg2d;
 
+import java.awt.BasicStroke;
+
 import javax.media.opengl.GL;
 
 /**
@@ -39,6 +41,12 @@ public interface PathVisitor {
    *          The GL context
    */
   void setGLContext(GL context);
+
+  /**
+   * Sets the stroke to be used when drawing a path. It's not needed for
+   * visitors that fill.
+   */
+  void setStroke(BasicStroke stroke);
 
   /**
    * Specifies the starting location for a new subpath.

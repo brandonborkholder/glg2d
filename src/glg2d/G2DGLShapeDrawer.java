@@ -51,7 +51,9 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
 
   protected PathVisitor simpleShapeFillVisitor;
 
-  protected LineDrawingVisitor simpleStrokeVisitor;
+  protected PathVisitor simpleStrokeVisitor;
+
+  protected FastLineVisitor fastLineVisitor;
 
   protected Stroke stroke;
 
@@ -59,11 +61,16 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
     tesselatingVisitor = new TesselatorVisitor();
     simpleShapeFillVisitor = new FillNonintersectingPolygonVisitor();
     simpleStrokeVisitor = new LineDrawingVisitor();
+    fastLineVisitor = new FastLineVisitor();
   }
 
   @Override
   public void setG2D(GLGraphics2D g2d) {
     gl = g2d.getGLContext().getGL();
+    tesselatingVisitor.setGLContext(gl);
+    simpleShapeFillVisitor.setGLContext(gl);
+    simpleStrokeVisitor.setGLContext(gl);
+    fastLineVisitor.setGLContext(gl);
   }
 
   @Override
@@ -173,13 +180,18 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
   public void draw(Shape shape) {
     if (stroke instanceof BasicStroke) {
       BasicStroke basicStroke = (BasicStroke) stroke;
-      if (basicStroke.getDashArray() == null) {
+      if (fastLineVisitor.isValid(basicStroke)) {
+        fastLineVisitor.setStroke(basicStroke);
+        traceShape(shape, fastLineVisitor);
+        return;
+      } else if (basicStroke.getDashArray() == null) {
         simpleStrokeVisitor.setStroke(basicStroke);
         traceShape(shape, simpleStrokeVisitor);
         return;
       }
     }
 
+    // can fall through for various reasons
     fill(stroke.createStrokedShape(shape));
   }
 
@@ -198,7 +210,6 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
   }
 
   protected void traceShape(Shape shape, PathVisitor visitor) {
-    visitor.setGLContext(gl);
     PathIterator iterator = shape.getPathIterator(null);
     visitor.beginPoly(iterator.getWindingRule());
 
