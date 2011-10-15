@@ -40,6 +40,42 @@ public class FastLineVisitor extends SimplePathVisitor {
   @Override
   public void setStroke(BasicStroke stroke) {
     // already set the line width in isValid
+
+    /*
+     * Not perfect copy of the BasicStroke implementation, but it does get
+     * decently close. The pattern is pretty much the same. I think it's pretty
+     * much impossible to do with out a fragment shader and only the fixed
+     * function pipeline.
+     */
+    float[] dash = stroke.getDashArray();
+    if (dash != null) {
+      float totalLength = 0;
+      for (float f : dash) {
+        totalLength += f;
+      }
+
+      float lengthSoFar = 0;
+      int prevIndex = 0;
+      int mask = 0;
+      for (int i = 0; i < dash.length; i++) {
+        lengthSoFar += dash[i];
+
+        int nextIndex = (int) (lengthSoFar / totalLength * 16);
+        for (int j = prevIndex; j < nextIndex; j++) {
+          mask |= (~i & 1) << j;
+        }
+
+        prevIndex = nextIndex;
+      }
+
+      /*
+       * XXX Should actually use the stroke phase, but not sure how yet.
+       */
+
+      gl.glEnable(GL.GL_LINE_STIPPLE);
+      int factor = (int)totalLength;
+      gl.glLineStipple(factor >> 4, (short) mask);
+    }
   }
 
   /**
@@ -54,6 +90,12 @@ public class FastLineVisitor extends SimplePathVisitor {
    * </p>
    */
   protected boolean isValid(BasicStroke stroke) {
+    // if the dash length is odd, I don't know how to handle that yet
+    float[] dash = stroke.getDashArray();
+    if (dash != null && (dash.length & 1) == 1) {
+      return false;
+    }
+
     float[] matrix = new float[16];
     gl.glGetFloatv(GL.GL_MODELVIEW_MATRIX, matrix, 0);
 
@@ -103,5 +145,6 @@ public class FastLineVisitor extends SimplePathVisitor {
   @Override
   public void endPoly() {
     buffer.drawBuffer(gl, GL.GL_LINE_STRIP);
+    gl.glDisable(GL.GL_LINE_STIPPLE);
   }
 }

@@ -542,4 +542,23 @@ public class VisualTest {
 
     tester.assertSame();
   }
+  
+  @Test
+  public void drawStippleTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        g2d.setColor(Color.black);
+        g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 10, new float[] {14, 40}, 0));
+        g2d.drawLine(0, 0, 50, 100);
+        g2d.drawLine(10, 0, 60, 100);
+        g2d.drawLine(20, 0, 70, 100);
+        g2d.drawLine(10, 100, 0, 200);
+        g2d.drawLine(20, 100, 10, 200);
+        g2d.drawLine(30, 100, 20, 200);
+      }
+    });
+
+    tester.assertSame();
+  }
 }
