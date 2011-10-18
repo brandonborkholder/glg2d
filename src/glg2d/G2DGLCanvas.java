@@ -19,8 +19,10 @@ package glg2d;
 import java.awt.Component;
 import java.awt.Graphics;
 
+import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLPbuffer;
@@ -31,7 +33,7 @@ import javax.swing.OverlayLayout;
 public class G2DGLCanvas extends JComponent {
   private static final long serialVersionUID = -471481443599019888L;
 
-  protected GLCanvas canvas;
+  protected GLAutoDrawable canvas;
 
   protected boolean drawGL = true;
 
@@ -60,17 +62,14 @@ public class G2DGLCanvas extends JComponent {
   }
 
   public G2DGLCanvas(GLCapabilities capabilities) {
-    canvas = new GLCanvas(capabilities);
+    canvas = createGLComponent(capabilities, null);
 
     /*
      * Set both canvas and drawableComponent to be the same size, but we never
      * draw the drawableComponent except into the canvas.
      */
     setLayout(new OverlayLayout(this));
-    add(canvas);
-
-    // don't take click events
-    canvas.setEnabled(false);
+    add((Component) canvas);
   }
 
   public G2DGLCanvas(JComponent drawableComponent) {
@@ -84,6 +83,19 @@ public class G2DGLCanvas extends JComponent {
   }
 
   /**
+   * Creates a {@code Component} that is also a {@code GLAutoDrawable}. This is
+   * where all the drawing takes place. The advantage of a GLCanvas is that it
+   * is faster, but a GLJPanel is more portable. The component should also be
+   * disabled so that it does not receive events that should be sent to the
+   * {@code drawableComponent}.
+   */
+  protected GLAutoDrawable createGLComponent(GLCapabilities capabilities, GLContext shareWith) {
+    GLCanvas canvas = new GLCanvas(capabilities, null, shareWith, null);
+    canvas.setEnabled(false);
+    return canvas;
+  }
+
+  /**
    * Returns {@code true} if the {@code drawableComonent} is drawn using OpenGL
    * libraries. If {@code false}, it is using normal Java2D drawing routines.
    */
@@ -94,12 +106,12 @@ public class G2DGLCanvas extends JComponent {
   /**
    * Sets the drawing path, {@code true} for OpenGL, {@code false} for normal
    * Java2D.
-   * 
+   *
    * @see #isGLDrawing()
    */
   public void setGLDrawing(boolean drawGL) {
     this.drawGL = drawGL;
-    canvas.setVisible(drawGL);
+    ((Component) canvas).setVisible(drawGL);
     repaint();
   }
 
@@ -120,7 +132,7 @@ public class G2DGLCanvas extends JComponent {
     if (drawableComponent != null) {
       g2dglListener = new G2DGLEventListener(drawableComponent);
       canvas.addGLEventListener(g2dglListener);
-      add(component);
+      add(drawableComponent);
     }
   }
 
@@ -153,12 +165,12 @@ public class G2DGLCanvas extends JComponent {
   public void removeNotify() {
     prepareSideContext();
 
-    remove(canvas);
+    remove((Component) canvas);
     super.removeNotify();
 
-    canvas = new GLCanvas(sideContext.getChosenGLCapabilities(), null, sideContext.getContext(), null);
+    canvas = createGLComponent(sideContext.getChosenGLCapabilities(), sideContext.getContext());
     canvas.addGLEventListener(g2dglListener);
-    add(canvas, 0);
+    add((Component) canvas, 0);
   }
 
   protected void prepareSideContext() {
@@ -183,10 +195,10 @@ public class G2DGLCanvas extends JComponent {
 
   @Override
   public void paint(Graphics g) {
-    super.paint(g);
-
     if (drawGL) {
       canvas.display();
+    } else {
+      super.paint(g);
     }
   }
 
