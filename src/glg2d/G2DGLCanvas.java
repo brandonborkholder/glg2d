@@ -25,6 +25,7 @@ import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLJPanel;
 import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.Threading;
 import javax.swing.JComponent;
@@ -90,7 +91,7 @@ public class G2DGLCanvas extends JComponent {
    * {@code drawableComponent}.
    */
   protected GLAutoDrawable createGLComponent(GLCapabilities capabilities, GLContext shareWith) {
-    GLCanvas canvas = new GLCanvas(capabilities, null, shareWith, null);
+    GLJPanel canvas = new GLJPanel(capabilities, null, shareWith);
     canvas.setEnabled(false);
     return canvas;
   }
