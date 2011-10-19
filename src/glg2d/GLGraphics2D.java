@@ -60,6 +60,8 @@ import javax.media.opengl.Threading;
 public class GLGraphics2D extends Graphics2D implements Cloneable {
   protected static final double RAD_TO_DEG = 180d / Math.PI;
 
+  protected GLGraphics2D parent;
+
   protected GLContext glContext;
 
   protected GL gl;
@@ -472,14 +474,6 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   @Override
-  public Graphics create() {
-    gl.glMatrixMode(GL.GL_MODELVIEW);
-    gl.glPushMatrix();
-    gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
-    return clone();
-  }
-
-  @Override
   public void setPaintMode() {
     // TODO Auto-generated method stub
 
@@ -705,6 +699,20 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   @Override
+  public Graphics create() {
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glPushMatrix();
+    gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
+  
+    GLGraphics2D newG2d = clone();
+    stringDrawer.push(newG2d);
+    imageDrawer.push(newG2d);
+    shapeDrawer.push(newG2d);
+  
+    return newG2d;
+  }
+
+  @Override
   public void dispose() {
     /*
      * This is also called on the finalizer thread, which should not make OpenGL
@@ -712,6 +720,13 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
      */
     if (!isDisposed && Threading.isOpenGLThread()) {
       isDisposed = true;
+
+      if (parent != null) {
+        shapeDrawer.pop(parent);
+        imageDrawer.pop(parent);
+        stringDrawer.pop(parent);
+      }
+
       gl.glPopAttrib();
       gl.glMatrixMode(GL.GL_MODELVIEW);
       gl.glPopMatrix();
@@ -722,6 +737,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   protected GLGraphics2D clone() {
     try {
       GLGraphics2D clone = (GLGraphics2D) super.clone();
+      clone.parent = this;
       clone.hints = (RenderingHints) hints.clone();
       return clone;
     } catch (CloneNotSupportedException exception) {
