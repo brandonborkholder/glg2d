@@ -26,7 +26,11 @@ package glg2d;
  * the implementation for the quadratic on my own, but it's simple.
  */
 public abstract class SimplePathVisitor implements PathVisitor {
-  public static final int CURVE_STEPS = 15;
+  /**
+   * Just a guess. Would be nice to make a better guess based on what's visually
+   * acceptable.
+   */
+  public static final int CURVE_STEPS = 30;
 
   protected int steps = CURVE_STEPS;
 
