@@ -49,7 +49,7 @@ public class TesselatorVisitor extends SimplePathVisitor {
   public void setGLContext(GL context) {
     gl = context;
   }
-  
+
   @Override
   public void setStroke(BasicStroke stroke) {
     // nop
@@ -57,6 +57,8 @@ public class TesselatorVisitor extends SimplePathVisitor {
 
   @Override
   public void beginPoly(int windingRule) {
+    gl.glPushAttrib(GL.GL_ENABLE_BIT);
+    gl.glDisable(GL.GL_POLYGON_SMOOTH);
     tesselator = glu.gluNewTess();
 
     switch (windingRule) {
@@ -101,6 +103,7 @@ public class TesselatorVisitor extends SimplePathVisitor {
   public void endPoly() {
     glu.gluTessEndPolygon(tesselator);
     glu.gluDeleteTess(tesselator);
+    gl.glPopAttrib();
   }
 
   protected class TessellatorCallback extends GLUtessellatorCallbackAdapter {
