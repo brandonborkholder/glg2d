@@ -289,6 +289,8 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
       }
 
       composite = comp;
+      // need to pre-multiply the alpha
+      setColor(color);
     } else {
       throw new UnsupportedOperationException();
     }
@@ -443,12 +445,26 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   @Override
   public void setColor(Color c) {
     color = c;
-    setColor(gl, c);
+    setColorRespectComposite(c);
   }
 
-  public static void setColor(GL gl, Color c) {
+  /**
+   * Sets the current color with a call to glColor4*. But it respects the
+   * AlphaComposite if any. If the AlphaComposite wants to pre-multiply an
+   * alpha, pre-multiply it.
+   */
+  protected void setColorRespectComposite(Color c) {
+    float alpha = 1;
+    if (composite instanceof AlphaComposite) {
+      alpha = ((AlphaComposite) composite).getAlpha();
+    }
+
+    setColor(gl, c, alpha);
+  }
+
+  public static void setColor(GL gl, Color c, float preMultiplyAlpha) {
     int rgb = c.getRGB();
-    gl.glColor4ub((byte) (rgb >> 16 & 0xFF), (byte) (rgb >> 8 & 0xFF), (byte) (rgb & 0xFF), (byte) (rgb >> 24 & 0xFF));
+    gl.glColor4ub((byte) (rgb >> 16 & 0xFF), (byte) (rgb >> 8 & 0xFF), (byte) (rgb & 0xFF), (byte) ((rgb >> 24 & 0xFF) * preMultiplyAlpha));
   }
 
   @Override
@@ -597,9 +613,9 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void clearRect(int x, int y, int width, int height) {
-    setColor(gl, background);
+    setColor(gl, background, 1);
     fillRect(x, y, width, height);
-    setColor(gl, color);
+    setColorRespectComposite(color);
   }
 
   @Override
@@ -703,12 +719,12 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
     gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
-  
+
     GLGraphics2D newG2d = clone();
     stringDrawer.push(newG2d);
     imageDrawer.push(newG2d);
     shapeDrawer.push(newG2d);
-  
+
     return newG2d;
   }
 
