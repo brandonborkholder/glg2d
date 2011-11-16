@@ -40,6 +40,8 @@ public class TesselatorVisitor extends SimplePathVisitor {
 
   protected GLUtessellatorCallback callback;
 
+  protected boolean contourClosed = true;
+
   public TesselatorVisitor() {
     glu = new GLU();
     callback = new TessellatorCallback();
@@ -92,15 +94,22 @@ public class TesselatorVisitor extends SimplePathVisitor {
     glu.gluTessBeginContour(tesselator);
     double[] v = new double[] { vertex[0], vertex[1], 0 };
     glu.gluTessVertex(tesselator, v, 0, v);
+    contourClosed = false;
   }
 
   @Override
   public void closeLine() {
     glu.gluTessEndContour(tesselator);
+    contourClosed = true;
   }
 
   @Override
   public void endPoly() {
+    // shapes may just end on the starting point without calling closeLine
+    if (!contourClosed) {
+      closeLine();
+    }
+
     glu.gluTessEndPolygon(tesselator);
     glu.gluDeleteTess(tesselator);
     gl.glPopAttrib();
