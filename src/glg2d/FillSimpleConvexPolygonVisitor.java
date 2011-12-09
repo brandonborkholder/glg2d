@@ -57,11 +57,11 @@ public class FillSimpleConvexPolygonVisitor extends SimplePathVisitor {
 
   @Override
   public void lineTo(float[] vertex) {
-    vBuffer.addVertex(vertex[0], vertex[1]);
+    vBuffer.addVertex(vertex, 0, 1);
   }
 
   @Override
   public void moveTo(float[] vertex) {
-    vBuffer.addVertex(vertex[0], vertex[1]);
+    vBuffer.addVertex(vertex, 0, 1);
   }
 }

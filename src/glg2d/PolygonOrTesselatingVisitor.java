@@ -109,7 +109,7 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
       previousVertices = new float[] { vertex[0], vertex[1], 0, 0 };
 
       buffer.clear();
-      buffer.addVertex(vertex[0], vertex[1]);
+      buffer.addVertex(vertex, 0, 1);
     } else {
       tesselatorFallback.moveTo(vertex);
     }
@@ -118,7 +118,7 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
   @Override
   public void lineTo(float[] vertex) {
     if (isConvexSoFar) {
-      buffer.addVertex(vertex[0], vertex[1]);
+      buffer.addVertex(vertex, 0, 1);
 
       if (!isValidCorner(vertex)) {
         setUseTesselator(false);

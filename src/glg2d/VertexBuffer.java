@@ -75,9 +75,9 @@ public class VertexBuffer {
    *          The number of vertices, pairs of floats
    */
   public void addVertex(float[] array, int offset, int numVertices) {
-    for (int i = 0; i < numVertices; i++) {
-      addVertex(array[offset + i], array[offset + i + 1]);
-    }
+    int numFloats = numVertices * 2;
+    ensureCapacity(numFloats);
+    buffer.put(array, offset, numFloats);
   }
 
   /**
@@ -89,7 +89,13 @@ public class VertexBuffer {
    *          The y coordinate
    */
   public void addVertex(float x, float y) {
-    if (buffer.position() >= buffer.capacity() - 2) {
+    ensureCapacity(2);
+    buffer.put(x);
+    buffer.put(y);
+  }
+  
+  protected void ensureCapacity(int numNewFloats) {
+    if (buffer.capacity() <= buffer.position() + numNewFloats) {
       FloatBuffer larger = BufferUtil.newFloatBuffer(buffer.position() * 2);
       int position = buffer.position();
       buffer.rewind();
@@ -97,9 +103,6 @@ public class VertexBuffer {
       buffer = larger;
       buffer.position(position);
     }
-
-    buffer.put(x);
-    buffer.put(y);
   }
 
   /**
