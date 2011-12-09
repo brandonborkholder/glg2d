@@ -16,6 +16,7 @@
 
 package glg2d;
 
+import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -111,9 +112,23 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
     return renderer;
   }
 
+  /**
+   * Sets the font color, respecting the AlphaComposite if it wants to
+   * pre-multiply an alpha.
+   */
+  protected void setTextColorRespectComposite(TextRenderer renderer, Color color) {
+    if (g2d.getComposite() instanceof AlphaComposite) {
+      float alpha = ((AlphaComposite) g2d.getComposite()).getAlpha();
+      float[] srgb = color.getRGBComponents(null);
+      color = new Color(srgb[0], srgb[1], srgb[2], alpha * srgb[3]);
+    }
+
+    renderer.setColor(color);
+  }
+
   public void drawString(String string, Color color, int x, int y) {
     TextRenderer renderer = getRenderer(getFont());
-    renderer.setColor(color);
+    setTextColorRespectComposite(renderer, color);
 
     GL gl = g2d.getGLContext().getGL();
     gl.glMatrixMode(GL.GL_MODELVIEW);

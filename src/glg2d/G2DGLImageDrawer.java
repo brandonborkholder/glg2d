@@ -38,10 +38,13 @@ import com.sun.opengl.util.texture.TextureIO;
 public class G2DGLImageDrawer implements G2DDrawingHelper {
   protected TextureCache cache = new TextureCache();
 
+  protected GLGraphics2D g2d;
+
   protected GL gl;
 
   @Override
   public void setG2D(GLGraphics2D g2d) {
+    this.g2d = g2d;
     gl = g2d.getGLContext().getGL();
   }
 
@@ -119,9 +122,9 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
     }
 
     if (bgcolor == null) {
-      gl.glColor4f(1f, 1f, 1f, 1f);
+      g2d.setColorRespectComposite(Color.white);
     } else {
-      GLGraphics2D.setColor(gl, bgcolor);
+      g2d.setColorRespectComposite(bgcolor);
     }
   }
 
@@ -163,7 +166,7 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
    * later as images change. Just not sure how to handle it if they do. I
    * suspect I should be using the ImageConsumer class and dumping pixels to the
    * screen as I receive them.
-   * 
+   *
    * <p>
    * If an image is a BufferedImage, turn it into a texture and cache it. If
    * it's not, draw it to a BufferedImage and see if all the image data is
