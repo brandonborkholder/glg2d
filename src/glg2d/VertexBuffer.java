@@ -31,6 +31,8 @@ import com.sun.opengl.util.BufferUtil;
 public class VertexBuffer {
   protected static FloatBuffer globalBuffer = BufferUtil.newFloatBuffer(300);
 
+  protected static VertexBuffer shared = new VertexBuffer(globalBuffer);
+
   protected FloatBuffer buffer;
 
   /**
@@ -41,26 +43,30 @@ public class VertexBuffer {
    * the objects being drawn simultaneously must use a private buffer. See
    * {@code #VertexBuffer(int)}.
    */
-  public VertexBuffer() {
-    buffer = globalBuffer;
-    clear();
+  public static VertexBuffer getSharedBuffer() {
+    shared.clear();
+    return shared;
+  }
+
+  protected VertexBuffer(FloatBuffer buffer) {
+    this.buffer = buffer;
   }
 
   /**
    * Creates a private buffer. This can be used without fear of clobbering the
    * global buffer. This should only be used if you have a need to create two
    * parallel shapes at the same time.
-   * 
+   *
    * @param capacity
    *          The size of the buffer in number of vertices
    */
   public VertexBuffer(int capacity) {
-    buffer = BufferUtil.newFloatBuffer(capacity * 2);
+    this(BufferUtil.newFloatBuffer(capacity * 2));
   }
 
   /**
    * Adds multiple vertices to the buffer.
-   * 
+   *
    * @param array
    *          The array containing vertices in the form (x,y),(x,y)
    * @param offset
@@ -76,7 +82,7 @@ public class VertexBuffer {
 
   /**
    * Adds a vertex to the buffer.
-   * 
+   *
    * @param x
    *          The x coordinate
    * @param y
@@ -99,13 +105,16 @@ public class VertexBuffer {
    * already added are not needed anymore and the buffer will be reused.
    */
   public void clear() {
-    buffer.clear();
     buffer.rewind();
+  }
+
+  public FloatBuffer getBuffer() {
+    return buffer;
   }
 
   /**
    * Draws the vertices and rewinds the buffer to be ready to draw next time.
-   * 
+   *
    * @param gl
    *          The graphics context to use to draw
    * @param mode

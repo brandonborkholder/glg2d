@@ -26,7 +26,6 @@ import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.RectangularShape;
 import java.awt.geom.RoundRectangle2D;
 
 import javax.media.opengl.GL;
@@ -47,19 +46,19 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
 
   protected GL gl;
 
-  protected PathVisitor tesselatingVisitor;
+  protected FillSimpleConvexPolygonVisitor simpleFillVisitor;
 
-  protected PathVisitor simpleShapeFillVisitor;
+  protected PolygonOrTesselatingVisitor complexFillVisitor;
 
-  protected PathVisitor simpleStrokeVisitor;
+  protected LineDrawingVisitor simpleStrokeVisitor;
 
   protected FastLineVisitor fastLineVisitor;
 
   protected Stroke stroke;
 
   public G2DGLShapeDrawer() {
-    tesselatingVisitor = new TesselatorVisitor();
-    simpleShapeFillVisitor = new FillNonintersectingPolygonVisitor();
+    simpleFillVisitor = new FillSimpleConvexPolygonVisitor();
+    complexFillVisitor = new PolygonOrTesselatingVisitor();
     simpleStrokeVisitor = new LineDrawingVisitor();
     fastLineVisitor = new FastLineVisitor();
   }
@@ -67,8 +66,8 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
   @Override
   public void setG2D(GLGraphics2D g2d) {
     gl = g2d.getGLContext().getGL();
-    tesselatingVisitor.setGLContext(gl);
-    simpleShapeFillVisitor.setGLContext(gl);
+    simpleFillVisitor.setGLContext(gl);
+    complexFillVisitor.setGLContext(gl);
     simpleStrokeVisitor.setGLContext(gl);
     fastLineVisitor.setGLContext(gl);
   }
@@ -113,7 +112,7 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
   public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight, boolean fill) {
     ROUND_RECT.setRoundRect(x, y, width, height, arcWidth, arcHeight);
     if (fill) {
-      fillPolygon(ROUND_RECT);
+      fill(ROUND_RECT, true);
     } else {
       draw(ROUND_RECT);
     }
@@ -136,7 +135,7 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
   public void drawOval(int x, int y, int width, int height, boolean fill) {
     ELLIPSE.setFrame(x, y, width, height);
     if (fill) {
-      fillPolygon(ELLIPSE);
+      fill(ELLIPSE, true);
     } else {
       draw(ELLIPSE);
     }
@@ -145,7 +144,7 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
   public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle, boolean fill) {
     ARC.setArc(x, y, width, height, startAngle, arcAngle, fill ? Arc2D.PIE : Arc2D.OPEN);
     if (fill) {
-      fillPolygon(ARC);
+      fill(ARC);
     } else {
       draw(ARC);
     }
@@ -196,17 +195,15 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
   }
 
   public void fill(Shape shape) {
-    // optimization for some basic shapes
-    if (shape instanceof RectangularShape) {
-      fillPolygon(shape);
-      return;
-    }
-
-    traceShape(shape, tesselatingVisitor);
+    fill(shape, false);
   }
 
-  protected void fillPolygon(Shape shape) {
-    traceShape(shape, simpleShapeFillVisitor);
+  public void fill(Shape shape, boolean forceSimple) {
+    if (forceSimple) {
+      traceShape(shape, simpleFillVisitor);
+    } else {
+      traceShape(shape, complexFillVisitor);
+    }
   }
 
   protected void traceShape(Shape shape, PathVisitor visitor) {

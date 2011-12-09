@@ -28,7 +28,7 @@ import javax.media.opengl.GL;
  * useful criteria.
  */
 public class FastLineVisitor extends SimplePathVisitor {
-  protected VertexBuffer buffer = new VertexBuffer();
+  protected VertexBuffer buffer = VertexBuffer.getSharedBuffer();
 
   protected GL gl;
 
@@ -83,7 +83,7 @@ public class FastLineVisitor extends SimplePathVisitor {
    * takes into account whether or not the transform will blow the line width
    * out of scale and it obvious that we aren't drawing correct corners and line
    * endings.
-   * 
+   *
    * <p>
    * Note: This must be called before {@link #setStroke(BasicStroke)}. If this
    * returns {@code false} then this renderer should not be used.

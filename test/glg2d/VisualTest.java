@@ -1,11 +1,16 @@
 package glg2d;
 
+import glg2d.util.Painter;
+import glg2d.util.TestWindow;
+import glg2d.util.Tester;
+
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Arc2D;
 import java.awt.geom.CubicCurve2D;
@@ -24,11 +29,6 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JRadioButton;
 import javax.swing.plaf.metal.MetalIconFactory;
-
-import glg2d.util.AutoTester;
-import glg2d.util.Painter;
-import glg2d.util.TestWindow;
-import glg2d.util.Tester;
 
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -542,7 +542,7 @@ public class VisualTest {
 
     tester.assertSame();
   }
-  
+
   @Test
   public void drawStippleTest() throws Exception {
     tester.setPainter(new Painter() {
@@ -556,6 +556,29 @@ public class VisualTest {
         g2d.drawLine(10, 100, 0, 200);
         g2d.drawLine(20, 100, 10, 200);
         g2d.drawLine(30, 100, 20, 200);
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void unknownSimplePolyTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        g2d.setColor(Color.black);
+        g2d.setStroke(new BasicStroke(4));
+        AffineTransform xform = AffineTransform.getShearInstance(0.9, 0.9);
+        RoundRectangle2D rect = new RoundRectangle2D.Double(50, 50, 30, 60, 3, 7);
+
+        // returned shape is a path, not an obvious simple poly
+        Shape s = xform.createTransformedShape(rect);
+        g2d.fill(s);
+
+        xform = AffineTransform.getTranslateInstance(3, 2);
+        s = xform.createTransformedShape(new Ellipse2D.Double(50, 120, 30, 20));
+        g2d.fill(s);
       }
     });
 

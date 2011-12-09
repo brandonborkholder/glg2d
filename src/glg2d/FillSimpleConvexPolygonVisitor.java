@@ -22,13 +22,13 @@ import java.awt.geom.PathIterator;
 import javax.media.opengl.GL;
 
 /**
- * Fills a convex polygon. This class does not test to determine if the polygon
- * is convex.
+ * Fills a simple convex polygon. This class does not test to determine if the
+ * polygon is actually simple and convex.
  */
-public class FillNonintersectingPolygonVisitor extends SimplePathVisitor {
+public class FillSimpleConvexPolygonVisitor extends SimplePathVisitor {
   protected GL gl;
 
-  protected VertexBuffer vBuffer = new VertexBuffer();
+  protected VertexBuffer vBuffer = VertexBuffer.getSharedBuffer();
 
   @Override
   public void setGLContext(GL context) {
