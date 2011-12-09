@@ -89,11 +89,13 @@ public class VertexBuffer {
    *          The y coordinate
    */
   public void addVertex(float x, float y) {
-    if (buffer.position() == buffer.capacity()) {
+    if (buffer.position() >= buffer.capacity() - 2) {
       FloatBuffer larger = BufferUtil.newFloatBuffer(buffer.position() * 2);
+      int position = buffer.position();
       buffer.rewind();
       larger.put(buffer);
       buffer = larger;
+      buffer.position(position);
     }
 
     buffer.put(x);

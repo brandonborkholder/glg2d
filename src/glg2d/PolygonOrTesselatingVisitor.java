@@ -243,6 +243,7 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
      */
     FloatBuffer buf = buffer.getBuffer();
     int position = buf.position();
+    buf.limit(position);
     buf.rewind();
 
     float[] vertex = new float[2];
@@ -259,7 +260,7 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
     }
 
     // put everything back the way it was
+    buf.limit(buf.capacity());
     buf.position(position);
-    buf.rewind();
   }
 }

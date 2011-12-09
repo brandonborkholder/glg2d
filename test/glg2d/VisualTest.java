@@ -569,8 +569,8 @@ public class VisualTest {
       public void paint(Graphics2D g2d) {
         g2d.setColor(Color.black);
         g2d.setStroke(new BasicStroke(4));
-        AffineTransform xform = AffineTransform.getShearInstance(0.9, 0.9);
-        RoundRectangle2D rect = new RoundRectangle2D.Double(50, 50, 30, 60, 3, 7);
+        AffineTransform xform = AffineTransform.getShearInstance(0.2, 0.3);
+        RoundRectangle2D rect = new RoundRectangle2D.Double(30, 40, 30, 60, 3, 7);
 
         // returned shape is a path, not an obvious simple poly
         Shape s = xform.createTransformedShape(rect);
