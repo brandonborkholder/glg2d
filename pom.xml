@@ -1,0 +1,70 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.github.glg2d</groupId>
+  <artifactId>glg2d</artifactId>
+  <version>0.1-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>GLG2D</name>
+  <description>Java to OpenGL bridge</description>
+  <inceptionYear>2010</inceptionYear>
+  <licenses>
+    <license>
+      <name>Apache 2</name>
+      <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>borkholder</id>
+      <name>Brandon Borkholder</name>
+      <email>borkhobs@gmail.com</email>
+      <roles>
+        <role>architect</role>
+        <role>developer</role>
+      </roles>
+      <timezone>-5</timezone>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:https://github.com/brandonborkholder/glg2d.git</connection>
+    <developerConnection>scm:git:git@github.com:brandonborkholder/glg2d.git</developerConnection>
+    <tag>HEAD</tag>
+    <url>https://github.com/brandonborkholder/glg2d</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>jogl</groupId>
+      <artifactId>jogl</artifactId>
+      <version>1.1.1</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/jogl-1.1.1/jogl.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>jogl</groupId>
+      <artifactId>gluegen-rt</artifactId>
+      <version>1.1.1</version>
+      <scope>system</scope>
+      <systemPath>${basedir}/lib/jogl-1.1.1/gluegen-rt.jar</systemPath>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.10</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.6</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build></project>
