@@ -36,6 +36,12 @@ import com.sun.opengl.util.texture.TextureIO;
  * Draws images for the {@code GLGraphics2D} class.
  */
 public class G2DGLImageDrawer implements G2DDrawingHelper {
+  /**
+   * This cache is kept for each paint operation. We don't keep track of images
+   * being changed across different painting calls. The first time we see an
+   * image, we cache the texture. Then we clear the cache for the next call to
+   * {@code display()}.
+   */
   protected TextureCache cache = new TextureCache();
 
   protected GLGraphics2D g2d;
@@ -46,6 +52,7 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
   public void setG2D(GLGraphics2D g2d) {
     this.g2d = g2d;
     gl = g2d.getGLContext().getGL();
+    cache.clear();
   }
 
   @Override
@@ -178,39 +185,29 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
   protected Texture getTexture(Image image, ImageObserver observer) {
     Texture texture = cache.get(image);
     if (texture == null) {
-      boolean imageIsComplete;
       BufferedImage bufferedImage;
       if (image instanceof BufferedImage) {
         bufferedImage = (BufferedImage) image;
-        imageIsComplete = true;
       } else {
-        CompleteImageObserver obs = new CompleteImageObserver(observer);
-        bufferedImage = toBufferedImage(image, obs);
-        imageIsComplete = obs.isComplete;
+        bufferedImage = toBufferedImage(image);
       }
 
-      if (bufferedImage == null) {
-        return null;
-      } else {
-        texture = TextureIO.newTexture(bufferedImage, false);
-        if (imageIsComplete) {
-          cache.put(image, texture);
-        }
-      }
+      texture = TextureIO.newTexture(bufferedImage, false);
+      cache.put(image, texture);
     }
 
     return texture;
   }
 
-  protected BufferedImage toBufferedImage(Image image, ImageObserver observer) {
-    int width = image.getWidth(observer);
-    int height = image.getHeight(observer);
+  protected BufferedImage toBufferedImage(Image image) {
+    int width = image.getWidth(null);
+    int height = image.getHeight(null);
     if (width < 0 || height < 0) {
       return null;
     }
 
     BufferedImage bufferedImage = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
-    bufferedImage.createGraphics().drawImage(image, null, observer);
+    bufferedImage.createGraphics().drawImage(image, null, null);
     return bufferedImage;
   }
 
@@ -261,26 +258,6 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
         return other.hash == hash && get() == other.get();
       } else {
         return false;
-      }
-    }
-  }
-
-  private static class CompleteImageObserver implements ImageObserver {
-    private final ImageObserver inner;
-
-    boolean isComplete;
-
-    CompleteImageObserver(ImageObserver inner) {
-      this.inner = inner;
-    }
-
-    @Override
-    public boolean imageUpdate(Image img, int infoflags, int x, int y, int width, int height) {
-      isComplete = (infoflags & ImageObserver.ALLBITS) != 0;
-      if (inner == null) {
-        return false;
-      } else {
-        return inner.imageUpdate(img, infoflags, x, y, width, height);
       }
     }
   }
