@@ -5,7 +5,7 @@ primitives, like GL_POLYGON and GLU tesselation that make drawing in OpenGL so
 fast.  Therefore, this library depends on the JOGL 1.1.1a library and as JOGL
 evolves, so will this library.
 
-Find more information on http://brandonborkholder.github.com/joglj2d/
+Find more information on http://brandonborkholder.github.com/glg2d/
 
 Use cases:
  * use as a drop-in replacement for a JPanel and all Swing children will be
