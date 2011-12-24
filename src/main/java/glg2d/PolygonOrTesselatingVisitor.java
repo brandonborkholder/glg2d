@@ -74,6 +74,8 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
    * multiple move-to's, then we need to tesselate.
    */
   protected boolean firstSegment;
+  
+  protected int windingRule;
 
   protected PathVisitor tesselatorFallback;
 
@@ -93,7 +95,7 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
     firstSegment = true;
     sign = 0;
 
-    assert windingRule == PathIterator.WIND_NON_ZERO : "Invalid assumption";
+    this.windingRule = windingRule;
   }
 
   @Override
@@ -232,7 +234,7 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
     }
 
     // we made this assumption
-    tesselatorFallback.beginPoly(PathIterator.WIND_NON_ZERO);
+    tesselatorFallback.beginPoly(windingRule);
     drawToTesselator(doClose);
   }
 

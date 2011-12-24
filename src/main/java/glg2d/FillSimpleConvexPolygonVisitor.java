@@ -17,7 +17,6 @@
 package glg2d;
 
 import java.awt.BasicStroke;
-import java.awt.geom.PathIterator;
 
 import javax.media.opengl.GL;
 
@@ -43,7 +42,9 @@ public class FillSimpleConvexPolygonVisitor extends SimplePathVisitor {
   @Override
   public void beginPoly(int windingRule) {
     vBuffer.clear();
-    assert windingRule == PathIterator.WIND_NON_ZERO : "Invalid assumption";
+    /*
+     * We don't care what the winding rule is, we disable face culling.
+     */
   }
 
   @Override
