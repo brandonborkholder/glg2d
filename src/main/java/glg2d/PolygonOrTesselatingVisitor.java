@@ -17,7 +17,6 @@
 package glg2d;
 
 import java.awt.BasicStroke;
-import java.awt.geom.PathIterator;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
