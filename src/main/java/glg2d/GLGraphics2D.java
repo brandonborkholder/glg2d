@@ -131,37 +131,9 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     gl.glDisable(GL.GL_CULL_FACE);
     gl.glShadeModel(GL.GL_FLAT);
     gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
-
-    // push all the matrices
-    gl.glMatrixMode(GL.GL_PROJECTION);
-    gl.glPushMatrix();
-
-    // and setup the viewport
-    gl.glViewport(0, 0, width, height);
-    gl.glLoadIdentity();
-    gl.glOrtho(0, width, 0, height, -1, 1);
-
-    gl.glMatrixMode(GL.GL_MODELVIEW);
-    gl.glPushMatrix();
-    gl.glLoadIdentity();
-
-    // do the transform from Graphics2D coords to openGL coords
-    gl.glTranslatef(0, height, 0);
-    gl.glScalef(1, -1, 1);
-
-    gl.glMatrixMode(GL.GL_TEXTURE);
-    gl.glPushMatrix();
-    gl.glLoadIdentity();
   }
 
   protected void postPaint() {
-    gl.glMatrixMode(GL.GL_MODELVIEW);
-    gl.glPopMatrix();
-    gl.glMatrixMode(GL.GL_PROJECTION);
-    gl.glPopMatrix();
-    gl.glMatrixMode(GL.GL_TEXTURE);
-    gl.glPopMatrix();
-
     gl.glPopClientAttrib();
     gl.glPopAttrib();
     gl.glFlush();

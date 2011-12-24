@@ -107,7 +107,7 @@ public class G2DGLCanvas extends JComponent {
   /**
    * Sets the drawing path, {@code true} for OpenGL, {@code false} for normal
    * Java2D.
-   *
+   * 
    * @see #isGLDrawing()
    */
   public void setGLDrawing(boolean drawGL) {
@@ -131,10 +131,18 @@ public class G2DGLCanvas extends JComponent {
 
     drawableComponent = component;
     if (drawableComponent != null) {
-      g2dglListener = new G2DGLEventListener(drawableComponent);
+      g2dglListener = createG2DListener(drawableComponent);
       canvas.addGLEventListener(g2dglListener);
       add(drawableComponent);
     }
+  }
+
+  /**
+   * Creates the GLEventListener that will draw the given component to the
+   * canvas.
+   */
+  protected GLEventListener createG2DListener(JComponent drawingComponent) {
+    return new G2DGLEventListener(drawingComponent);
   }
 
   public JComponent getDrawableComponent() {

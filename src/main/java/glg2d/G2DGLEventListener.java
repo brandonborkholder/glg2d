@@ -18,7 +18,9 @@ package glg2d;
 
 import java.awt.Component;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
+import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
 import javax.swing.RepaintManager;
 
@@ -36,7 +38,7 @@ public class G2DGLEventListener implements GLEventListener {
    * {@code baseComponent} is used to provide default font, backgroundColor,
    * etc. to the {@code GLGraphics2D} object. It is also used for width, height
    * of the viewport in OpenGL.
-   *
+   * 
    * @param baseComponent
    *          The component to use for default settings.
    */
@@ -47,9 +49,73 @@ public class G2DGLEventListener implements GLEventListener {
   @Override
   public void display(GLAutoDrawable drawable) {
     g2d.setCanvas(drawable);
-    g2d.prePaint(baseComponent);
+    prePaint(drawable.getContext());
     paintGL(g2d);
+    postPaint(drawable.getContext());
+  }
+
+  /**
+   * Called after the canvas is set on {@code g2d} but before any painting is
+   * done. This should setup the matrices and ask {@code g2d} to setup any
+   * client state.
+   */
+  protected void prePaint(GLContext context) {
+    setupMatrices(context);
+    g2d.prePaint(baseComponent);
+  }
+
+  /**
+   * Sets up the three matrices, including the transform from OpenGL coordinate
+   * system to Java2D coordinates.
+   */
+  protected void setupMatrices(GLContext context) {
+    GL gl = context.getGL();
+
+    // push all the matrices
+    gl.glMatrixMode(GL.GL_PROJECTION);
+    gl.glPushMatrix();
+
+    int width = baseComponent.getWidth();
+    int height = baseComponent.getHeight();
+
+    // and setup the viewport
+    gl.glViewport(0, 0, width, height);
+    gl.glLoadIdentity();
+    gl.glOrtho(0, width, 0, height, -1, 1);
+
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glPushMatrix();
+    gl.glLoadIdentity();
+
+    // do the transform from Graphics2D coords to openGL coords
+    gl.glTranslatef(0, height, 0);
+    gl.glScalef(1, -1, 1);
+
+    gl.glMatrixMode(GL.GL_TEXTURE);
+    gl.glPushMatrix();
+    gl.glLoadIdentity();
+  }
+
+  /**
+   * Called after all Java2D painting is complete. This should restore the
+   * matrices if they were modified.
+   */
+  protected void postPaint(GLContext context) {
     g2d.postPaint();
+    popMatrices(context);
+  }
+
+  /**
+   * Pops all the matrices.
+   */
+  protected void popMatrices(GLContext context) {
+    GL gl = context.getGL();
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glPopMatrix();
+    gl.glMatrixMode(GL.GL_PROJECTION);
+    gl.glPopMatrix();
+    gl.glMatrixMode(GL.GL_TEXTURE);
+    gl.glPopMatrix();
   }
 
   /**
