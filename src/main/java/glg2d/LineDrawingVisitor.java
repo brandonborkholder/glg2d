@@ -102,7 +102,6 @@ public class LineDrawingVisitor extends SimplePathVisitor {
     }
 
     gl.glPopMatrix();
-    gl.glDisableClientState(GL.GL_VERTEX_ARRAY);
   }
 
   @Override
