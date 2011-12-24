@@ -140,11 +140,19 @@ public class FastLineVisitor extends SimplePathVisitor {
   @Override
   public void beginPoly(int windingRule) {
     buffer.clear();
+
+    /*
+     * pen hangs down and to the right. See java.awt.Graphics
+     */
+    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glPushMatrix();
+    gl.glTranslatef(0.5f, 0.5f, 0);
   }
 
   @Override
   public void endPoly() {
     buffer.drawBuffer(gl, GL.GL_LINE_STRIP);
     gl.glDisable(GL.GL_LINE_STIPPLE);
+    gl.glPopMatrix();
   }
 }
