@@ -30,6 +30,7 @@ import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.Threading;
 import javax.swing.JComponent;
 import javax.swing.OverlayLayout;
+import javax.swing.RepaintManager;
 
 public class G2DGLCanvas extends JComponent {
   private static final long serialVersionUID = -471481443599019888L;
@@ -71,6 +72,8 @@ public class G2DGLCanvas extends JComponent {
      */
     setLayout(new OverlayLayout(this));
     add((Component) canvas);
+    
+    RepaintManager.setCurrentManager(GLAwareRepaintManager.INSTANCE);
   }
 
   public G2DGLCanvas(JComponent drawableComponent) {
