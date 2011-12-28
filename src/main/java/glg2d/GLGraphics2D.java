@@ -280,7 +280,9 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void setRenderingHint(Key hintKey, Object hintValue) {
-    if (hintKey == RenderingHints.KEY_TEXT_ANTIALIASING) {
+    if (!hintKey.isCompatibleValue(hintValue)) {
+      throw new IllegalArgumentException(hintValue + " is not compatible with " + hintKey);
+    } else if (hintKey == RenderingHints.KEY_TEXT_ANTIALIASING) {
       stringDrawer.setAntiAlias(hintValue);
     } else if (hintKey == RenderingHints.KEY_ANTIALIASING) {
       shapeDrawer.setAntiAlias(hintValue);
@@ -416,6 +418,10 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void setColor(Color c) {
+    if (c == null) {
+      return;
+    }
+
     color = c;
     setColorRespectComposite(c);
   }
