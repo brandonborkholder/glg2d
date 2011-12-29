@@ -17,6 +17,7 @@
 package glg2d;
 
 import java.awt.BasicStroke;
+import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 
@@ -31,6 +32,8 @@ public class FastLineVisitor extends SimplePathVisitor {
   protected VertexBuffer buffer = VertexBuffer.getSharedBuffer();
 
   protected GL gl;
+
+  protected BasicStroke stroke;
 
   @Override
   public void setGLContext(GL context) {
@@ -73,9 +76,11 @@ public class FastLineVisitor extends SimplePathVisitor {
        */
 
       gl.glEnable(GL.GL_LINE_STIPPLE);
-      int factor = (int)totalLength;
+      int factor = (int) totalLength;
       gl.glLineStipple(factor >> 4, (short) mask);
     }
+
+    this.stroke = stroke;
   }
 
   /**
@@ -83,7 +88,7 @@ public class FastLineVisitor extends SimplePathVisitor {
    * takes into account whether or not the transform will blow the line width
    * out of scale and it obvious that we aren't drawing correct corners and line
    * endings.
-   *
+   * 
    * <p>
    * Note: This must be called before {@link #setStroke(BasicStroke)}. If this
    * returns {@code false} then this renderer should not be used.
@@ -115,6 +120,7 @@ public class FastLineVisitor extends SimplePathVisitor {
     // we'll only try if it's a thin line
     if (glLineWidth <= 3) {
       gl.glLineWidth(glLineWidth);
+      gl.glPointSize(glLineWidth);
       return true;
     } else {
       return false;
@@ -123,7 +129,7 @@ public class FastLineVisitor extends SimplePathVisitor {
 
   @Override
   public void moveTo(float[] vertex) {
-    buffer.drawBuffer(gl, GL.GL_LINE_STRIP);
+    drawLine(false);
     buffer.addVertex(vertex, 0, 1);
   }
 
@@ -134,7 +140,24 @@ public class FastLineVisitor extends SimplePathVisitor {
 
   @Override
   public void closeLine() {
-    buffer.drawBuffer(gl, GL.GL_LINE_LOOP);
+    drawLine(true);
+  }
+
+  protected void drawLine(boolean close) {
+    FloatBuffer buf = buffer.getBuffer();
+    int p = buf.position();
+    buffer.drawBuffer(gl, close ? GL.GL_LINE_LOOP : GL.GL_LINE_STRIP);
+
+    /*
+     * We'll ignore butt endcaps, but we'll pretend like we're drawing round,
+     * bevel or miter corners as well as round or square corners by just putting
+     * a point there. Since our line should be very thin, pixel-wise, it
+     * shouldn't be noticeable.
+     */
+    if (stroke.getEndCap() != BasicStroke.CAP_BUTT) {
+      buf.position(p);
+      buffer.drawBuffer(gl, GL.GL_POINTS);
+    }
   }
 
   @Override
@@ -147,12 +170,16 @@ public class FastLineVisitor extends SimplePathVisitor {
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
     gl.glTranslatef(0.5f, 0.5f, 0);
+    
+    gl.glPushAttrib(GL.GL_LINE_BIT | GL.GL_POINT_BIT);
   }
 
   @Override
   public void endPoly() {
-    buffer.drawBuffer(gl, GL.GL_LINE_STRIP);
+    drawLine(false);
     gl.glDisable(GL.GL_LINE_STIPPLE);
     gl.glPopMatrix();
+    
+    gl.glPopAttrib();
   }
 }
