@@ -106,8 +106,6 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
   }
 
   protected boolean drawImage(Image img, AffineTransform xform, Color color, ImageObserver observer) {
-    gl.glTexParameterf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_BLEND);
-
     Texture texture = getTexture(img, observer);
 
     begin(texture, xform, color);
@@ -118,6 +116,8 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
   }
 
   protected void begin(Texture texture, AffineTransform xform, Color bgcolor) {
+    gl.glTexParameterf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_BLEND);
+
     gl.glEnable(GL.GL_TEXTURE_2D);
     texture.bind();
 

@@ -119,8 +119,10 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
   protected void setTextColorRespectComposite(TextRenderer renderer, Color color) {
     if (g2d.getComposite() instanceof AlphaComposite) {
       float alpha = ((AlphaComposite) g2d.getComposite()).getAlpha();
-      float[] srgb = color.getRGBComponents(null);
-      color = new Color(srgb[0], srgb[1], srgb[2], alpha * srgb[3]);
+      if (alpha < 1) {
+        float[] rgba = color.getRGBComponents(null);
+        color = new Color(rgba[0], rgba[1], rgba[2], alpha * rgba[3]);
+      }
     }
 
     renderer.setColor(color);
