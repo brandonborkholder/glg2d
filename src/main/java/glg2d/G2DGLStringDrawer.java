@@ -130,7 +130,14 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
 
   public void drawString(String string, Color color, int x, int y) {
     TextRenderer renderer = getRenderer(getFont());
-    setTextColorRespectComposite(renderer, color);
+
+    begin(renderer, color);
+    renderer.draw3D(string, x, g2d.getHeight() - y, 0, 1);
+    end(renderer);
+  }
+
+  protected void begin(TextRenderer renderer, Color textColor) {
+    setTextColorRespectComposite(renderer, textColor);
 
     GL gl = g2d.getGLContext().getGL();
     gl.glMatrixMode(GL.GL_MODELVIEW);
@@ -139,9 +146,12 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
     gl.glTranslatef(0, -g2d.getHeight(), 0);
 
     renderer.begin3DRendering();
-    renderer.draw3D(string, x, g2d.getHeight() - y, 0, 1);
+  }
+
+  protected void end(TextRenderer renderer) {
     renderer.end3DRendering();
 
+    GL gl = g2d.getGLContext().getGL();
     gl.glPopMatrix();
   }
 
