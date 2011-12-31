@@ -22,17 +22,24 @@ import glg2d.GLGraphics2D;
 import java.awt.Color;
 import java.awt.geom.AffineTransform;
 
+import javax.media.opengl.GL;
+
 import com.sun.opengl.util.texture.Texture;
 
 public class G2DShaderImageDrawer extends G2DGLImageDrawer {
   protected Shader shader;
-  
+
+  public G2DShaderImageDrawer(Shader shader) {
+    this.shader = shader;
+  }
+
   @Override
   public void setG2D(GLGraphics2D g2d) {
     super.setG2D(g2d);
 
-    if (shader == null) {
-      shader = ((GLShaderGraphics2D) g2d).getShaderRegistry().getTextureShader();
+    GL gl = g2d.getGLContext().getGL();
+    if (!shader.isProgram(gl)) {
+      shader.setup(gl);
     }
   }
 
@@ -41,7 +48,7 @@ public class G2DShaderImageDrawer extends G2DGLImageDrawer {
     super.begin(texture, xform, bgcolor);
     shader.use(true);
   }
-  
+
   @Override
   protected void end(Texture texture) {
     shader.use(false);

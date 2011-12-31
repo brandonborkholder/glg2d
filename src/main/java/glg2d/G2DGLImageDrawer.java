@@ -46,12 +46,9 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
 
   protected GLGraphics2D g2d;
 
-  protected GL gl;
-
   @Override
   public void setG2D(GLGraphics2D g2d) {
     this.g2d = g2d;
-    gl = g2d.getGLContext().getGL();
     cache.clear();
   }
 
@@ -116,6 +113,7 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
   }
 
   protected void begin(Texture texture, AffineTransform xform, Color bgcolor) {
+    GL gl = g2d.getGLContext().getGL();
     gl.glTexParameterf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_BLEND);
 
     gl.glEnable(GL.GL_TEXTURE_2D);
@@ -136,6 +134,7 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
   }
 
   protected void end(Texture texture) {
+    GL gl = g2d.getGLContext().getGL();
     gl.glEnd();
     gl.glPopMatrix();
     gl.glDisable(GL.GL_TEXTURE_2D);
@@ -150,6 +149,7 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
   }
 
   protected void applyTexture(Texture texture, int dx1, int dy1, int dx2, int dy2, float sx1, float sy1, float sx2, float sy2) {
+    GL gl = g2d.getGLContext().getGL();
     gl.glBegin(GL.GL_QUADS);
 
     // SW

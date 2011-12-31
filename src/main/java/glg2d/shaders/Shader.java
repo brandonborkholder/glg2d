@@ -16,12 +16,18 @@
 
 package glg2d.shaders;
 
+import javax.media.opengl.GL;
+
 public interface Shader {
-  void compileVertexShader();
+  void setup(GL gl);
+  
+  boolean isProgram(GL gl);
+  
+  void compileVertexShader() throws ShaderException;
 
-  void compileFragmentShader();
+  void compileFragmentShader() throws ShaderException;
 
-  void createAndAttach();
+  void createProgramAndAttach() throws ShaderException;
 
   void use(boolean use);
 

@@ -16,19 +16,18 @@
 
 package glg2d.shaders;
 
-import glg2d.G2DGLStringDrawer;
+import glg2d.G2DGLShapeDrawer;
 import glg2d.GLGraphics2D;
+import glg2d.PathVisitor;
 
-import java.awt.Color;
+import java.awt.Shape;
 
 import javax.media.opengl.GL;
 
-import com.sun.opengl.util.j2d.TextRenderer;
-
-public class G2DShaderStringDrawer extends G2DGLStringDrawer {
+public class G2DShaderShapeDrawer extends G2DGLShapeDrawer {
   protected Shader shader;
 
-  public G2DShaderStringDrawer(Shader shader) {
+  public G2DShaderShapeDrawer(Shader shader) {
     this.shader = shader;
   }
 
@@ -43,14 +42,9 @@ public class G2DShaderStringDrawer extends G2DGLStringDrawer {
   }
 
   @Override
-  protected void begin(TextRenderer renderer, Color textColor) {
-    super.begin(renderer, textColor);
+  protected void traceShape(Shape shape, PathVisitor visitor) {
     shader.use(true);
-  }
-
-  @Override
-  protected void end(TextRenderer renderer) {
+    super.traceShape(shape, visitor);
     shader.use(false);
-    super.end(renderer);
   }
 }

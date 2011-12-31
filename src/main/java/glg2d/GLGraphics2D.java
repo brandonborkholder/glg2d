@@ -44,6 +44,7 @@ import java.awt.image.ImageObserver;
 import java.awt.image.RenderedImage;
 import java.awt.image.renderable.RenderableImage;
 import java.text.AttributedCharacterIterator;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -90,23 +91,49 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   protected RenderingHints hints;
 
+  protected G2DDrawingHelper[] helpers = new G2DDrawingHelper[0];
+
   public GLGraphics2D(int width, int height) {
     this.height = height;
     this.width = width;
+
+    hints = new RenderingHints(Collections.<Key, Object> emptyMap());
+    
+    createDrawingHelpers();
+  }
+  
+  protected void createDrawingHelpers() {
     shapeDrawer = new G2DGLShapeDrawer();
     imageDrawer = new G2DGLImageDrawer();
     stringDrawer = new G2DGLStringDrawer();
+    
+    addG2DDrawingHelper(shapeDrawer);
+    addG2DDrawingHelper(imageDrawer);
+    addG2DDrawingHelper(stringDrawer);
+  }
 
-    hints = new RenderingHints(Collections.<Key, Object> emptyMap());
+  public void addG2DDrawingHelper(G2DDrawingHelper helper) {
+    helpers = Arrays.copyOf(helpers, helpers.length + 1);
+    helpers[helpers.length - 1] = helper;
+  }
+  
+  public void removeG2DDrawingHelper(G2DDrawingHelper helper) {
+    for (int i = 0; i < helpers.length; i++) {
+      if (helpers[i] == helper) {
+        System.arraycopy(helpers, i + 1, helpers, i, helpers.length - (i + 1));
+        helpers = Arrays.copyOf(helpers, helpers.length - 1);
+        break;
+      }
+    }
   }
 
   protected void setCanvas(GLAutoDrawable drawable) {
     glContext = drawable.getContext();
     gl = glContext.getGL();
 
-    shapeDrawer.setG2D(this);
-    imageDrawer.setG2D(this);
-    stringDrawer.setG2D(this);
+    for (G2DDrawingHelper helper : helpers) {
+      helper.setG2D(this);
+    }
   }
 
   protected void prePaint(Component component) {
@@ -152,8 +179,9 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   protected void glDispose() {
-    stringDrawer.dispose();
-    imageDrawer.dispose();
+    for (G2DDrawingHelper helper : helpers) {
+      helper.dispose();
+    }
   }
 
   @Override
@@ -699,9 +727,10 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
 
     GLGraphics2D newG2d = clone();
-    stringDrawer.push(newG2d);
-    imageDrawer.push(newG2d);
-    shapeDrawer.push(newG2d);
+    
+    for (G2DDrawingHelper helper : helpers) {
+      helper.push(newG2d);
+    }
 
     return newG2d;
   }
@@ -716,9 +745,9 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
       isDisposed = true;
 
       if (parent != null) {
-        shapeDrawer.pop(parent);
-        imageDrawer.pop(parent);
-        stringDrawer.pop(parent);
+        for (G2DDrawingHelper helper : helpers) {
+          helper.pop(parent);
+        }
       }
 
       gl.glPopAttrib();

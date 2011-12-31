@@ -18,30 +18,22 @@ package glg2d.shaders;
 
 import glg2d.GLGraphics2D;
 
-import javax.media.opengl.GLAutoDrawable;
-
 public class GLShaderGraphics2D extends GLGraphics2D {
-  protected ShaderRegistry shaders;
-
   public GLShaderGraphics2D(int width, int height) {
     super(width, height);
-
-    shaders = new ShaderRegistry();
-    
-    imageDrawer = new G2DShaderImageDrawer();
-    stringDrawer = new G2DShaderStringDrawer();
   }
 
   @Override
-  protected void setCanvas(GLAutoDrawable drawable) {
-    glContext = drawable.getContext();
-    gl = glContext.getGL();
+  protected void createDrawingHelpers() {
+    Shader s = new ResourceShader(GLShaderGraphics2D.class, "TextureShader.v", "TextureShader.f");
+    imageDrawer = new G2DShaderImageDrawer(s);
+    stringDrawer = new G2DShaderStringDrawer(s);
 
-    shaders.setG2D(this);
-    super.setCanvas(drawable);
-  }
+    s = new ResourceShader(GLShaderGraphics2D.class, "FixedFuncShader.v", "FixedFuncShader.f");
+    shapeDrawer = new G2DShaderShapeDrawer(s);
 
-  public ShaderRegistry getShaderRegistry() {
-    return shaders;
+    addG2DDrawingHelper(imageDrawer);
+    addG2DDrawingHelper(stringDrawer);
+    addG2DDrawingHelper(shapeDrawer);
   }
 }
