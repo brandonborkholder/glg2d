@@ -27,6 +27,8 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.awt.geom.Rectangle2D;
 import java.awt.geom.RoundRectangle2D;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import javax.media.opengl.GL;
 
@@ -45,6 +47,8 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
   protected static final Line2D.Double LINE = new Line2D.Double();
 
   protected GL gl;
+
+  protected Deque<Stroke> strokeStack = new ArrayDeque<Stroke>(10);
 
   protected FillSimpleConvexPolygonVisitor simpleFillVisitor;
 
@@ -74,11 +78,14 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
 
   @Override
   public void push(GLGraphics2D newG2d) {
+    strokeStack.push(stroke);
   }
 
   @Override
   public void pop(GLGraphics2D parentG2d) {
-    setStroke(parentG2d.getStroke());
+    if (!strokeStack.isEmpty()) {
+      stroke = strokeStack.pop();
+    }
     setAntiAlias(parentG2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING));
   }
 
