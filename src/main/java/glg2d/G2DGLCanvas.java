@@ -33,6 +33,7 @@ import javax.media.opengl.GLJPanel;
 import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.Threading;
 import javax.swing.JComponent;
+import javax.swing.JViewport;
 import javax.swing.RepaintManager;
 
 public class G2DGLCanvas extends JComponent {
@@ -140,6 +141,8 @@ public class G2DGLCanvas extends JComponent {
       g2dglListener = createG2DListener(drawableComponent);
       canvas.addGLEventListener(g2dglListener);
       add(drawableComponent);
+
+      forceViewportToNativeDraw(drawableComponent);
     }
   }
 
@@ -234,6 +237,23 @@ public class G2DGLCanvas extends JComponent {
       super.addImpl(comp, constraints, index);
     } else {
       throw new IllegalArgumentException("Do not add component to this. Add them to the object in getDrawableComponent()");
+    }
+  }
+
+  /**
+   * XXX This is a workaround until I figure out how to do blitting properly in
+   * viewports.
+   */
+  protected void forceViewportToNativeDraw(Container parent) {
+    for (int i = 0; i < parent.getComponentCount(); i++) {
+      Component c = parent.getComponent(i);
+      if (c instanceof JViewport) {
+        ((JViewport) c).setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
+      }
+
+      if (c instanceof Container) {
+        forceViewportToNativeDraw((Container) c);
+      }
     }
   }
 
