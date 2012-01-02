@@ -24,6 +24,8 @@ import java.awt.RenderingHints;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.text.AttributedCharacterIterator;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,6 +41,8 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
 
   protected Font font;
 
+  protected Deque<Font> fontStack = new ArrayDeque<Font>(10);
+
   protected GLGraphics2D g2d;
 
   protected boolean antiAlias;
@@ -50,12 +54,15 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
 
   @Override
   public void push(GLGraphics2D newG2d) {
+    fontStack.push(font);
   }
 
   @Override
   public void pop(GLGraphics2D parentG2d) {
-    font = parentG2d.getFont();
     setAntiAlias(parentG2d.getRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING));
+    if (!fontStack.isEmpty()) {
+      font = fontStack.pop();
+    }
   }
 
   @Override
