@@ -213,7 +213,7 @@ public class G2DGLCanvas extends JComponent {
 
   @Override
   public void paint(Graphics g) {
-    if (drawGL) {
+    if (drawGL && drawableComponent != null) {
       canvas.display();
     } else {
       super.paint(g);

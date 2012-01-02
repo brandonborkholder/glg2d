@@ -48,10 +48,9 @@ public class G2DGLEventListener implements GLEventListener {
 
   @Override
   public void display(GLAutoDrawable drawable) {
-    g2d.setCanvas(drawable);
-    prePaint(drawable.getContext());
+    prePaint(drawable);
     paintGL(g2d);
-    postPaint(drawable.getContext());
+    postPaint(drawable);
   }
 
   /**
@@ -59,9 +58,9 @@ public class G2DGLEventListener implements GLEventListener {
    * done. This should setup the matrices and ask {@code g2d} to setup any
    * client state.
    */
-  protected void prePaint(GLContext context) {
-    setupMatrices(context);
-    g2d.prePaint(baseComponent);
+  protected void prePaint(GLAutoDrawable drawable) {
+    setupMatrices(drawable.getContext());
+    g2d.prePaint(drawable, baseComponent);
   }
 
   /**
@@ -100,9 +99,9 @@ public class G2DGLEventListener implements GLEventListener {
    * Called after all Java2D painting is complete. This should restore the
    * matrices if they were modified.
    */
-  protected void postPaint(GLContext context) {
+  protected void postPaint(GLAutoDrawable drawable) {
     g2d.postPaint();
-    popMatrices(context);
+    popMatrices(drawable.getContext());
   }
 
   /**

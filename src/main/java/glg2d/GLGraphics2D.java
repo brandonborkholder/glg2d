@@ -36,7 +36,6 @@ import java.awt.Stroke;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
-import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -84,6 +83,8 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   protected G2DGLStringDrawer stringDrawer;
 
   protected Rectangle clip;
+
+  protected Rectangle userClip;
 
   protected Composite composite;
 
@@ -136,7 +137,14 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     }
   }
 
-  protected void prePaint(Component component) {
+  protected void prePaint(GLAutoDrawable drawable, Component component) {
+    setCanvas(drawable);
+    setupState(component);
+
+    gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
+  }
+
+  protected void setupState(Component component) {
     // push all GL states
     gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
     gl.glPushClientAttrib((int) GL.GL_ALL_CLIENT_ATTRIB_BITS);
@@ -156,7 +164,6 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     gl.glDisable(GL.GL_DEPTH_TEST);
     gl.glDisable(GL.GL_CULL_FACE);
     gl.glShadeModel(GL.GL_FLAT);
-    gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
   }
 
   protected void postPaint() {
@@ -532,11 +539,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     if (clip == null) {
       return null;
     } else {
-      try {
-        return getTransform().createInverse().createTransformedShape(clip).getBounds();
-      } catch (NoninvertibleTransformException e) {
-        throw new RuntimeException(e);
-      }
+      return userClip;
     }
   }
 
@@ -574,13 +577,16 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   protected void setClip(Rectangle2D clipShape, boolean intersect) {
     if (clipShape == null) {
       clip = null;
+      userClip = null;
       scissor(false);
     } else if (intersect && clip != null) {
       Rectangle rect = getTransform().createTransformedShape(clipShape).getBounds();
       clip = rect.intersection(clip);
+      userClip = userClip.intersection(clipShape.getBounds());
       scissor(true);
     } else {
       clip = getTransform().createTransformedShape(clipShape).getBounds();
+      userClip = clipShape.getBounds();
       scissor(true);
     }
   }
