@@ -29,11 +29,15 @@ import javax.media.opengl.GL;
  * useful criteria.
  */
 public class FastLineVisitor extends SimplePathVisitor {
+  protected float[] testMatrix = new float[16];
+
   protected VertexBuffer buffer = VertexBuffer.getSharedBuffer();
 
   protected GL gl;
 
   protected BasicStroke stroke;
+
+  protected float glLineWidth;
 
   @Override
   public void setGLContext(GL context) {
@@ -42,7 +46,8 @@ public class FastLineVisitor extends SimplePathVisitor {
 
   @Override
   public void setStroke(BasicStroke stroke) {
-    // already set the line width in isValid
+    gl.glLineWidth(glLineWidth);
+    gl.glPointSize(glLineWidth);
 
     /*
      * Not perfect copy of the BasicStroke implementation, but it does get
@@ -101,11 +106,10 @@ public class FastLineVisitor extends SimplePathVisitor {
       return false;
     }
 
-    float[] matrix = new float[16];
-    gl.glGetFloatv(GL.GL_MODELVIEW_MATRIX, matrix, 0);
+    gl.glGetFloatv(GL.GL_MODELVIEW_MATRIX, testMatrix, 0);
 
-    float scaleX = Math.abs(matrix[0]);
-    float scaleY = Math.abs(matrix[5]);
+    float scaleX = Math.abs(testMatrix[0]);
+    float scaleY = Math.abs(testMatrix[5]);
 
     // scales are different, we can't get a good line width
     if (Math.abs(scaleX - scaleY) > 1e-6) {
@@ -115,16 +119,10 @@ public class FastLineVisitor extends SimplePathVisitor {
     float strokeWidth = stroke.getLineWidth();
 
     // gl line width is in pixels, convert to pixel width
-    float glLineWidth = strokeWidth * scaleX;
+    glLineWidth = strokeWidth * scaleX;
 
     // we'll only try if it's a thin line
-    if (glLineWidth <= 3) {
-      gl.glLineWidth(glLineWidth);
-      gl.glPointSize(glLineWidth);
-      return true;
-    } else {
-      return false;
-    }
+    return glLineWidth <= 3;
   }
 
   @Override
@@ -154,7 +152,7 @@ public class FastLineVisitor extends SimplePathVisitor {
      * a point there. Since our line should be very thin, pixel-wise, it
      * shouldn't be noticeable.
      */
-    if (stroke.getEndCap() != BasicStroke.CAP_BUTT) {
+    if (stroke.getEndCap() != BasicStroke.CAP_BUTT && stroke.getDashArray() == null) {
       buf.position(p);
       buffer.drawBuffer(gl, GL.GL_POINTS);
     }
@@ -170,7 +168,7 @@ public class FastLineVisitor extends SimplePathVisitor {
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
     gl.glTranslatef(0.5f, 0.5f, 0);
-    
+
     gl.glPushAttrib(GL.GL_LINE_BIT | GL.GL_POINT_BIT);
   }
 
@@ -179,7 +177,7 @@ public class FastLineVisitor extends SimplePathVisitor {
     drawLine(false);
     gl.glDisable(GL.GL_LINE_STIPPLE);
     gl.glPopMatrix();
-    
+
     gl.glPopAttrib();
   }
 }
