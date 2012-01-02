@@ -17,7 +17,11 @@
 package glg2d;
 
 import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Graphics;
+import java.awt.LayoutManager2;
+import java.io.Serializable;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
@@ -29,7 +33,6 @@ import javax.media.opengl.GLJPanel;
 import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.Threading;
 import javax.swing.JComponent;
-import javax.swing.OverlayLayout;
 import javax.swing.RepaintManager;
 
 public class G2DGLCanvas extends JComponent {
@@ -70,9 +73,9 @@ public class G2DGLCanvas extends JComponent {
      * Set both canvas and drawableComponent to be the same size, but we never
      * draw the drawableComponent except into the canvas.
      */
-    setLayout(new OverlayLayout(this));
+    setLayout(new GLOverlayLayout());
     add((Component) canvas);
-    
+
     RepaintManager.setCurrentManager(GLAwareRepaintManager.INSTANCE);
   }
 
@@ -231,6 +234,99 @@ public class G2DGLCanvas extends JComponent {
       super.addImpl(comp, constraints, index);
     } else {
       throw new IllegalArgumentException("Do not add component to this. Add them to the object in getDrawableComponent()");
+    }
+  }
+
+  /**
+   * Implements a simple layout where all the components are the same size as
+   * the parent.
+   */
+  protected static class GLOverlayLayout implements LayoutManager2, Serializable {
+    private static final long serialVersionUID = -8248213786715565045L;
+
+    @Override
+    public Dimension preferredLayoutSize(Container parent) {
+      if (parent.isPreferredSizeSet() || parent.getComponentCount() == 0) {
+        return parent.getPreferredSize();
+      } else {
+        int x = -1, y = -1;
+        for (Component child : parent.getComponents()) {
+          Dimension dim = child.getPreferredSize();
+          x = Math.max(dim.width, x);
+          y = Math.max(dim.height, y);
+        }
+
+        return new Dimension(x, y);
+      }
+    }
+
+    @Override
+    public Dimension minimumLayoutSize(Container parent) {
+      if (parent.getComponentCount() == 0) {
+        return new Dimension(0, 0);
+      } else {
+        int x = Integer.MAX_VALUE, y = Integer.MAX_VALUE;
+        for (Component child : parent.getComponents()) {
+          Dimension dim = child.getMinimumSize();
+          x = Math.min(dim.width, x);
+          y = Math.min(dim.height, y);
+        }
+
+        return new Dimension(x, y);
+      }
+    }
+
+    @Override
+    public Dimension maximumLayoutSize(Container parent) {
+      if (parent.getComponentCount() == 0) {
+        return new Dimension(0, 0);
+      } else {
+        int x = -1, y = -1;
+        for (Component child : parent.getComponents()) {
+          Dimension dim = child.getMaximumSize();
+          x = Math.max(dim.width, x);
+          y = Math.max(dim.height, y);
+        }
+
+        return new Dimension(x, y);
+      }
+    }
+
+    @Override
+    public void layoutContainer(Container parent) {
+      for (Component child : parent.getComponents()) {
+        child.setSize(parent.getSize());
+      }
+    }
+
+    @Override
+    public void addLayoutComponent(String name, Component comp) {
+      // nop
+    }
+
+    @Override
+    public void addLayoutComponent(Component comp, Object constraints) {
+      // nop
+    }
+
+    @Override
+    public void removeLayoutComponent(Component comp) {
+      // nop
+    }
+
+    @Override
+    public void invalidateLayout(Container target) {
+      // nop
+    }
+
+    @Override
+    public float getLayoutAlignmentX(Container target) {
+      return 0.5f;
+    }
+
+    @Override
+    public float getLayoutAlignmentY(Container target) {
+      return 0.5f;
     }
   }
 }
