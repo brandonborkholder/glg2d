@@ -114,9 +114,17 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
 
   protected void begin(Texture texture, AffineTransform xform, Color bgcolor) {
     GL gl = g2d.getGLContext().getGL();
+    gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
     gl.glTexParameterf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_BLEND);
 
-    gl.glEnable(GL.GL_TEXTURE_2D);
+    /*
+     * This is unexpected since we never disable blending, but in some cases it
+     * interacts poorly with multiple split panes, scroll panes and the text
+     * renderer to disable blending.
+     */
+    g2d.setComposite(g2d.getComposite());
+
+    texture.enable();
     texture.bind();
 
     gl.glMatrixMode(GL.GL_MODELVIEW);
@@ -137,7 +145,7 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
     GL gl = g2d.getGLContext().getGL();
     gl.glEnd();
     gl.glPopMatrix();
-    gl.glDisable(GL.GL_TEXTURE_2D);
+    texture.disable();
   }
 
   protected void applyTexture(Texture texture) {
@@ -173,7 +181,7 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
    * later as images change. Just not sure how to handle it if they do. I
    * suspect I should be using the ImageConsumer class and dumping pixels to the
    * screen as I receive them.
-   *
+   * 
    * <p>
    * If an image is a BufferedImage, turn it into a texture and cache it. If
    * it's not, draw it to a BufferedImage and see if all the image data is

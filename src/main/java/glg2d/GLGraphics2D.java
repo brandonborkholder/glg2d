@@ -55,7 +55,7 @@ import javax.media.opengl.GLContext;
 import javax.media.opengl.Threading;
 
 /**
- * Implements the standards {@code Graphics2D} functionality, but instead draws
+ * Implements the standard {@code Graphics2D} functionality, but instead draws
  * to an OpenGL canvas.
  */
 public class GLGraphics2D extends Graphics2D implements Cloneable {
@@ -98,15 +98,15 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     this.width = width;
 
     hints = new RenderingHints(Collections.<Key, Object> emptyMap());
-    
+
     createDrawingHelpers();
   }
-  
+
   protected void createDrawingHelpers() {
     shapeDrawer = new G2DGLShapeDrawer();
     imageDrawer = new G2DGLImageDrawer();
     stringDrawer = new G2DGLStringDrawer();
-    
+
     addG2DDrawingHelper(shapeDrawer);
     addG2DDrawingHelper(imageDrawer);
     addG2DDrawingHelper(stringDrawer);
@@ -116,7 +116,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     helpers = Arrays.copyOf(helpers, helpers.length + 1);
     helpers[helpers.length - 1] = helper;
   }
-  
+
   public void removeG2DDrawingHelper(G2DDrawingHelper helper) {
     for (int i = 0; i < helpers.length; i++) {
       if (helpers[i] == helper) {
@@ -152,7 +152,6 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     graphicsConfig = component.getGraphicsConfiguration();
 
     // now enable some flags we'll use
-    gl.glEnable(GL.GL_BLEND);
     gl.glDisable(GL.GL_ALPHA_TEST);
     gl.glDisable(GL.GL_DEPTH_TEST);
     gl.glDisable(GL.GL_CULL_FACE);
@@ -249,6 +248,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void setComposite(Composite comp) {
+    gl.glEnable(GL.GL_BLEND);
     if (comp instanceof AlphaComposite) {
       switch (((AlphaComposite) comp).getRule()) {
       /*
@@ -725,9 +725,10 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     gl.glMatrixMode(GL.GL_MODELVIEW);
     gl.glPushMatrix();
     gl.glPushAttrib(GL.GL_ALL_ATTRIB_BITS);
+    gl.glPushClientAttrib((int) GL.GL_ALL_CLIENT_ATTRIB_BITS);
 
     GLGraphics2D newG2d = clone();
-    
+
     for (G2DDrawingHelper helper : helpers) {
       helper.push(newG2d);
     }
@@ -750,6 +751,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
         }
       }
 
+      gl.glPopClientAttrib();
       gl.glPopAttrib();
       gl.glMatrixMode(GL.GL_MODELVIEW);
       gl.glPopMatrix();
