@@ -1,5 +1,7 @@
 package glg2d.examples.shaders;
 
+import glg2d.G2DGLCanvas;
+
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -27,40 +29,71 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
+import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.JTree;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SpinnerDateModel;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.Timer;
+import javax.swing.UIManager;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
-import net.miginfocom.swing.MigLayout;
-
 @SuppressWarnings("serial")
 public class UIDemo extends JPanel {
   public UIDemo() {
-    JTabbedPane tabs = new JTabbedPane();
-    tabs.add(new JScrollPane(createButtonComponent()), "Buttons");
-    tabs.add(new JScrollPane(createTreeComponent()), "Tree");
-    tabs.add(new JScrollPane(createTableComponent()), "Table");
-    tabs.add(new JScrollPane(createBorderComponent()), "Borders");
-    tabs.add(new JScrollPane(createListComponent()), "List");
-    tabs.add(new JScrollPane(createInputComponent()), "Inputs");
-    tabs.add(new JScrollPane(createProgressComponent()), "Progress");
+    JPanel leftPanel = new JPanel(new BorderLayout());
+    leftPanel.add(new JScrollPane(createTreeComponent()), BorderLayout.NORTH);
+    leftPanel.add(new JScrollPane(createTableComponent()), BorderLayout.CENTER);
+    leftPanel.add(new JScrollPane(createListComponent()), BorderLayout.SOUTH);
+
+    JSplitPane mainSplit = new JSplitPane();
+    mainSplit.setDividerSize(8);
+    mainSplit.setOneTouchExpandable(true);
+    mainSplit.setContinuousLayout(true);
+    mainSplit.setLeftComponent(leftPanel);
+
+    JPanel rightPanel = new JPanel(new BorderLayout());
+    mainSplit.setRightComponent(rightPanel);
+    rightPanel.add(createButtonComponent(), BorderLayout.NORTH);
+
+    JPanel rightSubPanel = new JPanel(new BorderLayout());
+    rightPanel.add(rightSubPanel, BorderLayout.CENTER);
+    rightSubPanel.add(createProgressComponent(), BorderLayout.NORTH);
+
+    JSplitPane rightSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+    rightSplit.setDividerSize(10);
+    rightSplit.setOneTouchExpandable(true);
+    rightSplit.setTopComponent(createInputComponent());
+    rightSplit.setBottomComponent(createBorderComponent());
+
+    rightSubPanel.add(rightSplit, BorderLayout.CENTER);
+    rightSubPanel.add(createTabComponent(), BorderLayout.SOUTH);
 
     setLayout(new BorderLayout());
-    add(tabs, BorderLayout.CENTER);
+    mainSplit.setDividerLocation(400);
+    add(mainSplit, BorderLayout.CENTER);
+  }
+
+  JComponent createTabComponent() {
+    JTabbedPane tabs = new JTabbedPane();
+    tabs.addTab("Tab 1", new JLabel("Foo bar"));
+    tabs.addTab("Tab 2", new JLabel("Foo bar"));
+    tabs.addTab("Tab 3", new JLabel("Foo bar"));
+    tabs.addTab("Tab 4", new JLabel("Foo bar"));
+    tabs.addTab("Tab 5", new JLabel("Foo bar"));
+    return tabs;
   }
 
   JComponent createProgressComponent() {
-    JPanel panel = new JPanel(new MigLayout("fill,flowy"));
+    JPanel panel = new JPanel();
 
     JProgressBar bar = new JProgressBar();
     bar.setIndeterminate(true);
@@ -83,7 +116,7 @@ public class UIDemo extends JPanel {
   }
 
   JComponent createInputComponent() {
-    JPanel panel = new JPanel(new MigLayout("fill,flowy"));
+    JPanel panel = new JPanel();
 
     JComboBox box = new JComboBox(new String[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel" });
     panel.add(box);
@@ -95,13 +128,19 @@ public class UIDemo extends JPanel {
     panel.add(spinner);
 
     JTextField field = new JTextField();
+    field.setText("lorem ipsum...");
     field.setColumns(10);
     panel.add(field);
 
     JTextArea area = new JTextArea();
+    area.setText("lorem ipsum... lorem ipsum lorem ipsum...\n lorem ipsum...\n lorem ipsum...");
     area.setColumns(10);
     area.setRows(3);
     panel.add(new JScrollPane(area));
+
+    JPanel p = new JPanel();
+    p.setPreferredSize(new Dimension(100, 50));
+    panel.add(new JScrollPane(p, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS));
 
     JSlider slider = new JSlider();
     slider.setPaintTicks(true);
@@ -112,7 +151,7 @@ public class UIDemo extends JPanel {
   }
 
   JComponent createBorderComponent() {
-    JPanel panel = new JPanel(new MigLayout("fill,flowy"));
+    JPanel panel = new JPanel();
 
     JLabel label = new JLabel("no border");
     panel.add(label);
@@ -191,7 +230,7 @@ public class UIDemo extends JPanel {
   }
 
   JComponent createButtonComponent() {
-    JPanel panel = new JPanel(new MigLayout("fill,flowy"));
+    JPanel panel = new JPanel();
 
     JButton button = new JButton("Normal");
     panel.add(button);
@@ -241,9 +280,12 @@ public class UIDemo extends JPanel {
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
+    UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     JFrame frame = new JFrame("Swing Demo");
-    frame.setContentPane(new UIDemo());
+
+//     frame.setContentPane(new UIDemo());
+    frame.setContentPane(new G2DGLCanvas(new UIDemo()));
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setPreferredSize(new Dimension(1024, 768));
     frame.pack();
