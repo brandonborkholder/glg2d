@@ -173,6 +173,10 @@ public class G2DGLEventListener implements GLEventListener {
       height = 1;
     }
 
+    if (g2d != null) {
+      g2d.glDispose();
+    }
+
     g2d = createGraphics2D(drawable);
   }
 

@@ -181,7 +181,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     return width;
   }
 
-  protected void glDispose() {
+  public void glDispose() {
     for (G2DDrawingHelper helper : helpers) {
       helper.dispose();
     }
