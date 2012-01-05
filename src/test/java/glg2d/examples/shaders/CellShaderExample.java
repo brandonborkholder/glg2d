@@ -13,7 +13,6 @@ import glg2d.shaders.Shader;
 import java.awt.Dimension;
 
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.UIManager;
@@ -26,7 +25,7 @@ public class CellShaderExample {
     JFrame frame = new JFrame("Cell Shader Example");
     frame.setContentPane(new G2DGLCanvas(new UIDemo()) {
       @Override
-      protected GLEventListener createG2DListener(JComponent drawingComponent) {
+      protected G2DGLEventListener createG2DListener(JComponent drawingComponent) {
         return new G2DGLEventListener(drawingComponent) {
           @Override
           protected GLGraphics2D createGraphics2D(GLAutoDrawable drawable) {

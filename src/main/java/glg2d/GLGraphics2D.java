@@ -139,8 +139,6 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   protected void prePaint(GLAutoDrawable drawable, Component component) {
     setCanvas(drawable);
     setupState(component);
-
-    gl.glClear(GL.GL_COLOR_BUFFER_BIT | GL.GL_DEPTH_BUFFER_BIT);
   }
 
   protected void setupState(Component component) {

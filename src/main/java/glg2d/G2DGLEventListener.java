@@ -17,11 +17,15 @@
 package glg2d;
 
 import java.awt.Component;
+import java.awt.Rectangle;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
+import javax.swing.JComponent;
 import javax.swing.RepaintManager;
 
 /**
@@ -31,6 +35,10 @@ public class G2DGLEventListener implements GLEventListener {
   protected GLGraphics2D g2d;
 
   protected Component baseComponent;
+
+  Map<JComponent, Rectangle> repaints;
+
+  G2DGLCanvas canvas;
 
   /**
    * Creates a new listener that will paint using the {@code GLGraphics2D}
@@ -130,8 +138,28 @@ public class G2DGLEventListener implements GLEventListener {
     RepaintManager mgr = RepaintManager.currentManager(baseComponent);
     boolean doubleBuffer = mgr.isDoubleBufferingEnabled();
     mgr.setDoubleBufferingEnabled(false);
-    baseComponent.paint(g2d);
+
+    if (isPaintingDirtyRects()) {
+      paintDirtyRects();
+    } else {
+      baseComponent.paint(g2d);
+    }
+
     mgr.setDoubleBufferingEnabled(doubleBuffer);
+  }
+
+  protected boolean isPaintingDirtyRects() {
+    return repaints != null;
+  }
+
+  protected void paintDirtyRects() {
+    canvas.g2d = g2d;
+    for (Entry<JComponent, Rectangle> entry : repaints.entrySet()) {
+      entry.getKey().paintImmediately(entry.getValue());
+    }
+
+    repaints = null;
+    canvas.g2d = null;
   }
 
   @Override

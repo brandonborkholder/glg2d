@@ -21,14 +21,15 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.LayoutManager2;
+import java.awt.Rectangle;
 import java.io.Serializable;
+import java.util.Map;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
-import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLJPanel;
 import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.Threading;
@@ -41,16 +42,18 @@ public class G2DGLCanvas extends JComponent {
 
   protected GLAutoDrawable canvas;
 
-  protected boolean drawGL = true;
+  protected boolean drawGL;
 
   /**
    * @see #removeNotify()
    */
   protected GLPbuffer sideContext;
 
-  protected GLEventListener g2dglListener;
+  protected G2DGLEventListener g2dglListener;
 
   protected JComponent drawableComponent;
+
+  GLGraphics2D g2d;
 
   public static GLCapabilities getDefaultCapabalities() {
     GLCapabilities caps = new GLCapabilities();
@@ -78,6 +81,7 @@ public class G2DGLCanvas extends JComponent {
     add((Component) canvas);
 
     RepaintManager.setCurrentManager(GLAwareRepaintManager.INSTANCE);
+    setGLDrawing(true);
   }
 
   public G2DGLCanvas(JComponent drawableComponent) {
@@ -120,6 +124,7 @@ public class G2DGLCanvas extends JComponent {
   public void setGLDrawing(boolean drawGL) {
     this.drawGL = drawGL;
     ((Component) canvas).setVisible(drawGL);
+    setOpaque(drawGL);
     repaint();
   }
 
@@ -130,6 +135,9 @@ public class G2DGLCanvas extends JComponent {
 
     if (g2dglListener != null) {
       canvas.removeGLEventListener(g2dglListener);
+      if (sideContext != null) {
+        sideContext.removeGLEventListener(g2dglListener);
+      }
     }
 
     if (drawableComponent != null) {
@@ -140,6 +148,10 @@ public class G2DGLCanvas extends JComponent {
     if (drawableComponent != null) {
       g2dglListener = createG2DListener(drawableComponent);
       canvas.addGLEventListener(g2dglListener);
+      if (sideContext != null) {
+        sideContext.addGLEventListener(g2dglListener);
+      }
+
       add(drawableComponent);
 
       forceViewportToNativeDraw(drawableComponent);
@@ -150,7 +162,7 @@ public class G2DGLCanvas extends JComponent {
    * Creates the GLEventListener that will draw the given component to the
    * canvas.
    */
-  protected GLEventListener createG2DListener(JComponent drawingComponent) {
+  protected G2DGLEventListener createG2DListener(JComponent drawingComponent) {
     return new G2DGLEventListener(drawingComponent);
   }
 
@@ -213,8 +225,12 @@ public class G2DGLCanvas extends JComponent {
 
   @Override
   public void paint(Graphics g) {
-    if (drawGL && drawableComponent != null) {
-      canvas.display();
+    if (drawGL && drawableComponent != null && canvas != null) {
+      if (g2d == null) {
+        canvas.display();
+      } else {
+        drawableComponent.paint(g2d);
+      }
     } else {
       super.paint(g);
     }
@@ -255,6 +271,17 @@ public class G2DGLCanvas extends JComponent {
         forceViewportToNativeDraw((Container) c);
       }
     }
+  }
+
+  @Override
+  public Graphics getGraphics() {
+    return g2d == null ? super.getGraphics() : g2d.create();
+  }
+
+  public void paintGLImmediately(Map<JComponent, Rectangle> r) {
+    g2dglListener.canvas = this;
+    g2dglListener.repaints = r;
+    canvas.display();
   }
 
   /**

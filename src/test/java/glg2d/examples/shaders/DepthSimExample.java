@@ -11,7 +11,6 @@ import java.awt.event.ActionListener;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLEventListener;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.Timer;
@@ -25,7 +24,7 @@ public class DepthSimExample {
     final JFrame frame = new JFrame("Depth Shaker Example");
     frame.setContentPane(new G2DGLCanvas(new UIDemo()) {
       @Override
-      protected GLEventListener createG2DListener(JComponent drawingComponent) {
+      protected G2DGLEventListener createG2DListener(JComponent drawingComponent) {
         return new G2DGLEventListener(drawingComponent) {
           @Override
           protected GLGraphics2D createGraphics2D(GLAutoDrawable drawable) {

@@ -66,7 +66,7 @@ public class UIDemo extends JPanel {
 
     JPanel rightSubPanel = new JPanel(new BorderLayout());
     rightPanel.add(rightSubPanel, BorderLayout.CENTER);
-    rightSubPanel.add(createProgressComponent(), BorderLayout.NORTH);
+//    rightSubPanel.add(createProgressComponent(), BorderLayout.NORTH);
 
     JSplitPane rightSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     rightSplit.setDividerSize(10);
@@ -214,6 +214,11 @@ public class UIDemo extends JPanel {
     model.addElement("golf");
     model.addElement("hotel");
     model.addElement("india");
+    model.addElement("juliet");
+    model.addElement("kilo");
+    model.addElement("limo");
+    model.addElement("mike");
+    model.addElement("november");
     return new JList(model);
   }
 
@@ -286,6 +291,7 @@ public class UIDemo extends JPanel {
 
 //     frame.setContentPane(new UIDemo());
     frame.setContentPane(new G2DGLCanvas(new UIDemo()));
+//    frame.setContentPane(new UIDemo().createTabComponent());
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setPreferredSize(new Dimension(1024, 768));
     frame.pack();
