@@ -36,6 +36,7 @@ import java.awt.Stroke;
 import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
@@ -83,8 +84,6 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   protected G2DGLStringDrawer stringDrawer;
 
   protected Rectangle clip;
-
-  protected Rectangle userClip;
 
   protected Composite composite;
 
@@ -539,7 +538,25 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     if (clip == null) {
       return null;
     } else {
-      return userClip;
+      try {
+        double[] pts = new double[8];
+        pts[0] = clip.getMinX();
+        pts[1] = clip.getMinY();
+        pts[2] = clip.getMaxX();
+        pts[3] = clip.getMinY();
+        pts[4] = clip.getMaxX();
+        pts[5] = clip.getMaxY();
+        pts[6] = clip.getMinX();
+        pts[7] = clip.getMaxY();
+        getTransform().inverseTransform(pts, 0, pts, 0, 4);
+        int minX = (int) Math.min(pts[0], Math.min(pts[2], Math.min(pts[4], pts[6])));
+        int maxX = (int) Math.max(pts[0], Math.max(pts[2], Math.max(pts[4], pts[6])));
+        int minY = (int) Math.min(pts[1], Math.min(pts[3], Math.min(pts[5], pts[7])));
+        int maxY = (int) Math.max(pts[1], Math.max(pts[3], Math.max(pts[5], pts[7])));
+        return new Rectangle(minX, minY, maxX - minX, maxY - minY);
+      } catch (NoninvertibleTransformException e) {
+        throw new RuntimeException(e);
+      }
     }
   }
 
@@ -577,16 +594,13 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   protected void setClip(Rectangle2D clipShape, boolean intersect) {
     if (clipShape == null) {
       clip = null;
-      userClip = null;
       scissor(false);
     } else if (intersect && clip != null) {
       Rectangle rect = getTransform().createTransformedShape(clipShape).getBounds();
       clip = rect.intersection(clip);
-      userClip = userClip.intersection(clipShape.getBounds());
       scissor(true);
     } else {
       clip = getTransform().createTransformedShape(clipShape).getBounds();
-      userClip = clipShape.getBounds();
       scissor(true);
     }
   }
