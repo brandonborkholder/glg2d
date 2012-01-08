@@ -27,7 +27,6 @@ import java.text.AttributedCharacterIterator;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.Map;
 
 import javax.media.opengl.GL;
 
@@ -37,11 +36,11 @@ import com.sun.opengl.util.j2d.TextRenderer;
  * Draws text for the {@code GLGraphics2D} class.
  */
 public class G2DGLStringDrawer implements G2DDrawingHelper {
-  protected Map<Font, TextRenderer> cache = new HashMap<Font, TextRenderer>();
-
-  protected Font font;
+  protected FontRenderCache cache = new FontRenderCache();
 
   protected Deque<Font> fontStack = new ArrayDeque<Font>(10);
+
+  protected Font font;
 
   protected GLGraphics2D g2d;
 
@@ -67,7 +66,7 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
 
   @Override
   public void dispose() {
-    resetCache();
+    cache.dispose();
   }
 
   public void setFont(Font font) {
@@ -96,13 +95,14 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
     }
 
     antiAlias = doAlias;
-    resetCache();
   }
 
   public void drawString(AttributedCharacterIterator iterator, int x, int y) {
+    // TODO
   }
 
   public void drawString(AttributedCharacterIterator iterator, float x, float y) {
+    // TODO
   }
 
   public void drawString(String string, Color color, float x, float y) {
@@ -110,13 +110,7 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
   }
 
   protected TextRenderer getRenderer(Font font) {
-    TextRenderer renderer = cache.get(font);
-    if (renderer == null) {
-      renderer = new TextRenderer(font, antiAlias, false);
-      cache.put(font, renderer);
-    }
-
-    return renderer;
+    return cache.getRenderer(font, antiAlias);
   }
 
   /**
@@ -160,14 +154,6 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
 
     GL gl = g2d.getGLContext().getGL();
     gl.glPopMatrix();
-  }
-
-  protected void resetCache() {
-    for (TextRenderer renderer : cache.values()) {
-      renderer.dispose();
-    }
-
-    cache.clear();
   }
 
   /**
@@ -226,6 +212,37 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
       }
 
       return width;
+    }
+  }
+
+  @SuppressWarnings("serial")
+  public static class FontRenderCache extends HashMap<Font, TextRenderer[]> {
+    public TextRenderer getRenderer(Font font, boolean antiAlias) {
+      TextRenderer[] renderers = get(font);
+      if (renderers == null) {
+        renderers = new TextRenderer[2];
+        put(font, renderers);
+      }
+
+      TextRenderer renderer = renderers[antiAlias ? 1 : 0];
+
+      if (renderer == null) {
+        renderer = new TextRenderer(font, antiAlias, false);
+        renderers[antiAlias ? 1 : 0] = renderer;
+      }
+
+      return renderer;
+    }
+
+    public void dispose() {
+      for (TextRenderer[] value : values()) {
+        if (value[0] != null) {
+          value[0].dispose();
+        }
+        if (value[1] != null) {
+          value[1].dispose();
+        }
+      }
     }
   }
 }
