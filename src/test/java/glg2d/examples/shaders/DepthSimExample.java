@@ -46,7 +46,7 @@ public class DepthSimExample {
       }
     });
 
-    Timer timer = new Timer(50, new ActionListener() {
+    Timer timer = new Timer(100, new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         frame.getContentPane().repaint();
@@ -77,22 +77,19 @@ public class DepthSimExample {
 
     @Override
     public void pop(GLGraphics2D parentG2d) {
-      gl.glMatrixMode(GL.GL_MODELVIEW);
-      gl.glPopMatrix();
+      gl.glTranslated(-shiftX, -shiftY, 0);
     }
 
     @Override
     public void push(GLGraphics2D newG2d) {
-      gl.glMatrixMode(GL.GL_MODELVIEW);
-      gl.glPushMatrix();
       gl.glTranslated(shiftX, shiftY, 0);
     }
 
     @Override
     public void setG2D(GLGraphics2D g2d) {
       theta += 0.2;
-      shiftX = Math.round(Math.sin(theta) * 100) / 100d * 2;
-      shiftY = Math.round(Math.cos(theta) * 100) / 100d * 2;
+      shiftX = Math.round(Math.sin(theta) * 100) / 100d * 1;
+      shiftY = Math.round(Math.cos(theta) * 100) / 100d * 1;
 
       gl = g2d.getGLContext().getGL();
     }
