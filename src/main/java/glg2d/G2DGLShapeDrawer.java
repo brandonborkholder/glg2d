@@ -30,7 +30,7 @@ import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * Draws shapes for the {@code GLGraphics2D} class.
@@ -46,7 +46,7 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
 
   protected static final Line2D.Double LINE = new Line2D.Double();
 
-  protected GL gl;
+  protected GL2 gl;
 
   protected Deque<Stroke> strokeStack = new ArrayDeque<Stroke>(10);
 
@@ -69,7 +69,7 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
 
   @Override
   public void setG2D(GLGraphics2D g2d) {
-    gl = g2d.getGLContext().getGL();
+    gl = g2d.getGLContext().getGL().getGL2();
     simpleFillVisitor.setGLContext(gl);
     complexFillVisitor.setGLContext(gl);
     simpleStrokeVisitor.setGLContext(gl);
@@ -95,16 +95,16 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
 
   public void setAntiAlias(Object hintValue) {
     if (hintValue == RenderingHints.VALUE_ANTIALIAS_ON) {
-      gl.glEnable(GL.GL_LINE_SMOOTH);
-      gl.glEnable(GL.GL_POINT_SMOOTH);
-      gl.glEnable(GL.GL_POLYGON_SMOOTH);
-      gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
-      gl.glHint(GL.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
-      gl.glHint(GL.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST);
+      gl.glEnable(GL2.GL_LINE_SMOOTH);
+      gl.glEnable(GL2.GL_POINT_SMOOTH);
+      gl.glEnable(GL2.GL_POLYGON_SMOOTH);
+      gl.glHint(GL2.GL_LINE_SMOOTH_HINT, GL2.GL_NICEST);
+      gl.glHint(GL2.GL_POINT_SMOOTH_HINT, GL2.GL_NICEST);
+      gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL2.GL_NICEST);
     } else {
-      gl.glDisable(GL.GL_LINE_SMOOTH);
-      gl.glDisable(GL.GL_POINT_SMOOTH);
-      gl.glDisable(GL.GL_POLYGON_SMOOTH);
+      gl.glDisable(GL2.GL_LINE_SMOOTH);
+      gl.glDisable(GL2.GL_POINT_SMOOTH);
+      gl.glDisable(GL2.GL_POLYGON_SMOOTH);
     }
   }
 

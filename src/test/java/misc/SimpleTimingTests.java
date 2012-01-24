@@ -7,10 +7,11 @@ import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 import java.util.Random;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLJPanel;
+import javax.media.opengl.awt.GLJPanel;
+import javax.media.opengl.fixedfunc.GLMatrixFunc;
 import javax.swing.JFrame;
 
 import org.junit.BeforeClass;
@@ -36,14 +37,14 @@ public class SimpleTimingTests {
     Drawer d = new Drawer() {
       @Override
       public void display(GLAutoDrawable drawable) {
-        GL gl = drawable.getGL();
+        GL2 gl = drawable.getGL().getGL2();
 
         double height = 10;
         double[] matrix = new double[16];
         long start = System.nanoTime();
         for (int i = 0; i < NUM_TESTS; i++) {
-          gl.glMatrixMode(GL.GL_MODELVIEW);
-          gl.glGetDoublev(GL.GL_MODELVIEW_MATRIX, matrix, 0);
+          gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+          gl.glGetDoublev(GLMatrixFunc.GL_MODELVIEW_MATRIX, matrix, 0);
           new AffineTransform(matrix[0], -matrix[1], -matrix[4], matrix[5], matrix[12], height - matrix[13]);
         }
         long stop = System.nanoTime();
@@ -106,7 +107,7 @@ public class SimpleTimingTests {
   public void forwardDifferencingBezier() {
     SimplePathVisitor visitor = new SimplePathVisitor() {
       @Override
-      public void setGLContext(GL context) {
+      public void setGLContext(GL2 context) {
       }
 
       @Override
@@ -164,7 +165,7 @@ public class SimpleTimingTests {
     }
 
     @Override
-    public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {
+    public void dispose(GLAutoDrawable drawable) {
     }
   }
 }

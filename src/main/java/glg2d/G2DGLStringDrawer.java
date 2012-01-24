@@ -28,9 +28,10 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.fixedfunc.GLMatrixFunc;
 
-import com.sun.opengl.util.j2d.TextRenderer;
+import com.jogamp.opengl.util.awt.TextRenderer;
 
 /**
  * Draws text for the {@code GLGraphics2D} class.
@@ -140,8 +141,8 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
   protected void begin(TextRenderer renderer, Color textColor) {
     setTextColorRespectComposite(renderer, textColor);
 
-    GL gl = g2d.getGLContext().getGL();
-    gl.glMatrixMode(GL.GL_MODELVIEW);
+    GL2 gl = g2d.getGLContext().getGL().getGL2();
+    gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glPushMatrix();
     gl.glScalef(1, -1, 1);
     gl.glTranslatef(0, -g2d.getHeight(), 0);
@@ -152,7 +153,7 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
   protected void end(TextRenderer renderer) {
     renderer.end3DRendering();
 
-    GL gl = g2d.getGLContext().getGL();
+    GL2 gl = g2d.getGLContext().getGL().getGL2();
     gl.glPopMatrix();
   }
 

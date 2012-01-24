@@ -22,6 +22,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
@@ -76,10 +77,10 @@ public class G2DGLEventListener implements GLEventListener {
    * system to Java2D coordinates.
    */
   protected void setupMatrices(GLContext context) {
-    GL gl = context.getGL();
+    GL2 gl = context.getGL().getGL2();
 
     // push all the matrices
-    gl.glMatrixMode(GL.GL_PROJECTION);
+    gl.glMatrixMode(GL2.GL_PROJECTION);
     gl.glPushMatrix();
 
     int width = baseComponent.getWidth();
@@ -90,7 +91,7 @@ public class G2DGLEventListener implements GLEventListener {
     gl.glLoadIdentity();
     gl.glOrtho(0, width, 0, height, -1, 1);
 
-    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glMatrixMode(GL2.GL_MODELVIEW);
     gl.glPushMatrix();
     gl.glLoadIdentity();
 
@@ -116,12 +117,12 @@ public class G2DGLEventListener implements GLEventListener {
    * Pops all the matrices.
    */
   protected void popMatrices(GLContext context) {
-    GL gl = context.getGL();
-    gl.glMatrixMode(GL.GL_MODELVIEW);
+    GL2 gl = context.getGL().getGL2();
+    gl.glMatrixMode(GL2.GL_MODELVIEW);
     gl.glPopMatrix();
-    gl.glMatrixMode(GL.GL_PROJECTION);
+    gl.glMatrixMode(GL2.GL_PROJECTION);
     gl.glPopMatrix();
-    gl.glMatrixMode(GL.GL_TEXTURE);
+    gl.glMatrixMode(GL2.GL_TEXTURE);
     gl.glPopMatrix();
   }
 
@@ -175,19 +176,20 @@ public class G2DGLEventListener implements GLEventListener {
       height = 1;
     }
 
-    if (g2d != null) {
-      g2d.glDispose();
-    }
+    dispose(drawable);
 
     g2d = createGraphics2D(drawable);
   }
 
-  @Override
-  public void displayChanged(GLAutoDrawable drawable, boolean modeChanged, boolean deviceChanged) {
-    reshape(drawable, 0, 0, drawable.getWidth(), drawable.getWidth());
-  }
-
   protected GLGraphics2D createGraphics2D(GLAutoDrawable drawable) {
     return new GLGraphics2D(drawable.getWidth(), drawable.getHeight());
+  }
+
+  @Override
+  public void dispose(GLAutoDrawable arg0) {
+    if (g2d != null) {
+      g2d.glDispose();
+      g2d = null;
+    }
   }
 }

@@ -21,9 +21,9 @@ import glg2d.GLGraphics2D;
 
 import java.awt.Color;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GLES2;
 
-import com.sun.opengl.util.j2d.TextRenderer;
+import com.jogamp.opengl.util.awt.TextRenderer;
 
 public class G2DShaderStringDrawer extends G2DGLStringDrawer {
   protected Shader shader;
@@ -36,7 +36,7 @@ public class G2DShaderStringDrawer extends G2DGLStringDrawer {
   public void setG2D(GLGraphics2D g2d) {
     super.setG2D(g2d);
 
-    GL gl = g2d.getGLContext().getGL();
+    GLES2 gl = g2d.getGLContext().getGL().getGLES2();
     if (!shader.isProgram(gl)) {
       shader.setup(gl);
     }

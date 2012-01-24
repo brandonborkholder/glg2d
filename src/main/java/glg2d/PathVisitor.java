@@ -18,7 +18,7 @@ package glg2d;
 
 import java.awt.BasicStroke;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * Receives the calls from a {@link java.awt.geom.PathIterator} and draws the
@@ -40,7 +40,7 @@ public interface PathVisitor {
    * @param context
    *          The GL context
    */
-  void setGLContext(GL context);
+  void setGLContext(GL2 context);
 
   /**
    * Sets the stroke to be used when drawing a path. It's not needed for

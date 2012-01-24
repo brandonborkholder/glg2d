@@ -10,6 +10,7 @@ import java.awt.image.Raster;
 
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLPbuffer;
+import javax.media.opengl.GLProfile;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -17,26 +18,26 @@ import javax.swing.JSplitPane;
 
 import org.junit.Assert;
 
-import com.sun.opengl.util.Screenshot;
+import com.jogamp.opengl.util.awt.Screenshot;
 
 public class AutoTester implements Tester {
   static final int pixels = 500;
 
-  static GLPbuffer buffer = GLDrawableFactory.getFactory()
-      .createGLPbuffer(G2DGLCanvas.getDefaultCapabalities(), null, pixels, pixels, null);
-  
+  static GLPbuffer buffer = GLDrawableFactory.getFactory(GLProfile.getMaxFixedFunc())
+      .createGLPbuffer(null, G2DGLCanvas.getDefaultCapabalities(), null, pixels, pixels, null);
+
   private Painter p;
-  
+
   @Override
   public void assertSame() throws InterruptedException {
     Assert.assertEquals(1, getSimilarityScore(p), 0.05);
   }
-  
+
   @Override
   public void setPainter(Painter p) {
     this.p = p;
   }
-  
+
   @Override
   public void finish() {
   }

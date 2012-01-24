@@ -9,7 +9,7 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -69,7 +69,7 @@ public class DepthSimExample {
 
     double theta = 0;
 
-    GL gl;
+    GL2 gl;
 
     @Override
     public void dispose() {
@@ -91,7 +91,7 @@ public class DepthSimExample {
       shiftX = Math.round(Math.sin(theta) * 100) / 100d * 1;
       shiftY = Math.round(Math.cos(theta) * 100) / 100d * 1;
 
-      gl = g2d.getGLContext().getGL();
+      gl = g2d.getGLContext().getGL().getGL2();
     }
   }
 }

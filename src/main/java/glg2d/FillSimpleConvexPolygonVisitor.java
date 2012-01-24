@@ -18,19 +18,19 @@ package glg2d;
 
 import java.awt.BasicStroke;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * Fills a simple convex polygon. This class does not test to determine if the
  * polygon is actually simple and convex.
  */
 public class FillSimpleConvexPolygonVisitor extends SimplePathVisitor {
-  protected GL gl;
+  protected GL2 gl;
 
   protected VertexBuffer vBuffer = VertexBuffer.getSharedBuffer();
 
   @Override
-  public void setGLContext(GL context) {
+  public void setGLContext(GL2 context) {
     gl = context;
   }
 
@@ -49,7 +49,7 @@ public class FillSimpleConvexPolygonVisitor extends SimplePathVisitor {
 
   @Override
   public void closeLine() {
-    vBuffer.drawBuffer(gl, GL.GL_POLYGON);
+    vBuffer.drawBuffer(gl, GL2.GL_POLYGON);
   }
 
   @Override

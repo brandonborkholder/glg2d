@@ -27,10 +27,13 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES1;
+import javax.media.opengl.fixedfunc.GLMatrixFunc;
 
-import com.sun.opengl.util.texture.Texture;
-import com.sun.opengl.util.texture.TextureCoords;
-import com.sun.opengl.util.texture.TextureIO;
+import com.jogamp.opengl.util.texture.Texture;
+import com.jogamp.opengl.util.texture.TextureCoords;
+import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
 
 /**
  * Draws images for the {@code GLGraphics2D} class.
@@ -113,9 +116,9 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
   }
 
   protected void begin(Texture texture, AffineTransform xform, Color bgcolor) {
-    GL gl = g2d.getGLContext().getGL();
-    gl.glTexEnvi(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_MODULATE);
-    gl.glTexParameterf(GL.GL_TEXTURE_ENV, GL.GL_TEXTURE_ENV_MODE, GL.GL_BLEND);
+    GL2 gl = g2d.getGLContext().getGL().getGL2();
+    gl.glTexEnvi(GL2ES1.GL_TEXTURE_ENV, GL2ES1.GL_TEXTURE_ENV_MODE, GL2ES1.GL_MODULATE);
+    gl.glTexParameterf(GL2ES1.GL_TEXTURE_ENV, GL2ES1.GL_TEXTURE_ENV_MODE, GL.GL_BLEND);
 
     /*
      * This is unexpected since we never disable blending, but in some cases it
@@ -124,10 +127,10 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
      */
     g2d.setComposite(g2d.getComposite());
 
-    texture.enable();
-    texture.bind();
+    texture.enable(gl);
+    texture.bind(gl);
 
-    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glPushMatrix();
 
     if (xform != null) {
@@ -142,10 +145,10 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
   }
 
   protected void end(Texture texture) {
-    GL gl = g2d.getGLContext().getGL();
+    GL2 gl = g2d.getGLContext().getGL().getGL2();
     gl.glEnd();
     gl.glPopMatrix();
-    texture.disable();
+    texture.disable(gl);
   }
 
   protected void applyTexture(Texture texture) {
@@ -157,8 +160,8 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
   }
 
   protected void applyTexture(Texture texture, int dx1, int dy1, int dx2, int dy2, float sx1, float sy1, float sx2, float sy2) {
-    GL gl = g2d.getGLContext().getGL();
-    gl.glBegin(GL.GL_QUADS);
+    GL2 gl = g2d.getGLContext().getGL().getGL2();
+    gl.glBegin(GL2.GL_QUADS);
 
     // SW
     gl.glTexCoord2f(sx1, sy2);
@@ -200,7 +203,7 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
         bufferedImage = toBufferedImage(image);
       }
 
-      texture = TextureIO.newTexture(bufferedImage, false);
+      texture = AWTTextureIO.newTexture(g2d.getGLContext().getGL().getGLProfile(), bufferedImage, false);
       cache.put(image, texture);
     }
 

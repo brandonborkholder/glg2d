@@ -19,7 +19,7 @@ package glg2d;
 import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * Tesselating is expensive. This is a simple workaround to check if we can just
@@ -28,7 +28,7 @@ import javax.media.opengl.GL;
  * way around, we know that every turn went the same direction. That's
  * necessary, but not sufficient since we might still have self-intersections. I
  * haven't thought of a fast way to check that, yet.
- *
+ * 
  * <p>
  * So for now this just checks every corner and if it has the same sign, we
  * assume the polygon is convex. Once we get to the end, we draw it. If it's not
@@ -42,7 +42,7 @@ import javax.media.opengl.GL;
  * </p>
  */
 public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
-  protected GL gl;
+  protected GL2 gl;
 
   /**
    * This buffer is used to store points for the simple polygon, until we find
@@ -73,13 +73,13 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
    * multiple move-to's, then we need to tesselate.
    */
   protected boolean firstSegment;
-  
+
   protected int windingRule;
 
   protected PathVisitor tesselatorFallback;
 
   @Override
-  public void setGLContext(GL context) {
+  public void setGLContext(GL2 context) {
     gl = context;
   }
 
@@ -209,7 +209,7 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
   public void endPoly() {
     if (isConvexSoFar) {
       // we got through all the checks, draw it fast
-      buffer.drawBuffer(gl, GL.GL_POLYGON);
+      buffer.drawBuffer(gl, GL2.GL_POLYGON);
     } else {
       tesselatorFallback.endPoly();
     }
@@ -219,7 +219,7 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
    * Sets the state to start using the tesselator. This will catch the
    * tesselator up to the current position and then set {@code isConvexSoFar} to
    * false so we can start using the tesselator exclusively.
-   *
+   * 
    * If {@code doClose} is true, then we will also close the line when we update
    * the tesselator. This is for when we realized it's not a simple poly after
    * we already finished the first path.

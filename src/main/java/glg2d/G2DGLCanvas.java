@@ -26,13 +26,15 @@ import java.io.Serializable;
 import java.util.Map;
 
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCanvas;
 import javax.media.opengl.GLCapabilities;
+import javax.media.opengl.GLCapabilitiesImmutable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
-import javax.media.opengl.GLJPanel;
 import javax.media.opengl.GLPbuffer;
+import javax.media.opengl.GLProfile;
 import javax.media.opengl.Threading;
+import javax.media.opengl.awt.GLCanvas;
+import javax.media.opengl.awt.GLJPanel;
 import javax.swing.JComponent;
 import javax.swing.JViewport;
 import javax.swing.RepaintManager;
@@ -56,7 +58,7 @@ public class G2DGLCanvas extends JComponent {
   GLGraphics2D g2d;
 
   public static GLCapabilities getDefaultCapabalities() {
-    GLCapabilities caps = new GLCapabilities();
+    GLCapabilities caps = new GLCapabilities(GLProfile.getGL2ES2());
     caps.setRedBits(8);
     caps.setGreenBits(8);
     caps.setBlueBits(8);
@@ -101,7 +103,7 @@ public class G2DGLCanvas extends JComponent {
    * disabled so that it does not receive events that should be sent to the
    * {@code drawableComponent}.
    */
-  protected GLAutoDrawable createGLComponent(GLCapabilities capabilities, GLContext shareWith) {
+  protected GLAutoDrawable createGLComponent(GLCapabilitiesImmutable capabilities, GLContext shareWith) {
     GLJPanel canvas = new GLJPanel(capabilities, null, shareWith);
     canvas.setEnabled(false);
     return canvas;
@@ -205,7 +207,8 @@ public class G2DGLCanvas extends JComponent {
 
   protected void prepareSideContext() {
     if (sideContext == null) {
-      sideContext = GLDrawableFactory.getFactory().createGLPbuffer(canvas.getChosenGLCapabilities(), null, 1, 1, canvas.getContext());
+      GLDrawableFactory factory = canvas.getFactory();
+      sideContext = factory.createGLPbuffer(null, canvas.getChosenGLCapabilities(), null, 1, 1, canvas.getContext());
       sideContext.addGLEventListener(g2dglListener);
     }
 

@@ -23,6 +23,8 @@ import static java.lang.Math.sqrt;
 import java.awt.BasicStroke;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
+import javax.media.opengl.fixedfunc.GLMatrixFunc;
 
 /**
  * Draws a line, as outlined by a {@link BasicStroke}. The current
@@ -30,7 +32,7 @@ import javax.media.opengl.GL;
  * of quads for each line segment, joins corners and endpoints as appropriate.
  */
 public class LineDrawingVisitor extends SimplePathVisitor {
-  protected GL gl;
+  protected GL2 gl;
 
   protected int lineJoin;
 
@@ -51,7 +53,7 @@ public class LineDrawingVisitor extends SimplePathVisitor {
   protected VertexBuffer vBuffer = VertexBuffer.getSharedBuffer();
 
   @Override
-  public void setGLContext(GL context) {
+  public void setGLContext(GL2 context) {
     gl = context;
   }
 
@@ -72,7 +74,7 @@ public class LineDrawingVisitor extends SimplePathVisitor {
     /*
      * pen hangs down and to the right. See java.awt.Graphics
      */
-    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glPushMatrix();
     gl.glTranslatef(0.5f, 0.5f, 0);
   }
@@ -84,7 +86,7 @@ public class LineDrawingVisitor extends SimplePathVisitor {
     if (secondPoint != null) {
       lineTo(secondPoint);
       endLine();
-      drawBuffer(GL.GL_QUAD_STRIP);
+      drawBuffer(GL2.GL_QUAD_STRIP);
     }
 
     firstPoint = lastPoint = null;
@@ -95,7 +97,7 @@ public class LineDrawingVisitor extends SimplePathVisitor {
   public void endPoly() {
     if (firstPoint != null && secondPoint != null) {
       endLine();
-      drawBuffer(GL.GL_QUAD_STRIP);
+      drawBuffer(GL2.GL_QUAD_STRIP);
 
       applyEndCap(secondPoint, firstPoint);
       applyEndCap(secondLastPoint, lastPoint);
@@ -108,7 +110,7 @@ public class LineDrawingVisitor extends SimplePathVisitor {
   public void moveTo(float[] vertex) {
     if (firstPoint != null) {
       endLine();
-      drawBuffer(GL.GL_QUAD_STRIP);
+      drawBuffer(GL2.GL_QUAD_STRIP);
 
       applyEndCap(secondLastPoint, lastPoint);
       applyEndCap(secondPoint, firstPoint);
@@ -267,16 +269,16 @@ public class LineDrawingVisitor extends SimplePathVisitor {
    * understand the theory behind the computation. I found this at <a
    * href="http://mathforum.org/library/drmath/view/62814.html"
    * >http://mathforum.org/library/drmath/view/62814.html</a>.
-   *
+   * 
    * <p>
    * We have two lines, specified by three points (P1, P2, P3). They share the
    * second point. This gives us an easy way to represent the line in parametric
    * form. For example the first line has the form
-   *
+   * 
    * <pre>
    * &lt;x, y&gt; = &lt;P1<sub>x</sub>, P1<sub>y</sub>&gt; + t * &lt;P2<sub>x</sub>-P1<sub>x</sub>, P2<sub>y</sub>-P1<sub>y</sub>&gt;
    * </pre>
-   *
+   * 
    * </p>
    * <p>
    * <code>&lt;P1<sub>x</sub>, P1<sub>y</sub>&gt;</code> is a point on the line,
@@ -286,21 +288,21 @@ public class LineDrawingVisitor extends SimplePathVisitor {
    * of these two parametric lines is straightforward. Let <code>o1</code> and
    * <code>o2</code> be the points on the lines and <code>v1</code> and
    * <code>v2</code> be the two direction vectors. Now we have
-   *
+   * 
    * <pre>
    * p1 = o1 + t * v1
    * p2 = o2 + s * v2
    * </pre>
-   *
+   * 
    * We can solve to find the intersection by
-   *
+   * 
    * <pre>
    * o1 + t * v1 = o2 + s * v2
    * t * v1 = o2 - o1 + s * v2
    * (t * v1) x v2 = (o2 - o1 + s * v2) x v2    ; cross product by v2
    * t * (v1 x v2) = (o2 - o1) x v2             ; to get rid of s term
    * </pre>
-   *
+   * 
    * Solving for <code>t</code> is easy since we only have the z component. Put
    * <code>t</code> back into the first equation gives us our point of
    * intersection.
@@ -381,7 +383,7 @@ public class LineDrawingVisitor extends SimplePathVisitor {
     addVertex(corners[0] + v_x, corners[1] + v_y);
     addVertex(corners[2] + v_x, corners[3] + v_y);
     addVertex(corners[2], corners[3]);
-    drawBuffer(GL.GL_QUADS);
+    drawBuffer(GL2.GL_QUADS);
   }
 
   protected void drawCapRound(float[] lastPoint, float[] point) {

@@ -19,7 +19,7 @@ package glg2d;
 import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
 /**
  * Draws a line using the native GL implementation of a line. This is only
@@ -33,14 +33,14 @@ public class FastLineVisitor extends SimplePathVisitor {
 
   protected VertexBuffer buffer = VertexBuffer.getSharedBuffer();
 
-  protected GL gl;
+  protected GL2 gl;
 
   protected BasicStroke stroke;
 
   protected float glLineWidth;
 
   @Override
-  public void setGLContext(GL context) {
+  public void setGLContext(GL2 context) {
     gl = context;
   }
 
@@ -80,7 +80,7 @@ public class FastLineVisitor extends SimplePathVisitor {
        * XXX Should actually use the stroke phase, but not sure how yet.
        */
 
-      gl.glEnable(GL.GL_LINE_STIPPLE);
+      gl.glEnable(GL2.GL_LINE_STIPPLE);
       int factor = (int) totalLength;
       gl.glLineStipple(factor >> 4, (short) mask);
     }
@@ -106,7 +106,7 @@ public class FastLineVisitor extends SimplePathVisitor {
       return false;
     }
 
-    gl.glGetFloatv(GL.GL_MODELVIEW_MATRIX, testMatrix, 0);
+    gl.glGetFloatv(GL2.GL_MODELVIEW_MATRIX, testMatrix, 0);
 
     float scaleX = Math.abs(testMatrix[0]);
     float scaleY = Math.abs(testMatrix[5]);
@@ -144,7 +144,7 @@ public class FastLineVisitor extends SimplePathVisitor {
   protected void drawLine(boolean close) {
     FloatBuffer buf = buffer.getBuffer();
     int p = buf.position();
-    buffer.drawBuffer(gl, close ? GL.GL_LINE_LOOP : GL.GL_LINE_STRIP);
+    buffer.drawBuffer(gl, close ? GL2.GL_LINE_LOOP : GL2.GL_LINE_STRIP);
 
     /*
      * We'll ignore butt endcaps, but we'll pretend like we're drawing round,
@@ -154,7 +154,7 @@ public class FastLineVisitor extends SimplePathVisitor {
      */
     if (stroke.getEndCap() != BasicStroke.CAP_BUTT && stroke.getDashArray() == null) {
       buf.position(p);
-      buffer.drawBuffer(gl, GL.GL_POINTS);
+      buffer.drawBuffer(gl, GL2.GL_POINTS);
     }
   }
 
@@ -165,17 +165,17 @@ public class FastLineVisitor extends SimplePathVisitor {
     /*
      * pen hangs down and to the right. See java.awt.Graphics
      */
-    gl.glMatrixMode(GL.GL_MODELVIEW);
+    gl.glMatrixMode(GL2.GL_MODELVIEW);
     gl.glPushMatrix();
     gl.glTranslatef(0.5f, 0.5f, 0);
 
-    gl.glPushAttrib(GL.GL_LINE_BIT | GL.GL_POINT_BIT);
+    gl.glPushAttrib(GL2.GL_LINE_BIT | GL2.GL_POINT_BIT);
   }
 
   @Override
   public void endPoly() {
     drawLine(false);
-    gl.glDisable(GL.GL_LINE_STIPPLE);
+    gl.glDisable(GL2.GL_LINE_STIPPLE);
     gl.glPopMatrix();
 
     gl.glPopAttrib();

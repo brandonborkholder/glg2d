@@ -17,6 +17,8 @@
 package glg2d.shaders;
 
 import javax.media.opengl.GL;
+import javax.media.opengl.GL2ES2;
+import javax.media.opengl.GLES2;
 
 public abstract class AbstractShader implements Shader {
   protected String[] vertexShaderSrc;
@@ -25,20 +27,20 @@ public abstract class AbstractShader implements Shader {
   protected int vertexShaderId;
   protected int fragmentShaderId;
 
-  protected GL gl;
+  protected GLES2 gl;
 
   protected int programId;
 
   @Override
-  public void setup(GL gl) {
+  public void setup(GLES2 gl) {
     this.gl = gl;
     compileVertexShader();
     compileFragmentShader();
     createProgramAndAttach();
   }
-  
+
   @Override
-  public boolean isProgram(GL gl) {
+  public boolean isProgram(GLES2 gl) {
     return gl.glIsProgram(programId);
   }
 
@@ -48,10 +50,10 @@ public abstract class AbstractShader implements Shader {
     gl.glAttachShader(programId, vertexShaderId);
     gl.glAttachShader(programId, fragmentShaderId);
     gl.glLinkProgram(programId);
-    checkProgramThrowException(GL.GL_LINK_STATUS);
+    checkProgramThrowException(GL2ES2.GL_LINK_STATUS);
 
     gl.glValidateProgram(programId);
-    checkProgramThrowException(GL.GL_VALIDATE_STATUS);
+    checkProgramThrowException(GL2ES2.GL_VALIDATE_STATUS);
   }
 
   @Override
@@ -70,7 +72,7 @@ public abstract class AbstractShader implements Shader {
   public void compileVertexShader() {
     int[] lengths = lengths(vertexShaderSrc);
 
-    vertexShaderId = gl.glCreateShader(GL.GL_VERTEX_SHADER);
+    vertexShaderId = gl.glCreateShader(GL2ES2.GL_VERTEX_SHADER);
     gl.glShaderSource(vertexShaderId, vertexShaderSrc.length, vertexShaderSrc, lengths, 0);
     gl.glCompileShader(vertexShaderId);
 
@@ -81,7 +83,7 @@ public abstract class AbstractShader implements Shader {
   public void compileFragmentShader() {
     int[] lengths = lengths(fragmentShaderSrc);
 
-    fragmentShaderId = gl.glCreateShader(GL.GL_FRAGMENT_SHADER);
+    fragmentShaderId = gl.glCreateShader(GL2ES2.GL_FRAGMENT_SHADER);
     gl.glShaderSource(fragmentShaderId, fragmentShaderSrc.length, fragmentShaderSrc, lengths, 0);
     gl.glCompileShader(fragmentShaderId);
 
@@ -90,12 +92,12 @@ public abstract class AbstractShader implements Shader {
 
   protected void checkShaderThrowException(int shader) {
     int[] result = new int[1];
-    gl.glGetShaderiv(shader, GL.GL_COMPILE_STATUS, result, 0);
+    gl.glGetShaderiv(shader, GL2ES2.GL_COMPILE_STATUS, result, 0);
     if (result[0] == GL.GL_TRUE) {
       return;
     }
 
-    gl.glGetShaderiv(shader, GL.GL_INFO_LOG_LENGTH, result, 0);
+    gl.glGetShaderiv(shader, GL2ES2.GL_INFO_LOG_LENGTH, result, 0);
     int size = result[0];
     byte[] data = new byte[size];
     gl.glGetShaderInfoLog(shader, size, result, 0, data, 0);
@@ -111,7 +113,7 @@ public abstract class AbstractShader implements Shader {
       return;
     }
 
-    gl.glGetProgramiv(programId, GL.GL_INFO_LOG_LENGTH, result, 0);
+    gl.glGetProgramiv(programId, GL2ES2.GL_INFO_LOG_LENGTH, result, 0);
     int size = result[0];
     byte[] data = new byte[size];
     gl.glGetProgramInfoLog(programId, size, result, 0, data, 0);

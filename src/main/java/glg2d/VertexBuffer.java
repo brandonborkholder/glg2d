@@ -18,9 +18,9 @@ package glg2d;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
+import javax.media.opengl.GL2;
 
-import com.sun.opengl.util.BufferUtil;
+import com.jogamp.common.nio.Buffers;
 
 /**
  * Wraps a simple {@code FloatBuffer} and makes it easier to push 2-D vertices
@@ -29,7 +29,7 @@ import com.sun.opengl.util.BufferUtil;
  * multi-threaded.
  */
 public class VertexBuffer {
-  protected static FloatBuffer globalBuffer = BufferUtil.newFloatBuffer(300);
+  protected static FloatBuffer globalBuffer = Buffers.newDirectFloatBuffer(300);
 
   protected static VertexBuffer shared = new VertexBuffer(globalBuffer);
 
@@ -61,7 +61,7 @@ public class VertexBuffer {
    *          The size of the buffer in number of vertices
    */
   public VertexBuffer(int capacity) {
-    this(BufferUtil.newFloatBuffer(capacity * 2));
+    this(Buffers.newDirectFloatBuffer(capacity * 2));
   }
 
   /**
@@ -96,7 +96,7 @@ public class VertexBuffer {
   
   protected void ensureCapacity(int numNewFloats) {
     if (buffer.capacity() <= buffer.position() + numNewFloats) {
-      FloatBuffer larger = BufferUtil.newFloatBuffer(buffer.position() * 2);
+      FloatBuffer larger = Buffers.newDirectFloatBuffer(buffer.position() * 2);
       int position = buffer.position();
       buffer.rewind();
       larger.put(buffer);
@@ -125,17 +125,17 @@ public class VertexBuffer {
    * @param mode
    *          The mode, e.g. {@code GL#GL_LINE_STRIP}
    */
-  public void drawBuffer(GL gl, int mode) {
+  public void drawBuffer(GL2 gl, int mode) {
     if (buffer.position() == 0) {
       return;
     }
 
     // use vertex arrays
-    gl.glEnableClientState(GL.GL_VERTEX_ARRAY);
+    gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 
     int size = buffer.position() / 2;
     buffer.rewind();
-    gl.glVertexPointer(2, GL.GL_FLOAT, 0, buffer);
+    gl.glVertexPointer(2, GL2.GL_FLOAT, 0, buffer);
     gl.glDrawArrays(mode, 0, size);
   }
 }
