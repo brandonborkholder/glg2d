@@ -227,6 +227,7 @@ public class G2DGLCanvas extends JComponent {
   public void paint(Graphics g) {
     if (drawGL && drawableComponent != null && canvas != null) {
       if (g2d == null) {
+        g2dglListener.canvas = this;
         canvas.display();
       } else {
         drawableComponent.paint(g2d);

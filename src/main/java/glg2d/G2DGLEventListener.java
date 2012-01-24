@@ -139,11 +139,15 @@ public class G2DGLEventListener implements GLEventListener {
     boolean doubleBuffer = mgr.isDoubleBufferingEnabled();
     mgr.setDoubleBufferingEnabled(false);
 
+    canvas.g2d = g2d;
+
     if (isPaintingDirtyRects()) {
       paintDirtyRects();
     } else {
       baseComponent.paint(g2d);
     }
+
+    canvas.g2d = null;
 
     mgr.setDoubleBufferingEnabled(doubleBuffer);
   }
@@ -153,13 +157,11 @@ public class G2DGLEventListener implements GLEventListener {
   }
 
   protected void paintDirtyRects() {
-    canvas.g2d = g2d;
     for (Entry<JComponent, Rectangle> entry : repaints.entrySet()) {
       entry.getKey().paintImmediately(entry.getValue());
     }
 
     repaints = null;
-    canvas.g2d = null;
   }
 
   @Override
