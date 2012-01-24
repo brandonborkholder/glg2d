@@ -22,7 +22,7 @@ import glg2d.GLGraphics2D;
 import java.awt.Color;
 import java.awt.geom.AffineTransform;
 
-import javax.media.opengl.GLES2;
+import javax.media.opengl.GL2GL3;
 
 import com.jogamp.opengl.util.texture.Texture;
 
@@ -37,7 +37,7 @@ public class G2DShaderImageDrawer extends G2DGLImageDrawer {
   public void setG2D(GLGraphics2D g2d) {
     super.setG2D(g2d);
 
-    GLES2 gl = g2d.getGLContext().getGL().getGLES2();
+    GL2GL3 gl = g2d.getGLContext().getGL().getGL2GL3();
     if (!shader.isProgram(gl)) {
       shader.setup(gl);
     }

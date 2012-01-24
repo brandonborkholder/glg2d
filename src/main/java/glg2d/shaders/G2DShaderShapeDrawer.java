@@ -22,7 +22,7 @@ import glg2d.PathVisitor;
 
 import java.awt.Shape;
 
-import javax.media.opengl.GLES2;
+import javax.media.opengl.GL2GL3;
 
 public class G2DShaderShapeDrawer extends G2DGLShapeDrawer {
   protected Shader shader;
@@ -35,7 +35,7 @@ public class G2DShaderShapeDrawer extends G2DGLShapeDrawer {
   public void setG2D(GLGraphics2D g2d) {
     super.setG2D(g2d);
 
-    GLES2 gl = g2d.getGLContext().getGL().getGLES2();
+    GL2GL3 gl = g2d.getGLContext().getGL().getGL2GL3();
     if (!shader.isProgram(gl)) {
       shader.setup(gl);
     }

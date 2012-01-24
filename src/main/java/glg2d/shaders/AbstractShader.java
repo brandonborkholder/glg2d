@@ -18,7 +18,7 @@ package glg2d.shaders;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GLES2;
+import javax.media.opengl.GL2GL3;
 
 public abstract class AbstractShader implements Shader {
   protected String[] vertexShaderSrc;
@@ -27,12 +27,12 @@ public abstract class AbstractShader implements Shader {
   protected int vertexShaderId;
   protected int fragmentShaderId;
 
-  protected GLES2 gl;
+  protected GL2GL3 gl;
 
   protected int programId;
 
   @Override
-  public void setup(GLES2 gl) {
+  public void setup(GL2GL3 gl) {
     this.gl = gl;
     compileVertexShader();
     compileFragmentShader();
@@ -40,7 +40,7 @@ public abstract class AbstractShader implements Shader {
   }
 
   @Override
-  public boolean isProgram(GLES2 gl) {
+  public boolean isProgram(GL2GL3 gl) {
     return gl.glIsProgram(programId);
   }
 
