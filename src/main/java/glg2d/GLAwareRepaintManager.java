@@ -36,7 +36,7 @@ public class GLAwareRepaintManager extends RepaintManager {
 
   @Override
   public void addDirtyRegion(JComponent c, int x, int y, int w, int h) {
-    G2DGLCanvas canvas = getGLParent(c);
+    G2DGLPanel canvas = getGLParent(c);
     if (canvas == null || c instanceof GLAutoDrawable) {
       super.addDirtyRegion(c, x, y, w, h);
     } else {
@@ -66,7 +66,7 @@ public class GLAwareRepaintManager extends RepaintManager {
         }
 
         r = filter(r);
-        G2DGLCanvas canvas = getGLParent(r.keySet().iterator().next());
+        G2DGLPanel canvas = getGLParent(r.keySet().iterator().next());
         canvas.paintGLImmediately(r);
       }
     });
@@ -87,13 +87,13 @@ public class GLAwareRepaintManager extends RepaintManager {
     return rects;
   }
 
-  protected G2DGLCanvas getGLParent(JComponent component) {
+  protected G2DGLPanel getGLParent(JComponent component) {
     Container c = component.getParent();
     while (true) {
       if (c == null) {
         return null;
-      } else if (c instanceof G2DGLCanvas) {
-        return (G2DGLCanvas) c;
+      } else if (c instanceof G2DGLPanel) {
+        return (G2DGLPanel) c;
       } else {
         c = c.getParent();
       }

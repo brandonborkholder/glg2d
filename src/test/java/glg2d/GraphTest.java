@@ -43,7 +43,7 @@ public class GraphTest extends JFrame {
     };
 
 //    setContentPane(paintingComponent);
-    setContentPane(new G2DGLCanvas(paintingComponent));
+    setContentPane(new G2DGLPanel(paintingComponent));
 
     MouseHandler handler = new MouseHandler();
     getContentPane().addMouseListener(handler);

@@ -1,7 +1,7 @@
 package glg2d.examples.shaders;
 
-import glg2d.G2DGLCanvas;
 import glg2d.G2DGLEventListener;
+import glg2d.G2DGLPanel;
 import glg2d.GLGraphics2D;
 import glg2d.shaders.G2DShaderImageDrawer;
 import glg2d.shaders.G2DShaderShapeDrawer;
@@ -23,7 +23,7 @@ public class CellShaderExample {
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
     JFrame frame = new JFrame("Cell Shader Example");
-    frame.setContentPane(new G2DGLCanvas(new UIDemo()) {
+    frame.setContentPane(new G2DGLPanel(new UIDemo()) {
       @Override
       protected G2DGLEventListener createG2DListener(JComponent drawingComponent) {
         return new G2DGLEventListener(drawingComponent) {

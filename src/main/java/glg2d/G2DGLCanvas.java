@@ -21,42 +21,62 @@ import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.LayoutManager2;
-import java.awt.Rectangle;
 import java.io.Serializable;
-import java.util.Map;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLCapabilitiesImmutable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
+import javax.media.opengl.GLEventListener;
 import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.Threading;
 import javax.media.opengl.awt.GLCanvas;
-import javax.media.opengl.awt.GLJPanel;
 import javax.swing.JComponent;
-import javax.swing.JViewport;
-import javax.swing.RepaintManager;
 
+/**
+ * This canvas redirects all paints to an OpenGL canvas. The drawable component
+ * can be any JComponent. This is a simple implementation to allow manual
+ * painting of a JComponent scene to OpenGL. If you want to intercept Swing
+ * repaints in child components, use {@link G2DGLPanel}. A {@code G2DGLCanvas}
+ * is more appropriate when rendering a complex scene using
+ * {@link JComponent#paintComponent(Graphics)} and the {@code Graphics2D}
+ * object. If the drawable component contains child components, use
+ * {@link G2DGLPanel}.
+ * 
+ * <p>
+ * GL drawing can be enabled or disabled using the {@code setGLDrawing(boolean)}
+ * method. If GL drawing is enabled, all full paint requests are intercepted and
+ * the drawable component is drawn to the OpenGL canvas.
+ * </p>
+ * 
+ * <p>
+ * Override {@link #createGLComponent(GLCapabilitiesImmutable, GLContext)} to
+ * create the OpenGL canvas. The returned canvas may be a {@code GLJPanel} or a
+ * {@code GLCanvas}. {@link #createG2DListener(JComponent)} is used to create
+ * the {@code GLEventListener} that will draw to the OpenGL canvas.
+ * </p>
+ */
 public class G2DGLCanvas extends JComponent {
   private static final long serialVersionUID = -471481443599019888L;
 
   protected GLAutoDrawable canvas;
 
-  protected boolean drawGL;
+  protected GLEventListener g2dglListener;
 
   /**
    * @see #removeNotify()
    */
-  protected GLPbuffer sideContext;
+  private GLPbuffer sideContext;
 
-  protected G2DGLEventListener g2dglListener;
+  private JComponent drawableComponent;
 
-  protected JComponent drawableComponent;
+  private boolean drawGL;
 
-  GLGraphics2D g2d;
-
+  /**
+   * Returns the default, desired OpenGL capabilities needed for this component.
+   */
   public static GLCapabilities getDefaultCapabalities() {
     GLCapabilities caps = new GLCapabilities(GLProfile.getGL2ES2());
     caps.setRedBits(8);
@@ -68,10 +88,18 @@ public class G2DGLCanvas extends JComponent {
     return caps;
   }
 
+  /**
+   * Creates a new, blank {@code G2DGLCanvas} using the default capabilities
+   * from {@link #getDefaultCapabalities()}.
+   */
   public G2DGLCanvas() {
     this(getDefaultCapabalities());
   }
 
+  /**
+   * Creates a new, blank {@code G2DGLCanvas} using the given OpenGL
+   * capabilities.
+   */
   public G2DGLCanvas(GLCapabilities capabilities) {
     canvas = createGLComponent(capabilities, null);
 
@@ -82,31 +110,26 @@ public class G2DGLCanvas extends JComponent {
     setLayout(new GLOverlayLayout());
     add((Component) canvas);
 
-    RepaintManager.setCurrentManager(GLAwareRepaintManager.INSTANCE);
     setGLDrawing(true);
   }
 
+  /**
+   * Creates a new {@code G2DGLCanvas} where {@code drawableComponent} fills the
+   * canvas. This uses the default capabilities from
+   * {@link #getDefaultCapabalities()}.
+   */
   public G2DGLCanvas(JComponent drawableComponent) {
     this();
     setDrawableComponent(drawableComponent);
   }
 
+  /**
+   * Creates a new {@code G2DGLCanvas} where {@code drawableComponent} fills the
+   * canvas.
+   */
   public G2DGLCanvas(GLCapabilities capabilities, JComponent drawableComponent) {
     this(capabilities);
     setDrawableComponent(drawableComponent);
-  }
-
-  /**
-   * Creates a {@code Component} that is also a {@code GLAutoDrawable}. This is
-   * where all the drawing takes place. The advantage of a GLCanvas is that it
-   * is faster, but a GLJPanel is more portable. The component should also be
-   * disabled so that it does not receive events that should be sent to the
-   * {@code drawableComponent}.
-   */
-  protected GLAutoDrawable createGLComponent(GLCapabilitiesImmutable capabilities, GLContext shareWith) {
-    GLJPanel canvas = new GLJPanel(capabilities, null, shareWith);
-    canvas.setEnabled(false);
-    return canvas;
   }
 
   /**
@@ -124,12 +147,27 @@ public class G2DGLCanvas extends JComponent {
    * @see #isGLDrawing()
    */
   public void setGLDrawing(boolean drawGL) {
-    this.drawGL = drawGL;
-    ((Component) canvas).setVisible(drawGL);
-    setOpaque(drawGL);
-    repaint();
+    if (this.drawGL != drawGL) {
+      this.drawGL = drawGL;
+      ((Component) canvas).setVisible(drawGL);
+      setOpaque(drawGL);
+
+      firePropertyChange("gldrawing", !drawGL, drawGL);
+
+      repaint();
+    }
   }
 
+  /**
+   * Gets the {@code JComponent} to be drawn to the OpenGL canvas.
+   */
+  public JComponent getDrawableComponent() {
+    return drawableComponent;
+  }
+
+  /**
+   * Sets the {@code JComponent} that will be drawn to the OpenGL canvas.
+   */
   public void setDrawableComponent(JComponent component) {
     if (component == drawableComponent) {
       return;
@@ -155,21 +193,30 @@ public class G2DGLCanvas extends JComponent {
       }
 
       add(drawableComponent);
-
-      forceViewportToNativeDraw(drawableComponent);
     }
+  }
+
+  /**
+   * Creates a {@code Component} that is also a {@code GLAutoDrawable}. This is
+   * where all the drawing takes place. The advantage of a {@code GLCanvas} is
+   * that it is faster, but a {@code GLJPanel} is more portable. The component
+   * should also be disabled so that it does not receive events that should be
+   * sent to the {@code drawableComponent}. A {@code GLCanvas} is a heavyweight
+   * component and on some platforms will not pass through mouse events even
+   * though it is disabled. A {@code GLJPanel} supports this better.
+   */
+  protected GLAutoDrawable createGLComponent(GLCapabilitiesImmutable capabilities, GLContext shareWith) {
+    GLCanvas canvas = new GLCanvas(capabilities, shareWith);
+    canvas.setEnabled(false);
+    return canvas;
   }
 
   /**
    * Creates the GLEventListener that will draw the given component to the
    * canvas.
    */
-  protected G2DGLEventListener createG2DListener(JComponent drawingComponent) {
-    return new G2DGLEventListener(drawingComponent);
-  }
-
-  public JComponent getDrawableComponent() {
-    return drawableComponent;
+  protected GLEventListener createG2DListener(JComponent drawingComponent) {
+    return new G2DGLSimpleEventListener(drawingComponent);
   }
 
   /**
@@ -205,7 +252,7 @@ public class G2DGLCanvas extends JComponent {
     add((Component) canvas, 0);
   }
 
-  protected void prepareSideContext() {
+  private void prepareSideContext() {
     if (sideContext == null) {
       GLDrawableFactory factory = canvas.getFactory();
       sideContext = factory.createGLPbuffer(null, canvas.getChosenGLCapabilities(), null, 1, 1, canvas.getContext());
@@ -228,13 +275,8 @@ public class G2DGLCanvas extends JComponent {
 
   @Override
   public void paint(Graphics g) {
-    if (drawGL && drawableComponent != null && canvas != null) {
-      if (g2d == null) {
-        g2dglListener.canvas = this;
-        canvas.display();
-      } else {
-        drawableComponent.paint(g2d);
-      }
+    if (isGLDrawing() && drawableComponent != null && canvas != null) {
+      canvas.display();
     } else {
       super.paint(g);
     }
@@ -246,7 +288,7 @@ public class G2DGLCanvas extends JComponent {
      * Don't paint the drawableComponent. If we'd use a GLJPanel instead of a
      * GLCanvas, we'd have to paint it here.
      */
-    if (!drawGL) {
+    if (!isGLDrawing()) {
       super.paintChildren(g);
     }
   }
@@ -258,34 +300,6 @@ public class G2DGLCanvas extends JComponent {
     } else {
       throw new IllegalArgumentException("Do not add component to this. Add them to the object in getDrawableComponent()");
     }
-  }
-
-  /**
-   * XXX This is a workaround until I figure out how to do blitting properly in
-   * viewports.
-   */
-  protected void forceViewportToNativeDraw(Container parent) {
-    for (int i = 0; i < parent.getComponentCount(); i++) {
-      Component c = parent.getComponent(i);
-      if (c instanceof JViewport) {
-        ((JViewport) c).setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
-      }
-
-      if (c instanceof Container) {
-        forceViewportToNativeDraw((Container) c);
-      }
-    }
-  }
-
-  @Override
-  public Graphics getGraphics() {
-    return g2d == null ? super.getGraphics() : g2d.create();
-  }
-
-  public void paintGLImmediately(Map<JComponent, Rectangle> r) {
-    g2dglListener.canvas = this;
-    g2dglListener.repaints = r;
-    canvas.display();
   }
 
   /**

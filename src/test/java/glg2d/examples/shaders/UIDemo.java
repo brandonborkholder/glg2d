@@ -1,6 +1,6 @@
 package glg2d.examples.shaders;
 
-import glg2d.G2DGLCanvas;
+import glg2d.G2DGLPanel;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -290,8 +290,7 @@ public class UIDemo extends JPanel {
     JFrame frame = new JFrame("Swing Demo");
 
 //     frame.setContentPane(new UIDemo());
-    frame.setContentPane(new G2DGLCanvas(new UIDemo()));
-//    frame.setContentPane(new UIDemo().createTabComponent());
+    frame.setContentPane(new G2DGLPanel(new UIDemo()));
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setPreferredSize(new Dimension(1024, 768));
     frame.pack();
