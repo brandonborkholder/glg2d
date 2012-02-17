@@ -2,7 +2,6 @@ package glg2d.examples.shaders;
 
 import glg2d.G2DGLPanel;
 
-import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -164,9 +163,9 @@ public class UIDemo extends JPanel {
     label.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
     panel.add(label);
 
-    label = new JLabel("dashed border");
-    label.setBorder(BorderFactory.createDashedBorder(Color.red));
-    panel.add(label);
+//    label = new JLabel("dashed border");
+//    label.setBorder(BorderFactory.createDashedBorder(Color.red));
+//    panel.add(label);
 
     label = new JLabel("5px empty border");
     label.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -181,16 +180,16 @@ public class UIDemo extends JPanel {
     panel.add(label);
 
     label = new JLabel("line border");
-    label.setBorder(BorderFactory.createLineBorder(Color.blue, 3, true));
+    label.setBorder(BorderFactory.createLineBorder(Color.blue, 3));
     panel.add(label);
 
-    label = new JLabel("soft raised bevel border");
-    label.setBorder(BorderFactory.createSoftBevelBorder(BevelBorder.RAISED));
-    panel.add(label);
+//    label = new JLabel("soft raised bevel border");
+//    label.setBorder(BorderFactory.createSoftBevelBorder(BevelBorder.RAISED));
+//    panel.add(label);
 
-    label = new JLabel("stroke border");
-    label.setBorder(BorderFactory.createStrokeBorder(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER, 3)));
-    panel.add(label);
+//    label = new JLabel("stroke border");
+//    label.setBorder(BorderFactory.createStrokeBorder(new BasicStroke(2, BasicStroke.CAP_ROUND, BasicStroke.JOIN_MITER, 3)));
+//    panel.add(label);
 
     label = new JLabel("title border");
     label.setBorder(BorderFactory.createTitledBorder("Title"));
@@ -240,10 +239,10 @@ public class UIDemo extends JPanel {
     JButton button = new JButton("Normal");
     panel.add(button);
 
-    button = new JButton("Text w/ border");
-    button.setBorderPainted(true);
-    button.setBorder(BorderFactory.createLoweredSoftBevelBorder());
-    panel.add(button);
+//    button = new JButton("Text w/ border");
+//    button.setBorderPainted(true);
+//    button.setBorder(BorderFactory.createLoweredSoftBevelBorder());
+//    panel.add(button);
 
     button = new JButton("Rollover icon");
     button.setRolloverIcon(getIcon("plus"));

@@ -23,10 +23,6 @@ public class ShaderException extends RuntimeException {
     super();
   }
 
-  public ShaderException(String message, Throwable cause, boolean enableSuppression, boolean writableStackTrace) {
-    super(message, cause, enableSuppression, writableStackTrace);
-  }
-
   public ShaderException(String message, Throwable cause) {
     super(message, cause);
   }
