@@ -38,10 +38,12 @@ public class GraphTest extends JFrame {
     JPanel paintingComponent = new JPanel() {
       @Override
       protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
         GraphTest.this.paint(vertices, edges, (Graphics2D) g);
       }
     };
-
+    paintingComponent.setOpaque(true);
+    
 //    setContentPane(paintingComponent);
     setContentPane(new G2DGLPanel(paintingComponent));
 
