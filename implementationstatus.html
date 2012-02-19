@@ -9,7 +9,7 @@
     <meta name="description" content="Current implementation status of GLG2D." />
     <meta name="author" content="Brandon Borkholder" />
 
-    <title>Implementation Status - GLG2D</title>
+    <title>Implementation Status &mdash; GLG2D</title>
 
     <link rel="stylesheet" type="text/css" href="style.css" />
 
@@ -343,13 +343,13 @@
       </p>
 
       <p>
-      Another interesting use of shaders is rendering a shape with a <span class="code">BasicStroke</span>.  The <span class="code">Stroke</span> interface specifies only one method, <a href="http://docs.oracle.com/javase/7/docs/api/java/awt/Stroke.html#createStrokedShape%28java.awt.Shape%29"><span class="code">createStrokedShape(Shape)</span></a>.  That means theoretically you would have to tessellate every shape outline - a very expensive task!  Instead, GLG2D determines if you&apos;re using a <span class="code">BasicStroke</span> and uses a specialized renderer that draws the stroke using <span class="code">GL_QUADS</span>.  But all the vertex calculation is done on the CPU.  This could be offloaded to the GPU with a geometry shader.
+      Another interesting use of shaders is rendering a shape with a <span class="code">BasicStroke</span>.  The <span class="code">Stroke</span> interface specifies only one method, <a href="http://docs.oracle.com/javase/7/docs/api/java/awt/Stroke.html#createStrokedShape%28java.awt.Shape%29"><span class="code">createStrokedShape(Shape)</span></a>.  That means theoretically you would have to tessellate every shape outline &mdash; a very expensive task!  Instead, GLG2D determines if you&apos;re using a <span class="code">BasicStroke</span> and uses a specialized renderer that draws the stroke using <span class="code">GL_QUADS</span>.  But all the vertex calculation is done on the CPU.  This could be offloaded to the GPU with a geometry shader.
       </p>
 
       <hr />
 
       <p style="text-align: center">
-      <a href="index.html" class="glg2d">GLG2D</a> - fast Java2D painting using OpenGL &copy; Brandon Borkholder 2012
+      <a href="index.html" class="glg2d">GLG2D</a> &mdash; fast Java2D painting using OpenGL &copy; Brandon Borkholder 2012
       </p>
 
     </div>
