@@ -28,3 +28,6 @@ pre { background: #000; color: #fff; padding: 15px;}
 .code { font-family: monospace; }
 
 td,th { border-width: 3px; padding: 4px; border-style: ridge; border-color; white; }
+
+.imgholder { text-align: center; }
+

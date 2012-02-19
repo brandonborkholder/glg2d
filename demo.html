@@ -1,0 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Language" content="en-US" />
+    <meta name="keywords" content="glg2d,java,graphics2d,java2d,opengl,pipeline" />
+    <meta name="description" content="Demo screenshots for GLG2D." />
+    <meta name="author" content="Brandon Borkholder" />
+
+    <title>Screenshots and Capabilities - GLG2D</title>
+
+    <link rel="stylesheet" type="text/css" href="style.css" />
+  </head>
+
+  <body>
+    <a href="https://github.com/brandonborkholder/glg2d">
+      <img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" />
+    </a>
+
+    <div id="container">
+
+      <h1><a href="index.html" class="glg2d">GLG2D</a>
+        <span class="small">OpenGL accelerated Graphics2D</span>
+      </h1>
+
+      <h2>Comparing Java2D vs GLG2D</h2>
+
+      <p>
+      A Swing application rendered using the Java2D pipeline.
+      </p>
+
+      <p class="imgholder">
+      <a href="images/java2d-ui.png"><img src="images/java2d-ui-small.png" alt="Java2D rendering" /></a>
+      </p>
+
+      <p>
+      The same Swing application rendered using the GLG2D pipeline.
+      </p>
+
+      <p class="imgholder">
+      <a href="images/glg2d-ui.png"><img src="images/glg2d-ui-small.png" alt="OpenGL rendering" /></a>
+      </p>
+
+      <p>
+      What&apos;s not obvious from these screenshots is that the Swing application is fully functional while being painted in GLG2D.  Buttons respond to mouseovers and clicks.  Swing behaves exactly as before, except that it&apos; being painted to an OpenGL canvas instead.
+      </p>
+
+      <h2>Use Cases and Examples</h2>
+
+      <p>
+      Any shader can be used with the current implementation to add different effects to the rendered image.  Technically the same can be said of Swing.  You could use <span class="code">BufferedImageOp</span> to create a wide array of effects, or simply even draw into a <span>BufferedImage</span> and then manipulate the image.  And with the new <span class="code">JXLayer</span> in Java7 the plumbing is already there.  But this has two real drawbacks - speed and flexibility.  OpenGL offers significantly more flexibility and power in creating different effects.
+      </p>
+      
+      <p>
+      Below is a simple example of using a fragment shader to create a cell shading effect.
+      </p>
+
+      <p class="imgholder">
+      <a href="images/cellshader.png"><img src="images/cellshader-small.png" alt="Cell shader using GLG2D" /></a>
+      </p>
+
+      <p>
+      A multitude of other effects are possible.
+      </p>
+
+      <hr />
+
+      <p style="text-align: center">
+      <a href="index.html" class="glg2d">GLG2D</a> - fast Java2D painting using OpenGL &copy; Brandon Borkholder 2012
+      </p>
+
+    </div>
+
+    <script type="text/javascript">
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+      try {
+        var pageTracker = _gat._getTracker("UA-16069207-1");
+        pageTracker._trackPageview();
+        } catch(err) {}
+    </script>
+  </body>
+</html>
