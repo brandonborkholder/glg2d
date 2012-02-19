@@ -1,0 +1,30 @@
+body {
+  margin-top: 1.0em;
+  background-color: #eeeeee;
+  font-family: "Helvetica,Arial,FreeSans";
+  color: #222222;
+}
+
+#container {
+  margin: 0 auto;
+  width: 700px;
+}
+
+h1 { font-size: 3.8em; color: #2f6fbf; margin-bottom: 3px; }
+h1 .small { font-size: 0.3em; }
+h1 a { text-decoration: none }
+
+.glg2d { font-family: Georgia; font-weight: bold; }
+
+h2 { font-size: 1.5em; color: #2f6fbf; }
+h3 { text-align: center; color: #2f6fbf; }
+
+a { color: #2f6fbf; }
+
+.description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
+
+pre { background: #000; color: #fff; padding: 15px;}
+
+.code { font-family: monospace; }
+
+td,th { border-width: 3px; padding: 4px; border-style: ridge; border-color; white; }

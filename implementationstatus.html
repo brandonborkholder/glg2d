@@ -1,0 +1,368 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Language" content="en-US" />
+    <meta name="keywords" content="glg2d,java,graphics2d,java2d,opengl,pipeline" />
+    <meta name="description" content="Current implementation status of GLG2D." />
+    <meta name="author" content="Brandon Borkholder" />
+
+    <title>Implementation Status - GLG2D</title>
+
+    <link rel="stylesheet" type="text/css" href="style.css" />
+
+    <style type="text/css">
+      .impl-yes { background-color: #5CDE5C; font-weight: normal; text-align: center; }
+      .impl-no { background-color: #FF6666; font-weight: normal; text-align: center; }
+      .impl-partial { background-color: #FFFF80; font-weight: normal; text-align: center; }
+    </style>
+
+  </head>
+
+  <body>
+    <a href="https://github.com/brandonborkholder/glg2d">
+      <img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" />
+    </a>
+
+    <div id="container">
+
+      <h1><a href="index.html" class="glg2d">GLG2D</a>
+        <span class="small">OpenGL accelerated Graphics2D</span>
+      </h1>
+
+      <h2>Implementation Status</h2>
+
+      <p>
+      <span class="glg2d">GLG2D</span> is intended to speed up the most common painting operations.  Not all <span class="code">Graphics2D</span> methods are implemented according to the standard.  In general, we try to give priority to the most commonly-used functions.  If you have a request for a feature or want to report a bug, you can submit an issue on <a href="https://github.com/brandonborkholder/glg2d/issues"</a>GitHub</a> or send an email to
+      <span id="email">borkhobs+glg2d (at) gmail</span>.
+      <script type="text/javascript">
+        var anchor = '<a href="mailto:';
+          anchor += 'borkhobs+glg2d';
+          anchor += '@gmail.com';
+          anchor += '">borkhobs+glg2d';
+          anchor += '@gmail.com</a>';
+        document.getElementById('email').innerHTML = anchor;
+      </script>
+      </p>
+
+      <p>
+      Below are a list of all the abstract functions in <a href="http://docs.oracle.com/javase/7/docs/api/java/awt/Graphics2D.html"><span class="code">Graphics2D</span></a>.  Most methods are fully implemented, and some still have work left in order to behave like the Sun implementation.
+      </p>
+
+      <p>
+      <table>
+        <tr>
+          <td class="code">draw(Shape)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawString(String, int, int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawString(String, float, float)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawString(AttributedCharacterIterator, int, int)</td>
+          <td class="impl-partial">does not draw attributes</td>
+        </tr>
+        <tr>
+          <td class="code">drawString(AttributedCharacterIterator, float, float)</td>
+          <td class="impl-partial">does not draw attributes</td>
+        </tr>
+        <tr>
+          <td class="code">drawGlyphVector(GlyphVector, float, float)</td>
+          <td class="impl-no">not yet</td>
+        </tr>
+        <tr>
+          <td class="code">fill(Shape)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">hit(Rectangle, Shape, boolean)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">getDeviceConfiguration()</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">getComposite()</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">setComposite(Composite)</td>
+          <td class="impl-partial">not all composite types are supported</td>
+        </tr>
+        <tr>
+          <td class="code">setPaint(Paint)</td>
+          <td class="impl-partial">only accepts Color</td>
+        </tr>
+        <tr>
+          <td class="code">setRenderingHint(Key, Object)</td>
+          <td class="impl-partial">accepts a subset of the rendering hints (e.g. anti-aliasing)</td>
+        </tr>
+        <tr>
+          <td class="code">getRenderingHint(Key)</td>
+          <td class="impl-partial">accepts a subset of the rendering hints (e.g. anti-aliasing)</td>
+        </tr>
+        <tr>
+          <td class="code">setRenderingHints(Map<?, ?>)</td>
+          <td class="impl-partial">accepts a subset of the rendering hints (e.g. anti-aliasing)</td>
+        </tr>
+        <tr>
+          <td class="code">addRenderingHints(Map<?, ?>)</td>
+          <td class="impl-partial">accepts a subset of the rendering hints (e.g. anti-aliasing)</td>
+        </tr>
+        <tr>
+          <td class="code">getRenderingHints()</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">translate(int, int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">translate(double, double)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">rotate(double)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">rotate(double, double, double)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">scale(double, double)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">shear(double, double)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">transform(AffineTransform)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">setTransform(AffineTransform)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">getTransform()</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">getPaint()</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">getColor()</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">setColor(Color)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">setBackground(Color)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">getBackground()</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">getStroke()</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">setStroke(Stroke)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">setPaintMode()</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">setXORMode(Color)</td>
+          <td class="impl-no">not yet</td>
+        </tr>
+        <tr>
+          <td class="code">getFont()</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">setFont(Font)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">getFontMetrics(Font)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">getFontRenderContext()</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">getClipBounds()</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">clip(Shape s)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">clipRect(int, int, int, int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">setClip(int, int, int, int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">getClip()</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">setClip(Shape clipShape)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">copyArea(int, int, int, int, int, int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawLine(int, int, int, int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">fillRect(int, int, int, int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">clearRect(int, int, int, int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawRoundRect(int, int, int, int, int, int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">fillRoundRect(int, int, int, int, int, int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawOval(int, int, int, int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">fillOval(int, int, int, int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawArc(int, int, int, int, int, int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">fillArc(int, int, int, int, int, int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawPolyline(int[], int[], int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawPolygon(int[], int[], int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">fillPolygon(int[], int[], int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawImage(Image, AffineTransform, ImageObserver)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawImage(BufferedImage, BufferedImageOp, int, int)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawRenderedImage(RenderedImage, AffineTransform)</td>
+          <td class="impl-no">not yet</td>
+        </tr>
+        <tr>
+          <td class="code">drawRenderableImage(RenderableImage, AffineTransform)</td>
+          <td class="impl-no">not yet</td>
+        </tr>
+        <tr>
+          <td class="code">drawImage(Image, int, int, ImageObserver)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawImage(Image, int, int, Color, ImageObserver)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawImage(Image, int, int, int, int, ImageObserver)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawImage(Image, int, int, int, int, Color, ImageObserver)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawImage(Image, int, int, int, int, int, int, int, int, ImageObserver)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">drawImage(Image, int, int, int, int, int, int, int, int, Color)</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">create()</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+        <tr>
+          <td class="code">dispose()</td>
+          <td class="impl-yes">yes</td>
+        </tr>
+      </table>
+      </p>
+
+      <h2>Shader implementation</h2>
+
+      <p>
+      The initial implementation of GLG2D used just the fixed-function OpenGL pipeline.  However, there are several methods in <span class="code">Graphics2D</span> that need shaders.  The most obvious one is <a href="http://docs.oracle.com/javase/7/docs/api/java/awt/Graphics2D.html#setPaint%28java.awt.Paint%29"><span class="code">Graphics2D.setPaint(Paint)</span></a>.  A fragment shader could paint a gradient or any other kind of paint, whereas the fixed function pipeline can only paint a solid color (easily).  This is why the current implementation status of <span class="code">setPaint(Paint)</span> is <em>partial</em>.
+      </p>
+
+      <p>
+      Another interesting use of shaders is rendering a shape with a <span class="code">BasicStroke</span>.  The <span class="code">Stroke</span> interface specifies only one method, <a href="http://docs.oracle.com/javase/7/docs/api/java/awt/Stroke.html#createStrokedShape%28java.awt.Shape%29"><span class="code">createStrokedShape(Shape)</span></a>.  That means theoretically you would have to tessellate every shape outline - a very expensive task!  Instead, GLG2D determines if you&apos;re using a <span class="code">BasicStroke</span> and uses a specialized renderer that draws the stroke using <span class="code">GL_QUADS</span>.  But all the vertex calculation is done on the CPU.  This could be offloaded to the GPU with a geometry shader.
+      </p>
+
+      <hr />
+
+      <p style="text-align: center">
+      <a href="index.html" class="glg2d">GLG2D</a> - fast Java2D painting using OpenGL &copy; Brandon Borkholder 2012
+      </p>
+
+    </div>
+
+    <script type="text/javascript">
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    </script>
+    <script type="text/javascript">
+      try {
+        var pageTracker = _gat._getTracker("UA-16069207-1");
+        pageTracker._trackPageview();
+        } catch(err) {}
+    </script>
+  </body>
+</html>

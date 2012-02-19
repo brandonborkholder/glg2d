@@ -3,90 +3,72 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="Content-Language" content="en-US" />
+    <meta name="keywords" content="glg2d,java,graphics2d,java2d,opengl,pipeline" />
+    <meta name="description" content="Use OpenGL to implement the Java2D pipeline and render Java graphics quickly." />
+    <meta name="author" content="Brandon Borkholder" />
 
-    <title>JOGLJ2D - Java Graphics2D in OpenGL</title>
+    <title>GLG2D - Java Graphics2D pipeline in OpenGL</title>
 
-    <style type="text/css">
-      body {
-        margin-top: 1.0em;
-        background-color: #eeeeee;
-        font-family: "Helvetica,Arial,FreeSans";
-        color: #222222;
-      }
-      #container {
-        margin: 0 auto;
-        width: 700px;
-      }
-      h1 { font-size: 3.8em; color: #2f6fbf; margin-bottom: 3px; }
-      h1 .small { font-size: 0.3em; }
-      h1 a { text-decoration: none }
-      h2 { font-size: 1.5em; color: #2f6fbf; }
-      h3 { text-align: center; color: #2f6fbf; }
-      a { color: #2f6fbf; }
-      .description { font-size: 1.2em; margin-bottom: 30px; margin-top: 30px; font-style: italic;}
-      pre { background: #000; color: #fff; padding: 15px;}
-      .code { font-size: 0.9em; font-family: "Monospace"; }
-    </style>
+    <link rel="stylesheet" type="text/css" href="style.css" />
 
   </head>
 
   <body>
-    <a href="http://github.com/brandonborkholder/joglj2d">
+    <a href="https://github.com/brandonborkholder/glg2d">
       <img style="position: absolute; top: 0; right: 0; border: 0;" src="http://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub" />
     </a>
 
     <div id="container">
 
-      <h1><a href="http://brandonborkholder.github.com/joglj2d">JOGLJ2D</a>
+      <h1><a href="index.html" class="glg2d">GLG2D</a>
         <span class="small">OpenGL accelerated Graphics2D</span>
       </h1>
 
       <p class="description">
-      JOGLJ2D is a Graphics2D implementation that uses OpenGL to implement basic Java2D drawing functionality.
+      <span class="glg2d">GLG2D</span> is a Graphics2D implementation that uses OpenGL to implement basic Java2D drawing functionality.
       </p>
 
       <p>
-      The most recent versions of the Oracle JVM have an OpenGL pipeline to accelerate drawing on some platforms.  But the pipeline
-      doesn't use the full power of OpenGL since it doesn't make use of OpenGL's ability to draw primitives directly, like
-      <span class="code">glRect()</span>.  The Oracle implementation processes most of the Graphics2D calls in Java then sends
-      very primitive commands to the OpenGL system.
+      The most recent versions of the Oracle JVM have an OpenGL pipeline to accelerate drawing on some platforms.  But the pipeline doesn't use the full power of OpenGL since it doesn't make use of OpenGL's ability to draw primitives directly, like <span class="code">glRectf*()</span>.  The Oracle implementation processes most of the Graphics2D calls in Java then sends very primitive commands to the OpenGL system.  In addition, Oracle's implementation is not very reliable and will not work on some platforms.
       </p>
 
       <p>
-      JOGLJ2D takes a different approach.  Our object is to accelerate the most common ways that applications use the Graphics2D
-      drawing.  For example, when drawing shapes, we switch on the 
-      <a href="http://download.oracle.com/javase/6/docs/api/java/awt/Stroke.html"><span class="code">Stroke</span></a>
-      implementation and use a specialized class for
-      <a href="http://download.oracle.com/javase/6/docs/api/java/awt/BasicStroke.html"><span class="code">BasicStroke</span></a>.  For more advanced functionality, like <a href="http://download.oracle.com/javase/6/docs/api/java/awt/AlphaComposite.html"><span class="code">AlphaComposite</span></a>, we use fragment shaders.  In the future, even some of the line drawing could be implemented using geometry shaders.
+      GLG2D takes a different approach.  Our goal is to accelerate the most common ways that applications use Java2D drawing.  For example, when drawing shapes, we determine which implementation of <a href="http://download.oracle.com/javase/7/docs/api/java/awt/Stroke.html"><span class="code">Stroke</span></a> is being used and if <a href="http://download.oracle.com/javase/7/docs/api/java/awt/BasicStroke.html"><span class="code">BasicStroke</span></a> is used, we use a specialized control path that knows how to handle <span class="code">BasicStroke</span>.
       </p>
 
       <p>
-      We use the JOGL <a href="http://jogl.dev.java.net/">1.1.1a</a> libraries for making OpenGL calls.  As soon as the
-      <a href="http://jogamp.org/jogl/www/">jogamp</a> project hits a major release, we will move to the updated JOGL
-      libraries.
+      We currently use the fixed function pipeline, with the <a href="http://jogamp.org/deployment/jogamp-next/javadoc/jogl/javadoc/index.html?javax/media/opengl/GL2.html"><span class="code">GL2</span></a> profile for most functionality.  But a shader implementation is in the pipeline (so to speak).  See <a href="implementationstatus.html">implementation status</a> for which features are fully implemented.</a>
       </p>
 
-      <h2>Implementation Status</h2>
-
       <p>
-      Not all Graphics2D methods have been implemented and accelerated using JOGL calls.  In general, we try to implement
-      the most commonly-used functions first.  If you have a request for a feature or want to report a bug, send me an email
-      at
-      <span id="email">borkhobs+joglj2d (at) gmail</span>.
+      We use the latest <a href="http://jogamp.org/jogl/www/">JOGL</a> libraries for the OpenGL implementation.
+      </p>
+
+      <h2>Source</h2>
+      <p>
+      You can find the source on GitHub at <a href="http://github.com/brandonborkholder/glg2d/">http://github.com/brandonborkholder/glg2d/</a>.
+      </p>
+
+      <h2>Contact</h2>
+      <p>
+      GLG2D is maintained by Brandon Borkholder.  You can submit issues on <a href="https://github.com/brandonborkholder/glg2d/issues"</a>GitHub</a> or send an email to
+      <span id="email">borkhobs+glg2d (at) gmail</span>.
       <script type="text/javascript">
         var anchor = '<a href="mailto:';
-          anchor += 'borkhobs+joglj2d';
+          anchor += 'borkhobs+glg2d';
           anchor += '@gmail.com';
-          anchor += '">borkhobs+joglj2d';
+          anchor += '">borkhobs+glg2d';
           anchor += '@gmail.com</a>';
         document.getElementById('email').innerHTML = anchor;
       </script>
       </p>
 
-      <h2>Source</h2>
-      <p>
-      You can find the source on GitHub at <a href="http://github.com/brandonborkholder/joglj2d/">http://github.com/brandonborkholder/joglj2d/</a>.
+      <hr />
+
+      <p style="text-align: center">
+      <a href="index.html" class="glg2d">GLG2D</a> - fast Java2D painting using OpenGL &copy; Brandon Borkholder 2012
       </p>
 
     </div>
