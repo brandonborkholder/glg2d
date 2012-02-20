@@ -11,6 +11,8 @@
 
     <title>Screenshots and Capabilities &mdash; GLG2D</title>
 
+    <script type="text/javascript" src="http://gettopup.com/releases/latest/top_up-min.js"></script> 
+
     <link rel="stylesheet" type="text/css" href="style.css" />
   </head>
 
@@ -36,7 +38,7 @@
       </p>
 
       <p class="imgholder">
-      <a href="images/java2d-ui.png"><img src="images/java2d-ui-small.png" alt="Java2D rendering" /></a>
+      <a href="images/java2d-ui.png" class="top_up"><img src="images/java2d-ui-small.png" alt="Java2D rendering" /></a>
       </p>
 
       <p>
@@ -44,7 +46,7 @@
       </p>
 
       <p class="imgholder">
-      <a href="images/glg2d-ui.png"><img src="images/glg2d-ui-small.png" alt="OpenGL rendering" /></a>
+      <a href="images/glg2d-ui.png" class="top_up"><img src="images/glg2d-ui-small.png" alt="OpenGL rendering" /></a>
       </p>
 
       <p>
@@ -62,7 +64,7 @@
       </p>
 
       <p class="imgholder">
-      <a href="images/cellshader.png"><img src="images/cellshader-small.png" alt="Cell shader using GLG2D" /></a>
+      <a href="images/cellshader.png" class="top_up"><img src="images/cellshader-small.png" alt="Cell shader using GLG2D" /></a>
       </p>
 
       <p>
@@ -70,7 +72,20 @@
       </p>
 
       <p>
-      A more compelling use case is with games.  The default Java2D pipeline is easily fast enough for normal Swing applications.  Performance really only suffers when there is custom rendering on a <span class="code">JComponent</span>.
+      A more compelling use case is with games.  The default Java2D pipeline is easily fast enough for normal Swing applications.  Performance really only suffers when there is custom rendering on a <span class="code">JComponent</span>.  The screenshots below show a reasonably small network (~100 vertices, ~200 edges) being drawn each time the panel is painted.  It&apos;s not a complex painting operation, and there are not of lot of them, but the drawing takes significantly longer with the default Java2D pipeline.  With Java2D, it can paint only about 2.3 frames per second.  With GLG2D, the FPS is around 13.2.
+      </p>
+
+      <p class="imgholder">
+      <a href="images/java2d-network.png" class="top_up"><img src="images/java2d-network-small.png" alt="Java2D rendering" /></a>
+      </p>
+
+      <p class="imgholder">
+      <a href="images/glg2d-network.png" class="top_up"><img src="images/glg2d-network-small.png" alt="OpenGL rendering" /></a>
+      </p>
+
+      <p>
+      All screenshots were taken with Oracle JDK 7 (1.7.0-b147) on a quad-core Core i7 with an NVidia Quadro 1000M.
+      </p>
 
       <hr />
 
