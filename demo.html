@@ -72,11 +72,19 @@
       </p>
 
       <p>
-      A more compelling use case is with games.  The default Java2D pipeline is easily fast enough for normal Swing applications.  Performance really only suffers when there is custom rendering on a <span class="code">JComponent</span>.  The screenshots below show a reasonably small network (~100 vertices, ~200 edges) being drawn each time the panel is painted.  It&apos;s not a complex painting operation, and there are not of lot of them, but the drawing takes significantly longer with the default Java2D pipeline.  With Java2D, it can paint only about 2.3 frames per second.  With GLG2D, the FPS is around 13.2.
+      A more compelling use case is with games.  The default Java2D pipeline is easily fast enough for normal Swing applications.  Performance really only suffers when there is custom rendering on a <span class="code">JComponent</span>.  The screenshots below show a reasonably small network (1000 vertices, 1000 edges) being drawn each time the panel is painted.  It&apos;s not a complex painting operation, and there are not of lot of them, but the drawing takes significantly longer with the default Java2D pipeline.  With Java2D, it can paint only about 2.3 frames per second.  With GLG2D, the FPS is around 13.2.
+      </p>
+
+      <p>
+      A graph rendered using the Java2D pipeline.
       </p>
 
       <p class="imgholder">
       <a href="images/java2d-network.png" class="top_up"><img src="images/java2d-network-small.png" alt="Java2D rendering" /></a>
+      </p>
+
+      <p>
+      A graph rendered using GLG2D.
       </p>
 
       <p class="imgholder">
