@@ -4,6 +4,7 @@ import glg2d.G2DDrawingHelper;
 import glg2d.G2DGLEventListener;
 import glg2d.G2DGLPanel;
 import glg2d.GLGraphics2D;
+import glg2d.UIDemo;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;

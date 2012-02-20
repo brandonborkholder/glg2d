@@ -1,6 +1,4 @@
-package glg2d.examples.shaders;
-
-import glg2d.G2DGLPanel;
+package glg2d;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -19,9 +17,14 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
@@ -65,19 +68,24 @@ public class UIDemo extends JPanel {
 
     JPanel rightSubPanel = new JPanel(new BorderLayout());
     rightPanel.add(rightSubPanel, BorderLayout.CENTER);
-//    rightSubPanel.add(createProgressComponent(), BorderLayout.NORTH);
+    
+    JPanel rightSubPanel2 = new JPanel(new BorderLayout());
+    rightSubPanel2.add(createInputComponent(), BorderLayout.NORTH);
+    rightSubPanel2.add(createMDIComponent(), BorderLayout.CENTER);
 
     JSplitPane rightSplit = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
     rightSplit.setDividerSize(10);
+    rightSplit.setDividerLocation(400);
     rightSplit.setOneTouchExpandable(true);
-    rightSplit.setTopComponent(createInputComponent());
+    rightSplit.setTopComponent(rightSubPanel2);
     rightSplit.setBottomComponent(createBorderComponent());
 
+    rightSubPanel.add(createProgressComponent(), BorderLayout.NORTH);
     rightSubPanel.add(rightSplit, BorderLayout.CENTER);
     rightSubPanel.add(createTabComponent(), BorderLayout.SOUTH);
 
     setLayout(new BorderLayout());
-    mainSplit.setDividerLocation(400);
+    mainSplit.setDividerLocation(300);
     add(mainSplit, BorderLayout.CENTER);
   }
 
@@ -200,6 +208,34 @@ public class UIDemo extends JPanel {
     panel.add(label);
 
     return panel;
+  }
+  
+  JComponent createMDIComponent() {
+    JDesktopPane pane = new JDesktopPane();
+    pane.setDragMode(JDesktopPane.LIVE_DRAG_MODE);
+    pane.setBackground(new JPanel().getBackground());
+    pane.setOpaque(true);
+    pane.setBorder(BorderFactory.createEtchedBorder(EtchedBorder.RAISED));
+
+    for (int i = 0; i < 3; i++) {
+      JInternalFrame frame1 = new JInternalFrame("Foo" + i, true);
+      frame1.setClosable(true);
+      frame1.setMaximizable(true);
+      pane.add(frame1);
+
+      JMenuBar bar = new JMenuBar();
+      JMenu menu = new JMenu("File");
+      menu.add(new JMenuItem("Open"));
+      menu.add(new JMenuItem("Close"));
+      bar.add(menu);
+      frame1.setJMenuBar(bar);
+      
+      frame1.setSize(200, 200);
+      frame1.setLocation(100 * i, 5 * i);
+      frame1.setVisible(true);
+    }
+    
+    return pane;
   }
 
   JComponent createListComponent() {

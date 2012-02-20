@@ -3,6 +3,7 @@ package glg2d.examples.shaders;
 import glg2d.G2DGLEventListener;
 import glg2d.G2DGLPanel;
 import glg2d.GLGraphics2D;
+import glg2d.UIDemo;
 import glg2d.shaders.G2DShaderImageDrawer;
 import glg2d.shaders.G2DShaderShapeDrawer;
 import glg2d.shaders.G2DShaderStringDrawer;
