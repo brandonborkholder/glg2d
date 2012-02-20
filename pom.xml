@@ -1,13 +1,14 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.github.glg2d</groupId>
+  <groupId>com.jogamp</groupId>
   <artifactId>glg2d</artifactId>
   <version>0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>GLG2D</name>
-  <description>Java to OpenGL bridge</description>
+  <description>Java2D to OpenGL bridge</description>
   <inceptionYear>2010</inceptionYear>
+  <url>http://brandonborkholder.github.com/glg2d/</url>
   <licenses>
     <license>
       <name>Apache 2</name>
@@ -29,14 +30,16 @@
   </developers>
   <scm>
     <connection>scm:git:https://github.com/brandonborkholder/glg2d.git</connection>
-    <developerConnection>scm:git:git@github.com:brandonborkholder/glg2d.git</developerConnection>
+    <developerConnection>scm:git:[fetch=]https://github.com/brandonborkholder/glg2d.git[push=]git@github.com:brandonborkholder/glg2d.git</developerConnection>
     <tag>HEAD</tag>
     <url>https://github.com/brandonborkholder/glg2d</url>
   </scm>
   <properties>
-    <jogl.version>2.0rc5</jogl.version>
+    <jogl.version>2.0-rc5</jogl.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencies>
+    <!-- once JOGL is in maven, this should definitely be changed -->
     <dependency>
       <groupId>jogl</groupId>
       <artifactId>jogl</artifactId>
@@ -51,12 +54,16 @@
       <scope>system</scope>
       <systemPath>${basedir}/lib/jogl-${jogl.version}/gluegen-rt.jar</systemPath>
     </dependency>
+
+    <!-- use JUnit for tests -->
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>4.10</version>
       <scope>test</scope>
     </dependency>
+
+    <!-- use MigLayout as a quick layout manager for tests -->
     <dependency>
       <groupId>com.miglayout</groupId>
       <artifactId>miglayout-swing</artifactId>
@@ -66,14 +73,114 @@
   </dependencies>
   <build>
     <plugins>
+
+      <!-- source and target Java versions -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>2.3.2</version>
         <configuration>
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
       </plugin>
+
+      <!-- for release -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-release-plugin</artifactId>
+        <configuration>
+          <tagNameFormat>v@{project.version}</tagNameFormat>
+        </configuration>
+      </plugin>
+
+      <!-- skip tests on package -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <skipTests>true</skipTests>
+        </configuration>
+      </plugin>
+
+      <!-- get some git properties -->
+      <plugin>
+        <groupId>com.github.koraktor</groupId>
+        <artifactId>mavanagaiata</artifactId>
+        <executions>
+          <execution>
+            <goals>
+              <goal>branch</goal>
+              <goal>commit</goal>
+            </goals>
+            <phase>initialize</phase>
+          </execution>
+        </executions>
+      </plugin>
+
+      <!-- build jar -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <configuration>
+          <archive>
+            <index>true</index>
+            <manifest>
+              <addClasspath>false</addClasspath>
+            </manifest>
+            <manifestEntries>
+              <Implementation-Title>${project.name}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Branch>${mvngit.branch}</Implementation-Branch>
+              <Implementation-Commit>${mvngit.commit.id}</Implementation-Commit>
+              <Implementation-Vendor>JogAmp Community</Implementation-Vendor>
+              <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+              <Implementation-URL>${project.url}</Implementation-URL>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <!-- source jar -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <configuration>
+          <archive>
+            <manifestEntries>
+              <Implementation-Title>${project.name}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Branch>${mvngit.branch}</Implementation-Branch>
+              <Implementation-Commit>${mvngit.commit.id}</Implementation-Commit>
+              <Implementation-Vendor>JogAmp Community</Implementation-Vendor>
+              <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+              <Implementation-URL>${project.url}</Implementation-URL>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
+
+      <!-- javadoc jar -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <detectLinks>true</detectLinks>
+          <links>
+            <link>http://jogamp.org/deployment/v${jogl.version}/javadoc/jogl/javadoc/</link>
+          </links>
+          <archive>
+            <manifestEntries>
+              <Implementation-Title>${project.name}</Implementation-Title>
+              <Implementation-Version>${project.version}</Implementation-Version>
+              <Implementation-Branch>${mvngit.branch}</Implementation-Branch>
+              <Implementation-Commit>${mvngit.commit.id}</Implementation-Commit>
+              <Implementation-Vendor>JogAmp Community</Implementation-Vendor>
+              <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
+              <Implementation-URL>${project.url}</Implementation-URL>
+            </manifestEntries>
+          </archive>
+        </configuration>
+      </plugin>
     </plugins>
-  </build></project>
+  </build>
+</project>
