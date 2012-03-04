@@ -39,13 +39,15 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencies>
-    <!-- once JOGL is in maven, this should definitely be changed -->
+    <!-- once JOGL is in maven, this should definitely be changed. It's optional 
+      so it doesn't conflict with a dependency someone else has in their repo. -->
     <dependency>
       <groupId>jogl</groupId>
       <artifactId>jogl</artifactId>
       <version>${jogl.version}</version>
       <scope>system</scope>
       <systemPath>${basedir}/lib/jogl-${jogl.version}/jogl.all.jar</systemPath>
+      <optional>true</optional>
     </dependency>
     <dependency>
       <groupId>jogl</groupId>
@@ -53,24 +55,25 @@
       <version>${jogl.version}</version>
       <scope>system</scope>
       <systemPath>${basedir}/lib/jogl-${jogl.version}/gluegen-rt.jar</systemPath>
+      <optional>true</optional>
     </dependency>
 
-    <!-- use JUnit for tests -->
+    <!-- I put the test dependencies in a separate pom so I can use the tools.jar 
+      system dependency. -->
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.10</version>
-      <scope>test</scope>
-    </dependency>
-
-    <!-- use MigLayout as a quick layout manager for tests -->
-    <dependency>
-      <groupId>com.miglayout</groupId>
-      <artifactId>miglayout-swing</artifactId>
-      <version>4.2</version>
+      <groupId>com.jogamp</groupId>
+      <artifactId>glg2d-test</artifactId>
+      <version>${project.version}</version>
+      <type>pom</type>
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <repositories>
+    <repository>
+      <id>glg2d-project-local</id>
+      <url>file://${basedir}/lib</url>
+    </repository>
+  </repositories>
   <build>
     <plugins>
 
@@ -184,7 +187,8 @@
     </plugins>
     <pluginManagement>
       <plugins>
-        <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        <!--This plugin's configuration is used to store Eclipse m2e settings 
+          only. It has no influence on the Maven build itself. -->
         <plugin>
           <groupId>org.eclipse.m2e</groupId>
           <artifactId>lifecycle-mapping</artifactId>
