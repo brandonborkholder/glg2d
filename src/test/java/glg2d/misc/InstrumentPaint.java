@@ -1,7 +1,5 @@
-package misc;
+package glg2d.misc;
 
-import java.awt.Component;
-import java.awt.Graphics;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -67,7 +65,7 @@ public class InstrumentPaint {
     CtClass ctClass = ClassPool.getDefault().get(InstrumentPaint.class.getName());
     jos.write(ctClass.toBytecode());
     jos.closeEntry();
-    
+
     // write the instrumentation snippet
     JarEntry snip = new JarEntry("instrumentation.snip");
     jos.putNextEntry(snip);
@@ -115,22 +113,22 @@ public class InstrumentPaint {
 
     instrumentation.retransformClasses(JComponent.class);
   }
-  
+
   private static String getInstrumentationCode() {
     try {
-    InputStream stream = InstrumentPaint.class.getClassLoader().getResourceAsStream("instrumentation.snip");
-    BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-    
-    StringBuilder builder = new StringBuilder();
-    String line;
-      while ((line = reader.readLine())!=null) {
+      InputStream stream = InstrumentPaint.class.getClassLoader().getResourceAsStream("instrumentation.snip");
+      BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+
+      StringBuilder builder = new StringBuilder();
+      String line;
+      while ((line = reader.readLine()) != null) {
         builder.append(line);
         builder.append("\n");
       }
-    
-    reader.close();
-    
-    return builder.toString();
+
+      reader.close();
+
+      return builder.toString();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

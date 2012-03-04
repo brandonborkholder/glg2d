@@ -1,4 +1,4 @@
-package misc;
+package glg2d.misc;
 
 import glg2d.SimplePathVisitor;
 

@@ -1,5 +1,7 @@
 package glg2d;
 
+import glg2d.misc.InstrumentPaint;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -47,8 +49,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-
-import misc.InstrumentPaint;
 
 @SuppressWarnings("serial")
 public class UIDemo extends JPanel {
