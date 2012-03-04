@@ -1,10 +1,14 @@
 package misc;
 
-import glg2d.VertexBuffer;
-
+import java.awt.Component;
+import java.awt.Graphics;
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.instrument.Instrumentation;
@@ -63,6 +67,12 @@ public class InstrumentPaint {
     CtClass ctClass = ClassPool.getDefault().get(InstrumentPaint.class.getName());
     jos.write(ctClass.toBytecode());
     jos.closeEntry();
+    
+    // write the instrumentation snippet
+    JarEntry snip = new JarEntry("instrumentation.snip");
+    jos.putNextEntry(snip);
+    jos.write(getInstrumentationCode().getBytes());
+    jos.closeEntry();
     jos.close();
 
     // use an Oracle-specific method to get pid of the current JVM
@@ -75,9 +85,10 @@ public class InstrumentPaint {
     // detaches, we already loaded the agent
     vm.detach();
   }
-  
+
   public static void agentmain(String agentargs, Instrumentation instrumentation) throws UnmodifiableClassException, NotFoundException {
     final ClassPool pool = ClassPool.getDefault();
+    final String snippet = getInstrumentationCode();
 
     instrumentation.addTransformer(new ClassFileTransformer() {
       @Override
@@ -87,13 +98,13 @@ public class InstrumentPaint {
         if (!className.equals("javax/swing/JComponent")) {
           return classfileBuffer;
         }
-        
+
         System.err.println("Redefining: " + className);
 
         try {
           CtClass c = pool.makeClass(new ByteArrayInputStream(classfileBuffer));
           CtMethod method = c.getMethod("paint", "(Ljava/awt/Graphics;)V");
-          method.insertBefore(" if (getClass().getName().startsWith(\"javax.swing\") && !$1.getClass().getName().equals(\"glg2d.GLGraphics2D\")) System.err.println(getClass().getName() + \".paint(\" + $1.getClass().getName() + \")\");");
+          method.insertBefore(snippet);
           return c.toBytecode();
         } catch (Exception e) {
           e.printStackTrace();
@@ -103,5 +114,25 @@ public class InstrumentPaint {
     }, true);
 
     instrumentation.retransformClasses(JComponent.class);
+  }
+  
+  private static String getInstrumentationCode() {
+    try {
+    InputStream stream = InstrumentPaint.class.getClassLoader().getResourceAsStream("instrumentation.snip");
+    BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+    
+    StringBuilder builder = new StringBuilder();
+    String line;
+      while ((line = reader.readLine())!=null) {
+        builder.append(line);
+        builder.append("\n");
+      }
+    
+    reader.close();
+    
+    return builder.toString();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }

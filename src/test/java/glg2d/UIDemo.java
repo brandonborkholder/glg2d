@@ -48,6 +48,8 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 
+import misc.InstrumentPaint;
+
 @SuppressWarnings("serial")
 public class UIDemo extends JPanel {
   public UIDemo() {
@@ -321,6 +323,8 @@ public class UIDemo extends JPanel {
   }
 
   public static void main(String[] args) throws Exception {
+    InstrumentPaint.instrument();
+    
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     JFrame frame = new JFrame("Swing Demo");
 
