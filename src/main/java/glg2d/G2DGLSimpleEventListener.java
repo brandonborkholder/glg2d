@@ -137,6 +137,10 @@ public class G2DGLSimpleEventListener implements GLEventListener {
 
   @Override
   public void init(GLAutoDrawable drawable) {
+    if (!drawable.getGL().isGL2()) {
+      throw new IllegalStateException("GLG2D currently requires a GL2 implementation (OpenGL version 1.5 or greater)");
+    }
+
     reshape(drawable, 0, 0, drawable.getWidth(), drawable.getWidth());
   }
 
