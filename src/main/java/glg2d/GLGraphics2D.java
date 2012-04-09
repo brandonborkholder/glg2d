@@ -49,19 +49,20 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES1;
+import javax.media.opengl.GL2GL3;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.Threading;
-import javax.media.opengl.fixedfunc.GLMatrixFunc;
+import javax.media.opengl.fixedfunc.GLLightingFunc;
 
 /**
  * Implements the standard {@code Graphics2D} functionality, but instead draws
  * to an OpenGL canvas.
  */
 public class GLGraphics2D extends Graphics2D implements Cloneable {
-  protected static final double RAD_TO_DEG = 180d / Math.PI;
-
   protected GLGraphics2D parent;
 
   protected GLContext glContext;
@@ -83,6 +84,8 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   protected G2DGLImageDrawer imageDrawer;
 
   protected G2DGLStringDrawer stringDrawer;
+
+  protected G2DGLTransformHelper matrixHelper;
 
   protected Rectangle clip;
 
@@ -107,10 +110,12 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     shapeDrawer = new G2DGLShapeDrawer();
     imageDrawer = new G2DGLImageDrawer();
     stringDrawer = new G2DGLStringDrawer();
+    matrixHelper = new G2DGLTransformHelper();
 
     addG2DDrawingHelper(shapeDrawer);
     addG2DDrawingHelper(imageDrawer);
     addG2DDrawingHelper(stringDrawer);
+    addG2DDrawingHelper(matrixHelper);
   }
 
   public void addG2DDrawingHelper(G2DDrawingHelper helper) {
@@ -158,10 +163,10 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     graphicsConfig = component.getGraphicsConfiguration();
 
     // now enable some flags we'll use
-    gl.glDisable(GL2.GL_ALPHA_TEST);
-    gl.glDisable(GL2.GL_DEPTH_TEST);
-    gl.glDisable(GL2.GL_CULL_FACE);
-    gl.glShadeModel(GL2.GL_FLAT);
+    gl.glDisable(GL2ES1.GL_ALPHA_TEST);
+    gl.glDisable(GL.GL_DEPTH_TEST);
+    gl.glDisable(GL.GL_CULL_FACE);
+    gl.glShadeModel(GLLightingFunc.GL_FLAT);
   }
 
   protected void postPaint() {
@@ -253,7 +258,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void setComposite(Composite comp) {
-    gl.glEnable(GL2.GL_BLEND);
+    gl.glEnable(GL.GL_BLEND);
     if (comp instanceof AlphaComposite) {
       switch (((AlphaComposite) comp).getRule()) {
       /*
@@ -264,32 +269,32 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
        */
       case AlphaComposite.SRC:
       case AlphaComposite.SRC_IN:
-        gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ZERO);
+        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ZERO);
         break;
 
       case AlphaComposite.SRC_OVER:
       case AlphaComposite.SRC_ATOP:
-        gl.glBlendFunc(GL2.GL_SRC_ALPHA, GL2.GL_ONE_MINUS_SRC_ALPHA);
+        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
         break;
 
       case AlphaComposite.SRC_OUT:
       case AlphaComposite.CLEAR:
-        gl.glBlendFunc(GL2.GL_ZERO, GL2.GL_ZERO);
+        gl.glBlendFunc(GL.GL_ZERO, GL.GL_ZERO);
         break;
 
       case AlphaComposite.DST:
       case AlphaComposite.DST_OVER:
-        gl.glBlendFunc(GL2.GL_ZERO, GL2.GL_ONE);
+        gl.glBlendFunc(GL.GL_ZERO, GL.GL_ONE);
         break;
 
       case AlphaComposite.DST_IN:
       case AlphaComposite.DST_ATOP:
-        gl.glBlendFunc(GL2.GL_ZERO, GL2.GL_SRC_ALPHA);
+        gl.glBlendFunc(GL.GL_ZERO, GL.GL_SRC_ALPHA);
         break;
 
       case AlphaComposite.DST_OUT:
       case AlphaComposite.XOR:
-        gl.glBlendFunc(GL2.GL_ZERO, GL2.GL_ONE_MINUS_SRC_ALPHA);
+        gl.glBlendFunc(GL.GL_ZERO, GL.GL_ONE_MINUS_SRC_ALPHA);
         break;
       }
 
@@ -357,86 +362,47 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void translate(int x, int y) {
-    gl.glMatrixMode(GL2.GL_MODELVIEW);
-    gl.glTranslatef(x, y, 0);
+    matrixHelper.translate(x, y);
   }
 
   @Override
-  public void translate(double tx, double ty) {
-    gl.glMatrixMode(GL2.GL_MODELVIEW);
-    gl.glTranslated(tx, ty, 0);
+  public void translate(double x, double y) {
+    matrixHelper.translate(x, y);
   }
 
   @Override
   public void rotate(double theta) {
-    gl.glMatrixMode(GL2.GL_MODELVIEW);
-    gl.glRotated(theta * RAD_TO_DEG, 0, 0, 1);
+    matrixHelper.rotate(theta);
   }
 
   @Override
   public void rotate(double theta, double x, double y) {
-    gl.glMatrixMode(GL2.GL_MODELVIEW);
-    gl.glTranslated(x, y, 0);
-    gl.glRotated(theta * RAD_TO_DEG, 0, 0, 1);
-    gl.glTranslated(-x, -y, 0);
+    matrixHelper.rotate(theta, x, y);
   }
 
   @Override
   public void scale(double sx, double sy) {
-    gl.glMatrixMode(GL2.GL_MODELVIEW);
-    gl.glScaled(sx, sy, 1);
+    matrixHelper.scale(sx, sy);
   }
 
   @Override
   public void shear(double shx, double shy) {
-    gl.glMatrixMode(GL2.GL_MODELVIEW);
-    double[] shear = new double[] {
-        1, shy, 0, 0,
-        shx, 1, 0, 0,
-        0, 0, 1, 0,
-        0, 0, 0, 1 };
-    gl.glMultMatrixd(shear, 0);
+    matrixHelper.shear(shx, shy);
   }
 
   @Override
   public void transform(AffineTransform Tx) {
-    gl.glMatrixMode(GL2.GL_MODELVIEW);
-    multMatrix(gl, Tx);
+    matrixHelper.transform(Tx);
   }
 
   @Override
   public void setTransform(AffineTransform transform) {
-    gl.glMatrixMode(GL2.GL_MODELVIEW);
-    gl.glLoadIdentity();
-    gl.glTranslatef(0, height, 0);
-    gl.glScalef(1, -1, 1);
-    multMatrix(gl, transform);
-  }
-
-  public static void multMatrix(GLMatrixFunc gl, AffineTransform transform) {
-    float[] matrix = new float[16];
-    matrix[0] = (float) transform.getScaleX();
-    matrix[1] = (float) transform.getShearY();
-    matrix[4] = (float) transform.getShearX();
-    matrix[5] = (float) transform.getScaleY();
-    matrix[10] = 1;
-    matrix[12] = (float) transform.getTranslateX();
-    matrix[13] = (float) transform.getTranslateY();
-    matrix[15] = 1;
-
-    gl.glMultMatrixf(matrix, 0);
+    matrixHelper.setTransform(transform);
   }
 
   @Override
   public AffineTransform getTransform() {
-    double[] m = new double[16];
-    gl.glGetDoublev(GL2.GL_MODELVIEW_MATRIX, m, 0);
-
-    /*
-     * Since the MODELVIEW matrix includes the transform from Java2D to OpenGL
-     * coords, we remove that transform inline here.
-     */
-    return new AffineTransform(m[0], -m[1], m[4], -m[5], m[12], height - m[13]);
+    return matrixHelper.getTransform();
   }
 
   @Override
@@ -607,10 +573,10 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   protected void scissor(boolean enable) {
     if (enable) {
       gl.glScissor(clip.x, height - clip.y - clip.height, Math.max(clip.width, 0), Math.max(clip.height, 0));
-      gl.glEnable(GL2.GL_SCISSOR_TEST);
+      gl.glEnable(GL.GL_SCISSOR_TEST);
     } else {
       clip = null;
-      gl.glDisable(GL2.GL_SCISSOR_TEST);
+      gl.glDisable(GL.GL_SCISSOR_TEST);
     }
   }
 
@@ -623,7 +589,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
     int x1 = x;
     int y1 = this.height - (y + height);
-    gl.glCopyPixels(x1, y1, width, height, GL2.GL_COLOR);
+    gl.glCopyPixels(x1, y1, width, height, GL2GL3.GL_COLOR);
   }
 
   @Override
@@ -741,8 +707,6 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public Graphics create() {
-    gl.glMatrixMode(GL2.GL_MODELVIEW);
-    gl.glPushMatrix();
     gl.glPushAttrib(GL2.GL_ALL_ATTRIB_BITS);
     gl.glPushClientAttrib((int) GL2.GL_ALL_CLIENT_ATTRIB_BITS);
 
@@ -772,8 +736,6 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
       gl.glPopClientAttrib();
       gl.glPopAttrib();
-      gl.glMatrixMode(GL2.GL_MODELVIEW);
-      gl.glPopMatrix();
     }
   }
 

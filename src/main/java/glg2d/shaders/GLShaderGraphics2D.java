@@ -16,6 +16,7 @@
 
 package glg2d.shaders;
 
+import glg2d.G2DGLTransformHelper;
 import glg2d.GLGraphics2D;
 
 public class GLShaderGraphics2D extends GLGraphics2D {
@@ -28,6 +29,7 @@ public class GLShaderGraphics2D extends GLGraphics2D {
     Shader s = new ResourceShader(GLShaderGraphics2D.class, "TextureShader.v", "TextureShader.f");
     imageDrawer = new G2DShaderImageDrawer(s);
     stringDrawer = new G2DShaderStringDrawer(s);
+    matrixHelper = new G2DGLTransformHelper();
 
     s = new ResourceShader(GLShaderGraphics2D.class, "FixedFuncShader.v", "FixedFuncShader.f");
     shapeDrawer = new G2DShaderShapeDrawer(s);
@@ -35,5 +37,6 @@ public class GLShaderGraphics2D extends GLGraphics2D {
     addG2DDrawingHelper(imageDrawer);
     addG2DDrawingHelper(stringDrawer);
     addG2DDrawingHelper(shapeDrawer);
+    addG2DDrawingHelper(matrixHelper);
   }
 }

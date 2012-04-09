@@ -134,7 +134,7 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
     gl.glPushMatrix();
 
     if (xform != null) {
-      GLGraphics2D.multMatrix(gl, xform);
+      GLG2DUtils.multMatrix(gl, xform);
     }
 
     if (bgcolor == null) {
