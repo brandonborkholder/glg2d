@@ -16,6 +16,7 @@
 
 package glg2d;
 
+import java.awt.Color;
 import java.awt.geom.AffineTransform;
 
 import javax.media.opengl.GL2ES1;
@@ -45,5 +46,10 @@ public class GLG2DUtils {
     gl.glGetFloatv(GLMatrixFunc.GL_MODELVIEW_MATRIX, m, 0);
 
     return new AffineTransform(m[0], -m[1], m[4], -m[5], m[12], canvasHeight - m[13]);
+  }
+
+  public static void setColor(GL2ES1 gl, Color c, float preMultiplyAlpha) {
+    int rgb = c.getRGB();
+    gl.glColor4ub((byte) (rgb >> 16 & 0xFF), (byte) (rgb >> 8 & 0xFF), (byte) (rgb & 0xFF), (byte) ((rgb >> 24 & 0xFF) * preMultiplyAlpha));
   }
 }

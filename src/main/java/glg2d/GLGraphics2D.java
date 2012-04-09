@@ -52,11 +52,9 @@ import java.util.Map.Entry;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2ES1;
-import javax.media.opengl.GL2GL3;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.Threading;
-import javax.media.opengl.fixedfunc.GLLightingFunc;
 
 /**
  * Implements the standard {@code Graphics2D} functionality, but instead draws
@@ -75,10 +73,6 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   protected boolean isDisposed;
 
-  protected Color color;
-
-  protected Color background;
-
   protected G2DGLShapeDrawer shapeDrawer;
 
   protected G2DGLImageDrawer imageDrawer;
@@ -87,9 +81,9 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   protected G2DGLTransformHelper matrixHelper;
 
-  protected Rectangle clip;
+  protected G2DGLColorHelper colorHelper;
 
-  protected Composite composite;
+  protected Rectangle clip;
 
   protected GraphicsConfiguration graphicsConfig;
 
@@ -111,11 +105,13 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     imageDrawer = new G2DGLImageDrawer();
     stringDrawer = new G2DGLStringDrawer();
     matrixHelper = new G2DGLTransformHelper();
+    colorHelper = new G2DGLColorHelper();
 
     addG2DDrawingHelper(shapeDrawer);
     addG2DDrawingHelper(imageDrawer);
     addG2DDrawingHelper(stringDrawer);
     addG2DDrawingHelper(matrixHelper);
+    addG2DDrawingHelper(colorHelper);
   }
 
   public void addG2DDrawingHelper(G2DDrawingHelper helper) {
@@ -166,7 +162,6 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     gl.glDisable(GL2ES1.GL_ALPHA_TEST);
     gl.glDisable(GL.GL_DEPTH_TEST);
     gl.glDisable(GL.GL_CULL_FACE);
-    gl.glShadeModel(GLLightingFunc.GL_FLAT);
   }
 
   protected void postPaint() {
@@ -200,12 +195,12 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawString(String str, int x, int y) {
-    stringDrawer.drawString(str, color, x, y);
+    stringDrawer.drawString(str, getColor(), x, y);
   }
 
   @Override
   public void drawString(String str, float x, float y) {
-    stringDrawer.drawString(str, color, x, y);
+    stringDrawer.drawString(str, getColor(), x, y);
   }
 
   @Override
@@ -253,67 +248,17 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public Composite getComposite() {
-    return composite;
+    return colorHelper.getComposite();
   }
 
   @Override
   public void setComposite(Composite comp) {
-    gl.glEnable(GL.GL_BLEND);
-    if (comp instanceof AlphaComposite) {
-      switch (((AlphaComposite) comp).getRule()) {
-      /*
-       * Since the destination _always_ covers the entire canvas (i.e. there are
-       * always color components for every pixel), some of these composites can
-       * be collapsed into each other. They matter when Java2D is drawing into
-       * an image and the destination may not take up the entire canvas.
-       */
-      case AlphaComposite.SRC:
-      case AlphaComposite.SRC_IN:
-        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ZERO);
-        break;
-
-      case AlphaComposite.SRC_OVER:
-      case AlphaComposite.SRC_ATOP:
-        gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
-        break;
-
-      case AlphaComposite.SRC_OUT:
-      case AlphaComposite.CLEAR:
-        gl.glBlendFunc(GL.GL_ZERO, GL.GL_ZERO);
-        break;
-
-      case AlphaComposite.DST:
-      case AlphaComposite.DST_OVER:
-        gl.glBlendFunc(GL.GL_ZERO, GL.GL_ONE);
-        break;
-
-      case AlphaComposite.DST_IN:
-      case AlphaComposite.DST_ATOP:
-        gl.glBlendFunc(GL.GL_ZERO, GL.GL_SRC_ALPHA);
-        break;
-
-      case AlphaComposite.DST_OUT:
-      case AlphaComposite.XOR:
-        gl.glBlendFunc(GL.GL_ZERO, GL.GL_ONE_MINUS_SRC_ALPHA);
-        break;
-      }
-
-      composite = comp;
-      // need to pre-multiply the alpha
-      setColor(color);
-    } else {
-      throw new UnsupportedOperationException();
-    }
+    colorHelper.setComposite(comp);
   }
 
   @Override
   public void setPaint(Paint paint) {
-    if (paint instanceof Color) {
-      setColor((Color) paint);
-    } else {
-      // TODO
-      throw new UnsupportedOperationException();
-    }
+    colorHelper.setPaint(paint);
   }
 
   @Override
@@ -407,53 +352,27 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public Paint getPaint() {
-    return color;
+    return colorHelper.getPaint();
   }
 
   @Override
   public Color getColor() {
-    return color;
+    return colorHelper.getColor();
   }
 
   @Override
   public void setColor(Color c) {
-    if (c == null) {
-      return;
-    }
-
-    color = c;
-    setColorRespectComposite(c);
-  }
-
-  /**
-   * Sets the current color with a call to glColor4*. But it respects the
-   * AlphaComposite if any. If the AlphaComposite wants to pre-multiply an
-   * alpha, pre-multiply it.
-   */
-  protected void setColorRespectComposite(Color c) {
-    float alpha = 1;
-    if (composite instanceof AlphaComposite) {
-      alpha = ((AlphaComposite) composite).getAlpha();
-    }
-
-    setColor(gl, c, alpha);
-  }
-
-  public static void setColor(GL2 gl, Color c, float preMultiplyAlpha) {
-    int rgb = c.getRGB();
-    gl.glColor4ub((byte) (rgb >> 16 & 0xFF), (byte) (rgb >> 8 & 0xFF), (byte) (rgb & 0xFF), (byte) ((rgb >> 24 & 0xFF) * preMultiplyAlpha));
+    colorHelper.setColor(c);
   }
 
   @Override
   public void setBackground(Color color) {
-    background = color;
-    int rgb = background.getRGB();
-    gl.glClearColor((rgb >> 16 & 0xFF) / 255F, (rgb >> 8 & 0xFF) / 255F, (rgb & 0xFF) / 255F, (rgb >> 24 & 0xFF) / 255F);
+    colorHelper.setBackground(color);
   }
 
   @Override
   public Color getBackground() {
-    return background;
+    return colorHelper.getBackground();
   }
 
   @Override
@@ -468,14 +387,12 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void setPaintMode() {
-    // TODO Auto-generated method stub
-
+    colorHelper.setPaintMode();
   }
 
   @Override
-  public void setXORMode(Color c1) {
-    // TODO Auto-generated method stub
-
+  public void setXORMode(Color c) {
+    colorHelper.setXORMode(c);
   }
 
   @Override
@@ -582,14 +499,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void copyArea(int x, int y, int width, int height, int dx, int dy) {
-    // glRasterPos* is transformed, but CopyPixels is not
-    int x2 = x + dx;
-    int y2 = y + dy + height;
-    gl.glRasterPos2i(x2, y2);
-
-    int x1 = x;
-    int y1 = this.height - (y + height);
-    gl.glCopyPixels(x1, y1, width, height, GL2GL3.GL_COLOR);
+    colorHelper.copyArea(x, y, width, height, dx, dy);
   }
 
   @Override
@@ -604,9 +514,10 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void clearRect(int x, int y, int width, int height) {
-    setColor(gl, background, 1);
+    Color c = getColor();
+    colorHelper.setColorNoRespectComposite(getBackground());
     fillRect(x, y, width, height);
-    setColorRespectComposite(color);
+    colorHelper.setColorRespectComposite(c);
   }
 
   @Override

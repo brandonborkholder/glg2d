@@ -138,9 +138,9 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
     }
 
     if (bgcolor == null) {
-      g2d.setColorRespectComposite(Color.white);
+      g2d.colorHelper.setColorRespectComposite(Color.white);
     } else {
-      g2d.setColorRespectComposite(bgcolor);
+      g2d.colorHelper.setColorRespectComposite(bgcolor);
     }
   }
 
