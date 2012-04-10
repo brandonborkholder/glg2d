@@ -50,7 +50,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 import javax.media.opengl.GL2ES1;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
@@ -65,13 +64,11 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   protected GLContext glContext;
 
-  protected GL2 gl;
-
-  protected int height;
-
-  protected int width;
+  protected GL gl;
 
   protected boolean isDisposed;
+
+  protected int canvasHeight;
 
   protected G2DGLShapeDrawer shapeDrawer;
 
@@ -91,12 +88,8 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   protected G2DDrawingHelper[] helpers = new G2DDrawingHelper[0];
 
-  public GLGraphics2D(int width, int height) {
-    this.height = height;
-    this.width = width;
-
+  public GLGraphics2D() {
     hints = new RenderingHints(Collections.<Key, Object> emptyMap());
-
     createDrawingHelpers();
   }
 
@@ -133,6 +126,8 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     glContext = drawable.getContext();
     gl = glContext.getGL().getGL2();
 
+    canvasHeight = GLG2DUtils.getCanvasHeight(gl);
+
     for (G2DDrawingHelper helper : helpers) {
       helper.setG2D(this);
     }
@@ -144,10 +139,6 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   protected void setupState(Component component) {
-    // push all GL states
-    gl.glPushAttrib(GL2.GL_ALL_ATTRIB_BITS);
-    gl.glPushClientAttrib((int) GL2.GL_ALL_CLIENT_ATTRIB_BITS);
-
     // set the GL state to use defaults from the component
     setBackground(component.getBackground());
     setColor(component.getForeground());
@@ -165,8 +156,6 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   protected void postPaint() {
-    gl.glPopClientAttrib();
-    gl.glPopAttrib();
     gl.glFlush();
   }
 
@@ -174,12 +163,8 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     return glContext;
   }
 
-  public int getHeight() {
-    return height;
-  }
-
-  public int getWidth() {
-    return width;
+  public int getCanvasHeight() {
+    return canvasHeight;
   }
 
   public void glDispose() {
@@ -489,7 +474,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   protected void scissor(boolean enable) {
     if (enable) {
-      gl.glScissor(clip.x, height - clip.y - clip.height, Math.max(clip.width, 0), Math.max(clip.height, 0));
+      gl.glScissor(clip.x, canvasHeight - clip.y - clip.height, Math.max(clip.width, 0), Math.max(clip.height, 0));
       gl.glEnable(GL.GL_SCISSOR_TEST);
     } else {
       clip = null;
@@ -618,9 +603,6 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public Graphics create() {
-    gl.glPushAttrib(GL2.GL_ALL_ATTRIB_BITS);
-    gl.glPushClientAttrib((int) GL2.GL_ALL_CLIENT_ATTRIB_BITS);
-
     GLGraphics2D newG2d = clone();
 
     for (G2DDrawingHelper helper : helpers) {
@@ -640,13 +622,11 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
       isDisposed = true;
 
       if (parent != null) {
-        for (G2DDrawingHelper helper : helpers) {
-          helper.pop(parent);
+        // pop in reverse order
+        for (int i = helpers.length - 1; i >= 0; i--) {
+          helpers[i].pop(parent);
         }
       }
-
-      gl.glPopClientAttrib();
-      gl.glPopAttrib();
     }
   }
 

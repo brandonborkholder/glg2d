@@ -36,7 +36,7 @@ public class G2DShaderShapeDrawer extends G2DGLShapeDrawer {
     super.setG2D(g2d);
 
     GL2ES2 gl = g2d.getGLContext().getGL().getGL2ES2();
-    if (shader.isProgram(gl)) {
+    if (!shader.isProgram(gl)) {
       shader.setup(gl);
     }
   }

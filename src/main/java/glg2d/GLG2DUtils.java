@@ -19,6 +19,7 @@ package glg2d;
 import java.awt.Color;
 import java.awt.geom.AffineTransform;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES1;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
 
@@ -51,5 +52,12 @@ public class GLG2DUtils {
   public static void setColor(GL2ES1 gl, Color c, float preMultiplyAlpha) {
     int rgb = c.getRGB();
     gl.glColor4ub((byte) (rgb >> 16 & 0xFF), (byte) (rgb >> 8 & 0xFF), (byte) (rgb & 0xFF), (byte) ((rgb >> 24 & 0xFF) * preMultiplyAlpha));
+  }
+  
+  public static int getCanvasHeight(GL gl) {
+    int[] viewportDimensions = new int[4];
+    gl.glGetIntegerv(GL.GL_VIEWPORT, viewportDimensions, 0);
+    int canvasHeight = viewportDimensions[3];
+    return canvasHeight;
   }
 }

@@ -134,7 +134,7 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
     TextRenderer renderer = getRenderer(getFont());
 
     begin(renderer, color);
-    renderer.draw3D(string, x, g2d.getHeight() - y, 0, 1);
+    renderer.draw3D(string, x, g2d.getCanvasHeight() - y, 0, 1);
     end(renderer);
   }
 
@@ -145,7 +145,7 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glPushMatrix();
     gl.glScalef(1, -1, 1);
-    gl.glTranslatef(0, -g2d.getHeight(), 0);
+    gl.glTranslatef(0, -g2d.getCanvasHeight(), 0);
 
     renderer.begin3DRendering();
   }

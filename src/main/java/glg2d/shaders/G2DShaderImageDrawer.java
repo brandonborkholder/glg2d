@@ -37,7 +37,7 @@ public class G2DShaderImageDrawer extends G2DGLImageDrawer {
   public void setG2D(GLGraphics2D g2d) {
     super.setG2D(g2d);
 
-    GL2ES2 gl = g2d.getGLContext().getGL().getGLES2();
+    GL2ES2 gl = g2d.getGLContext().getGL().getGL2ES2();
     if (!shader.isProgram(gl)) {
       shader.setup(gl);
     }

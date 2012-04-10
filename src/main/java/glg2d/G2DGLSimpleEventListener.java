@@ -160,7 +160,7 @@ public class G2DGLSimpleEventListener implements GLEventListener {
    * calls.
    */
   protected GLGraphics2D createGraphics2D(GLAutoDrawable drawable) {
-    return new GLGraphics2D(drawable.getWidth(), drawable.getHeight());
+    return new GLGraphics2D();
   }
 
   @Override

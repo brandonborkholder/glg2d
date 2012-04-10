@@ -21,8 +21,8 @@ import glg2d.G2DGLTransformHelper;
 import glg2d.GLGraphics2D;
 
 public class GLShaderGraphics2D extends GLGraphics2D {
-  public GLShaderGraphics2D(int width, int height) {
-    super(width, height);
+  public GLShaderGraphics2D() {
+    super();
   }
 
   @Override

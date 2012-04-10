@@ -23,14 +23,14 @@ import javax.media.opengl.fixedfunc.GLMatrixFunc;
 
 public class G2DGLTransformHelper implements G2DDrawingHelper {
   protected static final float RAD_TO_DEG = 180f / (float) Math.PI;
+  
+  protected GLGraphics2D g2d;
 
   protected GL2 gl;
 
-  protected int canvasHeight;
-
   @Override
   public void setG2D(GLGraphics2D g2d) {
-    canvasHeight = g2d.getHeight();
+    this.g2d = g2d;
     gl = g2d.getGLContext().getGL().getGL2();
   }
 
@@ -95,12 +95,12 @@ public class G2DGLTransformHelper implements G2DDrawingHelper {
   public void setTransform(AffineTransform transform) {
     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glLoadIdentity();
-    gl.glTranslatef(0, canvasHeight, 0);
+    gl.glTranslatef(0, g2d.getCanvasHeight(), 0);
     gl.glScalef(1, -1, 1);
     GLG2DUtils.multMatrix(gl, transform);
   }
 
   public AffineTransform getTransform() {
-    return GLG2DUtils.getModelTransform(gl, canvasHeight);
+    return GLG2DUtils.getModelTransform(gl, g2d.getCanvasHeight());
   }
 }

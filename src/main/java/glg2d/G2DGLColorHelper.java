@@ -20,34 +20,42 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Paint;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
 
 public class G2DGLColorHelper implements G2DDrawingHelper {
+  protected GLGraphics2D g2d;
+
   protected GL2 gl;
 
-  protected int canvasHeight;
-
-  protected Color color;
-
-  protected Color background;
-
-  protected Composite composite;
+  protected Deque<ColorState> stack = new ArrayDeque<ColorState>(10);
 
   @Override
   public void setG2D(GLGraphics2D g2d) {
+    this.g2d = g2d;
     gl = g2d.getGLContext().getGL().getGL2();
-    canvasHeight = g2d.getHeight();
+
+    stack.clear();
+    stack.push(new ColorState());
   }
 
   @Override
   public void push(GLGraphics2D newG2d) {
+    stack.push(stack.peek());
   }
 
   @Override
   public void pop(GLGraphics2D parentG2d) {
+    stack.pop();
+
+    // set all the states
+    setComposite(getComposite());
+    setColor(getColor());
+    setBackground(getBackground());
   }
 
   @Override
@@ -95,16 +103,16 @@ public class G2DGLColorHelper implements G2DDrawingHelper {
         break;
       }
 
-      composite = comp;
+      stack.peek().composite = comp;
       // need to pre-multiply the alpha
-      setColor(color);
+      setColor(getColor());
     } else {
       throw new UnsupportedOperationException();
     }
   }
 
   public Composite getComposite() {
-    return composite;
+    return stack.peek().composite;
   }
 
   public void setPaint(Paint paint) {
@@ -117,11 +125,12 @@ public class G2DGLColorHelper implements G2DDrawingHelper {
   }
 
   public Paint getPaint() {
-    return color;
+    // until we implement Paint fully
+    return getColor();
   }
 
   public Color getColor() {
-    return color;
+    return stack.peek().color;
   }
 
   public void setColorNoRespectComposite(Color c) {
@@ -133,7 +142,7 @@ public class G2DGLColorHelper implements G2DDrawingHelper {
       return;
     }
 
-    color = c;
+    stack.peek().color = c;
     setColorRespectComposite(c);
   }
 
@@ -144,6 +153,7 @@ public class G2DGLColorHelper implements G2DDrawingHelper {
    */
   protected void setColorRespectComposite(Color c) {
     float alpha = 1;
+    Composite composite = getComposite();
     if (composite instanceof AlphaComposite) {
       alpha = ((AlphaComposite) composite).getAlpha();
     }
@@ -151,19 +161,19 @@ public class G2DGLColorHelper implements G2DDrawingHelper {
     setColor(gl, c, alpha);
   }
 
-  private static void setColor(GL2 gl, Color c, float preMultiplyAlpha) {
+  private void setColor(GL2 gl, Color c, float preMultiplyAlpha) {
     int rgb = c.getRGB();
     gl.glColor4ub((byte) (rgb >> 16 & 0xFF), (byte) (rgb >> 8 & 0xFF), (byte) (rgb & 0xFF), (byte) ((rgb >> 24 & 0xFF) * preMultiplyAlpha));
   }
 
   public void setBackground(Color color) {
-    background = color;
-    int rgb = background.getRGB();
+    stack.peek().background = color;
+    int rgb = color.getRGB();
     gl.glClearColor((rgb >> 16 & 0xFF) / 255F, (rgb >> 8 & 0xFF) / 255F, (rgb & 0xFF) / 255F, (rgb >> 24 & 0xFF) / 255F);
   }
 
   public Color getBackground() {
-    return background;
+    return stack.peek().background;
   }
 
   public void setPaintMode() {
@@ -181,7 +191,22 @@ public class G2DGLColorHelper implements G2DDrawingHelper {
     gl.glRasterPos2i(x2, y2);
 
     int x1 = x;
-    int y1 = canvasHeight - (y + height);
+    int y1 = g2d.getCanvasHeight() - (y + height);
     gl.glCopyPixels(x1, y1, width, height, GL2GL3.GL_COLOR);
+  }
+
+  protected static class ColorState {
+    public Composite composite;
+    public Color color;
+    public Color background;
+
+    @Override
+    public Object clone() {
+      ColorState c = new ColorState();
+      c.composite = composite;
+      c.color = color;
+      c.background = background;
+      return c;
+    }
   }
 }
