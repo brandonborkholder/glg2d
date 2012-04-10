@@ -36,13 +36,13 @@ public class G2DGLTransformHelper implements G2DDrawingHelper {
 
   @Override
   public void push(GLGraphics2D newG2d) {
-    gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW_MATRIX);
+    gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glPushMatrix();
   }
 
   @Override
   public void pop(GLGraphics2D parentG2d) {
-    gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW_MATRIX);
+    gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glPopMatrix();
   }
 
