@@ -29,7 +29,7 @@ public class DepthSimExample {
         return new G2DGLEventListener(drawingComponent) {
           @Override
           protected GLGraphics2D createGraphics2D(GLAutoDrawable drawable) {
-            return new GLGraphics2D(drawable.getWidth(), drawable.getHeight()) {
+            return new GLGraphics2D() {
               @Override
               protected void createDrawingHelpers() {
                 super.createDrawingHelpers();

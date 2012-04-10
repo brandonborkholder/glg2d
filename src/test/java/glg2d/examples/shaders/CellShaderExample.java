@@ -1,7 +1,9 @@
 package glg2d.examples.shaders;
 
+import glg2d.G2DGLColorHelper;
 import glg2d.G2DGLEventListener;
 import glg2d.G2DGLPanel;
+import glg2d.G2DGLTransformHelper;
 import glg2d.GLGraphics2D;
 import glg2d.UIDemo;
 import glg2d.shaders.G2DShaderImageDrawer;
@@ -30,7 +32,7 @@ public class CellShaderExample {
         return new G2DGLEventListener(drawingComponent) {
           @Override
           protected GLGraphics2D createGraphics2D(GLAutoDrawable drawable) {
-            return new GLShaderGraphics2D(drawable.getWidth(), drawable.getHeight()) {
+            return new GLShaderGraphics2D() {
               @Override
               protected void createDrawingHelpers() {
                 Shader s = new ResourceShader(CellShaderExample.class, "CellShader.v", "CellShader.f");
@@ -39,10 +41,15 @@ public class CellShaderExample {
                 s = new ResourceShader(CellShaderExample.class, "CellShader.v", "CellTextureShader.f");
                 imageDrawer = new G2DShaderImageDrawer(s);
                 stringDrawer = new G2DShaderStringDrawer(s);
+                
+                colorHelper = new G2DGLColorHelper();
+                matrixHelper = new G2DGLTransformHelper();
 
                 addG2DDrawingHelper(shapeDrawer);
                 addG2DDrawingHelper(imageDrawer);
                 addG2DDrawingHelper(stringDrawer);
+                addG2DDrawingHelper(colorHelper);
+                addG2DDrawingHelper(matrixHelper);
               }
             };
           }
