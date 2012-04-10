@@ -50,7 +50,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES1;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.Threading;
@@ -63,8 +62,6 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   protected GLGraphics2D parent;
 
   protected GLContext glContext;
-
-  protected GL gl;
 
   protected boolean isDisposed;
 
@@ -108,6 +105,10 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   public void addG2DDrawingHelper(G2DDrawingHelper helper) {
+    /*
+     * Essentially a persistent list so we don't modify other GLGraphics2D
+     * objects.
+     */
     helpers = Arrays.copyOf(helpers, helpers.length + 1);
     helpers[helpers.length - 1] = helper;
   }
@@ -124,9 +125,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   protected void setCanvas(GLAutoDrawable drawable) {
     glContext = drawable.getContext();
-    gl = glContext.getGL().getGL2();
-
-    canvasHeight = GLG2DUtils.getCanvasHeight(gl);
+    canvasHeight = GLG2DUtils.getCanvasHeight(glContext.getGL());
 
     for (G2DDrawingHelper helper : helpers) {
       helper.setG2D(this);
@@ -148,15 +147,16 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     setClip(null);
     setRenderingHints(null);
     graphicsConfig = component.getGraphicsConfiguration();
+    
+    GL gl = glContext.getGL();
 
     // now enable some flags we'll use
-    gl.glDisable(GL2ES1.GL_ALPHA_TEST);
     gl.glDisable(GL.GL_DEPTH_TEST);
     gl.glDisable(GL.GL_CULL_FACE);
   }
 
   protected void postPaint() {
-    gl.glFlush();
+    // could glFlush here, but not necessary
   }
 
   public GLContext getGLContext() {
@@ -250,10 +250,10 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   public void setRenderingHint(Key hintKey, Object hintValue) {
     if (!hintKey.isCompatibleValue(hintValue)) {
       throw new IllegalArgumentException(hintValue + " is not compatible with " + hintKey);
-    } else if (hintKey == RenderingHints.KEY_TEXT_ANTIALIASING) {
-      stringDrawer.setAntiAlias(hintValue);
-    } else if (hintKey == RenderingHints.KEY_ANTIALIASING) {
-      shapeDrawer.setAntiAlias(hintValue);
+    } else {
+      for (G2DDrawingHelper helper : helpers) {
+        helper.setHint(hintKey, hintValue);
+      }
     }
   }
 
@@ -272,8 +272,10 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   protected void resetRenderingHints() {
     hints = new RenderingHints(Collections.<Key, Object> emptyMap());
-    stringDrawer.setAntiAlias(RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT);
-    shapeDrawer.setAntiAlias(RenderingHints.VALUE_ANTIALIAS_DEFAULT);
+
+    for (G2DDrawingHelper helper : helpers) {
+      helper.resetHints();
+    }
   }
 
   @Override
@@ -422,7 +424,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
         int maxY = (int) Math.max(pts[1], Math.max(pts[3], Math.max(pts[5], pts[7])));
         return new Rectangle(minX, minY, maxX - minX, maxY - minY);
       } catch (NoninvertibleTransformException e) {
-        throw new RuntimeException(e);
+        throw new RuntimeException("Expected exception", e);
       }
     }
   }
@@ -454,7 +456,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     } else if (clipShape == null) {
       setClip(null, false);
     } else {
-      throw new IllegalArgumentException("Illegal shape for clip bounds, only java.awt.geom.Rectangle2D objects are supported");
+      setClip(clipShape.getBounds2D());
     }
   }
 
@@ -473,6 +475,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   protected void scissor(boolean enable) {
+    GL gl = glContext.getGL();
     if (enable) {
       gl.glScissor(clip.x, canvasHeight - clip.y - clip.height, Math.max(clip.width, 0), Math.max(clip.height, 0));
       gl.glEnable(GL.GL_SCISSOR_TEST);
@@ -557,17 +560,17 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y) {
-    // TODO Auto-generated method stub
+    imageDrawer.drawImage(img, op, x, y);
   }
 
   @Override
   public void drawRenderedImage(RenderedImage img, AffineTransform xform) {
-    // TODO Auto-generated method stub
+    imageDrawer.drawImage(img, xform);
   }
 
   @Override
   public void drawRenderableImage(RenderableImage img, AffineTransform xform) {
-    // TODO Auto-generated method stub
+    imageDrawer.drawImage(img, xform);
   }
 
   @Override
@@ -596,8 +599,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   @Override
-  public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, Color bgcolor,
-      ImageObserver observer) {
+  public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, Color bgcolor, ImageObserver observer) {
     return imageDrawer.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, bgcolor, observer);
   }
 

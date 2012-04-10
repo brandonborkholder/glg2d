@@ -7,6 +7,7 @@ import glg2d.GLGraphics2D;
 import glg2d.UIDemo;
 
 import java.awt.Dimension;
+import java.awt.RenderingHints.Key;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
@@ -84,6 +85,14 @@ public class DepthSimExample {
     @Override
     public void push(GLGraphics2D newG2d) {
       gl.glTranslated(shiftX, shiftY, 0);
+    }
+
+    @Override
+    public void resetHints() {
+    }
+
+    @Override
+    public void setHint(Key key, Object value) {
     }
 
     @Override

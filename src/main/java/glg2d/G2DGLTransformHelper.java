@@ -16,6 +16,7 @@
 
 package glg2d;
 
+import java.awt.RenderingHints.Key;
 import java.awt.geom.AffineTransform;
 
 import javax.media.opengl.GL2;
@@ -44,6 +45,16 @@ public class G2DGLTransformHelper implements G2DDrawingHelper {
   public void pop(GLGraphics2D parentG2d) {
     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glPopMatrix();
+  }
+  
+  @Override
+  public void setHint(Key key, Object value) {
+    // nop
+  }
+  
+  @Override
+  public void resetHints() {
+    // nop
   }
 
   @Override

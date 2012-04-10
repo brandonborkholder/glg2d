@@ -18,9 +18,13 @@ package glg2d;
 
 import java.awt.Color;
 import java.awt.Image;
+import java.awt.RenderingHints.Key;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
+import java.awt.image.BufferedImageOp;
 import java.awt.image.ImageObserver;
+import java.awt.image.RenderedImage;
+import java.awt.image.renderable.RenderableImage;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
@@ -61,6 +65,16 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
 
   @Override
   public void pop(GLGraphics2D parentG2d) {
+  }
+  
+  @Override
+  public void setHint(Key key, Object value) {
+    // nop
+  }
+  
+  @Override
+  public void resetHints() {
+    // nop
   }
 
   @Override
@@ -271,5 +285,17 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
         return false;
       }
     }
+  }
+
+  public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y) {
+    // TODO Not implemented yet!
+  }
+
+  public void drawImage(RenderedImage img, AffineTransform xform) {
+    // TODO Not implemented yet!
+  }
+
+  public void drawImage(RenderableImage img, AffineTransform xform) {
+    // TODO Not implemented yet!
   }
 }

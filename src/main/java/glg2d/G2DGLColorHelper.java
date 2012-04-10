@@ -20,6 +20,7 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Paint;
+import java.awt.RenderingHints.Key;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
@@ -56,6 +57,16 @@ public class G2DGLColorHelper implements G2DDrawingHelper {
     setComposite(getComposite());
     setColor(getColor());
     setBackground(getBackground());
+  }
+  
+  @Override
+  public void setHint(Key key, Object value) {
+    // nop
+  }
+  
+  @Override
+  public void resetHints() {
+    // nop
   }
 
   @Override

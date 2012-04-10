@@ -21,6 +21,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.RenderingHints;
+import java.awt.RenderingHints.Key;
 import java.awt.font.FontRenderContext;
 import java.awt.font.TextLayout;
 import java.text.AttributedCharacterIterator;
@@ -63,6 +64,18 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
     if (!fontStack.isEmpty()) {
       font = fontStack.pop();
     }
+  }
+  
+  @Override
+  public void setHint(Key key, Object value) {
+    if (key == RenderingHints.KEY_TEXT_ANTIALIASING) {
+      setAntiAlias(value);
+    }
+  }
+  
+  @Override
+  public void resetHints() {
+    setHint(RenderingHints.KEY_TEXT_ANTIALIASING, null);
   }
 
   @Override

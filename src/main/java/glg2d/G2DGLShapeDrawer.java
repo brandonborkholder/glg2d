@@ -20,6 +20,7 @@ import java.awt.BasicStroke;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.Stroke;
+import java.awt.RenderingHints.Key;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
@@ -91,6 +92,18 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
 
   @Override
   public void dispose() {
+  }
+  
+  @Override
+  public void setHint(Key key, Object value) {
+    if (key == RenderingHints.KEY_ANTIALIASING) {
+      setAntiAlias(value);
+    }
+  }
+  
+  @Override
+  public void resetHints() {
+    setHint(RenderingHints.KEY_ANTIALIASING, null);
   }
 
   public void setAntiAlias(Object hintValue) {

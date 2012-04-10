@@ -16,6 +16,8 @@
 
 package glg2d;
 
+import java.awt.RenderingHints;
+
 /**
  * Assists in the drawing of a particular aspect of the Graphics2D object. This
  * allows the drawing to be segregated into certain aspects, such as image, text
@@ -52,6 +54,23 @@ public interface G2DDrawingHelper {
    *          The new context, top of the stack.
    */
   void pop(GLGraphics2D parentG2d);
+
+  /**
+   * Sets a new rendering hint. The state of all rendering hints is kept by the
+   * {@code GLGraphics2D} object, but all new state changes are propagated to
+   * all listeners.
+   * 
+   * @param key
+   *          The rendering hint key.
+   * @param value
+   *          The new hint value.
+   */
+  void setHint(RenderingHints.Key key, Object value);
+
+  /**
+   * Clears all hints back to their default states.
+   */
+  void resetHints();
 
   /**
    * Disposes the helper object. This is not called during the dispose operation
