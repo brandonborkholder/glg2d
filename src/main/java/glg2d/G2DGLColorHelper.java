@@ -45,7 +45,7 @@ public class G2DGLColorHelper implements G2DDrawingHelper {
 
   @Override
   public void push(GLGraphics2D newG2d) {
-    stack.push(stack.peek());
+    stack.push(stack.peek().clone());
   }
 
   @Override
@@ -201,7 +201,7 @@ public class G2DGLColorHelper implements G2DDrawingHelper {
     public Color background;
 
     @Override
-    public Object clone() {
+    public ColorState clone() {
       ColorState c = new ColorState();
       c.composite = composite;
       c.color = color;
