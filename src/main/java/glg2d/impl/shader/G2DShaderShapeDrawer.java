@@ -14,24 +14,37 @@
    limitations under the License.
  ***************************************************************************/
 
-package glg2d.shaders;
+package glg2d.impl.shader;
 
-public class ShaderException extends RuntimeException {
-  private static final long serialVersionUID = 829519650852350876L;
+import glg2d.GLGraphics2D;
+import glg2d.PathVisitor;
+import glg2d.impl.gl2.GL2ShapeDrawer;
 
-  public ShaderException() {
-    super();
+import java.awt.Shape;
+
+import javax.media.opengl.GL2ES2;
+
+public class G2DShaderShapeDrawer extends GL2ShapeDrawer {
+  protected Shader shader;
+
+  public G2DShaderShapeDrawer(Shader shader) {
+    this.shader = shader;
   }
 
-  public ShaderException(String message, Throwable cause) {
-    super(message, cause);
+  @Override
+  public void setG2D(GLGraphics2D g2d) {
+    super.setG2D(g2d);
+
+    GL2ES2 gl = g2d.getGLContext().getGL().getGL2ES2();
+    if (!shader.isProgram(gl)) {
+      shader.setup(gl);
+    }
   }
 
-  public ShaderException(String message) {
-    super(message);
-  }
-
-  public ShaderException(Throwable cause) {
-    super(cause);
+  @Override
+  protected void traceShape(Shape shape, PathVisitor visitor) {
+    shader.use(true);
+    super.traceShape(shape, visitor);
+    shader.use(false);
   }
 }

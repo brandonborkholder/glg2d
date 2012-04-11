@@ -2,16 +2,16 @@ package glg2d.examples.shaders;
 
 import glg2d.G2DGLEventListener;
 import glg2d.G2DGLPanel;
-import glg2d.G2DGLTransformHelper;
 import glg2d.GLGraphics2D;
 import glg2d.UIDemo;
+import glg2d.impl.gl2.GL2StringDrawer;
+import glg2d.impl.gl2.GL2Transformhelper;
 import glg2d.impl.gl2.GL2ColorHelper;
-import glg2d.shaders.G2DShaderImageDrawer;
-import glg2d.shaders.G2DShaderShapeDrawer;
-import glg2d.shaders.G2DShaderStringDrawer;
-import glg2d.shaders.GLShaderGraphics2D;
-import glg2d.shaders.ResourceShader;
-import glg2d.shaders.Shader;
+import glg2d.impl.shader.G2DShaderImageDrawer;
+import glg2d.impl.shader.G2DShaderShapeDrawer;
+import glg2d.impl.shader.GLShaderGraphics2D;
+import glg2d.impl.shader.ResourceShader;
+import glg2d.impl.shader.Shader;
 
 import java.awt.Dimension;
 
@@ -40,10 +40,10 @@ public class CellShaderExample {
 
                 s = new ResourceShader(CellShaderExample.class, "CellShader.v", "CellTextureShader.f");
                 imageHelper = new G2DShaderImageDrawer(s);
-                stringHelper = new G2DShaderStringDrawer(s);
-                
+                stringHelper = new GL2StringDrawer();
+
                 colorHelper = new GL2ColorHelper();
-                matrixHelper = new G2DGLTransformHelper();
+                matrixHelper = new GL2Transformhelper();
 
                 addG2DDrawingHelper(shapeHelper);
                 addG2DDrawingHelper(imageHelper);

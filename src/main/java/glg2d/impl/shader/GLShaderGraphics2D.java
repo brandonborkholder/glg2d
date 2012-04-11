@@ -14,43 +14,29 @@
    limitations under the License.
  ***************************************************************************/
 
-package glg2d.shaders;
+package glg2d.impl.shader;
 
 import glg2d.GLGraphics2D;
+import glg2d.impl.gl2.GL2Transformhelper;
+import glg2d.impl.gl2.GL2ColorHelper;
 import glg2d.impl.gl2.GL2StringDrawer;
 
-import java.awt.Color;
-
-import javax.media.opengl.GL2ES2;
-
-import com.jogamp.opengl.util.awt.TextRenderer;
-
-public class G2DShaderStringDrawer extends GL2StringDrawer {
-  protected Shader shader;
-
-  public G2DShaderStringDrawer(Shader shader) {
-    this.shader = shader;
-  }
-
+public class GLShaderGraphics2D extends GLGraphics2D {
   @Override
-  public void setG2D(GLGraphics2D g2d) {
-    super.setG2D(g2d);
+  protected void createDrawingHelpers() {
+    Shader s = new ResourceShader(GLShaderGraphics2D.class, "TextureShader.v", "TextureShader.f");
+    imageHelper = new G2DShaderImageDrawer(s);
+    stringHelper = new GL2StringDrawer();
+    matrixHelper = new GL2Transformhelper();
+    colorHelper = new GL2ColorHelper();
 
-    GL2ES2 gl = g2d.getGLContext().getGL().getGL2ES2();
-    if (!shader.isProgram(gl)) {
-      shader.setup(gl);
-    }
-  }
+    s = new ResourceShader(GLShaderGraphics2D.class, "FixedFuncShader.v", "FixedFuncShader.f");
+    shapeHelper = new G2DShaderShapeDrawer(s);
 
-  @Override
-  protected void begin(TextRenderer renderer, Color textColor) {
-    super.begin(renderer, textColor);
-    shader.use(true);
-  }
-
-  @Override
-  protected void end(TextRenderer renderer) {
-    shader.use(false);
-    super.end(renderer);
+    addG2DDrawingHelper(imageHelper);
+    addG2DDrawingHelper(stringHelper);
+    addG2DDrawingHelper(shapeHelper);
+    addG2DDrawingHelper(matrixHelper);
+    addG2DDrawingHelper(colorHelper);
   }
 }

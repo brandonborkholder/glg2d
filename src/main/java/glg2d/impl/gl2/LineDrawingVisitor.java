@@ -56,8 +56,8 @@ public class LineDrawingVisitor extends SimplePathVisitor {
   protected VertexBuffer vBuffer = VertexBuffer.getSharedBuffer();
 
   @Override
-  public void setGLContext(GL2 context) {
-    gl = context;
+  public void setGLContext(GL context) {
+    gl = context.getGL2();
   }
 
   @Override

@@ -16,6 +16,7 @@
 
 package glg2d;
 
+import glg2d.impl.gl2.GL2Transformhelper;
 import glg2d.impl.gl2.GL2ColorHelper;
 import glg2d.impl.gl2.GL2ImageDrawer;
 import glg2d.impl.gl2.GL2ShapeDrawer;
@@ -99,7 +100,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     shapeHelper = new GL2ShapeDrawer();
     imageHelper = new GL2ImageDrawer();
     stringHelper = new GL2StringDrawer();
-    matrixHelper = new G2DGLTransformHelper();
+    matrixHelper = new GL2Transformhelper();
     colorHelper = new GL2ColorHelper();
 
     addG2DDrawingHelper(shapeHelper);

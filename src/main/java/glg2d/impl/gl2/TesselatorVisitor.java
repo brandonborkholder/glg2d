@@ -21,6 +21,7 @@ import glg2d.SimplePathVisitor;
 import java.awt.BasicStroke;
 import java.awt.geom.PathIterator;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLException;
 import javax.media.opengl.glu.GLU;
@@ -47,8 +48,8 @@ public class TesselatorVisitor extends SimplePathVisitor {
   }
 
   @Override
-  public void setGLContext(GL2 context) {
-    gl = context;
+  public void setGLContext(GL context) {
+    gl = context.getGL2();
   }
 
   @Override

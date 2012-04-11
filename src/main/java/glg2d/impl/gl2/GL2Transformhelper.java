@@ -14,7 +14,11 @@
    limitations under the License.
  ***************************************************************************/
 
-package glg2d;
+package glg2d.impl.gl2;
+
+import glg2d.GLG2DTransformHelper;
+import glg2d.GLG2DUtils;
+import glg2d.GLGraphics2D;
 
 import java.awt.RenderingHints.Key;
 import java.awt.geom.AffineTransform;
@@ -22,7 +26,7 @@ import java.awt.geom.AffineTransform;
 import javax.media.opengl.GL2;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
 
-public class G2DGLTransformHelper implements GLG2DTransformHelper {
+public class GL2Transformhelper implements GLG2DTransformHelper {
   protected static final float RAD_TO_DEG = 180f / (float) Math.PI;
   
   protected GLGraphics2D g2d;

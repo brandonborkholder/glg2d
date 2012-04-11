@@ -16,54 +16,26 @@
 
 package glg2d.impl.gl2;
 
-import glg2d.GLG2DShapeHelper;
 import glg2d.GLGraphics2D;
-import glg2d.PathVisitor;
+import glg2d.impl.AbstractShapeHelper;
 
 import java.awt.BasicStroke;
 import java.awt.RenderingHints;
-import java.awt.RenderingHints.Key;
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.Line2D;
-import java.awt.geom.Path2D;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Rectangle2D;
-import java.awt.geom.RoundRectangle2D;
-import java.util.ArrayDeque;
-import java.util.Deque;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2ES1;
 import javax.media.opengl.GL2GL3;
 
-public class GL2ShapeDrawer implements GLG2DShapeHelper {
-  protected static final Ellipse2D.Double ELLIPSE = new Ellipse2D.Double();
-
-  protected static final RoundRectangle2D.Double ROUND_RECT = new RoundRectangle2D.Double();
-
-  protected static final Arc2D.Double ARC = new Arc2D.Double();
-
-  protected static final Rectangle2D.Double RECT = new Rectangle2D.Double();
-
-  protected static final Line2D.Double LINE = new Line2D.Double();
-
+public class GL2ShapeDrawer extends AbstractShapeHelper {
   protected GL2 gl;
 
-  protected Deque<Stroke> strokeStack = new ArrayDeque<Stroke>(10);
-
   protected FillSimpleConvexPolygonVisitor simpleFillVisitor;
-
   protected PolygonOrTesselatingVisitor complexFillVisitor;
-
   protected LineDrawingVisitor simpleStrokeVisitor;
-
   protected FastLineVisitor fastLineVisitor;
-
-  protected Stroke stroke;
 
   public GL2ShapeDrawer() {
     simpleFillVisitor = new FillSimpleConvexPolygonVisitor();
@@ -74,40 +46,12 @@ public class GL2ShapeDrawer implements GLG2DShapeHelper {
 
   @Override
   public void setG2D(GLGraphics2D g2d) {
-    gl = g2d.getGLContext().getGL().getGL2();
+    super.setG2D(g2d);
+    GL gl = g2d.getGLContext().getGL();
     simpleFillVisitor.setGLContext(gl);
     complexFillVisitor.setGLContext(gl);
     simpleStrokeVisitor.setGLContext(gl);
     fastLineVisitor.setGLContext(gl);
-  }
-
-  @Override
-  public void push(GLGraphics2D newG2d) {
-    strokeStack.push(stroke);
-  }
-
-  @Override
-  public void pop(GLGraphics2D parentG2d) {
-    if (!strokeStack.isEmpty()) {
-      stroke = strokeStack.pop();
-    }
-    setAntiAlias(parentG2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING));
-  }
-
-  @Override
-  public void dispose() {
-  }
-
-  @Override
-  public void setHint(Key key, Object value) {
-    if (key == RenderingHints.KEY_ANTIALIASING) {
-      setAntiAlias(value);
-    }
-  }
-
-  @Override
-  public void resetHints() {
-    setHint(RenderingHints.KEY_ANTIALIASING, null);
   }
 
   public void setAntiAlias(Object hintValue) {
@@ -126,91 +70,8 @@ public class GL2ShapeDrawer implements GLG2DShapeHelper {
   }
 
   @Override
-  public void setStroke(Stroke stroke) {
-    this.stroke = stroke;
-  }
-
-  @Override
-  public Stroke getStroke() {
-    return stroke;
-  }
-
-  @Override
-  public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight, boolean fill) {
-    ROUND_RECT.setRoundRect(x, y, width, height, arcWidth, arcHeight);
-    if (fill) {
-      fill(ROUND_RECT, true);
-    } else {
-      draw(ROUND_RECT);
-    }
-  }
-
-  @Override
-  public void drawRect(int x, int y, int width, int height, boolean fill) {
-    if (fill) {
-      gl.glRecti(x, y, x + width, y + height);
-    } else {
-      RECT.setRect(x, y, width, height);
-      draw(RECT);
-    }
-  }
-
-  @Override
-  public void drawLine(int x1, int y1, int x2, int y2) {
-    LINE.setLine(x1, y1, x2, y2);
-    draw(LINE);
-  }
-
-  @Override
-  public void drawOval(int x, int y, int width, int height, boolean fill) {
-    ELLIPSE.setFrame(x, y, width, height);
-    if (fill) {
-      fill(ELLIPSE, true);
-    } else {
-      draw(ELLIPSE);
-    }
-  }
-
-  @Override
-  public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle, boolean fill) {
-    ARC.setArc(x, y, width, height, startAngle, arcAngle, fill ? Arc2D.PIE : Arc2D.OPEN);
-    if (fill) {
-      fill(ARC);
-    } else {
-      draw(ARC);
-    }
-  }
-
-  @Override
-  public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints) {
-    drawPoly(xPoints, yPoints, nPoints, false, false);
-  }
-
-  @Override
-  public void drawPolygon(int[] xPoints, int[] yPoints, int nPoints, boolean fill) {
-    drawPoly(xPoints, yPoints, nPoints, fill, true);
-  }
-
-  protected void drawPoly(int[] xPoints, int[] yPoints, int nPoints, boolean fill, boolean close) {
-    Path2D.Float path = new Path2D.Float(PathIterator.WIND_NON_ZERO, nPoints);
-    path.moveTo(xPoints[0], yPoints[0]);
-    for (int i = 1; i < nPoints; i++) {
-      path.lineTo(xPoints[i], yPoints[i]);
-    }
-
-    if (close) {
-      path.closePath();
-    }
-
-    if (fill) {
-      fill(path);
-    } else {
-      draw(path);
-    }
-  }
-
-  @Override
   public void draw(Shape shape) {
+    Stroke stroke = getStroke();
     if (stroke instanceof BasicStroke) {
       BasicStroke basicStroke = (BasicStroke) stroke;
       if (fastLineVisitor.isValid(basicStroke)) {
@@ -229,67 +90,11 @@ public class GL2ShapeDrawer implements GLG2DShapeHelper {
   }
 
   @Override
-  public void fill(Shape shape) {
-    fill(shape, false);
-  }
-
   protected void fill(Shape shape, boolean forceSimple) {
     if (forceSimple) {
       traceShape(shape, simpleFillVisitor);
     } else {
       traceShape(shape, complexFillVisitor);
     }
-  }
-
-  protected void traceShape(Shape shape, PathVisitor visitor) {
-    PathIterator iterator = shape.getPathIterator(null);
-    visitor.beginPoly(iterator.getWindingRule());
-
-    float[] coords = new float[10];
-    float[] previousVertex = new float[2];
-    for (; !iterator.isDone(); iterator.next()) {
-      int type = iterator.currentSegment(coords);
-      switch (type) {
-      case PathIterator.SEG_MOVETO:
-        visitor.moveTo(coords);
-        break;
-
-      case PathIterator.SEG_LINETO:
-        visitor.lineTo(coords);
-        break;
-
-      case PathIterator.SEG_QUADTO:
-        visitor.quadTo(previousVertex, coords);
-        break;
-
-      case PathIterator.SEG_CUBICTO:
-        visitor.cubicTo(previousVertex, coords);
-        break;
-
-      case PathIterator.SEG_CLOSE:
-        visitor.closeLine();
-        break;
-      }
-
-      switch (type) {
-      case PathIterator.SEG_LINETO:
-      case PathIterator.SEG_MOVETO:
-        previousVertex[0] = coords[0];
-        previousVertex[1] = coords[1];
-        break;
-
-      case PathIterator.SEG_QUADTO:
-        previousVertex[0] = coords[2];
-        previousVertex[1] = coords[3];
-        break;
-
-      case PathIterator.SEG_CUBICTO:
-        previousVertex[0] = coords[4];
-        previousVertex[1] = coords[5];
-        break;
-      }
-    }
-
-    visitor.endPoly();
   }
 }

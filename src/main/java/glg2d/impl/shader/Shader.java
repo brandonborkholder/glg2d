@@ -14,7 +14,7 @@
    limitations under the License.
  ***************************************************************************/
 
-package glg2d.shaders;
+package glg2d.impl.shader;
 
 import javax.media.opengl.GL2ES2;
 

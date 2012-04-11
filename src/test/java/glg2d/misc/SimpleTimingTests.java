@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 import java.util.Random;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
@@ -107,7 +108,7 @@ public class SimpleTimingTests {
   public void forwardDifferencingBezier() {
     SimplePathVisitor visitor = new SimplePathVisitor() {
       @Override
-      public void setGLContext(GL2 context) {
+      public void setGLContext(GL context) {
       }
 
       @Override
