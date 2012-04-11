@@ -1,6 +1,6 @@
 package glg2d.examples.shaders;
 
-import glg2d.G2DGLColorHelper;
+import glg2d.GL2ColorHelper;
 import glg2d.G2DGLEventListener;
 import glg2d.G2DGLPanel;
 import glg2d.G2DGLTransformHelper;
@@ -42,7 +42,7 @@ public class CellShaderExample {
                 imageDrawer = new G2DShaderImageDrawer(s);
                 stringDrawer = new G2DShaderStringDrawer(s);
                 
-                colorHelper = new G2DGLColorHelper();
+                colorHelper = new GL2ColorHelper();
                 matrixHelper = new G2DGLTransformHelper();
 
                 addG2DDrawingHelper(shapeDrawer);

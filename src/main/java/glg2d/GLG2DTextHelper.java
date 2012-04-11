@@ -14,37 +14,28 @@
    limitations under the License.
  ***************************************************************************/
 
-package glg2d.shaders;
+package glg2d;
 
-import glg2d.GL2ShapeDrawer;
-import glg2d.GLGraphics2D;
-import glg2d.PathVisitor;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.font.FontRenderContext;
+import java.text.AttributedCharacterIterator;
 
-import java.awt.Shape;
+public interface GLG2DTextHelper extends G2DDrawingHelper {
+  void setFont(Font font);
 
-import javax.media.opengl.GL2ES2;
+  Font getFont();
 
-public class G2DShaderShapeDrawer extends GL2ShapeDrawer {
-  protected Shader shader;
+  FontMetrics getFontMetrics(Font font);
 
-  public G2DShaderShapeDrawer(Shader shader) {
-    this.shader = shader;
-  }
+  FontRenderContext getFontRenderContext();
 
-  @Override
-  public void setG2D(GLGraphics2D g2d) {
-    super.setG2D(g2d);
+  void drawString(AttributedCharacterIterator iterator, int x, int y);
 
-    GL2ES2 gl = g2d.getGLContext().getGL().getGL2ES2();
-    if (!shader.isProgram(gl)) {
-      shader.setup(gl);
-    }
-  }
+  void drawString(AttributedCharacterIterator iterator, float x, float y);
 
-  @Override
-  protected void traceShape(Shape shape, PathVisitor visitor) {
-    shader.use(true);
-    super.traceShape(shape, visitor);
-    shader.use(false);
-  }
+  void drawString(String string, Color color, float x, float y);
+
+  void drawString(String string, Color color, int x, int y);
 }

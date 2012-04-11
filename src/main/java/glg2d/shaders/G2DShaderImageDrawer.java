@@ -16,7 +16,7 @@
 
 package glg2d.shaders;
 
-import glg2d.G2DGLImageDrawer;
+import glg2d.GL2ImageDrawer;
 import glg2d.GLGraphics2D;
 
 import java.awt.Color;
@@ -26,7 +26,7 @@ import javax.media.opengl.GL2ES2;
 
 import com.jogamp.opengl.util.texture.Texture;
 
-public class G2DShaderImageDrawer extends G2DGLImageDrawer {
+public class G2DShaderImageDrawer extends GL2ImageDrawer {
   protected Shader shader;
 
   public G2DShaderImageDrawer(Shader shader) {

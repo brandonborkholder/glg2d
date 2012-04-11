@@ -18,9 +18,9 @@ package glg2d;
 
 import java.awt.BasicStroke;
 import java.awt.RenderingHints;
+import java.awt.RenderingHints.Key;
 import java.awt.Shape;
 import java.awt.Stroke;
-import java.awt.RenderingHints.Key;
 import java.awt.geom.Arc2D;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
@@ -31,12 +31,12 @@ import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES1;
+import javax.media.opengl.GL2GL3;
 
-/**
- * Draws shapes for the {@code GLGraphics2D} class.
- */
-public class G2DGLShapeDrawer implements G2DDrawingHelper {
+public class GL2ShapeDrawer implements GLG2DShapeHelper {
   protected static final Ellipse2D.Double ELLIPSE = new Ellipse2D.Double();
 
   protected static final RoundRectangle2D.Double ROUND_RECT = new RoundRectangle2D.Double();
@@ -61,7 +61,7 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
 
   protected Stroke stroke;
 
-  public G2DGLShapeDrawer() {
+  public GL2ShapeDrawer() {
     simpleFillVisitor = new FillSimpleConvexPolygonVisitor();
     complexFillVisitor = new PolygonOrTesselatingVisitor();
     simpleStrokeVisitor = new LineDrawingVisitor();
@@ -93,14 +93,14 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
   @Override
   public void dispose() {
   }
-  
+
   @Override
   public void setHint(Key key, Object value) {
     if (key == RenderingHints.KEY_ANTIALIASING) {
       setAntiAlias(value);
     }
   }
-  
+
   @Override
   public void resetHints() {
     setHint(RenderingHints.KEY_ANTIALIASING, null);
@@ -108,27 +108,30 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
 
   public void setAntiAlias(Object hintValue) {
     if (hintValue == RenderingHints.VALUE_ANTIALIAS_ON) {
-      gl.glEnable(GL2.GL_LINE_SMOOTH);
-      gl.glEnable(GL2.GL_POINT_SMOOTH);
-      gl.glEnable(GL2.GL_POLYGON_SMOOTH);
-      gl.glHint(GL2.GL_LINE_SMOOTH_HINT, GL2.GL_NICEST);
-      gl.glHint(GL2.GL_POINT_SMOOTH_HINT, GL2.GL_NICEST);
-      gl.glHint(GL2.GL_POLYGON_SMOOTH_HINT, GL2.GL_NICEST);
+      gl.glEnable(GL.GL_LINE_SMOOTH);
+      gl.glEnable(GL2ES1.GL_POINT_SMOOTH);
+      gl.glEnable(GL2GL3.GL_POLYGON_SMOOTH);
+      gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
+      gl.glHint(GL2ES1.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
+      gl.glHint(GL2GL3.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST);
     } else {
-      gl.glDisable(GL2.GL_LINE_SMOOTH);
-      gl.glDisable(GL2.GL_POINT_SMOOTH);
-      gl.glDisable(GL2.GL_POLYGON_SMOOTH);
+      gl.glDisable(GL.GL_LINE_SMOOTH);
+      gl.glDisable(GL2ES1.GL_POINT_SMOOTH);
+      gl.glDisable(GL2GL3.GL_POLYGON_SMOOTH);
     }
   }
 
+  @Override
   public void setStroke(Stroke stroke) {
     this.stroke = stroke;
   }
 
+  @Override
   public Stroke getStroke() {
     return stroke;
   }
 
+  @Override
   public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight, boolean fill) {
     ROUND_RECT.setRoundRect(x, y, width, height, arcWidth, arcHeight);
     if (fill) {
@@ -138,6 +141,7 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
     }
   }
 
+  @Override
   public void drawRect(int x, int y, int width, int height, boolean fill) {
     if (fill) {
       gl.glRecti(x, y, x + width, y + height);
@@ -147,11 +151,13 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
     }
   }
 
+  @Override
   public void drawLine(int x1, int y1, int x2, int y2) {
     LINE.setLine(x1, y1, x2, y2);
     draw(LINE);
   }
 
+  @Override
   public void drawOval(int x, int y, int width, int height, boolean fill) {
     ELLIPSE.setFrame(x, y, width, height);
     if (fill) {
@@ -161,6 +167,7 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
     }
   }
 
+  @Override
   public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle, boolean fill) {
     ARC.setArc(x, y, width, height, startAngle, arcAngle, fill ? Arc2D.PIE : Arc2D.OPEN);
     if (fill) {
@@ -170,10 +177,12 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
     }
   }
 
+  @Override
   public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints) {
     drawPoly(xPoints, yPoints, nPoints, false, false);
   }
 
+  @Override
   public void drawPolygon(int[] xPoints, int[] yPoints, int nPoints, boolean fill) {
     drawPoly(xPoints, yPoints, nPoints, fill, true);
   }
@@ -196,6 +205,7 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
     }
   }
 
+  @Override
   public void draw(Shape shape) {
     if (stroke instanceof BasicStroke) {
       BasicStroke basicStroke = (BasicStroke) stroke;
@@ -214,11 +224,12 @@ public class G2DGLShapeDrawer implements G2DDrawingHelper {
     fill(stroke.createStrokedShape(shape));
   }
 
+  @Override
   public void fill(Shape shape) {
     fill(shape, false);
   }
 
-  public void fill(Shape shape, boolean forceSimple) {
+  protected void fill(Shape shape, boolean forceSimple) {
     if (forceSimple) {
       traceShape(shape, simpleFillVisitor);
     } else {

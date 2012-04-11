@@ -14,37 +14,36 @@
    limitations under the License.
  ***************************************************************************/
 
-package glg2d.shaders;
+package glg2d;
 
-import glg2d.GL2ShapeDrawer;
-import glg2d.GLGraphics2D;
-import glg2d.PathVisitor;
+import java.awt.Color;
+import java.awt.Composite;
+import java.awt.Paint;
 
-import java.awt.Shape;
+public interface GLG2DColorHelper extends G2DDrawingHelper {
+  void setComposite(Composite comp);
 
-import javax.media.opengl.GL2ES2;
+  Composite getComposite();
 
-public class G2DShaderShapeDrawer extends GL2ShapeDrawer {
-  protected Shader shader;
+  void setPaint(Paint paint);
 
-  public G2DShaderShapeDrawer(Shader shader) {
-    this.shader = shader;
-  }
+  Paint getPaint();
 
-  @Override
-  public void setG2D(GLGraphics2D g2d) {
-    super.setG2D(g2d);
+  void setColor(Color c);
 
-    GL2ES2 gl = g2d.getGLContext().getGL().getGL2ES2();
-    if (!shader.isProgram(gl)) {
-      shader.setup(gl);
-    }
-  }
+  Color getColor();
 
-  @Override
-  protected void traceShape(Shape shape, PathVisitor visitor) {
-    shader.use(true);
-    super.traceShape(shape, visitor);
-    shader.use(false);
-  }
+  void setColorNoRespectComposite(Color c);
+
+  void setColorRespectComposite(Color c);
+
+  void setBackground(Color color);
+
+  Color getBackground();
+
+  void setPaintMode();
+
+  void setXORMode(Color c);
+
+  void copyArea(int x, int y, int width, int height, int dx, int dy);
 }

@@ -37,7 +37,7 @@ import com.jogamp.opengl.util.awt.TextRenderer;
 /**
  * Draws text for the {@code GLGraphics2D} class.
  */
-public class G2DGLStringDrawer implements G2DDrawingHelper {
+public class GL2StringDrawer implements GLG2DTextHelper {
   protected FontRenderCache cache = new FontRenderCache();
 
   protected Deque<Font> fontStack = new ArrayDeque<Font>(10);
@@ -83,18 +83,22 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
     cache.dispose();
   }
 
+  @Override
   public void setFont(Font font) {
     this.font = font;
   }
 
+  @Override
   public Font getFont() {
     return font;
   }
 
+  @Override
   public FontMetrics getFontMetrics(Font font) {
     return new GLFontMetrics(font, getFontRenderContext(), getRenderer(font));
   }
 
+  @Override
   public FontRenderContext getFontRenderContext() {
     return new FontRenderContext(g2d.getTransform(), true, false);
   }
@@ -111,14 +115,17 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
     antiAlias = doAlias;
   }
 
+  @Override
   public void drawString(AttributedCharacterIterator iterator, int x, int y) {
     // TODO
   }
 
+  @Override
   public void drawString(AttributedCharacterIterator iterator, float x, float y) {
     // TODO
   }
 
+  @Override
   public void drawString(String string, Color color, float x, float y) {
     drawString(string, color, (int) x, (int) y);
   }
@@ -143,6 +150,7 @@ public class G2DGLStringDrawer implements G2DDrawingHelper {
     renderer.setColor(color);
   }
 
+  @Override
   public void drawString(String string, Color color, int x, int y) {
     TextRenderer renderer = getRenderer(getFont());
 

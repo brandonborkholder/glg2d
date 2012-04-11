@@ -16,7 +16,7 @@
 
 package glg2d.shaders;
 
-import glg2d.G2DGLStringDrawer;
+import glg2d.GL2StringDrawer;
 import glg2d.GLGraphics2D;
 
 import java.awt.Color;
@@ -25,7 +25,7 @@ import javax.media.opengl.GL2ES2;
 
 import com.jogamp.opengl.util.awt.TextRenderer;
 
-public class G2DShaderStringDrawer extends G2DGLStringDrawer {
+public class G2DShaderStringDrawer extends GL2StringDrawer {
   protected Shader shader;
 
   public G2DShaderStringDrawer(Shader shader) {

@@ -39,10 +39,7 @@ import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
 import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
 
-/**
- * Draws images for the {@code GLGraphics2D} class.
- */
-public class G2DGLImageDrawer implements G2DDrawingHelper {
+public class GL2ImageDrawer implements GLG2DImageHelper {
   /**
    * This cache is kept for each paint operation. We don't keep track of images
    * being changed across different painting calls. The first time we see an
@@ -82,14 +79,17 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
     cache.clear();
   }
 
+  @Override
   public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer) {
     return drawImage(img, AffineTransform.getTranslateInstance(x, y), bgcolor, observer);
   }
 
+  @Override
   public boolean drawImage(Image img, AffineTransform xform, ImageObserver observer) {
     return drawImage(img, xform, (Color) null, observer);
   }
 
+  @Override
   public boolean drawImage(Image img, int x, int y, int width, int height, Color bgcolor, ImageObserver observer) {
     double imgHeight = img.getHeight(null);
     double imgWidth = img.getWidth(null);
@@ -103,6 +103,7 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
     return drawImage(img, transform, bgcolor, observer);
   }
 
+  @Override
   public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, Color bgcolor,
       ImageObserver observer) {
     Texture texture = getTexture(img, observer);
@@ -287,15 +288,21 @@ public class G2DGLImageDrawer implements G2DDrawingHelper {
     }
   }
 
+  @Override
   public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y) {
     // TODO Not implemented yet!
+    System.err.println("drawImage(BufferedImage, BufferedImageOp, int, int) not implemented yet!");
   }
 
+  @Override
   public void drawImage(RenderedImage img, AffineTransform xform) {
     // TODO Not implemented yet!
+    System.err.println("drawImage(RenderedImage, AffineTransform) not implemented yet!");
   }
 
+  @Override
   public void drawImage(RenderableImage img, AffineTransform xform) {
     // TODO Not implemented yet!
+    System.err.println("drawImage(RenderableImage, AffineTransform) not implemented yet!");
   }
 }

@@ -67,15 +67,15 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   protected int canvasHeight;
 
-  protected G2DGLShapeDrawer shapeDrawer;
+  protected GLG2DShapeHelper shapeDrawer;
 
-  protected G2DGLImageDrawer imageDrawer;
+  protected GLG2DImageHelper imageDrawer;
 
-  protected G2DGLStringDrawer stringDrawer;
+  protected GLG2DTextHelper stringDrawer;
 
-  protected G2DGLTransformHelper matrixHelper;
+  protected GLG2DTransformHelper matrixHelper;
 
-  protected G2DGLColorHelper colorHelper;
+  protected GLG2DColorHelper colorHelper;
 
   protected Rectangle clip;
 
@@ -91,11 +91,11 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   protected void createDrawingHelpers() {
-    shapeDrawer = new G2DGLShapeDrawer();
-    imageDrawer = new G2DGLImageDrawer();
-    stringDrawer = new G2DGLStringDrawer();
+    shapeDrawer = new GL2ShapeDrawer();
+    imageDrawer = new GL2ImageDrawer();
+    stringDrawer = new GL2StringDrawer();
     matrixHelper = new G2DGLTransformHelper();
-    colorHelper = new G2DGLColorHelper();
+    colorHelper = new GL2ColorHelper();
 
     addG2DDrawingHelper(shapeDrawer);
     addG2DDrawingHelper(imageDrawer);

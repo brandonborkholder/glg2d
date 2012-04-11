@@ -28,7 +28,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
 
-public class G2DGLColorHelper implements G2DDrawingHelper {
+public class GL2ColorHelper implements G2DDrawingHelper, GLG2DColorHelper {
   protected GLGraphics2D g2d;
 
   protected GL2 gl;
@@ -73,6 +73,7 @@ public class G2DGLColorHelper implements G2DDrawingHelper {
   public void dispose() {
   }
 
+  @Override
   public void setComposite(Composite comp) {
     gl.glEnable(GL.GL_BLEND);
     if (comp instanceof AlphaComposite) {
@@ -122,10 +123,12 @@ public class G2DGLColorHelper implements G2DDrawingHelper {
     }
   }
 
+  @Override
   public Composite getComposite() {
     return stack.peek().composite;
   }
 
+  @Override
   public void setPaint(Paint paint) {
     if (paint instanceof Color) {
       setColor((Color) paint);
@@ -135,19 +138,23 @@ public class G2DGLColorHelper implements G2DDrawingHelper {
     }
   }
 
+  @Override
   public Paint getPaint() {
     // until we implement Paint fully
     return getColor();
   }
 
+  @Override
   public Color getColor() {
     return stack.peek().color;
   }
 
+  @Override
   public void setColorNoRespectComposite(Color c) {
     setColor(gl, c, 1);
   }
 
+  @Override
   public void setColor(Color c) {
     if (c == null) {
       return;
@@ -162,7 +169,8 @@ public class G2DGLColorHelper implements G2DDrawingHelper {
    * AlphaComposite if any. If the AlphaComposite wants to pre-multiply an
    * alpha, pre-multiply it.
    */
-  protected void setColorRespectComposite(Color c) {
+  @Override
+  public void setColorRespectComposite(Color c) {
     float alpha = 1;
     Composite composite = getComposite();
     if (composite instanceof AlphaComposite) {
@@ -177,24 +185,29 @@ public class G2DGLColorHelper implements G2DDrawingHelper {
     gl.glColor4ub((byte) (rgb >> 16 & 0xFF), (byte) (rgb >> 8 & 0xFF), (byte) (rgb & 0xFF), (byte) ((rgb >> 24 & 0xFF) * preMultiplyAlpha));
   }
 
+  @Override
   public void setBackground(Color color) {
     stack.peek().background = color;
     int rgb = color.getRGB();
     gl.glClearColor((rgb >> 16 & 0xFF) / 255F, (rgb >> 8 & 0xFF) / 255F, (rgb & 0xFF) / 255F, (rgb >> 24 & 0xFF) / 255F);
   }
 
+  @Override
   public Color getBackground() {
     return stack.peek().background;
   }
 
+  @Override
   public void setPaintMode() {
     // TODO Auto-generated method stub
   }
 
+  @Override
   public void setXORMode(Color c) {
     // TODO Auto-generated method stub
   }
 
+  @Override
   public void copyArea(int x, int y, int width, int height, int dx, int dy) {
     // glRasterPos* is transformed, but CopyPixels is not
     int x2 = x + dx;

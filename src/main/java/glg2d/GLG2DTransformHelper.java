@@ -14,37 +14,26 @@
    limitations under the License.
  ***************************************************************************/
 
-package glg2d.shaders;
+package glg2d;
 
-import glg2d.GL2ShapeDrawer;
-import glg2d.GLGraphics2D;
-import glg2d.PathVisitor;
+import java.awt.geom.AffineTransform;
 
-import java.awt.Shape;
+public interface GLG2DTransformHelper extends G2DDrawingHelper {
+  void translate(int x, int y);
 
-import javax.media.opengl.GL2ES2;
+  void translate(double tx, double ty);
 
-public class G2DShaderShapeDrawer extends GL2ShapeDrawer {
-  protected Shader shader;
+  void rotate(double theta);
 
-  public G2DShaderShapeDrawer(Shader shader) {
-    this.shader = shader;
-  }
+  void rotate(double theta, double x, double y);
 
-  @Override
-  public void setG2D(GLGraphics2D g2d) {
-    super.setG2D(g2d);
+  void scale(double sx, double sy);
 
-    GL2ES2 gl = g2d.getGLContext().getGL().getGL2ES2();
-    if (!shader.isProgram(gl)) {
-      shader.setup(gl);
-    }
-  }
+  void shear(double shx, double shy);
 
-  @Override
-  protected void traceShape(Shape shape, PathVisitor visitor) {
-    shader.use(true);
-    super.traceShape(shape, visitor);
-    shader.use(false);
-  }
+  void transform(AffineTransform Tx);
+
+  void setTransform(AffineTransform transform);
+
+  AffineTransform getTransform();
 }

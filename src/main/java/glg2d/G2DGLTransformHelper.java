@@ -22,7 +22,7 @@ import java.awt.geom.AffineTransform;
 import javax.media.opengl.GL2;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
 
-public class G2DGLTransformHelper implements G2DDrawingHelper {
+public class G2DGLTransformHelper implements GLG2DTransformHelper {
   protected static final float RAD_TO_DEG = 180f / (float) Math.PI;
   
   protected GLGraphics2D g2d;
@@ -61,21 +61,25 @@ public class G2DGLTransformHelper implements G2DDrawingHelper {
   public void dispose() {
   }
 
+  @Override
   public void translate(int x, int y) {
     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glTranslatef(x, y, 0);
   }
 
+  @Override
   public void translate(double tx, double ty) {
     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glTranslatef((float) tx, (float) ty, 0);
   }
 
+  @Override
   public void rotate(double theta) {
     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glRotatef((float) theta * RAD_TO_DEG, 0, 0, 1);
   }
 
+  @Override
   public void rotate(double theta, double x, double y) {
     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glTranslatef((float) x, (float) y, 0);
@@ -83,11 +87,13 @@ public class G2DGLTransformHelper implements G2DDrawingHelper {
     gl.glTranslatef((float) -x, (float) -y, 0);
   }
 
+  @Override
   public void scale(double sx, double sy) {
     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glScaled(sx, sy, 1);
   }
 
+  @Override
   public void shear(double shx, double shy) {
     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     float[] shear = new float[] {
@@ -98,11 +104,13 @@ public class G2DGLTransformHelper implements G2DDrawingHelper {
     gl.glMultMatrixf(shear, 0);
   }
 
+  @Override
   public void transform(AffineTransform Tx) {
     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     GLG2DUtils.multMatrix(gl, Tx);
   }
 
+  @Override
   public void setTransform(AffineTransform transform) {
     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glLoadIdentity();
@@ -111,6 +119,7 @@ public class G2DGLTransformHelper implements G2DDrawingHelper {
     GLG2DUtils.multMatrix(gl, transform);
   }
 
+  @Override
   public AffineTransform getTransform() {
     return GLG2DUtils.getModelTransform(gl, g2d.getCanvasHeight());
   }
