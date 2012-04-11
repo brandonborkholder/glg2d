@@ -14,7 +14,11 @@
    limitations under the License.
  ***************************************************************************/
 
-package glg2d;
+package glg2d.impl.gl2;
+
+import glg2d.GLG2DShapeHelper;
+import glg2d.GLGraphics2D;
+import glg2d.PathVisitor;
 
 import java.awt.BasicStroke;
 import java.awt.RenderingHints;

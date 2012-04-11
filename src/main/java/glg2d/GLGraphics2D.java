@@ -16,6 +16,11 @@
 
 package glg2d;
 
+import glg2d.impl.gl2.GL2ColorHelper;
+import glg2d.impl.gl2.GL2ImageDrawer;
+import glg2d.impl.gl2.GL2ShapeDrawer;
+import glg2d.impl.gl2.GL2StringDrawer;
+
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -67,11 +72,11 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   protected int canvasHeight;
 
-  protected GLG2DShapeHelper shapeDrawer;
+  protected GLG2DShapeHelper shapeHelper;
 
-  protected GLG2DImageHelper imageDrawer;
+  protected GLG2DImageHelper imageHelper;
 
-  protected GLG2DTextHelper stringDrawer;
+  protected GLG2DTextHelper stringHelper;
 
   protected GLG2DTransformHelper matrixHelper;
 
@@ -91,15 +96,15 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   protected void createDrawingHelpers() {
-    shapeDrawer = new GL2ShapeDrawer();
-    imageDrawer = new GL2ImageDrawer();
-    stringDrawer = new GL2StringDrawer();
+    shapeHelper = new GL2ShapeDrawer();
+    imageHelper = new GL2ImageDrawer();
+    stringHelper = new GL2StringDrawer();
     matrixHelper = new G2DGLTransformHelper();
     colorHelper = new GL2ColorHelper();
 
-    addG2DDrawingHelper(shapeDrawer);
-    addG2DDrawingHelper(imageDrawer);
-    addG2DDrawingHelper(stringDrawer);
+    addG2DDrawingHelper(shapeHelper);
+    addG2DDrawingHelper(imageHelper);
+    addG2DDrawingHelper(stringHelper);
     addG2DDrawingHelper(matrixHelper);
     addG2DDrawingHelper(colorHelper);
   }
@@ -121,6 +126,22 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
         break;
       }
     }
+  }
+
+  public GLG2DShapeHelper getShapeHelper() {
+    return shapeHelper;
+  }
+
+  public GLG2DTextHelper getStringHelper() {
+    return stringHelper;
+  }
+
+  public GLG2DTransformHelper getMatrixHelper() {
+    return matrixHelper;
+  }
+
+  public GLG2DColorHelper getColorHelper() {
+    return colorHelper;
   }
 
   protected void setCanvas(GLAutoDrawable drawable) {
@@ -175,37 +196,37 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void draw(Shape s) {
-    shapeDrawer.draw(s);
+    shapeHelper.draw(s);
   }
 
   @Override
   public void drawString(String str, int x, int y) {
-    stringDrawer.drawString(str, getColor(), x, y);
+    stringHelper.drawString(str, getColor(), x, y);
   }
 
   @Override
   public void drawString(String str, float x, float y) {
-    stringDrawer.drawString(str, getColor(), x, y);
+    stringHelper.drawString(str, getColor(), x, y);
   }
 
   @Override
   public void drawString(AttributedCharacterIterator iterator, int x, int y) {
-    stringDrawer.drawString(iterator, x, y);
+    stringHelper.drawString(iterator, x, y);
   }
 
   @Override
   public void drawString(AttributedCharacterIterator iterator, float x, float y) {
-    stringDrawer.drawString(iterator, x, y);
+    stringHelper.drawString(iterator, x, y);
   }
 
   @Override
   public void drawGlyphVector(GlyphVector g, float x, float y) {
-    shapeDrawer.fill(g.getOutline(x, y));
+    shapeHelper.fill(g.getOutline(x, y));
   }
 
   @Override
   public void fill(Shape s) {
-    shapeDrawer.fill(s);
+    shapeHelper.fill(s);
   }
 
   @Override
@@ -219,7 +240,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     }
 
     if (onStroke) {
-      s = shapeDrawer.getStroke().createStrokedShape(s);
+      s = shapeHelper.getStroke().createStrokedShape(s);
     }
 
     s = getTransform().createTransformedShape(s);
@@ -364,12 +385,12 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public Stroke getStroke() {
-    return shapeDrawer.getStroke();
+    return shapeHelper.getStroke();
   }
 
   @Override
   public void setStroke(Stroke s) {
-    shapeDrawer.setStroke(s);
+    shapeHelper.setStroke(s);
   }
 
   @Override
@@ -384,22 +405,22 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public Font getFont() {
-    return stringDrawer.getFont();
+    return stringHelper.getFont();
   }
 
   @Override
   public void setFont(Font font) {
-    stringDrawer.setFont(font);
+    stringHelper.setFont(font);
   }
 
   @Override
   public FontMetrics getFontMetrics(Font f) {
-    return stringDrawer.getFontMetrics(f);
+    return stringHelper.getFontMetrics(f);
   }
 
   @Override
   public FontRenderContext getFontRenderContext() {
-    return stringDrawer.getFontRenderContext();
+    return stringHelper.getFontRenderContext();
   }
 
   @Override
@@ -492,12 +513,12 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawLine(int x1, int y1, int x2, int y2) {
-    shapeDrawer.drawLine(x1, y1, x2, y2);
+    shapeHelper.drawLine(x1, y1, x2, y2);
   }
 
   @Override
   public void fillRect(int x, int y, int width, int height) {
-    shapeDrawer.drawRect(x, y, width, height, true);
+    shapeHelper.drawRect(x, y, width, height, true);
   }
 
   @Override
@@ -510,97 +531,97 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-    shapeDrawer.drawRoundRect(x, y, width, height, arcWidth, arcHeight, false);
+    shapeHelper.drawRoundRect(x, y, width, height, arcWidth, arcHeight, false);
   }
 
   @Override
   public void fillRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
-    shapeDrawer.drawRoundRect(x, y, width, height, arcWidth, arcHeight, true);
+    shapeHelper.drawRoundRect(x, y, width, height, arcWidth, arcHeight, true);
   }
 
   @Override
   public void drawOval(int x, int y, int width, int height) {
-    shapeDrawer.drawOval(x, y, width, height, false);
+    shapeHelper.drawOval(x, y, width, height, false);
   }
 
   @Override
   public void fillOval(int x, int y, int width, int height) {
-    shapeDrawer.drawOval(x, y, width, height, true);
+    shapeHelper.drawOval(x, y, width, height, true);
   }
 
   @Override
   public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
-    shapeDrawer.drawArc(x, y, width, height, startAngle, arcAngle, false);
+    shapeHelper.drawArc(x, y, width, height, startAngle, arcAngle, false);
   }
 
   @Override
   public void fillArc(int x, int y, int width, int height, int startAngle, int arcAngle) {
-    shapeDrawer.drawArc(x, y, width, height, startAngle, arcAngle, true);
+    shapeHelper.drawArc(x, y, width, height, startAngle, arcAngle, true);
   }
 
   @Override
   public void drawPolyline(int[] xPoints, int[] yPoints, int nPoints) {
-    shapeDrawer.drawPolyline(xPoints, yPoints, nPoints);
+    shapeHelper.drawPolyline(xPoints, yPoints, nPoints);
   }
 
   @Override
   public void drawPolygon(int[] xPoints, int[] yPoints, int nPoints) {
-    shapeDrawer.drawPolygon(xPoints, yPoints, nPoints, false);
+    shapeHelper.drawPolygon(xPoints, yPoints, nPoints, false);
   }
 
   @Override
   public void fillPolygon(int[] xPoints, int[] yPoints, int nPoints) {
-    shapeDrawer.drawPolygon(xPoints, yPoints, nPoints, true);
+    shapeHelper.drawPolygon(xPoints, yPoints, nPoints, true);
   }
 
   @Override
   public boolean drawImage(Image img, AffineTransform xform, ImageObserver obs) {
-    return imageDrawer.drawImage(img, xform, obs);
+    return imageHelper.drawImage(img, xform, obs);
   }
 
   @Override
   public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y) {
-    imageDrawer.drawImage(img, op, x, y);
+    imageHelper.drawImage(img, op, x, y);
   }
 
   @Override
   public void drawRenderedImage(RenderedImage img, AffineTransform xform) {
-    imageDrawer.drawImage(img, xform);
+    imageHelper.drawImage(img, xform);
   }
 
   @Override
   public void drawRenderableImage(RenderableImage img, AffineTransform xform) {
-    imageDrawer.drawImage(img, xform);
+    imageHelper.drawImage(img, xform);
   }
 
   @Override
   public boolean drawImage(Image img, int x, int y, ImageObserver observer) {
-    return imageDrawer.drawImage(img, x, y, null, observer);
+    return imageHelper.drawImage(img, x, y, null, observer);
   }
 
   @Override
   public boolean drawImage(Image img, int x, int y, Color bgcolor, ImageObserver observer) {
-    return imageDrawer.drawImage(img, x, y, bgcolor, observer);
+    return imageHelper.drawImage(img, x, y, bgcolor, observer);
   }
 
   @Override
   public boolean drawImage(Image img, int x, int y, int width, int height, ImageObserver observer) {
-    return imageDrawer.drawImage(img, x, y, width, height, null, observer);
+    return imageHelper.drawImage(img, x, y, width, height, null, observer);
   }
 
   @Override
   public boolean drawImage(Image img, int x, int y, int width, int height, Color bgcolor, ImageObserver observer) {
-    return imageDrawer.drawImage(img, x, y, width, height, bgcolor, observer);
+    return imageHelper.drawImage(img, x, y, width, height, bgcolor, observer);
   }
 
   @Override
   public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, ImageObserver observer) {
-    return imageDrawer.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null, observer);
+    return imageHelper.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, null, observer);
   }
 
   @Override
   public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, Color bgcolor, ImageObserver observer) {
-    return imageDrawer.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, bgcolor, observer);
+    return imageHelper.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, bgcolor, observer);
   }
 
   @Override

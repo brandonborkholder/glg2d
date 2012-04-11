@@ -14,7 +14,10 @@
    limitations under the License.
  ***************************************************************************/
 
-package glg2d;
+package glg2d.impl.gl2;
+
+import glg2d.GLG2DTextHelper;
+import glg2d.GLGraphics2D;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;

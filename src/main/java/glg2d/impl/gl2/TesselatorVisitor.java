@@ -14,7 +14,9 @@
    limitations under the License.
  ***************************************************************************/
 
-package glg2d;
+package glg2d.impl.gl2;
+
+import glg2d.SimplePathVisitor;
 
 import java.awt.BasicStroke;
 import java.awt.geom.PathIterator;

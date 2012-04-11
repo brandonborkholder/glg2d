@@ -14,11 +14,14 @@
    limitations under the License.
  ***************************************************************************/
 
-package glg2d;
+package glg2d.impl.gl2;
 
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
+
+import glg2d.SimplePathVisitor;
+import glg2d.VertexBuffer;
 
 import java.awt.BasicStroke;
 

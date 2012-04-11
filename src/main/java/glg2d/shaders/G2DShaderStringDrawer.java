@@ -16,8 +16,8 @@
 
 package glg2d.shaders;
 
-import glg2d.GL2StringDrawer;
 import glg2d.GLGraphics2D;
+import glg2d.impl.gl2.GL2StringDrawer;
 
 import java.awt.Color;
 

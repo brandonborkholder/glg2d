@@ -14,7 +14,10 @@
    limitations under the License.
  ***************************************************************************/
 
-package glg2d;
+package glg2d.impl.gl2;
+
+import glg2d.SimplePathVisitor;
+import glg2d.VertexBuffer;
 
 import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
@@ -99,7 +102,7 @@ public class FastLineVisitor extends SimplePathVisitor {
    * returns {@code false} then this renderer should not be used.
    * </p>
    */
-  protected boolean isValid(BasicStroke stroke) {
+  public boolean isValid(BasicStroke stroke) {
     // if the dash length is odd, I don't know how to handle that yet
     float[] dash = stroke.getDashArray();
     if (dash != null && (dash.length & 1) == 1) {

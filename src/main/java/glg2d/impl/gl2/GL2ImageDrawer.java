@@ -14,7 +14,11 @@
    limitations under the License.
  ***************************************************************************/
 
-package glg2d;
+package glg2d.impl.gl2;
+
+import glg2d.GLG2DImageHelper;
+import glg2d.GLG2DUtils;
+import glg2d.GLGraphics2D;
 
 import java.awt.Color;
 import java.awt.Image;
@@ -152,11 +156,7 @@ public class GL2ImageDrawer implements GLG2DImageHelper {
       GLG2DUtils.multMatrix(gl, xform);
     }
 
-    if (bgcolor == null) {
-      g2d.colorHelper.setColorRespectComposite(Color.white);
-    } else {
-      g2d.colorHelper.setColorRespectComposite(bgcolor);
-    }
+    g2d.getColorHelper().setColorRespectComposite(bgcolor == null ? Color.white : bgcolor);
   }
 
   protected void end(Texture texture) {

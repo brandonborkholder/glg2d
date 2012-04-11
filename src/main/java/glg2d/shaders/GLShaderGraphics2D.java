@@ -16,9 +16,9 @@
 
 package glg2d.shaders;
 
-import glg2d.GL2ColorHelper;
 import glg2d.G2DGLTransformHelper;
 import glg2d.GLGraphics2D;
+import glg2d.impl.gl2.GL2ColorHelper;
 
 public class GLShaderGraphics2D extends GLGraphics2D {
   public GLShaderGraphics2D() {
@@ -28,17 +28,17 @@ public class GLShaderGraphics2D extends GLGraphics2D {
   @Override
   protected void createDrawingHelpers() {
     Shader s = new ResourceShader(GLShaderGraphics2D.class, "TextureShader.v", "TextureShader.f");
-    imageDrawer = new G2DShaderImageDrawer(s);
-    stringDrawer = new G2DShaderStringDrawer(s);
+    imageHelper = new G2DShaderImageDrawer(s);
+    stringHelper = new G2DShaderStringDrawer(s);
     matrixHelper = new G2DGLTransformHelper();
     colorHelper = new GL2ColorHelper();
 
     s = new ResourceShader(GLShaderGraphics2D.class, "FixedFuncShader.v", "FixedFuncShader.f");
-    shapeDrawer = new G2DShaderShapeDrawer(s);
+    shapeHelper = new G2DShaderShapeDrawer(s);
 
-    addG2DDrawingHelper(imageDrawer);
-    addG2DDrawingHelper(stringDrawer);
-    addG2DDrawingHelper(shapeDrawer);
+    addG2DDrawingHelper(imageHelper);
+    addG2DDrawingHelper(stringHelper);
+    addG2DDrawingHelper(shapeHelper);
     addG2DDrawingHelper(matrixHelper);
     addG2DDrawingHelper(colorHelper);
   }

@@ -16,9 +16,9 @@
 
 package glg2d.shaders;
 
-import glg2d.GL2ShapeDrawer;
 import glg2d.GLGraphics2D;
 import glg2d.PathVisitor;
+import glg2d.impl.gl2.GL2ShapeDrawer;
 
 import java.awt.Shape;
 

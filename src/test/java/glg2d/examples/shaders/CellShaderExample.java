@@ -1,11 +1,11 @@
 package glg2d.examples.shaders;
 
-import glg2d.GL2ColorHelper;
 import glg2d.G2DGLEventListener;
 import glg2d.G2DGLPanel;
 import glg2d.G2DGLTransformHelper;
 import glg2d.GLGraphics2D;
 import glg2d.UIDemo;
+import glg2d.impl.gl2.GL2ColorHelper;
 import glg2d.shaders.G2DShaderImageDrawer;
 import glg2d.shaders.G2DShaderShapeDrawer;
 import glg2d.shaders.G2DShaderStringDrawer;
@@ -36,18 +36,18 @@ public class CellShaderExample {
               @Override
               protected void createDrawingHelpers() {
                 Shader s = new ResourceShader(CellShaderExample.class, "CellShader.v", "CellShader.f");
-                shapeDrawer = new G2DShaderShapeDrawer(s);
+                shapeHelper = new G2DShaderShapeDrawer(s);
 
                 s = new ResourceShader(CellShaderExample.class, "CellShader.v", "CellTextureShader.f");
-                imageDrawer = new G2DShaderImageDrawer(s);
-                stringDrawer = new G2DShaderStringDrawer(s);
+                imageHelper = new G2DShaderImageDrawer(s);
+                stringHelper = new G2DShaderStringDrawer(s);
                 
                 colorHelper = new GL2ColorHelper();
                 matrixHelper = new G2DGLTransformHelper();
 
-                addG2DDrawingHelper(shapeDrawer);
-                addG2DDrawingHelper(imageDrawer);
-                addG2DDrawingHelper(stringDrawer);
+                addG2DDrawingHelper(shapeHelper);
+                addG2DDrawingHelper(imageHelper);
+                addG2DDrawingHelper(stringHelper);
                 addG2DDrawingHelper(colorHelper);
                 addG2DDrawingHelper(matrixHelper);
               }
