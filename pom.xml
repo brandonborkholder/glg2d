@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.jogamp</groupId>
   <artifactId>glg2d</artifactId>
-  <version>0.1-SNAPSHOT</version>
+  <version>0.2-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>GLG2D</name>
   <description>Java2D to OpenGL bridge</description>
@@ -63,7 +63,7 @@
     <dependency>
       <groupId>com.jogamp</groupId>
       <artifactId>glg2d-test</artifactId>
-      <version>${project.version}</version>
+      <version>0.1-SNAPSHOT</version>
       <type>pom</type>
       <scope>test</scope>
     </dependency>
