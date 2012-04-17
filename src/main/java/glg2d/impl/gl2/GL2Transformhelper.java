@@ -23,12 +23,13 @@ import glg2d.GLGraphics2D;
 import java.awt.RenderingHints.Key;
 import java.awt.geom.AffineTransform;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
 
 public class GL2Transformhelper implements GLG2DTransformHelper {
   protected static final float RAD_TO_DEG = 180f / (float) Math.PI;
-  
+
   protected GLGraphics2D g2d;
 
   protected GL2 gl;
@@ -37,6 +38,8 @@ public class GL2Transformhelper implements GLG2DTransformHelper {
   public void setG2D(GLGraphics2D g2d) {
     this.g2d = g2d;
     gl = g2d.getGLContext().getGL().getGL2();
+
+    setupGLView();
   }
 
   @Override
@@ -50,12 +53,12 @@ public class GL2Transformhelper implements GLG2DTransformHelper {
     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glPopMatrix();
   }
-  
+
   @Override
   public void setHint(Key key, Object value) {
     // nop
   }
-  
+
   @Override
   public void resetHints() {
     // nop
@@ -63,6 +66,28 @@ public class GL2Transformhelper implements GLG2DTransformHelper {
 
   @Override
   public void dispose() {
+  }
+
+  protected void setupGLView() {
+    int[] viewportDimensions = new int[4];
+    gl.glGetIntegerv(GL.GL_VIEWPORT, viewportDimensions, 0);
+    int width = viewportDimensions[2];
+    int height = viewportDimensions[3];
+
+    // setup projection
+    gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
+    gl.glLoadIdentity();
+    gl.glOrtho(0, width, 0, height, -1, 1);
+
+    gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+    gl.glLoadIdentity();
+
+    // do the transform from Graphics2D coords to openGL coords
+    gl.glTranslatef(0, height, 0);
+    gl.glScalef(1, -1, 1);
+
+    gl.glMatrixMode(GL.GL_TEXTURE);
+    gl.glLoadIdentity();
   }
 
   @Override

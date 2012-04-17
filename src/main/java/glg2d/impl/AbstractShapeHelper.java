@@ -20,6 +20,7 @@ import glg2d.GLG2DShapeHelper;
 import glg2d.GLGraphics2D;
 import glg2d.PathVisitor;
 
+import java.awt.BasicStroke;
 import java.awt.RenderingHints;
 import java.awt.RenderingHints.Key;
 import java.awt.Shape;
@@ -45,6 +46,10 @@ public abstract class AbstractShapeHelper implements GLG2DShapeHelper {
   protected static final Line2D.Float LINE = new Line2D.Float();
 
   protected Deque<Stroke> strokeStack = new ArrayDeque<Stroke>(10);
+
+  public AbstractShapeHelper() {
+    strokeStack.push(new BasicStroke());
+  }
 
   @Override
   public void setG2D(GLGraphics2D g2d) {

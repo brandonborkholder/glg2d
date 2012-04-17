@@ -18,13 +18,22 @@ package glg2d;
 
 import java.awt.Color;
 import java.awt.geom.AffineTransform;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES1;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
 
 public class GLG2DUtils {
+  private static final Logger LOGGER = Logger.getLogger(GLG2DUtils.class.getName());
+
   public static void multMatrix(GLMatrixFunc gl, AffineTransform transform) {
+    float[] matrix = getGLMatrix(transform);
+    gl.glMultMatrixf(matrix, 0);
+  }
+
+  public static float[] getGLMatrix(AffineTransform transform) {
     float[] matrix = new float[16];
     matrix[0] = (float) transform.getScaleX();
     matrix[1] = (float) transform.getShearY();
@@ -35,7 +44,7 @@ public class GLG2DUtils {
     matrix[13] = (float) transform.getTranslateY();
     matrix[15] = 1;
 
-    gl.glMultMatrixf(matrix, 0);
+    return matrix;
   }
 
   /**
@@ -54,10 +63,21 @@ public class GLG2DUtils {
     gl.glColor4ub((byte) (rgb >> 16 & 0xFF), (byte) (rgb >> 8 & 0xFF), (byte) (rgb & 0xFF), (byte) ((rgb >> 24 & 0xFF) * preMultiplyAlpha));
   }
   
+  public static float[] getGLColor(Color c) {
+    return c.getComponents(null);
+  }
+
   public static int getCanvasHeight(GL gl) {
     int[] viewportDimensions = new int[4];
     gl.glGetIntegerv(GL.GL_VIEWPORT, viewportDimensions, 0);
     int canvasHeight = viewportDimensions[3];
     return canvasHeight;
+  }
+
+  public static void logGLError(GL gl) {
+    int error = gl.glGetError();
+    if (error != GL.GL_NO_ERROR) {
+      LOGGER.log(Level.SEVERE, "GL Error: code " + error);
+    }
   }
 }

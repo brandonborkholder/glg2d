@@ -16,11 +16,11 @@
 
 package glg2d;
 
-import glg2d.impl.gl2.GL2Transformhelper;
 import glg2d.impl.gl2.GL2ColorHelper;
 import glg2d.impl.gl2.GL2ImageDrawer;
 import glg2d.impl.gl2.GL2ShapeDrawer;
 import glg2d.impl.gl2.GL2StringDrawer;
+import glg2d.impl.gl2.GL2Transformhelper;
 
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
@@ -97,17 +97,37 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   protected void createDrawingHelpers() {
-    shapeHelper = new GL2ShapeDrawer();
-    imageHelper = new GL2ImageDrawer();
-    stringHelper = new GL2StringDrawer();
-    matrixHelper = new GL2Transformhelper();
-    colorHelper = new GL2ColorHelper();
+    imageHelper = createImageHelper();
+    stringHelper = createTextHelper();
+    matrixHelper = createTransformHelper();
+    colorHelper = createColorHelper();
+    shapeHelper = createShapeHelper();
 
-    addG2DDrawingHelper(shapeHelper);
     addG2DDrawingHelper(imageHelper);
     addG2DDrawingHelper(stringHelper);
+    addG2DDrawingHelper(shapeHelper);
     addG2DDrawingHelper(matrixHelper);
     addG2DDrawingHelper(colorHelper);
+  }
+
+  protected GLG2DShapeHelper createShapeHelper() {
+    return new GL2ShapeDrawer();
+  }
+
+  protected GLG2DTextHelper createTextHelper() {
+    return new GL2StringDrawer();
+  }
+
+  protected GLG2DImageHelper createImageHelper() {
+    return new GL2ImageDrawer();
+  }
+
+  protected GLG2DTransformHelper createTransformHelper() {
+    return new GL2Transformhelper();
+  }
+
+  protected GLG2DColorHelper createColorHelper() {
+    return new GL2ColorHelper();
   }
 
   public void addG2DDrawingHelper(G2DDrawingHelper helper) {
@@ -147,14 +167,21 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   protected void setCanvas(GLAutoDrawable drawable) {
     glContext = drawable.getContext();
-    canvasHeight = GLG2DUtils.getCanvasHeight(glContext.getGL());
 
     for (G2DDrawingHelper helper : helpers) {
       helper.setG2D(this);
     }
   }
 
+  protected void setupGLView(GL gl, Component component) {
+    canvasHeight = component.getHeight();
+    int width = component.getWidth();
+
+    gl.glViewport(0, 0, width, canvasHeight);
+  }
+
   protected void prePaint(GLAutoDrawable drawable, Component component) {
+    setupGLView(drawable.getGL(), component);
     setCanvas(drawable);
     setupState(component);
   }
@@ -169,12 +196,6 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     setClip(null);
     setRenderingHints(null);
     graphicsConfig = component.getGraphicsConfiguration();
-    
-    GL gl = glContext.getGL();
-
-    // now enable some flags we'll use
-    gl.glDisable(GL.GL_DEPTH_TEST);
-    gl.glDisable(GL.GL_CULL_FACE);
   }
 
   protected void postPaint() {
@@ -621,7 +642,8 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   @Override
-  public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, Color bgcolor, ImageObserver observer) {
+  public boolean drawImage(Image img, int dx1, int dy1, int dx2, int dy2, int sx1, int sy1, int sx2, int sy2, Color bgcolor,
+      ImageObserver observer) {
     return imageHelper.drawImage(img, dx1, dy1, dx2, dy2, sx1, sy1, sx2, sy2, bgcolor, observer);
   }
 

@@ -16,12 +16,10 @@
 
 package glg2d;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
+import glg2d.impl.shader.GLShaderGraphics2D;
+
 import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLContext;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.fixedfunc.GLMatrixFunc;
 import javax.swing.JComponent;
 import javax.swing.RepaintManager;
 
@@ -58,40 +56,7 @@ public class G2DGLSimpleEventListener implements GLEventListener {
    * client state.
    */
   protected void prePaint(GLAutoDrawable drawable) {
-    setupMatrices(drawable.getContext());
     g2d.prePaint(drawable, baseComponent);
-  }
-
-  /**
-   * Sets up the three matrices, including the transform from OpenGL coordinate
-   * system to Java2D coordinates.
-   */
-  protected void setupMatrices(GLContext context) {
-    GL2 gl = context.getGL().getGL2();
-
-    // push all the matrices
-    gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
-    gl.glPushMatrix();
-
-    int width = baseComponent.getWidth();
-    int height = baseComponent.getHeight();
-
-    // and setup the viewport
-    gl.glViewport(0, 0, width, height);
-    gl.glLoadIdentity();
-    gl.glOrtho(0, width, 0, height, -1, 1);
-
-    gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
-    gl.glPushMatrix();
-    gl.glLoadIdentity();
-
-    // do the transform from Graphics2D coords to openGL coords
-    gl.glTranslatef(0, height, 0);
-    gl.glScalef(1, -1, 1);
-
-    gl.glMatrixMode(GL.GL_TEXTURE);
-    gl.glPushMatrix();
-    gl.glLoadIdentity();
   }
 
   /**
@@ -100,20 +65,6 @@ public class G2DGLSimpleEventListener implements GLEventListener {
    */
   protected void postPaint(GLAutoDrawable drawable) {
     g2d.postPaint();
-    popMatrices(drawable.getContext());
-  }
-
-  /**
-   * Pops all the matrices.
-   */
-  protected void popMatrices(GLContext context) {
-    GL2 gl = context.getGL().getGL2();
-    gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
-    gl.glPopMatrix();
-    gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
-    gl.glPopMatrix();
-    gl.glMatrixMode(GL.GL_TEXTURE);
-    gl.glPopMatrix();
   }
 
   /**
@@ -137,10 +88,6 @@ public class G2DGLSimpleEventListener implements GLEventListener {
 
   @Override
   public void init(GLAutoDrawable drawable) {
-    if (!drawable.getGL().isGL2()) {
-      throw new IllegalStateException("GLG2D currently requires a GL2 implementation (OpenGL version 1.5 or greater)");
-    }
-
     reshape(drawable, 0, 0, drawable.getWidth(), drawable.getWidth());
   }
 
@@ -160,7 +107,7 @@ public class G2DGLSimpleEventListener implements GLEventListener {
    * calls.
    */
   protected GLGraphics2D createGraphics2D(GLAutoDrawable drawable) {
-    return new GLGraphics2D();
+    return new GLShaderGraphics2D();
   }
 
   @Override
