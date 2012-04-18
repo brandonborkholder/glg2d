@@ -175,9 +175,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   protected void setupGLView(GL gl, Component component) {
     canvasHeight = component.getHeight();
-    int width = component.getWidth();
-
-    gl.glViewport(0, 0, width, canvasHeight);
+    gl.glViewport(component.getX(), component.getY(), component.getWidth(), component.getHeight());
   }
 
   protected void prePaint(GLAutoDrawable drawable, Component component) {
