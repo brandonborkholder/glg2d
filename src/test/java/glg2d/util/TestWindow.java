@@ -28,7 +28,7 @@ public class TestWindow extends JFrame implements Tester {
 
   private CustomPainter painter;
 
-  private int result = -1;
+  private volatile int result = -1;
 
   public TestWindow() {
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
