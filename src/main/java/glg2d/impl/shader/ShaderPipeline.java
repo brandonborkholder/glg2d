@@ -18,18 +18,12 @@ package glg2d.impl.shader;
 
 import javax.media.opengl.GL2ES2;
 
-public interface Shader {
+public interface ShaderPipeline {
   void setup(GL2ES2 gl);
 
-  boolean isProgram(GL2ES2 gl);
+  boolean isSetup();
 
-  void compileVertexShader() throws ShaderException;
+  void use(GL2ES2 gl, boolean use);
 
-  void compileFragmentShader() throws ShaderException;
-
-  void createProgramAndAttach() throws ShaderException;
-
-  void use(boolean use);
-
-  void delete();
+  void delete(GL2ES2 gl);
 }

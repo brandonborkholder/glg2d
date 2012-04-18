@@ -16,27 +16,29 @@
 
 package glg2d.impl.shader;
 
+import glg2d.GLG2DImageHelper;
+import glg2d.GLG2DTransformHelper;
 import glg2d.GLGraphics2D;
-import glg2d.impl.gl2.GL2Transformhelper;
-import glg2d.impl.gl2.GL2ColorHelper;
-import glg2d.impl.gl2.GL2StringDrawer;
+
+import javax.media.opengl.GLAutoDrawable;
 
 public class GLShaderGraphics2D extends GLGraphics2D {
+  
   @Override
-  protected void createDrawingHelpers() {
-    Shader s = new ResourceShader(GLShaderGraphics2D.class, "TextureShader.v", "TextureShader.f");
-    imageHelper = new G2DShaderImageDrawer(s);
-    stringHelper = new GL2StringDrawer();
-    matrixHelper = new GL2Transformhelper();
-    colorHelper = new GL2ColorHelper();
+  protected void setCanvas(GLAutoDrawable drawable) {
+    // for debugging
+//    drawable.setGL(new DebugGL4bc(drawable.getGL().getGL4bc()));
+    
+    super.setCanvas(drawable);
+  }
 
-    s = new ResourceShader(GLShaderGraphics2D.class, "FixedFuncShader.v", "FixedFuncShader.f");
-    shapeHelper = new G2DShaderShapeDrawer(s);
-
-    addG2DDrawingHelper(imageHelper);
-    addG2DDrawingHelper(stringHelper);
-    addG2DDrawingHelper(shapeHelper);
-    addG2DDrawingHelper(matrixHelper);
-    addG2DDrawingHelper(colorHelper);
+  @Override
+  protected GLG2DImageHelper createImageHelper() {
+     return new GL2ES2ImageDrawer(new GL2ES2ImagePipeline());
+  }
+  
+  @Override
+  protected GLG2DTransformHelper createTransformHelper() {
+    return new GL2ES2TransformHelper();
   }
 }
