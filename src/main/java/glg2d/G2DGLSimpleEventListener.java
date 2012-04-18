@@ -107,7 +107,7 @@ public class G2DGLSimpleEventListener implements GLEventListener {
    * calls.
    */
   protected GLGraphics2D createGraphics2D(GLAutoDrawable drawable) {
-    return new GLShaderGraphics2D();
+    return new GLGraphics2D();
   }
 
   @Override
