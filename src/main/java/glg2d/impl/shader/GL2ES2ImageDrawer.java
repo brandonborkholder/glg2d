@@ -33,6 +33,8 @@ public class GL2ES2ImageDrawer extends AbstractImageHelper {
   protected FloatBuffer buffer = Buffers.newDirectFloatBuffer(300);
   protected GL2ES2ImagePipeline shader;
 
+  private float[] white = new float[] { 1, 1, 1, 1 };
+
   public GL2ES2ImageDrawer(GL2ES2ImagePipeline shader) {
     this.shader = shader;
   }
@@ -66,8 +68,18 @@ public class GL2ES2ImageDrawer extends AbstractImageHelper {
 
     shader.use(gl, true);
 
-    shader.setColor(gl, bgcolor == null ? Color.white : bgcolor);
-    shader.setMatrix(gl, ((GL2ES2TransformHelper) g2d.getMatrixHelper()).getGLMatrixData(xform));
+    float[] rgba;
+    if (bgcolor == null) {
+      rgba = white;
+      rgba[3] = ((GL2ES2ColorHelper) g2d.getColorHelper()).getCompositeAlpha();
+    } else {
+      rgba = ((GL2ES2ColorHelper) g2d.getColorHelper()).getForegroundRGBA();
+    }
+
+    FloatBuffer matrixBuf = ((GL2ES2TransformHelper) g2d.getMatrixHelper()).getGLMatrixData(xform);
+
+    shader.setColor(gl, rgba);
+    shader.setMatrix(gl, matrixBuf);
     shader.setTextureUnit(gl, 0);
   }
 

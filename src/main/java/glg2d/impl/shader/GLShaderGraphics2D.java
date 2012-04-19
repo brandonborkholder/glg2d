@@ -16,27 +16,33 @@
 
 package glg2d.impl.shader;
 
+import glg2d.GLG2DColorHelper;
 import glg2d.GLG2DImageHelper;
 import glg2d.GLG2DTransformHelper;
 import glg2d.GLGraphics2D;
 
+import javax.media.opengl.DebugGL4bc;
 import javax.media.opengl.GLAutoDrawable;
 
 public class GLShaderGraphics2D extends GLGraphics2D {
-  
   @Override
   protected void setCanvas(GLAutoDrawable drawable) {
     // for debugging
-//    drawable.setGL(new DebugGL4bc(drawable.getGL().getGL4bc()));
-    
+    drawable.setGL(new DebugGL4bc(drawable.getGL().getGL4bc()));
+
     super.setCanvas(drawable);
   }
 
   @Override
   protected GLG2DImageHelper createImageHelper() {
-     return new GL2ES2ImageDrawer(new GL2ES2ImagePipeline());
+    return new GL2ES2ImageDrawer(new GL2ES2ImagePipeline());
   }
-  
+
+  @Override
+  protected GLG2DColorHelper createColorHelper() {
+    return new GL2ES2ColorHelper();
+  }
+
   @Override
   protected GLG2DTransformHelper createTransformHelper() {
     return new GL2ES2TransformHelper();

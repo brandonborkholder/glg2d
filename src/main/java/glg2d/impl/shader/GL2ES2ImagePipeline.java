@@ -1,8 +1,5 @@
 package glg2d.impl.shader;
 
-import static glg2d.GLG2DUtils.getGLColor;
-
-import java.awt.Color;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
@@ -25,10 +22,9 @@ public class GL2ES2ImagePipeline extends AbstractShaderPipeline {
     }
   }
 
-  public void setColor(GL2ES2 gl, Color c) {
-    float[] color = getGLColor(c);
+  public void setColor(GL2ES2 gl, float[] rgba) {
     if (colorLocation >= 0) {
-      gl.glUniform4fv(colorLocation, 1, color, 0);
+      gl.glUniform4fv(colorLocation, 1, rgba, 0);
     }
   }
 
@@ -39,14 +35,11 @@ public class GL2ES2ImagePipeline extends AbstractShaderPipeline {
   }
 
   public void bindVertCoords(GL2ES2 gl, FloatBuffer buffer) {
-    vertArrayData = GLArrayDataServer.createGLSL("a_vertCoord", 2, GL.GL_FLOAT, false, buffer.limit() - buffer.position(),
-        GL.GL_STATIC_DRAW);
     vertArrayData.put(buffer);
     vertArrayData.seal(gl, true);
   }
 
   public void bindTexCoords(GL2ES2 gl, FloatBuffer buffer) {
-    texArrayData = GLArrayDataServer.createGLSL("a_texCoord", 2, GL.GL_FLOAT, false, buffer.limit() - buffer.position(), GL.GL_STATIC_DRAW);
     texArrayData.put(buffer);
     texArrayData.seal(gl, true);
   }
@@ -58,6 +51,9 @@ public class GL2ES2ImagePipeline extends AbstractShaderPipeline {
     transformLocation = gl.glGetUniformLocation(program.id(), "u_transform");
     colorLocation = gl.glGetUniformLocation(program.id(), "u_color");
     textureLocation = gl.glGetUniformLocation(program.id(), "u_tex");
+
+    vertArrayData = GLArrayDataServer.createGLSL("a_vertCoord", 2, GL.GL_FLOAT, false, 8, GL.GL_DYNAMIC_DRAW);
+    texArrayData = GLArrayDataServer.createGLSL("a_texCoord", 2, GL.GL_FLOAT, false, 8, GL.GL_DYNAMIC_DRAW);
   }
 
   @Override

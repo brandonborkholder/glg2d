@@ -20,12 +20,18 @@ public class GL2ES2TransformHelper implements GLG2DTransformHelper {
 
   protected boolean dirtyMatrixBuffer;
 
+  protected int[] viewportDimensions;
+
   @Override
   public void setG2D(GLGraphics2D g2d) {
     this.g2d = g2d;
     transformStack.clear();
     transformStack.push(new AffineTransform());
     dirtyMatrixBuffer = true;
+
+    viewportDimensions = new int[4];
+    GL gl = g2d.getGLContext().getGL();
+    gl.glGetIntegerv(GL.GL_VIEWPORT, viewportDimensions, 0);
   }
 
   @Override
@@ -132,26 +138,35 @@ public class GL2ES2TransformHelper implements GLG2DTransformHelper {
   }
 
   protected void updateMatrix(AffineTransform xform, FloatBuffer buffer) {
-    // we're going to add the GL->G2D coordinate transform inline here
-    int[] viewportDimensions = new int[4];
-    GL gl = g2d.getGLContext().getGL();
-    gl.glGetIntegerv(GL.GL_VIEWPORT, viewportDimensions, 0);
-    int canvasWidth = viewportDimensions[2];
-    int canvasHeight = viewportDimensions[3];
+    // add the GL->G2D coordinate transform and perspective inline here
 
-    float[] matrix = new float[16];
-
-    matrix[0] = (float) (2 * xform.getScaleX() / canvasWidth);
-    matrix[1] = (float) (-2 * xform.getShearY() / canvasHeight);
-    matrix[4] = (float) (2 * xform.getShearX() / canvasWidth);
-    matrix[5] = (float) (-2 * xform.getScaleY() / canvasHeight);
-    matrix[10] = -1;
-    matrix[12] = (float) (2 * xform.getTranslateX() / canvasWidth - 1);
-    matrix[13] = (float) (1 - 2 * xform.getTranslateY() / canvasHeight);
-    matrix[15] = 1;
+    int x1 = viewportDimensions[0];
+    int y1 = viewportDimensions[1];
+    int x2 = viewportDimensions[2];
+    int y2 = viewportDimensions[3];
 
     buffer.rewind();
-    buffer.put(matrix);
+
+    buffer.put((float) (2 * xform.getScaleX() / (x2 - x1)));
+    buffer.put((float) (-2 * xform.getShearY() / (y2 - y1)));
+    buffer.put(0);
+    buffer.put(0);
+
+    buffer.put((float) (2 * xform.getShearX() / (x2 - x1)));
+    buffer.put((float) (-2 * xform.getScaleY() / (y2 - y1)));
+    buffer.put(0);
+    buffer.put(0);
+
+    buffer.put(0);
+    buffer.put(0);
+    buffer.put(-1);
+    buffer.put(0);
+
+    buffer.put((float) (2 * xform.getTranslateX() / (x2 - x1) - 1));
+    buffer.put((float) (1 - 2 * xform.getTranslateY() / (y2 - y1)));
+    buffer.put(0);
+    buffer.put(1);
+
     buffer.flip();
   }
 }
