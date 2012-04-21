@@ -79,7 +79,7 @@ public class GL2ES2ImageDrawer extends AbstractImageHelper {
     FloatBuffer matrixBuf = ((GL2ES2TransformHelper) g2d.getMatrixHelper()).getGLMatrixData(xform);
 
     shader.setColor(gl, rgba);
-    shader.setMatrix(gl, matrixBuf);
+    shader.setTransform(gl, matrixBuf);
     shader.setTextureUnit(gl, 0);
   }
 
@@ -89,37 +89,29 @@ public class GL2ES2ImageDrawer extends AbstractImageHelper {
 
     buffer.rewind();
 
-    // vertex values
+    // interleave vertex and texture coordinates
     buffer.put(dx1);
     buffer.put(dy1);
+    buffer.put(sx1);
+    buffer.put(sy1);
+
     buffer.put(dx1);
     buffer.put(dy2);
+    buffer.put(sx1);
+    buffer.put(sy2);
+
     buffer.put(dx2);
     buffer.put(dy1);
+    buffer.put(sx2);
+    buffer.put(sy1);
+
     buffer.put(dx2);
     buffer.put(dy2);
-
-    // texture values
-    buffer.put(sx1);
-    buffer.put(sy1);
-    buffer.put(sx1);
-    buffer.put(sy2);
-    buffer.put(sx2);
-    buffer.put(sy1);
     buffer.put(sx2);
     buffer.put(sy2);
 
-    buffer.limit(8);
-    buffer.position(0);
-    shader.bindVertCoords(gl, buffer.slice());
-
-    buffer.limit(16);
-    buffer.position(8);
-    shader.bindTexCoords(gl, buffer.slice());
-
-    buffer.limit(buffer.capacity());
-
-    shader.draw(gl);
+    buffer.flip();
+    shader.draw(gl, buffer);
   }
 
   @Override

@@ -18,6 +18,7 @@ package glg2d.impl.shader;
 
 import glg2d.GLG2DColorHelper;
 import glg2d.GLG2DImageHelper;
+import glg2d.GLG2DShapeHelper;
 import glg2d.GLG2DTransformHelper;
 import glg2d.GLGraphics2D;
 
@@ -46,5 +47,10 @@ public class GLShaderGraphics2D extends GLGraphics2D {
   @Override
   protected GLG2DTransformHelper createTransformHelper() {
     return new GL2ES2TransformHelper();
+  }
+  
+  @Override
+  protected GLG2DShapeHelper createShapeHelper() {
+    return new GL2ES2ShapeDrawer();
   }
 }

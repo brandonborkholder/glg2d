@@ -21,18 +21,30 @@ import java.nio.FloatBuffer;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.GLArrayDataServer;
-import com.jogamp.opengl.util.glsl.ShaderCode;
 
 public class GL2ES2ImagePipeline extends AbstractShaderPipeline {
   protected GLArrayDataServer vertArrayData;
   protected GLArrayDataServer texArrayData;
 
+  protected int vertexBufferId;
+
   protected int transformLocation;
   protected int colorLocation;
   protected int textureLocation;
+  protected int vertCoordLocation;
+  protected int texCoordLocation;
 
-  public void setMatrix(GL2ES2 gl, FloatBuffer glMatrixData) {
+  public GL2ES2ImagePipeline() {
+    this("TextureShader.v", "TextureShader.f");
+  }
+
+  public GL2ES2ImagePipeline(String vertexShaderFileName, String fragmentShaderFileName) {
+    super(vertexShaderFileName, null, fragmentShaderFileName);
+  }
+
+  public void setTransform(GL2ES2 gl, FloatBuffer glMatrixData) {
     if (transformLocation >= 0) {
       gl.glUniformMatrix4fv(transformLocation, 1, false, glMatrixData);
     }
@@ -50,37 +62,50 @@ public class GL2ES2ImagePipeline extends AbstractShaderPipeline {
     }
   }
 
-  public void bindVertCoords(GL2ES2 gl, FloatBuffer buffer) {
-    vertArrayData.put(buffer);
-    vertArrayData.seal(gl, true);
+  protected void bufferData(GL2ES2 gl, FloatBuffer buffer) {
+    if (!gl.glIsBuffer(vertexBufferId)) {
+      int[] ids = new int[1];
+      gl.glGenBuffers(1, ids, 0);
+      vertexBufferId = ids[0];
+    }
+
+    gl.glEnableVertexAttribArray(vertCoordLocation);
+    gl.glEnableVertexAttribArray(texCoordLocation);
+
+    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertexBufferId);
+    gl.glBufferData(GL.GL_ARRAY_BUFFER, Buffers.SIZEOF_FLOAT * 16, buffer, GL.GL_STATIC_DRAW);
+
+    gl.glVertexAttribPointer(vertCoordLocation, 2, GL.GL_FLOAT, false, 4 * Buffers.SIZEOF_FLOAT, 0);
+    gl.glVertexAttribPointer(texCoordLocation, 2, GL.GL_FLOAT, false, 4 * Buffers.SIZEOF_FLOAT, 2 * Buffers.SIZEOF_FLOAT);
   }
 
-  public void bindTexCoords(GL2ES2 gl, FloatBuffer buffer) {
-    texArrayData.put(buffer);
-    texArrayData.seal(gl, true);
-  }
+  public void draw(GL2ES2 gl, FloatBuffer interleavedVertTexBuffer) {
+    bufferData(gl, interleavedVertTexBuffer);
 
-  @Override
-  public void createProgramAndAttach(GL2ES2 gl) {
-    super.createProgramAndAttach(gl);
-
-    transformLocation = gl.glGetUniformLocation(program.id(), "u_transform");
-    colorLocation = gl.glGetUniformLocation(program.id(), "u_color");
-    textureLocation = gl.glGetUniformLocation(program.id(), "u_tex");
-
-    vertArrayData = GLArrayDataServer.createGLSL("a_vertCoord", 2, GL.GL_FLOAT, false, 8, GL.GL_DYNAMIC_DRAW);
-    texArrayData = GLArrayDataServer.createGLSL("a_texCoord", 2, GL.GL_FLOAT, false, 8, GL.GL_DYNAMIC_DRAW);
-  }
-
-  @Override
-  protected void loadShaders(GL2ES2 gl) {
-    vertexShader = ShaderCode.create(gl, GL2ES2.GL_VERTEX_SHADER, 1, getClass(), new String[] { "TextureShader.v" });
-    fragmentShader = ShaderCode.create(gl, GL2ES2.GL_FRAGMENT_SHADER, 1, getClass(), new String[] { "TextureShader.f" });
-  }
-
-  public void draw(GL2ES2 gl) {
     gl.glDrawArrays(GL.GL_TRIANGLE_STRIP, 0, 4);
-    vertArrayData.seal(gl, false);
-    texArrayData.seal(gl, false);
+
+    gl.glDisableVertexAttribArray(vertCoordLocation);
+    gl.glDisableVertexAttribArray(texCoordLocation);
+  }
+
+  @Override
+  protected void setupUniformsAndAttributes(GL2ES2 gl) {
+    super.setupUniformsAndAttributes(gl);
+
+    transformLocation = gl.glGetUniformLocation(programId, "u_transform");
+    colorLocation = gl.glGetUniformLocation(programId, "u_color");
+    textureLocation = gl.glGetUniformLocation(programId, "u_tex");
+
+    vertCoordLocation = gl.glGetAttribLocation(programId, "a_vertCoord");
+    texCoordLocation = gl.glGetAttribLocation(programId, "a_texCoord");
+  }
+
+  @Override
+  public void delete(GL2ES2 gl) {
+    super.delete(gl);
+
+    if (gl.glIsBuffer(vertexBufferId)) {
+      gl.glDeleteBuffers(1, new int[] { vertexBufferId }, 0);
+    }
   }
 }

@@ -111,6 +111,7 @@ public class VertexBuffer {
    */
   public void clear() {
     buffer.rewind();
+    buffer.limit(buffer.capacity());
   }
 
   public FloatBuffer getBuffer() {
