@@ -28,7 +28,7 @@ import com.jogamp.opengl.util.GLArrayDataServer;
 public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
   protected GLArrayDataServer vertArrayData;
 
-  protected int maxVerticesOut = 512;
+  protected int maxVerticesOut = 1024;
 
   protected int vertCoordLocation;
   protected int vertCoordBuffer;
@@ -84,8 +84,8 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
 
     // offset and draw each segment with adjacent points
     gl.glDrawArrays(GL.GL_TRIANGLES, 0, numPts);
-    gl.glDrawArrays(GL.GL_TRIANGLES, 1, numPts);
-//    gl.glDrawArrays(GL.GL_TRIANGLES, 2, numPts);
+    gl.glDrawArrays(GL.GL_TRIANGLES, 1, numPts - 1);
+    gl.glDrawArrays(GL.GL_TRIANGLES, 2, numPts - 2);
 
     gl.glDisableVertexAttribArray(vertCoordLocation);
   }

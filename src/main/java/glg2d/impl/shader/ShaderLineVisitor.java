@@ -32,6 +32,8 @@ public class ShaderLineVisitor extends SimplePathVisitor implements ShaderPathVi
   protected float[] color;
   protected FloatBuffer matrixBuffer;
 
+  protected float[] lastV = new float[2];
+
   protected GL2ES2 gl;
 
   protected GL2ES2StrokeLinePipeline pipeline;
@@ -39,10 +41,13 @@ public class ShaderLineVisitor extends SimplePathVisitor implements ShaderPathVi
   @Override
   public void setGLContext(GL context) {
     gl = context.getGL2ES2();
-    if (pipeline == null) {
-      pipeline = new GL2ES2StrokeLinePipeline();
-      pipeline.setup(gl);
+    if (pipeline != null) {
+      pipeline.delete(gl);
     }
+    // if (pipeline == null) {
+    pipeline = new GL2ES2StrokeLinePipeline();
+    pipeline.setup(gl);
+    // }
   }
 
   @Override
@@ -63,25 +68,40 @@ public class ShaderLineVisitor extends SimplePathVisitor implements ShaderPathVi
   @Override
   public void moveTo(float[] vertex) {
     buffer.clear();
+
     buffer.addVertex(vertex, 0, 1);
+    lastV[0] = vertex[0];
+    lastV[1] = vertex[1];
   }
 
   @Override
   public void lineTo(float[] vertex) {
+    // no 0-length lines
+    if (vertex[0] == lastV[0] && vertex[1] == lastV[1]) {
+      return;
+    }
+
     buffer.addVertex(vertex, 0, 1);
+    lastV[0] = vertex[0];
+    lastV[1] = vertex[1];
   }
 
   @Override
   public void closeLine() {
-    // add the first 2 vertices to wrap the corner around
+    // add the first 2 vertices to wrap around the corner
     FloatBuffer buf = buffer.getBuffer();
     int oldPos = buf.position();
     buf.position(0);
-    float[] tmp = new float[4];
-    buf.get(tmp);
+
+    float[] first = new float[2];
+    float[] second = new float[2];
+    buf.get(first);
+    buf.get(second);
+
     buf.position(oldPos);
 
-    buffer.addVertex(tmp, 0, 2);
+    lineTo(first);
+    lineTo(second);
 
     draw();
   }
@@ -108,9 +128,6 @@ public class ShaderLineVisitor extends SimplePathVisitor implements ShaderPathVi
     }
 
     buf.flip();
-    pipeline.setStroke(gl, stroke);
     pipeline.draw(gl, buf);
-
-    buf.limit(buf.capacity());
   }
 }

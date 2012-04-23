@@ -86,6 +86,7 @@ public class GL2ES2ImagePipeline extends AbstractShaderPipeline {
 
     gl.glDisableVertexAttribArray(vertCoordLocation);
     gl.glDisableVertexAttribArray(texCoordLocation);
+    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
   }
 
   @Override

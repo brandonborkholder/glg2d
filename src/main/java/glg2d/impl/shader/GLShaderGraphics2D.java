@@ -29,7 +29,7 @@ public class GLShaderGraphics2D extends GLGraphics2D {
   @Override
   protected void setCanvas(GLAutoDrawable drawable) {
     // for debugging
-    drawable.setGL(new DebugGL4bc(drawable.getGL().getGL4bc()));
+//    drawable.setGL(new DebugGL4bc(drawable.getGL().getGL4bc()));
 
     super.setCanvas(drawable);
   }
