@@ -550,6 +550,11 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   @Override
+  public void drawRect(int x, int y, int width, int height) {
+    shapeHelper.drawRect(x, y, width, height, false);
+  }
+
+  @Override
   public void drawRoundRect(int x, int y, int width, int height, int arcWidth, int arcHeight) {
     shapeHelper.drawRoundRect(x, y, width, height, arcWidth, arcHeight, false);
   }
@@ -670,6 +675,9 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
         for (int i = helpers.length - 1; i >= 0; i--) {
           helpers[i].pop(parent);
         }
+
+        // the parent needs to set its clip
+        parent.scissor(parent.clip != null);
       }
     }
   }
