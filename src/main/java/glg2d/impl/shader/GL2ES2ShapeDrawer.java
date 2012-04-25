@@ -25,11 +25,13 @@ import java.awt.Stroke;
 
 public class GL2ES2ShapeDrawer extends AbstractShapeHelper {
   protected ShaderPathVisitor lineVisitor;
+  protected ShaderPathVisitor simpleFillVisitor;
 
   protected GLGraphics2D g2d;
 
   public GL2ES2ShapeDrawer() {
     lineVisitor = new ShaderLineVisitor();
+    simpleFillVisitor = new TriangleFanSimplePolyFillVisitor();
   }
 
   @Override
@@ -37,6 +39,7 @@ public class GL2ES2ShapeDrawer extends AbstractShapeHelper {
     this.g2d = g2d;
     super.setG2D(g2d);
     lineVisitor.setGLContext(g2d.getGLContext().getGL());
+    simpleFillVisitor.setGLContext(g2d.getGLContext().getGL());
   }
 
   @Override
@@ -54,5 +57,10 @@ public class GL2ES2ShapeDrawer extends AbstractShapeHelper {
 
   @Override
   protected void fill(Shape shape, boolean isDefinitelySimpleConvex) {
+    if (isDefinitelySimpleConvex) {
+      simpleFillVisitor.setColor(((GL2ES2ColorHelper) g2d.getColorHelper()).getForegroundRGBA());
+      simpleFillVisitor.setTransform(((GL2ES2TransformHelper) g2d.getMatrixHelper()).getGLMatrixData());
+      traceShape(shape, simpleFillVisitor);
+    }
   }
 }

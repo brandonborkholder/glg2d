@@ -1,3 +1,5 @@
+uniform vec4 u_color;
+
 void main() {
-  gl_FragColor = gl_Color;
+  gl_FragColor = u_color;
 }
