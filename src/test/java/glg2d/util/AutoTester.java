@@ -23,7 +23,7 @@ import com.jogamp.opengl.util.awt.Screenshot;
 public class AutoTester implements Tester {
   static final int pixels = 500;
 
-  static GLPbuffer buffer = GLDrawableFactory.getFactory(GLProfile.getMaxFixedFunc())
+  static GLPbuffer buffer = GLDrawableFactory.getFactory(GLProfile.getMaxFixedFunc(true))
       .createGLPbuffer(null, G2DGLCanvas.getDefaultCapabalities(), null, pixels, pixels, null);
 
   private Painter p;

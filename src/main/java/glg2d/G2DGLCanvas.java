@@ -269,7 +269,7 @@ public class G2DGLCanvas extends JComponent {
     if (Threading.isOpenGLThread()) {
       work.run();
     } else {
-      Threading.invokeOnOpenGLThread(work);
+      Threading.invokeOnOpenGLThread(false, work);
     }
   }
 

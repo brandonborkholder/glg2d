@@ -1,0 +1,7 @@
+Put the following jogl libraries in this directory in order for maven to pick them up.
+
+ * gluegen.jar
+ * gluegen-rt.jar
+ * gluegen-rt-natives-<your platform>.jar
+ * jogl.all.jar
+ * jogl-all-natives-<your platform>.jar

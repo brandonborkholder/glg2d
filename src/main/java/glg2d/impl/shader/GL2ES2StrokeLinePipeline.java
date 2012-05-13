@@ -23,14 +23,26 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL2GL3;
 
+import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.GLArrayDataServer;
 
 public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
+  private static final int DRAW_BOTH = 0;
+  private static final int DRAW_FIRST = -1;
+  private static final int DRAW_LAST = 1;
+
+  protected FloatBuffer vBuffer = Buffers.newDirectFloatBuffer(500);
+
   protected GLArrayDataServer vertArrayData;
 
-  protected int maxVerticesOut = 1024;
+  protected String lineCapShaderFileName;
+  protected int lineCapShaderId;
+
+  protected int maxVerticesOut = 32;
 
   protected int vertCoordLocation;
+  protected int vertBeforeLocation;
+  protected int vertAfterLocation;
   protected int vertCoordBuffer;
 
   protected int transformLocation;
@@ -38,13 +50,16 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
   protected int lineWidthLocation;
   protected int miterLimitLocation;
   protected int joinTypeLocation;
+  protected int drawEndLocation;
 
   public GL2ES2StrokeLinePipeline() {
-    this("StrokeShader.v", "StrokeShader.g", "StrokeShader.f");
+    this("StrokeShader.v", "StrokeShader.g", "CapShader.g", "StrokeShader.f");
   }
 
-  public GL2ES2StrokeLinePipeline(String vertexShaderFileName, String geometryShaderFileName, String fragmentShaderFileName) {
-    super(vertexShaderFileName, geometryShaderFileName, fragmentShaderFileName);
+  public GL2ES2StrokeLinePipeline(String vertexShaderFileName, String lineJoinShaderFileName, String lineCapShaderFileName,
+      String fragmentShaderFileName) {
+    super(vertexShaderFileName, lineJoinShaderFileName, fragmentShaderFileName);
+    this.lineCapShaderFileName = lineCapShaderFileName;
   }
 
   public void setTransform(GL2ES2 gl, FloatBuffer glMatrixData) {
@@ -73,21 +88,72 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
     }
   }
 
-  protected void bindBuffer(GL2ES2 gl, FloatBuffer vertexBuffer) {
-    gl.glEnableVertexAttribArray(vertCoordLocation);
-    gl.glVertexAttribPointer(vertCoordLocation, 2, GL.GL_FLOAT, false, 0, vertexBuffer);
+  protected void setDrawEnd(GL2ES2 gl, int drawType) {
+    if (drawEndLocation >= 0) {
+      gl.glUniform1i(drawEndLocation, drawType);
+    }
   }
 
-  public void draw(GL2ES2 gl, FloatBuffer vertexBuffer) {
-    int numPts = (vertexBuffer.limit() - vertexBuffer.position()) / 2;
-    bindBuffer(gl, vertexBuffer);
+  protected void bindBuffer(GL2ES2 gl, FloatBuffer vertexBuffer) {
+    gl.glEnableVertexAttribArray(vertCoordLocation);
+    gl.glEnableVertexAttribArray(vertBeforeLocation);
+    gl.glEnableVertexAttribArray(vertAfterLocation);
 
-    // offset and draw each segment with adjacent points
-    gl.glDrawArrays(GL.GL_TRIANGLES, 0, numPts);
-    gl.glDrawArrays(GL.GL_TRIANGLES, 1, numPts - 1);
-    gl.glDrawArrays(GL.GL_TRIANGLES, 2, numPts - 2);
+    if (!gl.glIsBuffer(vertCoordBuffer)) {
+      int[] ids = new int[1];
+      gl.glGenBuffers(1, ids, 0);
+      vertCoordBuffer = ids[0];
+    }
+
+    int count = vertexBuffer.limit() - vertexBuffer.position();
+    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertCoordBuffer);
+    gl.glBufferData(GL.GL_ARRAY_BUFFER, Buffers.SIZEOF_FLOAT * count, vertexBuffer, GL2ES2.GL_STREAM_DRAW);
+
+    gl.glVertexAttribPointer(vertCoordLocation, 2, GL.GL_FLOAT, false, 0, 2 * Buffers.SIZEOF_FLOAT);
+    gl.glVertexAttribPointer(vertBeforeLocation, 2, GL.GL_FLOAT, false, 0, 0);
+    gl.glVertexAttribPointer(vertAfterLocation, 2, GL.GL_FLOAT, false, 0, 4 * Buffers.SIZEOF_FLOAT);
+  }
+
+  public void draw(GL2ES2 gl, FloatBuffer vertexBuffer, boolean close) {
+    int pos = vertexBuffer.position();
+    int lim = vertexBuffer.limit();
+    int numPts = (lim - pos) / 2;
+
+    if (numPts * 2 + 4 > vBuffer.capacity()) {
+      vBuffer = Buffers.newDirectFloatBuffer(numPts * 2 + 4);
+    }
+
+    vBuffer.clear();
+
+    vBuffer.put(vertexBuffer.get(lim - 2));
+    vBuffer.put(vertexBuffer.get(lim - 1));
+    vBuffer.put(vertexBuffer);
+    vBuffer.put(vertexBuffer.get(pos));
+    vBuffer.put(vertexBuffer.get(pos + 1));
+
+    vBuffer.flip();
+
+    bindBuffer(gl, vBuffer);
+
+    if (close) {
+      setDrawEnd(gl, DRAW_BOTH);
+      gl.glDrawArrays(GL.GL_LINES, 1, numPts);
+//      gl.glDrawArrays(GL.GL_LINES, 2, numPts - 1);
+    } else {
+      setDrawEnd(gl, DRAW_BOTH);
+      gl.glDrawArrays(GL.GL_LINES, 2, numPts - 1);
+      gl.glDrawArrays(GL.GL_LINES, 3, numPts - 2);
+
+      setDrawEnd(gl, DRAW_LAST);
+      gl.glDrawArrays(GL.GL_LINES, 1, 1);
+
+      setDrawEnd(gl, DRAW_FIRST);
+      gl.glDrawArrays(GL.GL_LINES, numPts, 1);
+    }
 
     gl.glDisableVertexAttribArray(vertCoordLocation);
+    gl.glDisableVertexAttribArray(vertBeforeLocation);
+    gl.glDisableVertexAttribArray(vertAfterLocation);
   }
 
   @Override
@@ -99,16 +165,23 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
     lineWidthLocation = gl.glGetUniformLocation(programId, "u_lineWidth");
     miterLimitLocation = gl.glGetUniformLocation(programId, "u_miterLimit");
     joinTypeLocation = gl.glGetUniformLocation(programId, "u_joinType");
+    drawEndLocation = gl.glGetUniformLocation(programId, "u_drawEnd");
 
     vertCoordLocation = gl.glGetAttribLocation(programId, "a_vertCoord");
+    vertBeforeLocation = gl.glGetAttribLocation(programId, "a_vertBefore");
+    vertAfterLocation = gl.glGetAttribLocation(programId, "a_vertAfter");
   }
 
   @Override
   protected void attachShaders(GL2ES2 gl) {
     super.attachShaders(gl);
 
+    if (lineCapShaderFileName != null) {
+      lineCapShaderId = compileShader(gl, GL2GL3.GL_GEOMETRY_SHADER_ARB, getClass(), lineCapShaderFileName);
+    }
+
     GL2GL3 gl3 = gl.getGL2GL3();
-    gl3.glProgramParameteri(programId, GL2GL3.GL_GEOMETRY_INPUT_TYPE_ARB, GL.GL_TRIANGLES);
+    gl3.glProgramParameteri(programId, GL2GL3.GL_GEOMETRY_INPUT_TYPE_ARB, GL.GL_LINES);
     gl3.glProgramParameteri(programId, GL2GL3.GL_GEOMETRY_OUTPUT_TYPE_ARB, GL.GL_TRIANGLE_STRIP);
     gl3.glProgramParameteri(programId, GL2GL3.GL_GEOMETRY_VERTICES_OUT_ARB, maxVerticesOut);
   }
@@ -117,8 +190,6 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
   public void delete(GL2ES2 gl) {
     super.delete(gl);
 
-    if (gl.glIsBuffer(vertCoordBuffer)) {
-      gl.glDeleteBuffers(1, new int[] { vertCoordBuffer }, 0);
-    }
+    gl.glDeleteBuffers(1, new int[] { vertCoordBuffer }, 0);
   }
 }

@@ -44,6 +44,7 @@ public class ShaderLineVisitor extends SimplePathVisitor implements ShaderPathVi
     if (pipeline != null) {
       pipeline.delete(gl);
     }
+
     // if (pipeline == null) {
     pipeline = new GL2ES2StrokeLinePipeline();
     pipeline.setup(gl);
@@ -67,9 +68,8 @@ public class ShaderLineVisitor extends SimplePathVisitor implements ShaderPathVi
 
   @Override
   public void moveTo(float[] vertex) {
-    buffer.clear();
+    draw(false);
 
-    buffer.addVertex(vertex, 0, 1);
     lastV[0] = vertex[0];
     lastV[1] = vertex[1];
   }
@@ -88,22 +88,17 @@ public class ShaderLineVisitor extends SimplePathVisitor implements ShaderPathVi
 
   @Override
   public void closeLine() {
-    // add the first 2 vertices to wrap around the corner
+    /*
+     * Sometimes shapes will set the last point to be the same as the first and
+     * then close the line. That can be confusing. So we discard the last point
+     * if it's the same as the first. Now no 2 consecutive points are the same.
+     */
     FloatBuffer buf = buffer.getBuffer();
-    int oldPos = buf.position();
-    buf.position(0);
+    if (buf.get(0) == lastV[0] && buf.get(1) == lastV[1]) {
+      buf.position(buf.position() - 2);
+    }
 
-    float[] first = new float[2];
-    float[] second = new float[2];
-    buf.get(first);
-    buf.get(second);
-
-    buf.position(oldPos);
-
-    lineTo(first);
-    lineTo(second);
-
-    draw();
+    draw(true);
   }
 
   @Override
@@ -113,21 +108,25 @@ public class ShaderLineVisitor extends SimplePathVisitor implements ShaderPathVi
     pipeline.setColor(gl, color);
     pipeline.setTransform(gl, matrixBuffer);
     pipeline.setStroke(gl, stroke);
+
+    buffer.clear();
   }
 
   @Override
   public void endPoly() {
-    draw();
+    draw(false);
     pipeline.use(gl, false);
   }
 
-  protected void draw() {
+  protected void draw(boolean close) {
     FloatBuffer buf = buffer.getBuffer();
     if (buf.position() == 0) {
       return;
     }
 
     buf.flip();
-    pipeline.draw(gl, buf);
+    pipeline.draw(gl, buf, close);
+
+    buffer.clear();
   }
 }
