@@ -1,1 +1,3 @@
 target
+lib/jogl-*/*.jar
+lib/jogl-*/*.zip
