@@ -45,10 +45,10 @@ public class ShaderLineVisitor extends SimplePathVisitor implements ShaderPathVi
       pipeline.delete(gl);
     }
 
-    // if (pipeline == null) {
-    pipeline = new GL2ES2StrokeLinePipeline();
-    pipeline.setup(gl);
-    // }
+    if (pipeline == null) {
+      pipeline = new GL2ES2StrokeLinePipeline();
+      pipeline.setup(gl);
+    }
   }
 
   @Override

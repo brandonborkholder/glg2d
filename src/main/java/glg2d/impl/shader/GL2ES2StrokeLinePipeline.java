@@ -137,8 +137,13 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
 
     if (close) {
       setDrawEnd(gl, DRAW_BOTH);
-      gl.glDrawArrays(GL.GL_LINES, 1, numPts);
-//      gl.glDrawArrays(GL.GL_LINES, 2, numPts - 1);
+//      if ((numPts & 1) == 0) {
+        gl.glDrawArrays(GL.GL_LINES, 1, numPts);
+        gl.glDrawArrays(GL.GL_LINES, 2, numPts - 2);
+//      } else {
+//        gl.glDrawArrays(GL.GL_LINES, 1, numPts - 1);
+//        gl.glDrawArrays(GL.GL_LINES, 2, numPts - 1);
+//      }
     } else {
       setDrawEnd(gl, DRAW_BOTH);
       gl.glDrawArrays(GL.GL_LINES, 2, numPts - 1);
@@ -154,6 +159,8 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
     gl.glDisableVertexAttribArray(vertCoordLocation);
     gl.glDisableVertexAttribArray(vertBeforeLocation);
     gl.glDisableVertexAttribArray(vertAfterLocation);
+    
+    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
   }
 
   @Override

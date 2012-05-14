@@ -70,10 +70,8 @@ public class TriangleFanPolyFillShader extends AbstractShaderPipeline implements
 
     gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertexBufferId);
     gl.glBufferData(GL.GL_ARRAY_BUFFER, Buffers.SIZEOF_FLOAT * (count + 2), null, GL2ES2.GL_STREAM_DRAW);
-//    gl.glBufferData(GL.GL_ARRAY_BUFFER, Buffers.SIZEOF_FLOAT * count, null, GL2ES2.GL_STREAM_DRAW);
     gl.glBufferSubData(GL.GL_ARRAY_BUFFER, 0, Buffers.SIZEOF_FLOAT * 2, centroidBuffer);
     gl.glBufferSubData(GL.GL_ARRAY_BUFFER, Buffers.SIZEOF_FLOAT * 2, Buffers.SIZEOF_FLOAT * count, buffer);
-//    gl.glBufferSubData(GL.GL_ARRAY_BUFFER, 0, Buffers.SIZEOF_FLOAT * count, buffer);
 
     gl.glVertexAttribPointer(vertCoordLocation, 2, GL.GL_FLOAT, false, 0, 0);
   }
@@ -90,7 +88,7 @@ public class TriangleFanPolyFillShader extends AbstractShaderPipeline implements
     }
 
     vertexBuffer.position(oldPos);
-    float size = vertexBuffer.limit() - vertexBuffer.position();
+    float size = (vertexBuffer.limit() - vertexBuffer.position()) / 2;
 
     centroidBuffer.rewind();
     centroidBuffer.put(x / size);
