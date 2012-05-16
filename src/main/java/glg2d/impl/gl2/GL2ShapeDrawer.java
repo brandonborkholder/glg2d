@@ -53,7 +53,7 @@ public class GL2ShapeDrawer extends AbstractShapeHelper {
     complexFillVisitor.setGLContext(gl);
     simpleStrokeVisitor.setGLContext(gl);
     fastLineVisitor.setGLContext(gl);
-    
+
     this.gl = gl.getGL2();
   }
 
@@ -99,10 +99,17 @@ public class GL2ShapeDrawer extends AbstractShapeHelper {
 
   @Override
   protected void fill(Shape shape, boolean forceSimple) {
+    boolean smoothed = gl.glIsEnabled(GL2GL3.GL_POLYGON_SMOOTH);
+    gl.glDisable(GL2GL3.GL_POLYGON_SMOOTH);
+
     if (forceSimple) {
       traceShape(shape, simpleFillVisitor);
     } else {
       traceShape(shape, complexFillVisitor);
+    }
+
+    if (smoothed) {
+      gl.glEnable(GL2GL3.GL_POLYGON_SMOOTH);
     }
   }
 }
