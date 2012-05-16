@@ -21,6 +21,7 @@ import glg2d.impl.AbstractShapeHelper;
 
 import java.awt.BasicStroke;
 import java.awt.RenderingHints;
+import java.awt.RenderingHints.Key;
 import java.awt.Shape;
 import java.awt.Stroke;
 
@@ -52,20 +53,27 @@ public class GL2ShapeDrawer extends AbstractShapeHelper {
     complexFillVisitor.setGLContext(gl);
     simpleStrokeVisitor.setGLContext(gl);
     fastLineVisitor.setGLContext(gl);
+    
+    this.gl = gl.getGL2();
   }
 
-  public void setAntiAlias(Object hintValue) {
-    if (hintValue == RenderingHints.VALUE_ANTIALIAS_ON) {
-      gl.glEnable(GL.GL_LINE_SMOOTH);
-      gl.glEnable(GL2ES1.GL_POINT_SMOOTH);
-      gl.glEnable(GL2GL3.GL_POLYGON_SMOOTH);
-      gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
-      gl.glHint(GL2ES1.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
-      gl.glHint(GL2GL3.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST);
-    } else {
-      gl.glDisable(GL.GL_LINE_SMOOTH);
-      gl.glDisable(GL2ES1.GL_POINT_SMOOTH);
-      gl.glDisable(GL2GL3.GL_POLYGON_SMOOTH);
+  @Override
+  public void setHint(Key key, Object value) {
+    super.setHint(key, value);
+
+    if (key == RenderingHints.KEY_ANTIALIASING) {
+      if (value == RenderingHints.VALUE_ANTIALIAS_ON) {
+        gl.glEnable(GL.GL_LINE_SMOOTH);
+        gl.glEnable(GL2ES1.GL_POINT_SMOOTH);
+        gl.glEnable(GL2GL3.GL_POLYGON_SMOOTH);
+        gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
+        gl.glHint(GL2ES1.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
+        gl.glHint(GL2GL3.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST);
+      } else {
+        gl.glDisable(GL.GL_LINE_SMOOTH);
+        gl.glDisable(GL2ES1.GL_POINT_SMOOTH);
+        gl.glDisable(GL2GL3.GL_POLYGON_SMOOTH);
+      }
     }
   }
 
