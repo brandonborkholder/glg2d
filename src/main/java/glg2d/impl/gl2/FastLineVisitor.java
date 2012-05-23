@@ -52,7 +52,7 @@ public class FastLineVisitor extends SimplePathVisitor {
   public void setStroke(BasicStroke stroke) {
     gl.glLineWidth(glLineWidth);
     gl.glPointSize(glLineWidth);
-
+    
     /*
      * Not perfect copy of the BasicStroke implementation, but it does get
      * decently close. The pattern is pretty much the same. I think it's pretty
@@ -126,7 +126,7 @@ public class FastLineVisitor extends SimplePathVisitor {
     glLineWidth = strokeWidth * scaleX;
 
     // we'll only try if it's a thin line
-    return glLineWidth <= 3;
+    return glLineWidth <= 2;
   }
 
   @Override
@@ -156,7 +156,7 @@ public class FastLineVisitor extends SimplePathVisitor {
      * a point there. Since our line should be very thin, pixel-wise, it
      * shouldn't be noticeable.
      */
-    if (stroke.getEndCap() != BasicStroke.CAP_BUTT && stroke.getDashArray() == null) {
+    if (stroke.getDashArray() == null) {
       buf.position(p);
       buffer.drawBuffer(gl, GL2.GL_POINTS);
     }
