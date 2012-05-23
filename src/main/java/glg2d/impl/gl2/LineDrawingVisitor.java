@@ -19,10 +19,14 @@ package glg2d.impl.gl2;
 import glg2d.impl.BasicStrokeLineVisitor;
 
 import java.awt.BasicStroke;
+import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES2;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
+
+import com.jogamp.common.nio.Buffers;
 
 /**
  * Draws a line, as outlined by a {@link BasicStroke}. The current
@@ -32,9 +36,17 @@ import javax.media.opengl.fixedfunc.GLMatrixFunc;
 public class LineDrawingVisitor extends BasicStrokeLineVisitor {
   protected GL2 gl;
 
+  protected int deviceBufferId;
+
   @Override
   public void setGLContext(GL context) {
     gl = context.getGL2();
+
+    if (!gl.glIsBuffer(deviceBufferId)) {
+      int[] ids = new int[1];
+      gl.glGenBuffers(1, ids, 0);
+      deviceBufferId = ids[0];
+    }
   }
 
   @Override
@@ -58,7 +70,16 @@ public class LineDrawingVisitor extends BasicStrokeLineVisitor {
   }
 
   @Override
-  protected void drawBuffer(int mode) {
-    vBuffer.drawBuffer(gl, mode);
+  protected void drawBuffer() {
+    FloatBuffer buf = vBuffer.getBuffer();
+    int count = buf.limit() - buf.position();
+
+    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, deviceBufferId);
+
+    gl.glBufferData(GL.GL_ARRAY_BUFFER, Buffers.SIZEOF_FLOAT * count, buf, GL2ES2.GL_STREAM_DRAW);
+    gl.glVertexPointer(2, GL.GL_FLOAT, 0, 0);
+    gl.glDrawArrays(GL.GL_TRIANGLE_STRIP, 0, count / 2);
+
+    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
   }
 }

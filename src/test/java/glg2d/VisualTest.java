@@ -132,6 +132,7 @@ public class VisualTest {
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
+        g2d.setColor(new Color(0,0, 0,0.4f));
         g2d.setStroke(new BasicStroke(5));
         g2d.draw(new RoundRectangle2D.Float(99, 40, 230, 493, 90, 70));
       }

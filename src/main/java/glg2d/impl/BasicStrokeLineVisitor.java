@@ -1,5 +1,7 @@
 package glg2d.impl;
 
+import static java.lang.Math.acos;
+import static java.lang.Math.ceil;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
@@ -7,8 +9,9 @@ import glg2d.SimplePathVisitor;
 import glg2d.VertexBuffer;
 
 import java.awt.BasicStroke;
+import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
+import com.jogamp.common.nio.Buffers;
 
 /**
  * Draws a line, as outlined by a {@link BasicStroke}. The current
@@ -27,6 +30,7 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
   protected float[] secondPoint;
 
   protected VertexBuffer vBuffer = VertexBuffer.getSharedBuffer();
+  protected FloatBuffer tmpBuffer = Buffers.newDirectFloatBuffer(1024);
 
   @Override
   public void setStroke(BasicStroke stroke) {
@@ -38,35 +42,20 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
 
   @Override
   public void beginPoly(int windingRule) {
-    vBuffer.clear();
-    firstPoint = secondPoint = null;
-    lastPoint = secondLastPoint = null;
+    clear();
   }
 
   @Override
   public void endPoly() {
-    if (firstPoint != null && secondPoint != null) {
-      endLine();
-      drawBuffer(GL.GL_TRIANGLE_STRIP);
-
-      applyEndCap(secondPoint, firstPoint);
-      applyEndCap(secondLastPoint, lastPoint);
-    }
+    finishAndDrawLine();
   }
 
   @Override
   public void moveTo(float[] vertex) {
-    if (firstPoint != null) {
-      endLine();
-      drawBuffer(GL.GL_TRIANGLE_STRIP);
-
-      applyEndCap(secondLastPoint, lastPoint);
-      applyEndCap(secondPoint, firstPoint);
-    }
+    finishAndDrawLine();
 
     lastPoint = new float[] { vertex[0], vertex[1] };
     firstPoint = lastPoint;
-    secondLastPoint = secondPoint = null;
   }
 
   @Override
@@ -81,10 +70,8 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
       secondPoint = vClone;
     }
 
-    if (secondLastPoint == null) {
-      startLine();
-    } else {
-      drawCorner(vertex);
+    if (secondLastPoint != null) {
+      applyCorner(vertex);
     }
 
     secondLastPoint = lastPoint;
@@ -93,16 +80,56 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
 
   @Override
   public void closeLine() {
-    // force drawing around the corner
-    lineTo(firstPoint);
-    if (secondPoint != null) {
+    /*
+     * Our first point we stroked is around the second point we hit. So we add
+     * the first 2 points so we do all the corners. Then we end on the last two
+     * points to finish the last two triangles.
+     */
+    if (firstPoint != null && secondPoint != null) {
+      lineTo(firstPoint);
       lineTo(secondPoint);
-      endLine();
-      drawBuffer(GL.GL_TRIANGLE_STRIP);
+
+      FloatBuffer buf = vBuffer.getBuffer();
+      addVertex(buf.get(0), buf.get(1));
+      addVertex(buf.get(2), buf.get(3));
+
+      buf.flip();
+      drawBuffer();
     }
 
-    firstPoint = lastPoint = null;
-    secondPoint = secondLastPoint = null;
+    clear();
+  }
+
+  protected void clear() {
+    vBuffer.clear();
+    firstPoint = secondPoint = null;
+    lastPoint = secondLastPoint = null;
+  }
+
+  protected void finishAndDrawLine() {
+    if (firstPoint != null && secondPoint != null) {
+      applyEndCap(secondLastPoint, lastPoint, false);
+
+      FloatBuffer buf = vBuffer.getBuffer();
+      if (tmpBuffer.capacity() < buf.position()) {
+        tmpBuffer = Buffers.newDirectFloatBuffer(buf.position());
+      }
+
+      tmpBuffer.clear();
+
+      buf.flip();
+      tmpBuffer.put(buf);
+      tmpBuffer.flip();
+
+      buf.clear();
+      applyEndCap(firstPoint, secondPoint, true);
+      buf.put(tmpBuffer);
+
+      buf.flip();
+      drawBuffer();
+    }
+
+    clear();
   }
 
   @Override
@@ -125,31 +152,19 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
     lineJoin = originalJoin;
   }
 
-  protected void endLine() {
-    float[] corners = lineCorners(secondLastPoint, lastPoint, lastPoint, lineOffset);
-    addVertex(corners[0], corners[1]);
-    addVertex(corners[2], corners[3]);
-  }
-
-  protected void startLine() {
-    float[] corners = lineCorners(firstPoint, secondPoint, firstPoint, lineOffset);
-    addVertex(corners[0], corners[1]);
-    addVertex(corners[2], corners[3]);
-  }
-
-  protected void drawCorner(float[] vertex) {
+  protected void applyCorner(float[] vertex) {
     switch (lineJoin) {
     case BasicStroke.JOIN_BEVEL:
       drawCornerBevel(secondLastPoint, lastPoint, vertex);
-      return;
+      break;
 
     case BasicStroke.JOIN_ROUND:
       drawCornerRound(secondLastPoint, lastPoint, vertex);
-      return;
+      break;
 
     case BasicStroke.JOIN_MITER:
       drawCornerMiter(secondLastPoint, lastPoint, vertex);
-      return;
+      break;
 
     default:
       throw new IllegalStateException("This class cannot support unknown line join");
@@ -157,59 +172,187 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
   }
 
   protected void drawCornerRound(float[] secondLastPoint, float[] lastPoint, float[] point) {
-    float step = 0.5f;
+    float step = 0.1f;
     float cos = (float) cos(step);
     float sin = (float) sin(step);
 
-    // translate to 0,0
-    float[] corner = lineCorners(secondLastPoint, lastPoint, new float[2], lineOffset);
+    float[] offset1 = lineOffset(secondLastPoint, lastPoint);
+    float[] offset2 = lineOffset(lastPoint, point);
 
-    addVertex(lastPoint[0] + corner[0], lastPoint[1] + corner[1]);
-    addVertex(lastPoint[0] - corner[0], lastPoint[1] - corner[1]);
+    float[] v1 = subtract(lastPoint, secondLastPoint);
+    normalize(v1);
+    float[] v2 = subtract(lastPoint, point);
+    normalize(v2);
 
-    float max = 2 * (float) Math.PI / step + 1;
-    for (int i = 0; i < max; i++) {
-      // rotate it
-      float x = cos * corner[0] - sin * corner[1];
-      float y = sin * corner[0] + cos * corner[1];
-      corner[0] = x;
-      corner[1] = y;
+    float[] rightPt1 = add(lastPoint, offset1);
+    float[] rightPt2 = add(lastPoint, offset2);
+    float[] leftPt1 = subtract(lastPoint, offset1);
+    float[] leftPt2 = subtract(lastPoint, offset2);
 
-      // translate back
-      addVertex(lastPoint[0] + corner[0], lastPoint[1] + corner[1]);
-      addVertex(lastPoint[0] - corner[0], lastPoint[1] - corner[1]);
+    float alpha = getIntersectionAlpha(rightPt1, v1, rightPt2, v2);
+
+    float theta = getOutsideTheta(v1, v2);
+
+    // if inside corner is right side
+    if (alpha <= 0) {
+      float[] rightInside = addScaled(rightPt1, v1, alpha);
+
+      addVertex(rightInside[0], rightInside[1]);
+      addVertex(leftPt1[0], leftPt1[1]);
+
+      int max = (int) ceil(theta / step);
+      // rotate the other way
+      sin = -sin;
+      for (int i = 0; i < max; i++) {
+        offset1[0] = cos * offset1[0] - sin * offset1[1];
+        offset1[1] = sin * offset1[0] + cos * offset1[1];
+
+        addVertex(rightInside[0], rightInside[1]);
+        addVertex(lastPoint[0] - offset1[0], lastPoint[1] - offset1[1]);
+      }
+
+      addVertex(rightInside[0], rightInside[1]);
+      addVertex(leftPt2[0], leftPt2[1]);
+    } else {
+      alpha = getIntersectionAlpha(leftPt1, v1, leftPt2, v2);
+      float[] leftInside = addScaled(leftPt1, v1, alpha);
+
+      addVertex(rightPt1[0], rightPt1[1]);
+      addVertex(leftInside[0], leftInside[1]);
+
+      int max = (int) ceil(theta / step);
+      for (int i = 0; i < max; i++) {
+        offset1[0] = (cos * offset1[0] - sin * offset1[1]);
+        offset1[1] = (sin * offset1[0] + cos * offset1[1]);
+
+        addVertex(lastPoint[0] + offset1[0], lastPoint[1] + offset1[1]);
+        addVertex(leftInside[0], leftInside[1]);
+      }
+
+      addVertex(rightPt2[0], rightPt2[1]);
+      addVertex(leftInside[0], leftInside[1]);
     }
+  }
 
-    corner = lineCorners(lastPoint, point, lastPoint, lineOffset);
-    addVertex(corner[0], corner[1]);
-    addVertex(corner[2], corner[3]);
+  protected float getOutsideTheta(float[] v1, float[] v2) {
+    float magn1 = (float) sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
+    float magn2 = (float) sqrt(v2[0] * v2[0] + v2[1] * v2[1]);
+    float dot = v1[0] * v2[0] + v1[1] * v2[1];
+
+    float theta = (float) acos(dot) / magn1 / magn2;
+    return (float) Math.PI - theta;
   }
 
   protected void drawCornerBevel(float[] secondLastPoint, float[] lastPoint, float[] point) {
-    float[] corners = lineCorners(secondLastPoint, lastPoint, lastPoint, lineOffset);
-    addVertex(corners[0], corners[1]);
-    addVertex(corners[2], corners[3]);
+    float[] offset1 = lineOffset(secondLastPoint, lastPoint);
+    float[] offset2 = lineOffset(lastPoint, point);
 
-    corners = lineCorners(lastPoint, point, lastPoint, lineOffset);
-    addVertex(corners[0], corners[1]);
-    addVertex(corners[2], corners[3]);
+    float[] v1 = subtract(lastPoint, secondLastPoint);
+    normalize(v1);
+    float[] v2 = subtract(lastPoint, point);
+    normalize(v2);
+
+    float[] rightPt1 = add(lastPoint, offset1);
+    float[] rightPt2 = add(lastPoint, offset2);
+    float[] leftPt1 = subtract(lastPoint, offset1);
+    float[] leftPt2 = subtract(lastPoint, offset2);
+
+    float alpha = getIntersectionAlpha(rightPt1, v1, rightPt2, v2);
+
+    // if inside corner is right side
+    if (alpha <= 0) {
+      float[] rightInside = addScaled(rightPt1, v1, alpha);
+
+      addVertex(rightInside[0], rightInside[1]);
+      addVertex(leftPt1[0], leftPt1[1]);
+      addVertex(rightInside[0], rightInside[1]);
+      addVertex(leftPt2[0], leftPt2[1]);
+    } else {
+      alpha = getIntersectionAlpha(leftPt1, v1, leftPt2, v2);
+      float[] leftInside = addScaled(leftPt1, v1, alpha);
+
+      addVertex(rightPt1[0], rightPt1[1]);
+      addVertex(leftInside[0], leftInside[1]);
+      addVertex(rightPt2[0], rightPt2[1]);
+      addVertex(leftInside[0], leftInside[1]);
+    }
   }
 
   protected void drawCornerMiter(float[] secondLastPoint, float[] lastPoint, float[] point) {
-    float[] intersection = getMiterIntersections(secondLastPoint, lastPoint, point);
+    float[] offset1 = lineOffset(secondLastPoint, lastPoint);
+    float[] offset2 = lineOffset(lastPoint, point);
+
+    float[] v1 = subtract(lastPoint, secondLastPoint);
+    normalize(v1);
+    float[] v2 = subtract(lastPoint, point);
+    normalize(v2);
+
+    float[] rightPt1 = add(lastPoint, offset1);
+    float[] rightPt2 = add(lastPoint, offset2);
+    float[] leftPt1 = subtract(lastPoint, offset1);
+    float[] leftPt2 = subtract(lastPoint, offset2);
+
+    float alpha = getIntersectionAlpha(rightPt1, v1, rightPt2, v2);
+    float[] rightCorner = addScaled(rightPt1, v1, alpha);
+
+    alpha = getIntersectionAlpha(leftPt1, v1, leftPt2, v2);
+    float[] leftCorner = addScaled(leftPt1, v1, alpha);
 
     // If we exceed the miter limit, draw beveled corner
-    double diffX = intersection[0] - intersection[2];
-    double diffY = intersection[1] - intersection[3];
-    double distSq = diffX * diffX + diffY * diffY;
+    float dist = distance(rightCorner, leftCorner);
 
-    float lineWidth = lineOffset * 2;
-    if (distSq / (lineWidth * lineWidth) > miterLimit * miterLimit) {
+    if (dist > miterLimit * lineOffset * 2) {
       drawCornerBevel(secondLastPoint, lastPoint, point);
     } else {
-      addVertex(intersection[0], intersection[1]);
-      addVertex(intersection[2], intersection[3]);
+      addVertex(rightCorner[0], rightCorner[1]);
+      addVertex(leftCorner[0], leftCorner[1]);
     }
+  }
+
+  protected float distance(float[] pt1, float[] pt2) {
+    double diffX = pt1[0] - pt2[0];
+    double diffY = pt1[1] - pt2[1];
+    double distSq = diffX * diffX + diffY * diffY;
+    return (float) sqrt(distSq);
+  }
+
+  protected float[] addScaled(float[] pt, float[] v, float alpha) {
+    return new float[] { pt[0] + v[0] * alpha, pt[1] + v[1] * alpha };
+  }
+
+  protected void normalize(float[] v) {
+    float norm = (float) sqrt(v[0] * v[0] + v[1] * v[1]);
+    v[0] /= norm;
+    v[1] /= norm;
+  }
+
+  protected float[] subtract(float[] pt1, float[] pt2) {
+    return new float[] { pt1[0] - pt2[0], pt1[1] - pt2[1] };
+  }
+
+  protected float[] add(float[] pt1, float[] pt2) {
+    return new float[] { pt2[0] + pt1[0], pt2[1] + pt1[1] };
+  }
+
+  protected float getIntersectionAlpha(float[] pt1, float[] v1, float[] pt2, float[] v2) {
+    float t = (pt2[0] - pt1[0]) * v2[1] - (pt2[1] - pt1[1]) * v2[0];
+    t /= v1[0] * v2[1] - v1[1] * v2[0];
+    return t;
+  }
+
+  protected float[] lineOffset(float[] linePoint1, float[] linePoint2) {
+    float[] vec = new float[2];
+    vec[0] = linePoint2[0] - linePoint1[0];
+    vec[1] = linePoint2[1] - linePoint1[1];
+
+    float norm = vec[0] * vec[0] + vec[1] * vec[1];
+    norm = (float) sqrt(norm);
+
+    float scale = lineOffset / norm;
+    float[] offset = new float[2];
+    offset[0] = vec[1] * scale;
+    offset[1] = -vec[0] * scale;
+    return offset;
   }
 
   protected float[] lineCorners(float[] linePoint1, float[] linePoint2, float[] vertex, float offset) {
@@ -315,71 +458,109 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
     return intersections;
   }
 
-  protected void applyEndCap(float[] lastPoint, float[] vertex) {
+  protected void applyEndCap(float[] point1, float[] point2, boolean first) {
     switch (endCap) {
     case BasicStroke.CAP_BUTT:
-      drawCapButt(lastPoint, vertex);
+      drawCapButt(point1, point2, first);
       break;
 
     case BasicStroke.CAP_SQUARE:
-      drawCapSquare(lastPoint, vertex);
+      drawCapSquare(point1, point2, first);
       break;
 
     case BasicStroke.CAP_ROUND:
-      drawCapRound(lastPoint, vertex);
+      drawCapRound(point1, point2, first);
       break;
     }
   }
 
-  protected void drawCapButt(float[] lastPoint, float[] point) {
-    // do nothing
+  protected void drawCapButt(float[] point1, float[] point2, boolean first) {
+    float[] offset = lineOffset(point1, point2);
+
+    float[] pt = first ? point1 : point2;
+    float[] cornerPt = add(pt, offset);
+    addVertex(cornerPt[0], cornerPt[1]);
+    cornerPt = subtract(pt, offset);
+    addVertex(cornerPt[0], cornerPt[1]);
   }
 
-  protected void drawCapSquare(float[] lastPoint, float[] point) {
-    float v_x = point[0] - lastPoint[0];
-    float v_y = point[1] - lastPoint[1];
+  protected void drawCapSquare(float[] point1, float[] point2, boolean first) {
+    float[] offset = lineOffset(point1, point2);
 
-    float norm = (float) sqrt(v_x * v_x + v_y * v_y);
-    v_x *= lineOffset / norm;
-    v_y *= lineOffset / norm;
+    float[] offsetRotated;
+    float[] pt;
+    if (first) {
+      offsetRotated = new float[] { offset[1], -offset[0] };
+      pt = point1;
+    } else {
+      offsetRotated = new float[] { -offset[1], offset[0] };
+      pt = point2;
+    }
 
-    float[] corners = lineCorners(lastPoint, point, point, lineOffset);
-
-    addVertex(corners[0], corners[1]);
-    addVertex(corners[0] + v_x, corners[1] + v_y);
-    addVertex(corners[2], corners[3]);
-    addVertex(corners[2] + v_x, corners[3] + v_y);
-    drawBuffer(GL.GL_TRIANGLE_STRIP);
+    float[] cornerPt = add(add(pt, offset), offsetRotated);
+    addVertex(cornerPt[0], cornerPt[1]);
+    cornerPt = add(subtract(pt, offset), offsetRotated);
+    addVertex(cornerPt[0], cornerPt[1]);
   }
 
-  protected void drawCapRound(float[] lastPoint, float[] point) {
-    float step = 0.5f;
+  protected void drawCapRound(float[] point1, float[] point2, boolean first) {
+    float step = 0.1f;
     float cos = (float) cos(step);
     float sin = (float) sin(step);
 
-    // put the corner around 0,0
-    float[] corner = lineCorners(lastPoint, point, new float[2], lineOffset);
+    /*
+     * Instead of doing a triangle-fan around the cap, we're going to jump back
+     * and forth from the tip toward the body of the line.
+     */
 
-    addVertex(point[0], point[1]);
-    addVertex(point[0] + corner[0], point[1] + corner[1]);
+    float[] offsetRight;
+    float[] offsetLeft;
+    float[] pt;
+    if (first) {
+      float[] v = subtract(point1, point2);
+      normalize(v);
+      v[0] *= lineOffset;
+      v[1] *= lineOffset;
 
-    float max = (float) Math.PI / step + 1;
-    for (int i = 0; i < max; i++) {
-      // rotate it
-      float x = cos * corner[0] - sin * corner[1];
-      float y = sin * corner[0] + cos * corner[1];
-      corner[0] = x;
-      corner[1] = y;
-
-      // translate back
-      addVertex(point[0] + corner[0], point[1] + corner[1]);
+      offsetRight = v;
+      offsetLeft = new float[] { v[0], v[1] };
+      pt = point1;
+    } else {
+      offsetRight = lineOffset(point1, point2);
+      offsetLeft = new float[] { -offsetRight[0], -offsetRight[1] };
+      pt = point2;
     }
-    drawBuffer(GL.GL_TRIANGLE_FAN);
+
+    int max = (int) ceil(Math.PI / 2 / step);
+    for (int i = 0; i < max; i++) {
+      addVertex(pt[0] + offsetRight[0], pt[1] + offsetRight[1]);
+      addVertex(pt[0] + offsetLeft[0], pt[1] + offsetLeft[1]);
+
+      offsetRight[0] = cos * offsetRight[0] + -sin * offsetRight[1];
+      offsetRight[1] = sin * offsetRight[0] + cos * offsetRight[1];
+
+      offsetLeft[0] = cos * offsetLeft[0] + sin * offsetLeft[1];
+      offsetLeft[1] = -sin * offsetLeft[0] + cos * offsetLeft[1];
+    }
+
+    if (first) {
+      offsetRight = lineOffset(point1, point2);
+
+      addVertex(pt[0] + offsetRight[0], point1[1] + offsetRight[1]);
+      addVertex(pt[0] - offsetRight[0], point1[1] - offsetRight[1]);
+    } else {
+      float[] v = subtract(point2, point1);
+      normalize(v);
+      v[0] *= lineOffset;
+      v[1] *= lineOffset;
+
+      addVertex(pt[0] + v[0], pt[1] + v[1]);
+    }
   }
 
   protected void addVertex(float x, float y) {
     vBuffer.addVertex(x, y);
   }
 
-  protected abstract void drawBuffer(int mode);
+  protected abstract void drawBuffer();
 }
