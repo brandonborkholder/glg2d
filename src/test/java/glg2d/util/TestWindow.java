@@ -94,6 +94,7 @@ public class TestWindow extends JFrame implements Tester {
       @Override
       public void windowClosing(WindowEvent e) {
         result = DIFFERENT;
+        System.exit(-1);
       }
     });
 
