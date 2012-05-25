@@ -81,7 +81,7 @@ public class GL2ES2StrokeLineVisitor extends BasicStrokeLineVisitor implements S
   }
 
   @Override
-  protected void drawBuffer(int mode) {
+  protected void drawBuffer() {
     FloatBuffer buf = vBuffer.getBuffer();
     if (buf.position() == 0) {
       return;
@@ -89,7 +89,7 @@ public class GL2ES2StrokeLineVisitor extends BasicStrokeLineVisitor implements S
 
     buf.flip();
 
-    pipeline.draw(gl, buf, mode);
+    pipeline.draw(gl, buf, GL.GL_TRIANGLE_STRIP);
 
     vBuffer.clear();
   }
