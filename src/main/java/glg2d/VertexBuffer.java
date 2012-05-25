@@ -18,6 +18,7 @@ package glg2d;
 
 import java.nio.FloatBuffer;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import com.jogamp.common.nio.Buffers;
@@ -56,7 +57,7 @@ public class VertexBuffer {
    * Creates a private buffer. This can be used without fear of clobbering the
    * global buffer. This should only be used if you have a need to create two
    * parallel shapes at the same time.
-   *
+   * 
    * @param capacity
    *          The size of the buffer in number of vertices
    */
@@ -66,7 +67,7 @@ public class VertexBuffer {
 
   /**
    * Adds multiple vertices to the buffer.
-   *
+   * 
    * @param array
    *          The array containing vertices in the form (x,y),(x,y)
    * @param offset
@@ -82,7 +83,7 @@ public class VertexBuffer {
 
   /**
    * Adds a vertex to the buffer.
-   *
+   * 
    * @param x
    *          The x coordinate
    * @param y
@@ -93,7 +94,7 @@ public class VertexBuffer {
     buffer.put(x);
     buffer.put(y);
   }
-  
+
   protected void ensureCapacity(int numNewFloats) {
     if (buffer.capacity() <= buffer.position() + numNewFloats) {
       FloatBuffer larger = Buffers.newDirectFloatBuffer(buffer.position() * 2);
@@ -120,7 +121,7 @@ public class VertexBuffer {
 
   /**
    * Draws the vertices and rewinds the buffer to be ready to draw next time.
-   *
+   * 
    * @param gl
    *          The graphics context to use to draw
    * @param mode
@@ -134,9 +135,13 @@ public class VertexBuffer {
     // use vertex arrays
     gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
 
-    int size = buffer.position() / 2;
+    int count = buffer.position();
+
     buffer.rewind();
-    gl.glVertexPointer(2, GL2.GL_FLOAT, 0, buffer);
-    gl.glDrawArrays(mode, 0, size);
+    
+    gl.glVertexPointer(2, GL.GL_FLOAT, 0, buffer);
+    gl.glDrawArrays(mode, 0, count >> 1);
+
+    buffer.position(count);
   }
 }

@@ -93,7 +93,6 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
       addVertex(buf.get(0), buf.get(1));
       addVertex(buf.get(2), buf.get(3));
 
-      buf.flip();
       drawBuffer();
     }
 
@@ -125,7 +124,6 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
       applyEndCap(firstPoint, secondPoint, true);
       buf.put(tmpBuffer);
 
-      buf.flip();
       drawBuffer();
     }
 
