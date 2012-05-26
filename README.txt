@@ -15,3 +15,10 @@ Use cases:
 This library is licensed under the Apache 2.0 license and JOGL is licensed and
 distributed separately.
 
+How to build
+
+This project uses maven, but JOGL doesn't yet.  First check which version of
+JOGL is required under the ./lib folder.  There is a jogl-$version directory
+with a README.  Follow the instructions in the README to download the correct
+version of JOGL and get the necessary jars.  Once you've put the required jars
+under the ./lib/jogl-$version directory, then use maven to complete the build.
