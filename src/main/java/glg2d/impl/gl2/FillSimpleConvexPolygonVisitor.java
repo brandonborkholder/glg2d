@@ -46,9 +46,11 @@ public class FillSimpleConvexPolygonVisitor extends SimplePathVisitor {
   @Override
   public void beginPoly(int windingRule) {
     vBuffer.clear();
+
     /*
      * We don't care what the winding rule is, we disable face culling.
      */
+    gl.glDisable(GL.GL_CULL_FACE);
   }
 
   @Override
