@@ -27,8 +27,6 @@ import java.awt.Stroke;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GL2ES1;
-import javax.media.opengl.GL2GL3;
 
 public class GL2ShapeDrawer extends AbstractShapeHelper {
   protected GL2 gl;
@@ -63,16 +61,9 @@ public class GL2ShapeDrawer extends AbstractShapeHelper {
 
     if (key == RenderingHints.KEY_ANTIALIASING) {
       if (value == RenderingHints.VALUE_ANTIALIAS_ON) {
-        gl.glEnable(GL.GL_LINE_SMOOTH);
-        gl.glEnable(GL2ES1.GL_POINT_SMOOTH);
-        gl.glEnable(GL2GL3.GL_POLYGON_SMOOTH);
-        gl.glHint(GL.GL_LINE_SMOOTH_HINT, GL.GL_NICEST);
-        gl.glHint(GL2ES1.GL_POINT_SMOOTH_HINT, GL.GL_NICEST);
-        gl.glHint(GL2GL3.GL_POLYGON_SMOOTH_HINT, GL.GL_NICEST);
+        gl.glEnable(GL.GL_MULTISAMPLE);
       } else {
-        gl.glDisable(GL.GL_LINE_SMOOTH);
-        gl.glDisable(GL2ES1.GL_POINT_SMOOTH);
-        gl.glDisable(GL2GL3.GL_POLYGON_SMOOTH);
+        gl.glDisable(GL.GL_MULTISAMPLE);
       }
     }
   }
@@ -99,17 +90,10 @@ public class GL2ShapeDrawer extends AbstractShapeHelper {
 
   @Override
   protected void fill(Shape shape, boolean forceSimple) {
-    boolean smoothed = gl.glIsEnabled(GL2GL3.GL_POLYGON_SMOOTH);
-    gl.glDisable(GL2GL3.GL_POLYGON_SMOOTH);
-
     if (forceSimple) {
       traceShape(shape, simpleFillVisitor);
     } else {
       traceShape(shape, complexFillVisitor);
-    }
-
-    if (smoothed) {
-      gl.glEnable(GL2GL3.GL_POLYGON_SMOOTH);
     }
   }
 }

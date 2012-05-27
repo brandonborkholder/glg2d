@@ -85,6 +85,9 @@ public class G2DGLCanvas extends JComponent {
     caps.setAlphaBits(8);
     caps.setDoubleBuffered(true);
     caps.setHardwareAccelerated(true);
+    caps.setNumSamples(4);
+    caps.setBackgroundOpaque(false);
+    caps.setSampleBuffers(true);
     return caps;
   }
 
