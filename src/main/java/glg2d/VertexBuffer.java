@@ -20,6 +20,8 @@ import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
+import javax.media.opengl.GL2ES2;
+import javax.media.opengl.fixedfunc.GLPointerFunc;
 
 import com.jogamp.common.nio.Buffers;
 
@@ -35,6 +37,8 @@ public class VertexBuffer {
   protected static VertexBuffer shared = new VertexBuffer(globalBuffer);
 
   protected FloatBuffer buffer;
+
+  protected int deviceBufferId;
 
   /**
    * Creates a buffer that uses the shared global buffer. This is faster than
@@ -111,8 +115,7 @@ public class VertexBuffer {
    * already added are not needed anymore and the buffer will be reused.
    */
   public void clear() {
-    buffer.rewind();
-    buffer.limit(buffer.capacity());
+    buffer.clear();
   }
 
   public FloatBuffer getBuffer() {
@@ -132,16 +135,25 @@ public class VertexBuffer {
       return;
     }
 
-    // use vertex arrays
-    gl.glEnableClientState(GL2.GL_VERTEX_ARRAY);
+    if (!gl.glIsBuffer(deviceBufferId)) {
+      int[] ids = new int[1];
+      gl.glGenBuffers(1, ids, 0);
+      deviceBufferId = ids[0];
+    }
 
     int count = buffer.position();
-
     buffer.rewind();
-    
-    gl.glVertexPointer(2, GL.GL_FLOAT, 0, buffer);
-    gl.glDrawArrays(mode, 0, count >> 1);
 
+    gl.glEnableClientState(GLPointerFunc.GL_VERTEX_ARRAY);
+
+    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, deviceBufferId);
+    gl.glBufferData(GL.GL_ARRAY_BUFFER, Buffers.SIZEOF_FLOAT * count, buffer, GL2ES2.GL_STREAM_DRAW);
+
+    gl.glVertexPointer(2, GL.GL_FLOAT, 0, 0);
+
+    gl.glDrawArrays(mode, 0, count / 2);
+
+    gl.glDisableClientState(GLPointerFunc.GL_VERTEX_ARRAY);
     buffer.position(count);
   }
 }
