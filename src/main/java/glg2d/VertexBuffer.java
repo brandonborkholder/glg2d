@@ -20,7 +20,6 @@ import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
-import javax.media.opengl.GL2ES2;
 import javax.media.opengl.fixedfunc.GLPointerFunc;
 
 import com.jogamp.common.nio.Buffers;
@@ -32,9 +31,7 @@ import com.jogamp.common.nio.Buffers;
  * multi-threaded.
  */
 public class VertexBuffer {
-  protected static FloatBuffer globalBuffer = Buffers.newDirectFloatBuffer(300);
-
-  protected static VertexBuffer shared = new VertexBuffer(globalBuffer);
+  protected static VertexBuffer shared = new VertexBuffer(1024);
 
   protected FloatBuffer buffer;
 
@@ -102,6 +99,7 @@ public class VertexBuffer {
   protected void ensureCapacity(int numNewFloats) {
     if (buffer.capacity() <= buffer.position() + numNewFloats) {
       FloatBuffer larger = Buffers.newDirectFloatBuffer(buffer.position() * 2);
+      deviceBufferId = -deviceBufferId;
       int position = buffer.position();
       buffer.rewind();
       larger.put(buffer);
@@ -135,25 +133,26 @@ public class VertexBuffer {
       return;
     }
 
-    if (!gl.glIsBuffer(deviceBufferId)) {
-      int[] ids = new int[1];
-      gl.glGenBuffers(1, ids, 0);
-      deviceBufferId = ids[0];
-    }
+    /*
+     * XXX This fixes a strange bug where a client-side vertex array doesn't
+     * work well on my video card under certain conditions. It's like the call
+     * to glIsBuffer(int) clear some kind of state and everything works like it
+     * should.
+     * 
+     * VisualTest.lineWidthTest() especially shows this bug when this line is
+     * removed.
+     */
+    gl.glIsBuffer(0);
 
     int count = buffer.position();
     buffer.rewind();
 
+    gl.glVertexPointer(2, GL.GL_FLOAT, 0, buffer);
+
     gl.glEnableClientState(GLPointerFunc.GL_VERTEX_ARRAY);
-
-    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, deviceBufferId);
-    gl.glBufferData(GL.GL_ARRAY_BUFFER, Buffers.SIZEOF_FLOAT * count, buffer, GL2ES2.GL_STREAM_DRAW);
-
-    gl.glVertexPointer(2, GL.GL_FLOAT, 0, 0);
-
     gl.glDrawArrays(mode, 0, count / 2);
-
     gl.glDisableClientState(GLPointerFunc.GL_VERTEX_ARRAY);
+
     buffer.position(count);
   }
 }
