@@ -34,6 +34,10 @@ import com.jogamp.common.nio.Buffers;
  * of quads for each line segment, joins corners and endpoints as appropriate.
  */
 public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
+  protected static float THETA_STEP = 0.5f;
+  protected static float COS_STEP = (float) cos(THETA_STEP);
+  protected static float SIN_STEP = (float) sin(THETA_STEP);
+
   protected int lineJoin;
   protected int endCap;
   protected float lineOffset;
@@ -185,10 +189,6 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
   }
 
   protected void drawCornerRound(float[] secondLastPoint, float[] lastPoint, float[] point) {
-    float step = 0.1f;
-    float cos = (float) cos(step);
-    float sin = (float) sin(step);
-
     float[] offset1 = lineOffset(secondLastPoint, lastPoint);
     float[] offset2 = lineOffset(lastPoint, point);
 
@@ -204,7 +204,8 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
 
     float alpha = getIntersectionAlpha(rightPt1, v1, rightPt2, v2);
 
-    float theta = getOutsideTheta(v1, v2);
+    // get the outside angle (our vectors v1, v2 are unit vectors)
+    float theta = (float) (Math.PI - acos(v1[0] * v2[0] + v1[1] * v2[1]));
 
     // if inside corner is right side
     if (alpha <= 0) {
@@ -213,12 +214,12 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
       addVertex(rightInside[0], rightInside[1]);
       addVertex(leftPt1[0], leftPt1[1]);
 
-      int max = (int) ceil(theta / step);
+      int max = (int) ceil(theta / THETA_STEP);
       // rotate the other way
-      sin = -sin;
       for (int i = 0; i < max; i++) {
-        offset1[0] = cos * offset1[0] - sin * offset1[1];
-        offset1[1] = sin * offset1[0] + cos * offset1[1];
+        float newX = COS_STEP * offset1[0] + SIN_STEP * offset1[1];
+        offset1[1] = -SIN_STEP * offset1[0] + COS_STEP * offset1[1];
+        offset1[0] = newX;
 
         addVertex(rightInside[0], rightInside[1]);
         addVertex(lastPoint[0] - offset1[0], lastPoint[1] - offset1[1]);
@@ -233,10 +234,11 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
       addVertex(rightPt1[0], rightPt1[1]);
       addVertex(leftInside[0], leftInside[1]);
 
-      int max = (int) ceil(theta / step);
+      int max = (int) ceil(theta / THETA_STEP);
       for (int i = 0; i < max; i++) {
-        offset1[0] = (cos * offset1[0] - sin * offset1[1]);
-        offset1[1] = (sin * offset1[0] + cos * offset1[1]);
+        float newX = COS_STEP * offset1[0] - SIN_STEP * offset1[1];
+        offset1[1] = SIN_STEP * offset1[0] + COS_STEP * offset1[1];
+        offset1[0] = newX;
 
         addVertex(lastPoint[0] + offset1[0], lastPoint[1] + offset1[1]);
         addVertex(leftInside[0], leftInside[1]);
@@ -245,15 +247,6 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
       addVertex(rightPt2[0], rightPt2[1]);
       addVertex(leftInside[0], leftInside[1]);
     }
-  }
-
-  protected float getOutsideTheta(float[] v1, float[] v2) {
-    float magn1 = (float) sqrt(v1[0] * v1[0] + v1[1] * v1[1]);
-    float magn2 = (float) sqrt(v2[0] * v2[0] + v2[1] * v2[1]);
-    float dot = v1[0] * v2[0] + v1[1] * v2[1];
-
-    float theta = (float) acos(dot) / magn1 / magn2;
-    return (float) Math.PI - theta;
   }
 
   protected void drawCornerBevel(float[] secondLastPoint, float[] lastPoint, float[] point) {
@@ -281,7 +274,8 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
       addVertex(rightInside[0], rightInside[1]);
       addVertex(leftPt2[0], leftPt2[1]);
     } else {
-      alpha = getIntersectionAlpha(leftPt1, v1, leftPt2, v2);
+      // carry the math through and this turns out
+      alpha = -alpha;
       float[] leftInside = addScaled(leftPt1, v1, alpha);
 
       addVertex(rightPt1[0], rightPt1[1]);
@@ -517,10 +511,6 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
   }
 
   protected void drawCapRound(float[] point1, float[] point2, boolean first) {
-    float step = 0.1f;
-    float cos = (float) cos(step);
-    float sin = (float) sin(step);
-
     /*
      * Instead of doing a triangle-fan around the cap, we're going to jump back
      * and forth from the tip toward the body of the line.
@@ -544,16 +534,18 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
       pt = point2;
     }
 
-    int max = (int) ceil(Math.PI / 2 / step);
+    int max = (int) ceil(Math.PI / 2 / THETA_STEP);
     for (int i = 0; i < max; i++) {
       addVertex(pt[0] + offsetRight[0], pt[1] + offsetRight[1]);
       addVertex(pt[0] + offsetLeft[0], pt[1] + offsetLeft[1]);
 
-      offsetRight[0] = cos * offsetRight[0] + -sin * offsetRight[1];
-      offsetRight[1] = sin * offsetRight[0] + cos * offsetRight[1];
+      float newX = COS_STEP * offsetRight[0] + -SIN_STEP * offsetRight[1];
+      offsetRight[1] = SIN_STEP * offsetRight[0] + COS_STEP * offsetRight[1];
+      offsetRight[0] = newX;
 
-      offsetLeft[0] = cos * offsetLeft[0] + sin * offsetLeft[1];
-      offsetLeft[1] = -sin * offsetLeft[0] + cos * offsetLeft[1];
+      newX = COS_STEP * offsetLeft[0] + SIN_STEP * offsetLeft[1];
+      offsetLeft[1] = -SIN_STEP * offsetLeft[0] + COS_STEP * offsetLeft[1];
+      offsetLeft[0] = newX;
     }
 
     if (first) {
