@@ -17,6 +17,7 @@ package glg2d.impl.shader;
 
 import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
+import java.util.Arrays;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
@@ -29,6 +30,7 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
   private static final int DRAW_BOTH = 0;
   private static final int DRAW_FIRST = -1;
   private static final int DRAW_LAST = 1;
+  private static final int DRAW_NONE = 2;
 
   protected FloatBuffer vBuffer = Buffers.newDirectFloatBuffer(500);
 
@@ -118,47 +120,59 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
     int lim = vertexBuffer.limit();
     int numPts = (lim - pos) / 2;
 
-    if (numPts * 2 + 4 > vBuffer.capacity()) {
+    if (numPts * 2 + 6 > vBuffer.capacity()) {
       vBuffer = Buffers.newDirectFloatBuffer(numPts * 2 + 4);
     }
 
     vBuffer.clear();
 
-    vBuffer.put(vertexBuffer.get(lim - 2));
-    vBuffer.put(vertexBuffer.get(lim - 1));
-    vBuffer.put(vertexBuffer);
-    vBuffer.put(vertexBuffer.get(pos));
-    vBuffer.put(vertexBuffer.get(pos + 1));
+    if (close) {
+      vBuffer.put(vertexBuffer.get(lim - 2));
+      vBuffer.put(vertexBuffer.get(lim - 1));
+      vBuffer.put(vertexBuffer);
+      vBuffer.put(vertexBuffer.get(pos));
+      vBuffer.put(vertexBuffer.get(pos + 1));
+      vBuffer.put(vertexBuffer.get(pos + 2));
+      vBuffer.put(vertexBuffer.get(pos + 3));
+    } else {
+      vBuffer.put(0);
+      vBuffer.put(0);
+      vBuffer.put(vertexBuffer);
+      vBuffer.put(0);
+      vBuffer.put(0);
+    }
 
     vBuffer.flip();
+    float[] v = new float[vBuffer.limit()];
+    vBuffer.get(v);
+    vBuffer.rewind();
+    System.out.println(Arrays.toString(v));
 
     bindBuffer(gl, vBuffer);
 
     if (close) {
       setDrawEnd(gl, DRAW_BOTH);
-//      if ((numPts & 1) == 0) {
-        gl.glDrawArrays(GL.GL_LINES, 1, numPts);
-        gl.glDrawArrays(GL.GL_LINES, 2, numPts - 2);
-//      } else {
-//        gl.glDrawArrays(GL.GL_LINES, 1, numPts - 1);
-//        gl.glDrawArrays(GL.GL_LINES, 2, numPts - 1);
-//      }
+      gl.glDrawArrays(GL.GL_LINES, 0, numPts + 1);
+      gl.glDrawArrays(GL.GL_LINES, 1, numPts);
+    } else if (numPts == 2) {
+      setDrawEnd(gl, DRAW_NONE);
+      gl.glDrawArrays(GL.GL_LINES, 0, 2);
     } else {
       setDrawEnd(gl, DRAW_BOTH);
-      gl.glDrawArrays(GL.GL_LINES, 2, numPts - 1);
-      gl.glDrawArrays(GL.GL_LINES, 3, numPts - 2);
+      gl.glDrawArrays(GL.GL_LINES, 1, numPts - 2);
+      gl.glDrawArrays(GL.GL_LINES, 2, numPts - 3);
 
       setDrawEnd(gl, DRAW_LAST);
-      gl.glDrawArrays(GL.GL_LINES, 1, 1);
+      gl.glDrawArrays(GL.GL_LINES, 0, 2);
 
       setDrawEnd(gl, DRAW_FIRST);
-      gl.glDrawArrays(GL.GL_LINES, numPts, 1);
+      gl.glDrawArrays(GL.GL_LINES, numPts - 2, 2);
     }
 
     gl.glDisableVertexAttribArray(vertCoordLocation);
     gl.glDisableVertexAttribArray(vertBeforeLocation);
     gl.glDisableVertexAttribArray(vertAfterLocation);
-    
+
     gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
   }
 

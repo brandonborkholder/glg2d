@@ -24,6 +24,7 @@ import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
+import javax.media.opengl.GLContext;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.texture.Texture;
@@ -46,6 +47,13 @@ public class GL2ES2ImageDrawer extends AbstractImageHelper {
     if (!shader.isSetup()) {
       shader.setup(gl);
     }
+  }
+  
+  @Override
+  public void dispose() {
+    super.dispose();
+    
+    shader.delete(GLContext.getCurrentGL().getGL2ES2());
   }
 
   @Override

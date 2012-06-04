@@ -19,7 +19,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,18 +26,16 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL2GL3;
 
-import com.jogamp.common.nio.Buffers;
-
 public abstract class AbstractShaderPipeline implements ShaderPipeline {
-  protected int vertexShaderId = -1;
-  protected int geometryShaderId = -1;
-  protected int fragmentShaderId = -1;
+  protected int vertexShaderId = 0;
+  protected int geometryShaderId = 0;
+  protected int fragmentShaderId = 0;
 
   protected String vertexShaderFileName;
   protected String geometryShaderFileName;
   protected String fragmentShaderFileName;
 
-  protected int programId = -1;
+  protected int programId = 0;
 
   public AbstractShaderPipeline(String vertexShaderFileName, String geometryShaderFileName, String fragmentShaderFileName) {
     this.vertexShaderFileName = vertexShaderFileName;
@@ -54,7 +51,7 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
 
   @Override
   public boolean isSetup() {
-    return programId != -1;
+    return programId > 0;
   }
 
   protected void createProgramAndAttach(GL2ES2 gl) {
@@ -101,18 +98,21 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
     gl.glDeleteProgram(programId);
     deleteShaders(gl);
 
-    programId = -1;
+    programId = 0;
   }
 
   protected void deleteShaders(GL2ES2 gl) {
     if (gl.glIsShader(vertexShaderId)) {
       gl.glDeleteShader(vertexShaderId);
+      vertexShaderId = 0;
     }
     if (gl.glIsShader(geometryShaderId)) {
       gl.glDeleteShader(geometryShaderId);
+      geometryShaderId = 0;
     }
     if (gl.glIsShader(fragmentShaderId)) {
       gl.glDeleteShader(fragmentShaderId);
+      fragmentShaderId = 0;
     }
   }
 
@@ -126,13 +126,12 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
   protected int compileShader(GL2ES2 gl, int type, String[] source) throws ShaderException {
     int id = gl.glCreateShader(type);
 
-    IntBuffer lineLengths = Buffers.newDirectIntBuffer(source.length);
-    for (String element : source) {
-      lineLengths.put(element.length());
+    int[] lineLengths = new int[source.length];
+    for (int i = 0; i < source.length; i++) {
+      lineLengths[i] = source[i].length();
     }
 
-    lineLengths.rewind();
-    gl.glShaderSource(id, source.length, source, lineLengths);
+    gl.glShaderSource(id, source.length, source, lineLengths, 0);
     int err = gl.glGetError();
     if (err != GL.GL_NO_ERROR) {
       throw new ShaderException("Shader source failed, GL Error: 0x" + Integer.toHexString(err));
@@ -156,7 +155,7 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
       }
 
       if (stream == null) {
-        throw new NullPointerException("InputStream is null");
+        throw new NullPointerException("InputStream for " + name + " is null");
       }
 
       BufferedReader reader = new BufferedReader(new InputStreamReader(stream));

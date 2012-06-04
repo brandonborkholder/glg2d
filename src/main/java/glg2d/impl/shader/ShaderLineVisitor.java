@@ -40,9 +40,10 @@ public class ShaderLineVisitor extends SimplePathVisitor implements ShaderPathVi
   @Override
   public void setGLContext(GL context) {
     gl = context.getGL2ES2();
-    if (pipeline != null) {
-      pipeline.delete(gl);
-    }
+//    if (pipeline != null) {
+//      pipeline.delete(gl);
+//      pipeline = null;
+//    }
 
     if (pipeline == null) {
       pipeline = new GL2ES2StrokeLinePipeline();
@@ -71,6 +72,7 @@ public class ShaderLineVisitor extends SimplePathVisitor implements ShaderPathVi
 
     lastV[0] = vertex[0];
     lastV[1] = vertex[1];
+    buffer.addVertex(vertex[0], vertex[1]);
   }
 
   @Override

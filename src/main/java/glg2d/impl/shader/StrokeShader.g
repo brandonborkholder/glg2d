@@ -17,48 +17,54 @@ void emit(vec2);
 void emitMiterCorner(vec2, vec2, vec2, int);
 void emitRoundCorner(vec2, vec2, vec2, int);
 void emitBevelCorner(vec2, vec2, vec2, int);
+vec2 intersection(vec2, vec2, vec2, vec2);
 void emitEnd(vec2, vec2, int);
 
 void main() {
-//  if (u_joinType == 0) {
-//    if (u_drawEnd < 1) {
-//      emitMiterCorner(posBefore[0], position[0], position[1], -1);
-//    } else {
-//      emitEnd(position[0], position[1], -1);
-      emitEnd(posBefore[0], position[0], 1);
-//    }
+  if (u_drawEnd == 2) {
+    // single line segment
+    emitEnd(position[0], position[1], -1);
+    emitEnd(position[0], position[1], 1);
+  } else if (u_joinType == 0) {
+    // join miter
+    if (u_drawEnd < 1) {
+      emitMiterCorner(posBefore[0], position[0], position[1], -1);
+    } else {
+      emitEnd(position[0], position[1], -1);
+    }
 
-//    if (u_drawEnd > -1) {
-//      emitMiterCorner(position[0], position[1], posAfter[1], 1);
-//    } else {
-//      emitEnd(position[0], position[1], 1);
-      emitEnd(position[1], posAfter[1], -1);
-//    }
-//  } else if (u_joinType == 1) {
-//    if (u_drawEnd < 1) {
-//      emitRoundCorner(position[0], position[1], position[2], 1);
-//    } else {
-//      emitEnd(position[1], position[2], 1);
-//    }
-//
-//    if (u_drawEnd > -1) {
-//      emitRoundCorner(position[1], position[2], position[3], -1);
-//    } else {
-//      emitEnd(position[1], position[2], -1);
-//    }
-//  } else if (u_joinType == 2) {
-//    if (u_drawEnd < 1) {
-//      emitBevelCorner(position[0], position[1], position[2], 1);
-//    } else {
-//      emitEnd(position[1], position[2], 1);
-//    }
-//    
-//    if (u_drawEnd > -1) {
-//      emitBevelCorner(position[1], position[2], position[3], -1);
-//    } else {
-//      emitEnd(position[1], position[2], -1);
-//    }
-//  }
+    if (u_drawEnd > -1) {
+      emitMiterCorner(position[0], position[1], posAfter[1], 1);
+    } else {
+      emitEnd(position[0], position[1], 1);
+    }
+  } else if (u_joinType == 1) {
+    // join round
+    if (u_drawEnd < 1) {
+      emitRoundCorner(posBefore[0], position[0], position[1], -1);
+    } else {
+      emitEnd(position[0], position[1], -1);
+    }
+
+    if (u_drawEnd > -1) {
+      emitRoundCorner(position[0], position[1], posAfter[1], 1);
+    } else {
+      emitEnd(position[0], position[1], 1);
+    }
+  } else if (u_joinType == 2) {
+    // join bevel
+    if (u_drawEnd < 1) {
+      emitBevelCorner(posBefore[0], position[0], position[1], -1);
+    } else {
+      emitEnd(position[0], position[1], -1);
+    }
+    
+    if (u_drawEnd > -1) {
+      emitBevelCorner(position[0], position[1], posAfter[1], 1);
+    } else {
+      emitEnd(position[0], position[1], 1);
+    }
+  }
 
   EndPrimitive();
 }
@@ -80,75 +86,111 @@ void emitMiterCorner(in vec2 first, in vec2 second, in vec2 third, in int direct
   vec2 offset2 = getLineOffsetVec(second, third);
   vec2 v1 = normalize(second - first);
   vec2 v2 = normalize(second - third);
-  vec2 p1, p2;
   vec2 miterCorner1, miterCorner2;
-  float t;
+  float alpha;
   
-  p1 = second + offset1;
-  p2 = second + offset2;
+  // p2 - p1 = (second + offset2) - (second + offset1) = offset2 - offset1
+  alpha = cross2(offset2 - offset1, v1) / cross2(v1, v2);
+  miterCorner1 = second + offset1 + alpha * v1;
 
-  t = cross2(p2 - p1, v2) / cross2(v1, v2);
-  miterCorner1 = second + offset1 + t * v1;
+  // p2 - p1 = (second - offset2) - (second - offset1) = -(offset2 - offset1)
+  // => we get the negative alpha from above
+  miterCorner2 = second - offset1 - alpha * v1;
 
-  p1 = second - offset1;
-  p2 = second - offset2;
-
-  t = cross2(p2 - p1, v2) / cross2(v1, v2);
-  miterCorner2 = second - offset1 + t * v1;
-
-//  if (distance(miterCorner1, miterCorner2) / u_lineWidth <= u_miterLimit) {
+  if (distance(miterCorner1, miterCorner2) / u_lineWidth <= u_miterLimit) {
     emit(miterCorner1);
     emit(miterCorner2);
-//  } else {
-//    emitBevelCorner(first, second, third, direction);
-//  }
+  } else {
+    emitBevelCorner(first, second, third, direction);
+  }
+}
+
+vec2 intersection(in vec2 p1, in vec2 v1, in vec2 p2, in vec2 v2) {
+  float t = cross2(p2 - p1, v2) / cross2(v1, v2);
+  return p1 + t * v1;
 }
 
 void emitRoundCorner(in vec2 first, in vec2 second, in vec2 third, in int direction) {
+  vec2 offset1 = getLineOffsetVec(first, second);
+  vec2 offset2 = getLineOffsetVec(second, third);
+  vec2 v1 = normalize(second - first);
+  vec2 v2 = normalize(second - third);
+  vec2 insidePt;
+
+  float theta = 3.1415926 - acos(dot(v1, v2));
+  mat2 rotationMatrix;
+  int i;
+  int numSteps = int(floor(theta / 0.2));
+
+  // p2 - p1 = (second + offset2) - (second + offset1) = offset2 - offset1
+  float alpha = cross2(offset2 - offset1, v2) / cross2(v1, v2);
+  
+  if (alpha <= 0) {
+    // right side is inside corner
+    insidePt = second + offset1 + alpha * v1;
+    rotationMatrix = mat2(cos(0.2), -sin(0.2), sin(0.2), cos(0.2));
+
+    emit(insidePt);
+    emit(second - offset1);
+    
+    for (i = 0; i < numSteps; i++) {
+      offset1 = rotationMatrix * offset1;
+      
+      emit(insidePt);
+      emit(second - offset1);
+    }
+
+    emit(insidePt);
+    emit(second - offset2);
+  } else {
+    // left side is inside corner
+    alpha = -alpha;
+    
+    insidePt = second - offset1 + alpha * v1;
+    rotationMatrix = mat2(cos(0.2), sin(0.2), -sin(0.2), cos(0.2));
+
+    emit(second + offset1);
+    emit(insidePt);
+
+    for (i = 0; i < numSteps; i++) {
+      offset1 = rotationMatrix * offset1;
+      
+      emit(second + offset1);
+      emit(insidePt);
+    }
+
+    emit(second + offset2);
+    emit(insidePt);
+  }
 }
 
 void emitBevelCorner(in vec2 first, in vec2 second, in vec2 third, in int direction) {
   vec2 offset1 = getLineOffsetVec(first, second);
   vec2 offset2 = getLineOffsetVec(second, third);
-  
-  vec2 bisector = offset1 + 0.5 * (offset2 - offset1);
-  bisector = bisector * u_lineWidth / 2.0;
-  
-  vec2 rightPt = mix(second + offset1, second + offset2, 0.5);
-  vec2 leftPt = mix(second - offset1, second - offset2, 0.5);
+  vec2 v1 = normalize(second - first);
+  vec2 v2 = normalize(second - third);
+  vec2 insidePt;
 
-  if (dot(bisector, rightPt) >= 0) {
-    // left is the outside corner
+  // p2 - p1 = (second + offset2) - (second + offset1) = offset2 - offset1
+  float alpha = cross2(offset2 - offset1, v2) / cross2(v1, v2);
+
+  if (alpha <= 0) {
+    // right side is inside corner
+    insidePt = second + offset1 + alpha * v1;
     
-    if (direction < 0) {
-      // coming into the corner
-      emit(bisector);
-      emit(second - offset1);
-    }
-    
-    emit(bisector);
-    emit(leftPt);
-    
-    if (direction > 0) {
-      // going out of the corner
-      emit(bisector);
-      emit(second - offset2);
-    }
+    emit(insidePt);
+    emit(second - offset1);
+    emit(insidePt);
+    emit(second - offset2);
   } else {
-    // right is outside corner
-    
-    if (direction < 0) {
-      emit(second + offset1);
-      emit(bisector);
-    }
-    
-    emit(rightPt);
-    emit(bisector);
-    
-    if (direction > 0) {
-      emit(second + offset2);
-      emit(bisector);
-    }
+    // p2 - p1 = (second - offset2) - (second - offset1) = -(offset2 - offset1)
+    // => we get -alpha from above
+    insidePt = second - offset1 - alpha * v1;
+
+    emit(second + offset1);
+    emit(insidePt);
+    emit(second + offset2);
+    emit(insidePt);
   }
 }
 

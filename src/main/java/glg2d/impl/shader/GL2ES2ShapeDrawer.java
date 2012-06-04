@@ -29,7 +29,7 @@ public class GL2ES2ShapeDrawer extends AbstractShapeHelper {
   protected GLGraphics2D g2d;
 
   public GL2ES2ShapeDrawer() {
-    lineVisitor = new GL2ES2StrokeLineVisitor();
+    lineVisitor = new ShaderLineVisitor();
     simpleFillVisitor = new TriangleFanSimplePolyFillVisitor();
   }
 
