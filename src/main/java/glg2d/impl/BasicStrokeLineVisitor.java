@@ -228,7 +228,7 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
       addVertex(rightInside[0], rightInside[1]);
       addVertex(leftPt2[0], leftPt2[1]);
     } else {
-      alpha = getIntersectionAlpha(leftPt1, v1, leftPt2, v2);
+      alpha = -alpha;
       float[] leftInside = addScaled(leftPt1, v1, alpha);
 
       addVertex(rightPt1[0], rightPt1[1]);
@@ -297,12 +297,12 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
     float[] rightPt1 = add(lastPoint, offset1);
     float[] rightPt2 = add(lastPoint, offset2);
     float[] leftPt1 = subtract(lastPoint, offset1);
-    float[] leftPt2 = subtract(lastPoint, offset2);
 
     float alpha = getIntersectionAlpha(rightPt1, v1, rightPt2, v2);
     float[] rightCorner = addScaled(rightPt1, v1, alpha);
 
-    alpha = getIntersectionAlpha(leftPt1, v1, leftPt2, v2);
+    // other side is just the negative alpha
+    alpha = -alpha;
     float[] leftCorner = addScaled(leftPt1, v1, alpha);
 
     // If we exceed the miter limit, draw beveled corner
