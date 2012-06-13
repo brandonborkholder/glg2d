@@ -141,7 +141,7 @@
               <goal>branch</goal>
               <goal>commit</goal>
             </goals>
-            <phase>initialize</phase>
+            <phase>prepare-package</phase>
           </execution>
         </executions>
       </plugin>
@@ -233,7 +233,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <execute />
+                    <ignore />
                   </action>
                 </pluginExecution>
               </pluginExecutions>
