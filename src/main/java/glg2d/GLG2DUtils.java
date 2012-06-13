@@ -61,7 +61,7 @@ public class GLG2DUtils {
     int rgb = c.getRGB();
     gl.glColor4ub((byte) (rgb >> 16 & 0xFF), (byte) (rgb >> 8 & 0xFF), (byte) (rgb & 0xFF), (byte) ((rgb >> 24 & 0xFF) * preMultiplyAlpha));
   }
-  
+
   public static float[] getGLColor(Color c) {
     return c.getComponents(null);
   }
@@ -78,5 +78,19 @@ public class GLG2DUtils {
     if (error != GL.GL_NO_ERROR) {
       LOGGER.log(Level.SEVERE, "GL Error: code " + error);
     }
+  }
+
+  public static int ensureIsGLBuffer(GL gl, int bufferId) {
+    if (gl.glIsBuffer(bufferId)) {
+      return genBufferId(gl);
+    } else {
+      return bufferId;
+    }
+  }
+
+  public static int genBufferId(GL gl) {
+    int[] ids = new int[1];
+    gl.glGenBuffers(1, ids, 0);
+    return ids[0];
   }
 }

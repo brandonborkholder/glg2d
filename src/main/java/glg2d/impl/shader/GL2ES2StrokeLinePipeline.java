@@ -15,29 +15,24 @@
  */
 package glg2d.impl.shader;
 
+import glg2d.GLG2DUtils;
+
 import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
-import java.util.Arrays;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GL2GL3;
 
 import com.jogamp.common.nio.Buffers;
-import com.jogamp.opengl.util.GLArrayDataServer;
 
 public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
-  private static final int DRAW_BOTH = 0;
-  private static final int DRAW_FIRST = -1;
-  private static final int DRAW_LAST = 1;
-  private static final int DRAW_NONE = 2;
+  public static final int DRAW_END_NONE = 0;
+  public static final int DRAW_END_FIRST = -1;
+  public static final int DRAW_END_LAST = 1;
+  public static final int DRAW_END_BOTH = 2;
 
   protected FloatBuffer vBuffer = Buffers.newDirectFloatBuffer(500);
-
-  protected GLArrayDataServer vertArrayData;
-
-  protected String lineCapShaderFileName;
-  protected int lineCapShaderId;
 
   protected int maxVerticesOut = 32;
 
@@ -51,16 +46,15 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
   protected int lineWidthLocation;
   protected int miterLimitLocation;
   protected int joinTypeLocation;
+  protected int capTypeLocation;
   protected int drawEndLocation;
 
   public GL2ES2StrokeLinePipeline() {
-    this("StrokeShader.v", "StrokeShader.g", "CapShader.g", "StrokeShader.f");
+    this("StrokeShader.v", "StrokeShader.g", "StrokeShader.f");
   }
 
-  public GL2ES2StrokeLinePipeline(String vertexShaderFileName, String lineJoinShaderFileName, String lineCapShaderFileName,
-      String fragmentShaderFileName) {
+  public GL2ES2StrokeLinePipeline(String vertexShaderFileName, String lineJoinShaderFileName, String fragmentShaderFileName) {
     super(vertexShaderFileName, lineJoinShaderFileName, fragmentShaderFileName);
-    this.lineCapShaderFileName = lineCapShaderFileName;
   }
 
   public void setTransform(GL2ES2 gl, FloatBuffer glMatrixData) {
@@ -87,6 +81,10 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
     if (joinTypeLocation >= 0) {
       gl.glUniform1i(joinTypeLocation, stroke.getLineJoin());
     }
+
+    if (capTypeLocation >= 0) {
+      gl.glUniform1i(capTypeLocation, stroke.getEndCap());
+    }
   }
 
   protected void setDrawEnd(GL2ES2 gl, int drawType) {
@@ -100,15 +98,15 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
     gl.glEnableVertexAttribArray(vertBeforeLocation);
     gl.glEnableVertexAttribArray(vertAfterLocation);
 
-    if (!gl.glIsBuffer(vertCoordBuffer)) {
-      int[] ids = new int[1];
-      gl.glGenBuffers(1, ids, 0);
-      vertCoordBuffer = ids[0];
-    }
+    if (gl.glIsBuffer(vertCoordBuffer)) {
+      gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertCoordBuffer);
+      gl.glBufferSubData(GL.GL_ARRAY_BUFFER, 0, Buffers.SIZEOF_FLOAT * vertexBuffer.limit(), vertexBuffer);
+    } else {
+      vertCoordBuffer = GLG2DUtils.genBufferId(gl);
 
-    int count = vertexBuffer.limit() - vertexBuffer.position();
-    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertCoordBuffer);
-    gl.glBufferData(GL.GL_ARRAY_BUFFER, Buffers.SIZEOF_FLOAT * count, vertexBuffer, GL2ES2.GL_STREAM_DRAW);
+      gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertCoordBuffer);
+      gl.glBufferData(GL.GL_ARRAY_BUFFER, Buffers.SIZEOF_FLOAT * vertexBuffer.capacity(), vertexBuffer, GL2ES2.GL_STREAM_DRAW);
+    }
 
     gl.glVertexAttribPointer(vertCoordLocation, 2, GL.GL_FLOAT, false, 0, 2 * Buffers.SIZEOF_FLOAT);
     gl.glVertexAttribPointer(vertBeforeLocation, 2, GL.GL_FLOAT, false, 0, 0);
@@ -143,29 +141,25 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
     }
 
     vBuffer.flip();
-    float[] v = new float[vBuffer.limit()];
-    vBuffer.get(v);
-    vBuffer.rewind();
-    System.out.println(Arrays.toString(v));
 
     bindBuffer(gl, vBuffer);
 
     if (close) {
-      setDrawEnd(gl, DRAW_BOTH);
+      setDrawEnd(gl, DRAW_END_NONE);
       gl.glDrawArrays(GL.GL_LINES, 0, numPts + 1);
       gl.glDrawArrays(GL.GL_LINES, 1, numPts);
     } else if (numPts == 2) {
-      setDrawEnd(gl, DRAW_NONE);
+      setDrawEnd(gl, DRAW_END_BOTH);
       gl.glDrawArrays(GL.GL_LINES, 0, 2);
     } else {
-      setDrawEnd(gl, DRAW_BOTH);
+      setDrawEnd(gl, DRAW_END_NONE);
       gl.glDrawArrays(GL.GL_LINES, 1, numPts - 2);
       gl.glDrawArrays(GL.GL_LINES, 2, numPts - 3);
 
-      setDrawEnd(gl, DRAW_LAST);
+      setDrawEnd(gl, DRAW_END_FIRST);
       gl.glDrawArrays(GL.GL_LINES, 0, 2);
 
-      setDrawEnd(gl, DRAW_FIRST);
+      setDrawEnd(gl, DRAW_END_LAST);
       gl.glDrawArrays(GL.GL_LINES, numPts - 2, 2);
     }
 
@@ -186,6 +180,7 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
     miterLimitLocation = gl.glGetUniformLocation(programId, "u_miterLimit");
     joinTypeLocation = gl.glGetUniformLocation(programId, "u_joinType");
     drawEndLocation = gl.glGetUniformLocation(programId, "u_drawEnd");
+    capTypeLocation = gl.glGetUniformLocation(programId, "u_capType");
 
     vertCoordLocation = gl.glGetAttribLocation(programId, "a_vertCoord");
     vertBeforeLocation = gl.glGetAttribLocation(programId, "a_vertBefore");
@@ -195,10 +190,6 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
   @Override
   protected void attachShaders(GL2ES2 gl) {
     super.attachShaders(gl);
-
-    if (lineCapShaderFileName != null) {
-      lineCapShaderId = compileShader(gl, GL2GL3.GL_GEOMETRY_SHADER_ARB, getClass(), lineCapShaderFileName);
-    }
 
     GL2GL3 gl3 = gl.getGL2GL3();
     gl3.glProgramParameteri(programId, GL2GL3.GL_GEOMETRY_INPUT_TYPE_ARB, GL.GL_LINES);

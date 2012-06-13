@@ -1,8 +1,22 @@
 #version 120
 #extension GL_EXT_geometry_shader4 : enable
 
+#define DRAW_END_NONE 0
+#define DRAW_END_FIRST -1
+#define DRAW_END_LAST 1
+#define DRAW_END_BOTH 2
+
+#define JOIN_MITER 0
+#define JOIN_ROUND 1
+#define JOIN_BEVEL 2
+
+#define CAP_BUTT 0
+#define CAP_ROUND 1
+#define CAP_SQUARE 2
+
 uniform mat4 u_transform;
 uniform int u_joinType;
+uniform int u_capType;
 uniform float u_miterLimit;
 uniform float u_lineWidth;
 uniform int u_drawEnd;
@@ -14,62 +28,49 @@ in vec2 posAfter[];
 vec2 getLineOffsetVec(vec2, vec2);
 float cross2(vec2, vec2);
 void emit(vec2);
+void emitCorner(vec2, vec2, vec2, int);
 void emitMiterCorner(vec2, vec2, vec2, int);
 void emitRoundCorner(vec2, vec2, vec2, int);
 void emitBevelCorner(vec2, vec2, vec2, int);
+void emitCap(vec2, vec2, int);
+void emitButtCap(vec2, vec2, int);
+void emitRoundCap(vec2, vec2, int);
+void emitSquareCap(vec2, vec2, int);
 vec2 intersection(vec2, vec2, vec2, vec2);
-void emitEnd(vec2, vec2, int);
 
 void main() {
-  if (u_drawEnd == 2) {
+  if (u_drawEnd == DRAW_END_BOTH) {
     // single line segment
-    emitEnd(position[0], position[1], -1);
-    emitEnd(position[0], position[1], 1);
-  } else if (u_joinType == 0) {
-    // join miter
-    if (u_drawEnd < 1) {
-      emitMiterCorner(posBefore[0], position[0], position[1], -1);
+    emitCap(position[0], position[1], DRAW_END_FIRST);
+    emitCap(position[0], position[1], DRAW_END_LAST);
+  } else {
+    if (u_drawEnd == DRAW_END_FIRST) {
+      emitCap(position[0], position[1], DRAW_END_FIRST);
     } else {
-      emitEnd(position[0], position[1], -1);
+      emitCorner(posBefore[0], position[0], position[1], DRAW_END_FIRST);
     }
 
-    if (u_drawEnd > -1) {
-      emitMiterCorner(position[0], position[1], posAfter[1], 1);
+    if (u_drawEnd == DRAW_END_LAST) {
+      emitCap(position[0], position[1], DRAW_END_LAST);
     } else {
-      emitEnd(position[0], position[1], 1);
-    }
-  } else if (u_joinType == 1) {
-    // join round
-    if (u_drawEnd < 1) {
-      emitRoundCorner(posBefore[0], position[0], position[1], -1);
-    } else {
-      emitEnd(position[0], position[1], -1);
-    }
-
-    if (u_drawEnd > -1) {
-      emitRoundCorner(position[0], position[1], posAfter[1], 1);
-    } else {
-      emitEnd(position[0], position[1], 1);
-    }
-  } else if (u_joinType == 2) {
-    // join bevel
-    if (u_drawEnd < 1) {
-      emitBevelCorner(posBefore[0], position[0], position[1], -1);
-    } else {
-      emitEnd(position[0], position[1], -1);
-    }
-    
-    if (u_drawEnd > -1) {
-      emitBevelCorner(position[0], position[1], posAfter[1], 1);
-    } else {
-      emitEnd(position[0], position[1], 1);
+      emitCorner(position[0], position[1], posAfter[1], DRAW_END_LAST);
     }
   }
 
   EndPrimitive();
 }
 
-void emitEnd(in vec2 first, in vec2 second, in int direction) {
+void emitCap(in vec2 first, in vec2 second, in int direction) {
+  if (u_capType == CAP_BUTT) {
+    emitButtCap(first, second, direction);
+  } else if (u_capType == CAP_ROUND) {
+    emitRoundCap(first, second, direction);
+  } else {
+    emitSquareCap(first, second, direction);
+  }
+}
+
+void emitButtCap(in vec2 first, in vec2 second, in int direction) {
   vec2 offset = getLineOffsetVec(first, second);
 
   if (direction < 0) {
@@ -78,6 +79,76 @@ void emitEnd(in vec2 first, in vec2 second, in int direction) {
   } else if (0 < direction) {
     emit(second + offset);
     emit(second - offset);
+  }
+}
+
+void emitRoundCap(in vec2 first, in vec2 second, in int direction) {
+  // Instead of doing a triangle-fan around the cap, we're going to jump back
+  // and forth from the tip toward the body of the line.
+
+  vec2 extended = normalize(second - first) * u_lineWidth / 2;
+  float theta = 3.1415926 / 2.0;
+  mat2 rotationMatrix1;
+  mat2 rotationMatrix2;
+  int i;
+  int numSteps = int(floor(theta / 0.2));
+
+  vec2 offsetRight;
+  vec2 offsetLeft;
+  vec2 pt;
+
+  if (direction == DRAW_END_FIRST) {
+    offsetRight = -extended;
+    offsetLeft = -extended;
+    pt = first;
+  } else {
+    offsetRight = getLineOffsetVec(first, second);
+    offsetLeft = -offsetRight;
+    pt = second;
+  }
+
+  rotationMatrix2 = mat2(cos(0.2), -sin(0.2), sin(0.2), cos(0.2));
+  rotationMatrix1 = mat2(cos(0.2), sin(0.2), -sin(0.2), cos(0.2));
+    
+  for (i = 0; i < numSteps; i++) {
+    emit(pt + offsetRight);
+    emit(pt + offsetLeft);
+
+    offsetRight = rotationMatrix1 * offsetRight;
+    offsetLeft = rotationMatrix2 * offsetLeft;
+  }
+
+  if (direction == DRAW_END_FIRST) {
+    offsetRight = getLineOffsetVec(first, second);
+
+    emit(pt + offsetRight);
+    emit(pt - offsetRight);
+  } else {
+    emit(pt + extended);
+  }
+}
+
+void emitSquareCap(in vec2 first, in vec2 second, in int direction) {
+  vec2 offset = getLineOffsetVec(first, second);
+  // point in direction of first to second
+  vec2 extended = normalize(second - first) * u_lineWidth / 2.0;
+
+  if (direction == DRAW_END_FIRST) {
+    emit(first + offset - extended);
+    emit(first - offset - extended);
+  } else {
+    emit(second + offset + extended);
+    emit(second - offset + extended);
+  }
+}
+
+void emitCorner(in vec2 first, in vec2 second, in vec2 third, in int direction) {
+  if (u_joinType == JOIN_MITER) {
+    emitMiterCorner(first, second, third, direction);
+  } else if (u_joinType == JOIN_ROUND) {
+    emitRoundCorner(first, second, third, direction);
+  } else {
+    emitBevelCorner(first, second, third, direction);
   }
 }
 
