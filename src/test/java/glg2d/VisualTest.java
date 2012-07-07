@@ -42,7 +42,7 @@ public class VisualTest {
     // XXX if doing visual inspection
     tester = new TestWindow();
     // if automated pixel comparison
-//    tester = new AutoTester();
+    // tester = new AutoTester();
   }
 
   @AfterClass
@@ -132,7 +132,7 @@ public class VisualTest {
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
-        g2d.setColor(new Color(0,0, 0,0.4f));
+        g2d.setColor(new Color(0, 0, 0, 0.4f));
         g2d.setStroke(new BasicStroke(5));
         g2d.draw(new RoundRectangle2D.Float(99, 40, 230, 493, 90, 70));
       }
@@ -265,7 +265,59 @@ public class VisualTest {
         g2d.drawLine(149, 274, 118, 142);
         g2d.setColor(Color.BLUE);
         g2d.setStroke(new BasicStroke(14, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL));
-        g2d.drawLine(219, 139, 98, 242);
+        g2d.drawLine(219, 139, 88, 242);
+
+        g2d.setColor(Color.RED);
+        g2d.setStroke(new BasicStroke(8, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
+        g2d.drawLine(49, 300, 110, 140);
+        g2d.setColor(Color.BLUE);
+        g2d.setStroke(new BasicStroke(14, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL));
+        g2d.drawLine(19, 300, 8, 242);
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  private void strokedShapes(Graphics2D g2d) {
+    g2d.draw(new Rectangle2D.Double(50, 100, 120, 90));
+
+    Path2D.Double path = new Path2D.Double();
+    path.moveTo(180, 50);
+    path.lineTo(210, 30);
+    path.lineTo(280, 70);
+    path.lineTo(210, 38);
+    path.closePath();
+    g2d.draw(path);
+
+    path = new Path2D.Double();
+    path.moveTo(180, 250);
+    path.lineTo(180, 230);
+    path.lineTo(280, 209);
+    path.lineTo(240, 283);
+    path.closePath();
+    g2d.draw(path);
+
+    Arc2D.Double arc = new Arc2D.Double(77, 349, 60, 40, 0, 70, Arc2D.OPEN);
+    g2d.draw(arc);
+
+    g2d.setColor(Color.red);
+    path = new Path2D.Double();
+    path.moveTo(240, 383);
+    path.lineTo(280, 309);
+    path.lineTo(180, 330);
+    path.lineTo(180, 350);
+    path.closePath();
+    g2d.draw(path);
+  }
+
+  @Test
+  public void miterJoinTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        g2d.setStroke(new BasicStroke(7, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
+        strokedShapes(g2d);
       }
     });
 
@@ -273,40 +325,25 @@ public class VisualTest {
   }
 
   @Test
-  public void joinTest() throws Exception {
+  public void roundJoinTest() throws Exception {
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
-        g2d.setStroke(new BasicStroke(7, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_MITER));
-        g2d.draw(new Rectangle2D.Double(50, 100, 120, 90));
+        g2d.setStroke(new BasicStroke(7, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_ROUND));
+        strokedShapes(g2d);
+      }
+    });
 
-        Path2D.Double path = new Path2D.Double();
-        path.moveTo(180, 50);
-        path.lineTo(210, 30);
-        path.lineTo(280, 70);
-        path.lineTo(210, 38);
-        path.closePath();
-        g2d.draw(path);
+    tester.assertSame();
+  }
 
-        path = new Path2D.Double();
-        path.moveTo(180, 250);
-        path.lineTo(180, 230);
-        path.lineTo(280, 209);
-        path.lineTo(240, 283);
-        path.closePath();
-        g2d.draw(path);
-
-        Arc2D.Double arc = new Arc2D.Double(77, 349, 60, 40, 0, 70, Arc2D.OPEN);
-        g2d.draw(arc);
-
-        g2d.setColor(Color.red);
-        path = new Path2D.Double();
-        path.moveTo(240, 383);
-        path.lineTo(280, 309);
-        path.lineTo(180, 330);
-        path.lineTo(180, 350);
-        path.closePath();
-        g2d.draw(path);
+  @Test
+  public void bevelJoinTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        g2d.setStroke(new BasicStroke(7, BasicStroke.CAP_SQUARE, BasicStroke.JOIN_BEVEL));
+        strokedShapes(g2d);
       }
     });
 
@@ -550,7 +587,7 @@ public class VisualTest {
       @Override
       public void paint(Graphics2D g2d) {
         g2d.setColor(Color.black);
-        g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 10, new float[] {14, 40}, 0));
+        g2d.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 10, new float[] { 14, 40 }, 0));
         g2d.drawLine(0, 0, 50, 100);
         g2d.drawLine(10, 0, 60, 100);
         g2d.drawLine(20, 0, 70, 100);
