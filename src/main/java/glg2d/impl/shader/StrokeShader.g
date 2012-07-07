@@ -14,6 +14,12 @@
 #define CAP_ROUND 1
 #define CAP_SQUARE 2
 
+#define THETA_STEP 0.2
+#define COS_THETA_STEP cos(THETA_STEP)
+#define SIN_THETA_STEP sin(THETA_STEP)
+
+#define PI 3.141592653
+
 uniform mat4 u_transform;
 uniform int u_joinType;
 uniform int u_capType;
@@ -87,9 +93,10 @@ void emitRoundCap(in vec2 first, in vec2 second, in int direction) {
   // and forth from the tip toward the body of the line.
 
   vec2 extended = normalize(second - first) * u_lineWidth / 2;
-  float theta = 3.1415926 / 2.0;
-  mat2 rotationMatrix1;
-  mat2 rotationMatrix2;
+  float theta = PI / 2.0;
+  mat2 rotationMatrixRight = mat2(COS_THETA_STEP, SIN_THETA_STEP, -SIN_THETA_STEP, COS_THETA_STEP);
+  mat2 rotationMatrixLeft = mat2(COS_THETA_STEP, -SIN_THETA_STEP, SIN_THETA_STEP, COS_THETA_STEP);
+
   int i;
   int numSteps = int(floor(theta / 0.2));
 
@@ -107,15 +114,12 @@ void emitRoundCap(in vec2 first, in vec2 second, in int direction) {
     pt = second;
   }
 
-  rotationMatrix2 = mat2(cos(0.2), -sin(0.2), sin(0.2), cos(0.2));
-  rotationMatrix1 = mat2(cos(0.2), sin(0.2), -sin(0.2), cos(0.2));
-    
   for (i = 0; i < numSteps; i++) {
     emit(pt + offsetRight);
     emit(pt + offsetLeft);
 
-    offsetRight = rotationMatrix1 * offsetRight;
-    offsetLeft = rotationMatrix2 * offsetLeft;
+    offsetRight = rotationMatrixRight * offsetRight;
+    offsetLeft = rotationMatrixLeft * offsetLeft;
   }
 
   if (direction == DRAW_END_FIRST) {
@@ -188,7 +192,7 @@ void emitRoundCorner(in vec2 first, in vec2 second, in vec2 third, in int direct
   vec2 v2 = normalize(second - third);
   vec2 insidePt;
 
-  float theta = 3.1415926 - acos(dot(v1, v2));
+  float theta = PI - acos(dot(v1, v2));
   mat2 rotationMatrix;
   int i;
   int numSteps = int(floor(theta / 0.2));
@@ -199,7 +203,7 @@ void emitRoundCorner(in vec2 first, in vec2 second, in vec2 third, in int direct
   if (alpha <= 0) {
     // right side is inside corner
     insidePt = second + offset1 + alpha * v1;
-    rotationMatrix = mat2(cos(0.2), -sin(0.2), sin(0.2), cos(0.2));
+    rotationMatrix = mat2(COS_THETA_STEP, -SIN_THETA_STEP, SIN_THETA_STEP, COS_THETA_STEP);
 
     emit(insidePt);
     emit(second - offset1);
@@ -218,7 +222,7 @@ void emitRoundCorner(in vec2 first, in vec2 second, in vec2 third, in int direct
     alpha = -alpha;
     
     insidePt = second - offset1 + alpha * v1;
-    rotationMatrix = mat2(cos(0.2), sin(0.2), -sin(0.2), cos(0.2));
+    rotationMatrix = mat2(COS_THETA_STEP, SIN_THETA_STEP, -SIN_THETA_STEP, COS_THETA_STEP);
 
     emit(second + offset1);
     emit(insidePt);
