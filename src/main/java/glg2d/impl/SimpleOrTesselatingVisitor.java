@@ -13,8 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package glg2d.impl.gl2;
+package glg2d.impl;
 
+import static java.lang.Math.acos;
+import static java.lang.Math.sqrt;
 import glg2d.PathVisitor;
 import glg2d.SimplePathVisitor;
 import glg2d.VertexBuffer;
@@ -23,20 +25,20 @@ import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GL2;
 
 /**
  * Tesselating is expensive. This is a simple workaround to check if we can just
- * draw the convex polygon without tesselating. At each corner, we have to check
- * the sign of the z-component of the cross-product. If it's the same all the
- * way around, we know that every turn went the same direction. That's
- * necessary, but not sufficient since we might still have self-intersections. I
- * haven't thought of a fast way to check that, yet.
+ * draw the simple, convex polygon without tesselating. At each corner, we have
+ * to check the sign of the z-component of the cross-product. If it's the same
+ * all the way around, we know that every turn went the same direction. That
+ * ensures it's convex. That's necessary, but not sufficient since we might
+ * still have self-intersections. For that, we check that the total curvature
+ * along the path is 2π. That ensures it's simple.
  * 
  * <p>
- * So for now this just checks every corner and if it has the same sign, we
- * assume the polygon is convex. Once we get to the end, we draw it. If it's not
- * convex, then we fall back to tesselating it.
+ * This checks every corner and if it has the same sign and total curvature is
+ * 2π, we know the polygon is convex. Once we get to the end, we draw it. If
+ * it's not convex, then we fall back to tesselating it.
  * </p>
  * <p>
  * There are many places where we could fail being a simple convex polygon and
@@ -45,21 +47,25 @@ import javax.media.opengl.GL2;
  * from then on. For that reason, this class is a little messy.
  * </p>
  */
-public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
-  protected GL2 gl;
-
+public class SimpleOrTesselatingVisitor extends SimplePathVisitor {
   /**
    * This buffer is used to store points for the simple polygon, until we find
    * out it's not simple. Then we push all this data to the tesselator and
    * ignore the buffer.
    */
-  protected VertexBuffer buffer = VertexBuffer.getSharedBuffer();
+  protected VertexBuffer buffer = new VertexBuffer(1024);
 
   /**
    * This is the buffer of vertices we'll use to test the corner.
    */
   protected float[] previousVertices;
   protected int numberOfPreviousVertices;
+
+  /**
+   * The total curvature along the path. Since we know we close the path, if
+   * it's a simple, convex polygon, we'll have a total curvature of 2π.
+   */
+  protected double totalCurvature;
 
   /**
    * All corners must have the same sign.
@@ -76,15 +82,26 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
    * The flag to indicate if we are on our first segment (move-to). If we have
    * multiple move-to's, then we need to tesselate.
    */
-  protected boolean firstSegment;
+  protected boolean firstContour;
 
+  /**
+   * Keep the winding rule for when we pass the information off to the
+   * tesselator.
+   */
   protected int windingRule;
 
   protected PathVisitor tesselatorFallback;
+  protected PathVisitor simpleFallback;
+
+  public SimpleOrTesselatingVisitor(PathVisitor simpleVisitor, PathVisitor tesselatorVisitor) {
+    tesselatorFallback = tesselatorVisitor;
+    simpleFallback = simpleVisitor;
+  }
 
   @Override
   public void setGLContext(GL context) {
-    gl = context.getGL2();
+    simpleFallback.setGLContext(context);
+    tesselatorFallback.setGLContext(context);
   }
 
   @Override
@@ -95,16 +112,17 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
   @Override
   public void beginPoly(int windingRule) {
     isConvexSoFar = true;
-    firstSegment = true;
+    firstContour = true;
     sign = 0;
+    totalCurvature = 0;
 
     this.windingRule = windingRule;
   }
 
   @Override
   public void moveTo(float[] vertex) {
-    if (firstSegment) {
-      firstSegment = false;
+    if (firstContour) {
+      firstContour = false;
     } else if (isConvexSoFar) {
       setUseTesselator(true);
     }
@@ -114,7 +132,7 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
       previousVertices = new float[] { vertex[0], vertex[1], 0, 0 };
 
       buffer.clear();
-      buffer.addVertex(vertex, 0, 1);
+      buffer.addVertex(vertex[0], vertex[1]);
     } else {
       tesselatorFallback.moveTo(vertex);
     }
@@ -123,7 +141,7 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
   @Override
   public void lineTo(float[] vertex) {
     if (isConvexSoFar) {
-      buffer.addVertex(vertex, 0, 1);
+      buffer.addVertex(vertex[0], vertex[1]);
 
       if (!isValidCorner(vertex)) {
         setUseTesselator(false);
@@ -139,12 +157,37 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
    */
   protected boolean isValidCorner(float[] vertex) {
     if (numberOfPreviousVertices >= 2) {
-      int currentSign = crossSign(vertex);
+      double diff1 = previousVertices[2] - previousVertices[0];
+      double diff2 = previousVertices[3] - previousVertices[1];
+      double diff3 = vertex[0] - previousVertices[0];
+      double diff4 = vertex[1] - previousVertices[1];
+
+      double cross2 = diff1 * diff4 - diff2 * diff3;
+
+      /*
+       * Check that the current sign of the cross-product is the same as the
+       * others.
+       */
+      int currentSign = sign(cross2);
       if (sign == 0) {
         sign = currentSign;
 
         // allow for currentSign = 0, in which case we don't care
       } else if (currentSign * sign == -1) {
+        return false;
+      }
+
+      /*
+       * Check that the total curvature along the path is less than 2π.
+       */
+      double norm1sq = diff1 * diff1 + diff2 * diff2;
+      double norm2sq = diff3 * diff3 + diff4 * diff4;
+      double dot = diff1 * diff3 + diff2 * diff4;
+      double cosThetasq = dot * dot / (norm1sq * norm2sq);
+      double theta = acos(sqrt(cosThetasq));
+
+      totalCurvature += theta;
+      if (totalCurvature > 2 * Math.PI + 1e-3) {
         return false;
       }
     }
@@ -158,22 +201,13 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
     return true;
   }
 
-  /**
-   * Returns the sign of the z-component of the cross-product.
-   */
-  protected int crossSign(float[] next) {
-    float diff1 = previousVertices[2] - previousVertices[0];
-    float diff2 = previousVertices[3] - previousVertices[1];
-    float diff3 = next[0] - previousVertices[0];
-    float diff4 = next[1] - previousVertices[1];
-
-    float value = diff1 * diff4 - diff2 * diff3;
-    if (value == 0) {
-      return 0;
-    } else if (value < 0) {
+  protected int sign(double value) {
+    if (value > 1e-8) {
+      return 1;
+    } else if (value < -1e-8) {
       return -1;
     } else {
-      return 1;
+      return 0;
     }
   }
 
@@ -212,8 +246,9 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
   @Override
   public void endPoly() {
     if (isConvexSoFar) {
-      // we got through all the checks, draw it fast
-      buffer.drawBuffer(gl, GL2.GL_POLYGON);
+      simpleFallback.beginPoly(windingRule);
+      drawToVisitor(simpleFallback, true);
+      simpleFallback.endPoly();
     } else {
       tesselatorFallback.endPoly();
     }
@@ -231,41 +266,29 @@ public class PolygonOrTesselatingVisitor extends SimplePathVisitor {
   protected void setUseTesselator(boolean doClose) {
     isConvexSoFar = false;
 
-    if (tesselatorFallback == null) {
-      tesselatorFallback = new TesselatorVisitor();
-      tesselatorFallback.setGLContext(gl);
-    }
-
-    // we made this assumption
     tesselatorFallback.beginPoly(windingRule);
-    drawToTesselator(doClose);
+    drawToVisitor(tesselatorFallback, doClose);
   }
 
-  protected void drawToTesselator(boolean doClose) {
-    /*
-     * Need to be careful that the tesselator functionality doesn't use the
-     * shared VertexBuffer and clobber it.
-     */
+  protected void drawToVisitor(PathVisitor visitor, boolean doClose) {
     FloatBuffer buf = buffer.getBuffer();
-    int position = buf.position();
-    buf.limit(position);
-    buf.rewind();
+    buf.flip();
 
     float[] vertex = new float[2];
-    buf.get(vertex);
 
-    tesselatorFallback.moveTo(vertex);
+    buf.get(vertex);
+    visitor.moveTo(vertex);
+
     while (buf.hasRemaining()) {
       buf.get(vertex);
-      tesselatorFallback.lineTo(vertex);
+      visitor.lineTo(vertex);
     }
 
     if (doClose) {
-      tesselatorFallback.closeLine();
+      visitor.closeLine();
     }
 
     // put everything back the way it was
-    buf.limit(buf.capacity());
-    buf.position(position);
+    buffer.clear();
   }
 }

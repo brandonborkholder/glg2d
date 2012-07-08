@@ -167,12 +167,25 @@ public class VisualTest {
   }
 
   @Test
-  public void fillPolygonTest() throws Exception {
+  public void fillNonconvexPolygonTest() throws Exception {
     tester.setPainter(new Painter() {
       @Override
       public void paint(Graphics2D g2d) {
         g2d.setColor(Color.CYAN);
         g2d.fillPolygon(new int[] { 8, 23, 98, 42 }, new int[] { 47, 23, 43, 25 }, 4);
+      }
+    });
+
+    tester.assertSame();
+  }
+
+  @Test
+  public void fillConvexPolygonTest() throws Exception {
+    tester.setPainter(new Painter() {
+      @Override
+      public void paint(Graphics2D g2d) {
+        g2d.setColor(Color.RED);
+        g2d.fillPolygon(new int[] { 5, 50, 60, 30 }, new int[] { 10, 15, 80, 90 }, 4);
       }
     });
 

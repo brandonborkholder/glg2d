@@ -131,7 +131,7 @@ public abstract class AbstractShapeHelper implements GLG2DShapeHelper {
   public void drawArc(int x, int y, int width, int height, int startAngle, int arcAngle, boolean fill) {
     ARC.setArc(x, y, width, height, startAngle, arcAngle, fill ? Arc2D.PIE : Arc2D.OPEN);
     if (fill) {
-      fill(ARC);
+      fill(ARC, true);
     } else {
       draw(ARC);
     }
@@ -167,7 +167,14 @@ public abstract class AbstractShapeHelper implements GLG2DShapeHelper {
 
   @Override
   public void fill(Shape shape) {
-    fill(shape, false);
+    if (shape instanceof Rectangle2D ||
+        shape instanceof Ellipse2D ||
+        shape instanceof Arc2D ||
+        shape instanceof RoundRectangle2D) {
+      fill(shape, true);
+    } else {
+      fill(shape, false);
+    }
   }
 
   protected abstract void fill(Shape shape, boolean isDefinitelySimpleConvex);

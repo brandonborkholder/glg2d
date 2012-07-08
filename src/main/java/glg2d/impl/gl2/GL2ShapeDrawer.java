@@ -17,6 +17,7 @@ package glg2d.impl.gl2;
 
 import glg2d.GLGraphics2D;
 import glg2d.impl.AbstractShapeHelper;
+import glg2d.impl.SimpleOrTesselatingVisitor;
 
 import java.awt.BasicStroke;
 import java.awt.RenderingHints;
@@ -31,13 +32,13 @@ public class GL2ShapeDrawer extends AbstractShapeHelper {
   protected GL2 gl;
 
   protected FillSimpleConvexPolygonVisitor simpleFillVisitor;
-  protected PolygonOrTesselatingVisitor complexFillVisitor;
+  protected SimpleOrTesselatingVisitor complexFillVisitor;
   protected LineDrawingVisitor simpleStrokeVisitor;
   protected FastLineVisitor fastLineVisitor;
 
   public GL2ShapeDrawer() {
     simpleFillVisitor = new FillSimpleConvexPolygonVisitor();
-    complexFillVisitor = new PolygonOrTesselatingVisitor();
+    complexFillVisitor = new SimpleOrTesselatingVisitor(simpleFillVisitor, new GL2TesselatorVisitor());
     simpleStrokeVisitor = new LineDrawingVisitor();
     fastLineVisitor = new FastLineVisitor();
   }
