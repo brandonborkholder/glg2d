@@ -82,9 +82,9 @@ public class GLG2DUtils {
 
   public static int ensureIsGLBuffer(GL gl, int bufferId) {
     if (gl.glIsBuffer(bufferId)) {
-      return genBufferId(gl);
-    } else {
       return bufferId;
+    } else {
+      return genBufferId(gl);
     }
   }
 
