@@ -16,6 +16,7 @@
 package glg2d.impl;
 
 import glg2d.SimplePathVisitor;
+import glg2d.VertexBuffer;
 
 import java.awt.BasicStroke;
 import java.awt.geom.PathIterator;
@@ -37,6 +38,9 @@ public abstract class AbstractTesselatorVisitor extends SimplePathVisitor {
   protected GLUtessellatorCallback callback;
 
   protected boolean contourClosed = true;
+
+  protected int drawMode;
+  protected VertexBuffer vBuffer = new VertexBuffer(1024);
 
   public AbstractTesselatorVisitor() {
     callback = new TessellatorCallback();
@@ -101,12 +105,17 @@ public abstract class AbstractTesselatorVisitor extends SimplePathVisitor {
     GLU.gluTessEndPolygon(tesselator);
     GLU.gluDeleteTess(tesselator);
   }
-  
-  protected abstract void beginTess(int type);
-  
+
+  protected void beginTess(int type) {
+    drawMode = type;
+    vBuffer.clear();
+  }
+
+  protected void addTessVertex(double[] vertex) {
+    vBuffer.addVertex((float) vertex[0], (float) vertex[1]);
+  }
+
   protected abstract void endTess();
-  
-  protected abstract void addTessVertex(double[] vertex);
 
   protected class TessellatorCallback extends GLUtessellatorCallbackAdapter {
     @Override
@@ -122,7 +131,7 @@ public abstract class AbstractTesselatorVisitor extends SimplePathVisitor {
     @Override
     public void vertex(Object vertexData) {
       assert vertexData instanceof double[] : "Invalid assumption";
-      addTessVertex((double[])vertexData);
+      addTessVertex((double[]) vertexData);
     }
 
     @Override

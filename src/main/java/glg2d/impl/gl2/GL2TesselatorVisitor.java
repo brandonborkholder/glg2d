@@ -15,7 +15,6 @@
  */
 package glg2d.impl.gl2;
 
-import glg2d.VertexBuffer;
 import glg2d.impl.AbstractTesselatorVisitor;
 
 import javax.media.opengl.GL;
@@ -23,10 +22,6 @@ import javax.media.opengl.GL2;
 
 public class GL2TesselatorVisitor extends AbstractTesselatorVisitor {
   protected GL2 gl;
-  
-  protected VertexBuffer vBuffer = new VertexBuffer(1024);
-  
-  protected int drawMode;
 
   @Override
   public void setGLContext(GL context) {
@@ -34,17 +29,7 @@ public class GL2TesselatorVisitor extends AbstractTesselatorVisitor {
   }
 
   @Override
-  protected void beginTess(int mode) {
-    drawMode = mode;
-  }
-
-  @Override
   protected void endTess() {
     vBuffer.drawBuffer(gl, drawMode);
-  }
-
-  @Override
-  protected void addTessVertex(double[] vertex) {
-    vBuffer.addVertex((float) vertex[0], (float) vertex[1]);
   }
 }
