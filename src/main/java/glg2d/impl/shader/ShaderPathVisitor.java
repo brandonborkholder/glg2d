@@ -15,12 +15,10 @@
  */
 package glg2d.impl.shader;
 
-import java.nio.FloatBuffer;
-
 import glg2d.PathVisitor;
 
+import javax.media.opengl.GL;
+
 public interface ShaderPathVisitor extends PathVisitor {
-  void setColor(float[] rgba);
-  
-  void setTransform(FloatBuffer glMatrixBuffer);
+  void setGLContext(GL glContext, UniformBufferObject uniforms);
 }

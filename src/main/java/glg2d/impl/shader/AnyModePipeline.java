@@ -15,6 +15,8 @@
  */
 package glg2d.impl.shader;
 
+import static glg2d.GLG2DUtils.ensureIsGLBuffer;
+
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
@@ -22,39 +24,20 @@ import javax.media.opengl.GL2ES2;
 
 import com.jogamp.common.nio.Buffers;
 
-public class SimpleStrokePipeline extends AbstractShaderPipeline {
-  protected int transformLocation = -1;
-  protected int colorLocation = -1;
-
+public class AnyModePipeline extends AbstractShaderPipeline {
   protected int vertCoordBuffer = -1;
   protected int vertCoordLocation = -1;
 
-  public SimpleStrokePipeline() {
+  public AnyModePipeline() {
     this("StrokeLineShader.v", "FixedFuncShader.f");
   }
 
-  public SimpleStrokePipeline(String vertexShaderFileName, String fragmentShaderFileName) {
+  public AnyModePipeline(String vertexShaderFileName, String fragmentShaderFileName) {
     super(vertexShaderFileName, null, fragmentShaderFileName);
   }
 
-  public void setColor(GL2ES2 gl, float[] rgba) {
-    if (colorLocation >= 0) {
-      gl.glUniform4fv(colorLocation, 1, rgba, 0);
-    }
-  }
-
-  public void setTransform(GL2ES2 gl, FloatBuffer glMatrixData) {
-    if (transformLocation >= 0) {
-      gl.glUniformMatrix4fv(transformLocation, 1, false, glMatrixData);
-    }
-  }
-
   protected void bindBuffer(GL2ES2 gl, FloatBuffer vertexBuffer) {
-    if (!gl.glIsBuffer(vertCoordBuffer)) {
-      int[] ids = new int[1];
-      gl.glGenBuffers(1, ids, 0);
-      vertCoordBuffer = ids[0];
-    }
+    vertCoordBuffer = ensureIsGLBuffer(gl, vertCoordBuffer);
 
     int count = vertexBuffer.limit() - vertexBuffer.position();
     gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertCoordBuffer);
@@ -63,15 +46,12 @@ public class SimpleStrokePipeline extends AbstractShaderPipeline {
     gl.glVertexAttribPointer(vertCoordLocation, 2, GL.GL_FLOAT, false, 0, 0);
   }
 
-  public void draw(GL2ES2 gl, FloatBuffer vertexBuffer, int mode) {
-    int pos = vertexBuffer.position();
-    int lim = vertexBuffer.limit();
-    int numPts = (lim - pos) / 2;
-
+  public void draw(GL2ES2 gl, int mode, FloatBuffer vertexBuffer) {
     gl.glEnableVertexAttribArray(vertCoordLocation);
 
     bindBuffer(gl, vertexBuffer);
 
+    int numPts = (vertexBuffer.limit() - vertexBuffer.position()) / 2;
     gl.glDrawArrays(mode, 0, numPts);
 
     gl.glDisableVertexAttribArray(vertCoordLocation);
@@ -86,5 +66,14 @@ public class SimpleStrokePipeline extends AbstractShaderPipeline {
     colorLocation = gl.glGetUniformLocation(programId, "u_color");
 
     vertCoordLocation = gl.glGetAttribLocation(programId, "a_vertCoord");
+  }
+
+  @Override
+  public void delete(GL2ES2 gl) {
+    super.delete(gl);
+
+    if (gl.glIsBuffer(vertCoordBuffer)) {
+      gl.glDeleteBuffers(1, new int[] { vertCoordBuffer }, 0);
+    }
   }
 }

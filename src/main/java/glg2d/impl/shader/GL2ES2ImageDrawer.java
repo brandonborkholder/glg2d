@@ -24,16 +24,22 @@ import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GLContext;
 
 import com.jogamp.common.nio.Buffers;
 import com.jogamp.opengl.util.texture.Texture;
 
 public class GL2ES2ImageDrawer extends AbstractImageHelper {
-  protected FloatBuffer buffer = Buffers.newDirectFloatBuffer(300);
+  protected GLShaderGraphics2D g2d;
+  protected GL2ES2 gl;
+
+  protected FloatBuffer vertTexCoords = Buffers.newDirectFloatBuffer(16);
   protected GL2ES2ImagePipeline shader;
 
   private float[] white = new float[] { 1, 1, 1, 1 };
+
+  public GL2ES2ImageDrawer() {
+    this(new GL2ES2ImagePipeline());
+  }
 
   public GL2ES2ImageDrawer(GL2ES2ImagePipeline shader) {
     this.shader = shader;
@@ -43,17 +49,23 @@ public class GL2ES2ImageDrawer extends AbstractImageHelper {
   public void setG2D(GLGraphics2D g2d) {
     super.setG2D(g2d);
 
-    GL2ES2 gl = g2d.getGLContext().getGL().getGL2ES2();
+    if (g2d instanceof GLShaderGraphics2D) {
+      this.g2d = (GLShaderGraphics2D) g2d;
+    } else {
+      throw new IllegalArgumentException(GLGraphics2D.class.getName() + " implementation must be instance of "
+          + GLShaderGraphics2D.class.getSimpleName());
+    }
+
+    gl = g2d.getGLContext().getGL().getGL2ES2();
     if (!shader.isSetup()) {
       shader.setup(gl);
     }
   }
-  
+
   @Override
   public void dispose() {
     super.dispose();
-    
-    shader.delete(GLContext.getCurrentGL().getGL2ES2());
+    shader.delete(gl);
   }
 
   @Override
@@ -65,7 +77,6 @@ public class GL2ES2ImageDrawer extends AbstractImageHelper {
      */
     g2d.setComposite(g2d.getComposite());
 
-    GL2ES2 gl = g2d.getGLContext().getGL().getGL2ES2();
     gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
     gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
 
@@ -75,55 +86,54 @@ public class GL2ES2ImageDrawer extends AbstractImageHelper {
 
     shader.use(gl, true);
 
-    float[] rgba;
     if (bgcolor == null) {
-      rgba = white;
-      rgba[3] = ((GL2ES2ColorHelper) g2d.getColorHelper()).getCompositeAlpha();
+      white[3] = g2d.getUniformsObject().colorHook.getAlpha();
+      shader.setColor(gl, white);
     } else {
-      rgba = ((GL2ES2ColorHelper) g2d.getColorHelper()).getForegroundRGBA();
+      float[] rgba = g2d.getUniformsObject().colorHook.getRGBA();
+      shader.setColor(gl, rgba);
     }
 
-    FloatBuffer matrixBuf = ((GL2ES2TransformHelper) g2d.getMatrixHelper()).getGLMatrixData(xform);
+    if (xform == null) {
+      shader.setTransform(gl, g2d.getUniformsObject().transformHook.getGLMatrixData());
+    } else {
+      shader.setTransform(gl, g2d.getUniformsObject().transformHook.getGLMatrixData(xform));
+    }
 
-    shader.setColor(gl, rgba);
-    shader.setTransform(gl, matrixBuf);
     shader.setTextureUnit(gl, 0);
   }
 
   @Override
   protected void applyTexture(Texture texture, int dx1, int dy1, int dx2, int dy2, float sx1, float sy1, float sx2, float sy2) {
-    GL2ES2 gl = g2d.getGLContext().getGL().getGL2ES2();
-
-    buffer.rewind();
+    vertTexCoords.rewind();
 
     // interleave vertex and texture coordinates
-    buffer.put(dx1);
-    buffer.put(dy1);
-    buffer.put(sx1);
-    buffer.put(sy1);
+    vertTexCoords.put(dx1);
+    vertTexCoords.put(dy1);
+    vertTexCoords.put(sx1);
+    vertTexCoords.put(sy1);
 
-    buffer.put(dx1);
-    buffer.put(dy2);
-    buffer.put(sx1);
-    buffer.put(sy2);
+    vertTexCoords.put(dx1);
+    vertTexCoords.put(dy2);
+    vertTexCoords.put(sx1);
+    vertTexCoords.put(sy2);
 
-    buffer.put(dx2);
-    buffer.put(dy1);
-    buffer.put(sx2);
-    buffer.put(sy1);
+    vertTexCoords.put(dx2);
+    vertTexCoords.put(dy1);
+    vertTexCoords.put(sx2);
+    vertTexCoords.put(sy1);
 
-    buffer.put(dx2);
-    buffer.put(dy2);
-    buffer.put(sx2);
-    buffer.put(sy2);
+    vertTexCoords.put(dx2);
+    vertTexCoords.put(dy2);
+    vertTexCoords.put(sx2);
+    vertTexCoords.put(sy2);
 
-    buffer.flip();
-    shader.draw(gl, buffer);
+    vertTexCoords.flip();
+    shader.draw(gl, vertTexCoords);
   }
 
   @Override
   protected void end(Texture texture) {
-    GL2ES2 gl = g2d.getGLContext().getGL().getGL2ES2();
     shader.use(gl, false);
     texture.disable(gl);
   }

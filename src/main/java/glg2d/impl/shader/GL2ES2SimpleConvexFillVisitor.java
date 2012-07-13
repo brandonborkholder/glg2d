@@ -24,22 +24,27 @@ import java.nio.FloatBuffer;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 
-public class TriangleFanSimplePolyFillVisitor extends SimplePathVisitor implements ShaderPathVisitor {
+public class GL2ES2SimpleConvexFillVisitor extends SimplePathVisitor implements ShaderPathVisitor {
   protected GL2ES2 gl;
+  protected UniformBufferObject uniforms;
 
-  protected VertexBuffer vBuffer = VertexBuffer.getSharedBuffer();
+  protected VertexBuffer vBuffer = new VertexBuffer(1024);
 
-  protected float[] color;
-  protected FloatBuffer glMatrixData;
+  protected AnyModePipeline pipeline;
 
-  protected ShapeShaderPipeline pipeline;
-
-  public TriangleFanSimplePolyFillVisitor() {
-    this(new TriangleFanPolyFillShader());
+  public GL2ES2SimpleConvexFillVisitor() {
+    this(new AnyModePipeline());
   }
 
-  public TriangleFanSimplePolyFillVisitor(ShapeShaderPipeline pipeline) {
+  public GL2ES2SimpleConvexFillVisitor(AnyModePipeline pipeline) {
     this.pipeline = pipeline;
+  }
+
+  @Override
+  public void setGLContext(GL glContext, UniformBufferObject uniforms) {
+    setGLContext(glContext);
+
+    this.uniforms = uniforms;
   }
 
   @Override
@@ -52,16 +57,6 @@ public class TriangleFanSimplePolyFillVisitor extends SimplePathVisitor implemen
   }
 
   @Override
-  public void setColor(float[] rgba) {
-    color = rgba;
-  }
-
-  @Override
-  public void setTransform(FloatBuffer glMatrixBuffer) {
-    glMatrixData = glMatrixBuffer;
-  }
-
-  @Override
   public void setStroke(BasicStroke stroke) {
     // nop
   }
@@ -69,30 +64,32 @@ public class TriangleFanSimplePolyFillVisitor extends SimplePathVisitor implemen
   @Override
   public void beginPoly(int windingRule) {
     // do we need to care about winding rule?
-    vBuffer.clear();
     pipeline.use(gl, true);
 
-    pipeline.setColor(gl, color);
-    pipeline.setGLTransform(gl, glMatrixData);
+    pipeline.setColor(gl, uniforms.colorHook.getRGBA());
+    pipeline.setTransform(gl, uniforms.transformHook.getGLMatrixData());
+
+    vBuffer.clear();
+    vBuffer.addVertex(0, 0);
   }
 
   @Override
   public void moveTo(float[] vertex) {
     draw();
 
-    vBuffer.addVertex(vertex, 0, 1);
+    vBuffer.addVertex(vertex[0], vertex[1]);
   }
 
   @Override
   public void lineTo(float[] vertex) {
-    vBuffer.addVertex(vertex, 0, 1);
+    vBuffer.addVertex(vertex[0], vertex[1]);
   }
 
   @Override
   public void closeLine() {
     FloatBuffer buf = vBuffer.getBuffer();
-    float x = buf.get(0);
-    float y = buf.get(1);
+    float x = buf.get(2);
+    float y = buf.get(3);
     vBuffer.addVertex(x, y);
   }
 
@@ -104,13 +101,37 @@ public class TriangleFanSimplePolyFillVisitor extends SimplePathVisitor implemen
 
   protected void draw() {
     FloatBuffer buf = vBuffer.getBuffer();
-    if (buf.position() == 0) {
+    if (buf.position() <= 2) {
+      buf.position(2);
       return;
     }
 
     buf.flip();
 
-    pipeline.draw(gl, buf);
+    setupCentroid(buf);
+
+    pipeline.draw(gl, GL.GL_TRIANGLE_FAN, buf);
+
     vBuffer.clear();
+    vBuffer.addVertex(0, 0);
+  }
+
+  protected void setupCentroid(FloatBuffer vertexBuffer) {
+    float x = 0;
+    float y = 0;
+
+    vertexBuffer.position(2);
+    int numPts = 0;
+    while (vertexBuffer.position() < vertexBuffer.limit()) {
+      x += vertexBuffer.get();
+      y += vertexBuffer.get();
+      numPts++;
+    }
+
+    vertexBuffer.rewind();
+    vertexBuffer.put(x / numPts);
+    vertexBuffer.put(y / numPts);
+
+    vertexBuffer.rewind();
   }
 }

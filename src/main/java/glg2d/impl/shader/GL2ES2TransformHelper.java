@@ -17,23 +17,22 @@ package glg2d.impl.shader;
 
 import glg2d.GLG2DTransformHelper;
 import glg2d.GLGraphics2D;
+import glg2d.impl.shader.UniformBufferObject.TransformHook;
 
 import java.awt.RenderingHints.Key;
 import java.awt.geom.AffineTransform;
-import java.nio.FloatBuffer;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
 import javax.media.opengl.GL;
 
-public class GL2ES2TransformHelper implements GLG2DTransformHelper {
+public class GL2ES2TransformHelper implements GLG2DTransformHelper, TransformHook {
   protected GLGraphics2D g2d;
 
   protected Deque<AffineTransform> transformStack = new ArrayDeque<AffineTransform>();
 
-  protected FloatBuffer matrixBuffer = FloatBuffer.allocate(16);
-
-  protected boolean dirtyMatrixBuffer;
+  protected float[] glMatrix = new float[16];
+  protected boolean dirtyMatrix;
 
   protected int[] viewportDimensions;
 
@@ -42,12 +41,17 @@ public class GL2ES2TransformHelper implements GLG2DTransformHelper {
     this.g2d = g2d;
     transformStack.clear();
     transformStack.push(new AffineTransform());
-    dirtyMatrixBuffer = true;
+    dirtyMatrix = true;
 
     viewportDimensions = new int[4];
     GL gl = g2d.getGLContext().getGL();
     gl.glGetIntegerv(GL.GL_VIEWPORT, viewportDimensions, 0);
+
+    if (g2d instanceof GLShaderGraphics2D) {
+      ((GLShaderGraphics2D) g2d).getUniformsObject().transformHook = this;
+    }
   }
+
   @Override
   public void push(GLGraphics2D newG2d) {
     transformStack.push((AffineTransform) getTransform0().clone());
@@ -56,7 +60,7 @@ public class GL2ES2TransformHelper implements GLG2DTransformHelper {
   @Override
   public void pop(GLGraphics2D parentG2d) {
     transformStack.pop();
-    dirtyMatrixBuffer = true;
+    dirtyMatrix = true;
   }
 
   @Override
@@ -76,50 +80,50 @@ public class GL2ES2TransformHelper implements GLG2DTransformHelper {
   @Override
   public void translate(int x, int y) {
     translate((double) x, (double) y);
-    dirtyMatrixBuffer = true;
+    dirtyMatrix = true;
   }
 
   @Override
   public void translate(double tx, double ty) {
     getTransform0().translate(tx, ty);
-    dirtyMatrixBuffer = true;
+    dirtyMatrix = true;
   }
 
   @Override
   public void rotate(double theta) {
     getTransform0().rotate(theta);
-    dirtyMatrixBuffer = true;
+    dirtyMatrix = true;
   }
 
   @Override
   public void rotate(double theta, double x, double y) {
     getTransform0().rotate(theta, x, y);
-    dirtyMatrixBuffer = true;
+    dirtyMatrix = true;
   }
 
   @Override
   public void scale(double sx, double sy) {
     getTransform0().scale(sx, sy);
-    dirtyMatrixBuffer = true;
+    dirtyMatrix = true;
   }
 
   @Override
   public void shear(double shx, double shy) {
     getTransform0().shear(shx, shy);
-    dirtyMatrixBuffer = true;
+    dirtyMatrix = true;
   }
 
   @Override
   public void transform(AffineTransform Tx) {
     getTransform0().concatenate(Tx);
-    dirtyMatrixBuffer = true;
+    dirtyMatrix = true;
   }
 
   @Override
   public void setTransform(AffineTransform transform) {
     transformStack.pop();
     transformStack.push(transform);
-    dirtyMatrixBuffer = true;
+    dirtyMatrix = true;
   }
 
   @Override
@@ -131,27 +135,29 @@ public class GL2ES2TransformHelper implements GLG2DTransformHelper {
     return transformStack.peek();
   }
 
-  public FloatBuffer getGLMatrixData() {
+  @Override
+  public float[] getGLMatrixData() {
     return getGLMatrixData(null);
   }
 
-  public FloatBuffer getGLMatrixData(AffineTransform concat) {
+  @Override
+  public float[] getGLMatrixData(AffineTransform concat) {
     if (concat == null || concat.isIdentity()) {
-      if (dirtyMatrixBuffer) {
-        updateMatrix(getTransform0(), matrixBuffer);
-        dirtyMatrixBuffer = false;
+      if (dirtyMatrix) {
+        updateGLMatrix(getTransform0());
+        dirtyMatrix = false;
       }
     } else {
       AffineTransform tmp = getTransform();
       tmp.concatenate(concat);
-      updateMatrix(tmp, matrixBuffer);
-      dirtyMatrixBuffer = true;
+      updateGLMatrix(tmp);
+      dirtyMatrix = true;
     }
 
-    return matrixBuffer;
+    return glMatrix;
   }
 
-  protected void updateMatrix(AffineTransform xform, FloatBuffer buffer) {
+  protected void updateGLMatrix(AffineTransform xform) {
     // add the GL->G2D coordinate transform and perspective inline here
 
     int x1 = viewportDimensions[0];
@@ -159,28 +165,24 @@ public class GL2ES2TransformHelper implements GLG2DTransformHelper {
     int x2 = viewportDimensions[2];
     int y2 = viewportDimensions[3];
 
-    buffer.rewind();
+    glMatrix[0] = ((float) (2 * xform.getScaleX() / (x2 - x1)));
+    glMatrix[1] = ((float) (-2 * xform.getShearY() / (y2 - y1)));
+    // glMatrix[2] = 0;
+    // glMatrix[3] = 0;
 
-    buffer.put((float) (2 * xform.getScaleX() / (x2 - x1)));
-    buffer.put((float) (-2 * xform.getShearY() / (y2 - y1)));
-    buffer.put(0);
-    buffer.put(0);
+    glMatrix[4] = ((float) (2 * xform.getShearX() / (x2 - x1)));
+    glMatrix[5] = ((float) (-2 * xform.getScaleY() / (y2 - y1)));
+    // glMatrix[6] = 0;
+    // glMatrix[7] = 0;
 
-    buffer.put((float) (2 * xform.getShearX() / (x2 - x1)));
-    buffer.put((float) (-2 * xform.getScaleY() / (y2 - y1)));
-    buffer.put(0);
-    buffer.put(0);
+    // glMatrix[8] = 0;
+    // glMatrix[9] = 0;
+    glMatrix[10] = -1;
+    // glMatrix[11] = 0;
 
-    buffer.put(0);
-    buffer.put(0);
-    buffer.put(-1);
-    buffer.put(0);
-
-    buffer.put((float) (2 * xform.getTranslateX() / (x2 - x1) - 1));
-    buffer.put((float) (1 - 2 * xform.getTranslateY() / (y2 - y1)));
-    buffer.put(0);
-    buffer.put(1);
-
-    buffer.flip();
+    glMatrix[12] = ((float) (2 * xform.getTranslateX() / (x2 - x1) - 1));
+    glMatrix[13] = ((float) (1 - 2 * xform.getTranslateY() / (y2 - y1)));
+    // glMatrix[14] = 0;
+    glMatrix[15] = 1;
   }
 }

@@ -26,7 +26,7 @@ import javax.media.opengl.GL2GL3;
 
 import com.jogamp.common.nio.Buffers;
 
-public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
+public class GeometryShaderStrokePipeline extends AbstractShaderPipeline {
   public static final int DRAW_END_NONE = 0;
   public static final int DRAW_END_FIRST = -1;
   public static final int DRAW_END_LAST = 1;
@@ -41,32 +41,18 @@ public class GL2ES2StrokeLinePipeline extends AbstractShaderPipeline {
   protected int vertAfterLocation;
   protected int vertCoordBuffer;
 
-  protected int transformLocation;
-  protected int colorLocation;
   protected int lineWidthLocation;
   protected int miterLimitLocation;
   protected int joinTypeLocation;
   protected int capTypeLocation;
   protected int drawEndLocation;
 
-  public GL2ES2StrokeLinePipeline() {
+  public GeometryShaderStrokePipeline() {
     this("StrokeShader.v", "StrokeShader.g", "StrokeShader.f");
   }
 
-  public GL2ES2StrokeLinePipeline(String vertexShaderFileName, String lineJoinShaderFileName, String fragmentShaderFileName) {
-    super(vertexShaderFileName, lineJoinShaderFileName, fragmentShaderFileName);
-  }
-
-  public void setTransform(GL2ES2 gl, FloatBuffer glMatrixData) {
-    if (transformLocation >= 0) {
-      gl.glUniformMatrix4fv(transformLocation, 1, false, glMatrixData);
-    }
-  }
-
-  public void setColor(GL2ES2 gl, float[] rgba) {
-    if (colorLocation >= 0) {
-      gl.glUniform4fv(colorLocation, 1, rgba, 0);
-    }
+  public GeometryShaderStrokePipeline(String vertexShaderFileName, String geometryShaderFileName, String fragmentShaderFileName) {
+    super(vertexShaderFileName, geometryShaderFileName, fragmentShaderFileName);
   }
 
   public void setStroke(GL2ES2 gl, BasicStroke stroke) {

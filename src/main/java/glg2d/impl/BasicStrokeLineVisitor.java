@@ -48,7 +48,7 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
   protected float[] firstPoint;
   protected float[] secondPoint;
 
-  protected VertexBuffer vBuffer = VertexBuffer.getSharedBuffer();
+  protected VertexBuffer vBuffer = new VertexBuffer(1024);
   protected FloatBuffer tmpBuffer = Buffers.newDirectFloatBuffer(1024);
 
   @Override

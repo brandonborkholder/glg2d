@@ -24,41 +24,39 @@ import java.nio.FloatBuffer;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 
-public class ShaderLineVisitor extends SimplePathVisitor implements ShaderPathVisitor {
-  protected VertexBuffer buffer = VertexBuffer.getSharedBuffer();
+public class GL2GL3StrokeLineVisitor extends SimplePathVisitor implements ShaderPathVisitor {
+  protected VertexBuffer buffer = new VertexBuffer(1024);
 
   protected BasicStroke stroke;
-  protected float[] color;
-  protected FloatBuffer matrixBuffer;
 
   protected float[] lastV = new float[2];
 
   protected GL2ES2 gl;
+  protected UniformBufferObject uniforms;
 
-  protected GL2ES2StrokeLinePipeline pipeline;
+  protected GeometryShaderStrokePipeline pipeline;
+
+  public GL2GL3StrokeLineVisitor() {
+    this(new GeometryShaderStrokePipeline());
+  }
+
+  public GL2GL3StrokeLineVisitor(GeometryShaderStrokePipeline pipeline) {
+    this.pipeline = pipeline;
+  }
 
   @Override
   public void setGLContext(GL context) {
     gl = context.getGL2ES2();
-//    if (pipeline != null) {
-//      pipeline.delete(gl);
-//      pipeline = null;
-//    }
 
-    if (pipeline == null) {
-      pipeline = new GL2ES2StrokeLinePipeline();
+    if (!pipeline.isSetup()) {
       pipeline.setup(gl);
     }
   }
 
   @Override
-  public void setColor(float[] rgba) {
-    color = rgba;
-  }
-
-  @Override
-  public void setTransform(FloatBuffer glMatrixBuffer) {
-    matrixBuffer = glMatrixBuffer;
+  public void setGLContext(GL glContext, UniformBufferObject uniforms) {
+    setGLContext(glContext);
+    this.uniforms = uniforms;
   }
 
   @Override
@@ -106,8 +104,8 @@ public class ShaderLineVisitor extends SimplePathVisitor implements ShaderPathVi
   public void beginPoly(int windingRule) {
     pipeline.use(gl, true);
 
-    pipeline.setColor(gl, color);
-    pipeline.setTransform(gl, matrixBuffer);
+    pipeline.setColor(gl, uniforms.colorHook.getRGBA());
+    pipeline.setTransform(gl, uniforms.transformHook.getGLMatrixData());
     pipeline.setStroke(gl, stroke);
 
     buffer.clear();

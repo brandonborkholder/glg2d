@@ -15,25 +15,21 @@
  */
 package glg2d.impl.shader;
 
+import static glg2d.GLG2DUtils.ensureIsGLBuffer;
+
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 
 import com.jogamp.common.nio.Buffers;
-import com.jogamp.opengl.util.GLArrayDataServer;
 
 public class GL2ES2ImagePipeline extends AbstractShaderPipeline {
-  protected GLArrayDataServer vertArrayData;
-  protected GLArrayDataServer texArrayData;
+  protected int vertexBufferId = -1;
 
-  protected int vertexBufferId;
-
-  protected int transformLocation;
-  protected int colorLocation;
-  protected int textureLocation;
-  protected int vertCoordLocation;
-  protected int texCoordLocation;
+  protected int textureLocation = -1;
+  protected int vertCoordLocation = -1;
+  protected int texCoordLocation = -1;
 
   public GL2ES2ImagePipeline() {
     this("TextureShader.v", "TextureShader.f");
@@ -43,18 +39,6 @@ public class GL2ES2ImagePipeline extends AbstractShaderPipeline {
     super(vertexShaderFileName, null, fragmentShaderFileName);
   }
 
-  public void setTransform(GL2ES2 gl, FloatBuffer glMatrixData) {
-    if (transformLocation >= 0) {
-      gl.glUniformMatrix4fv(transformLocation, 1, false, glMatrixData);
-    }
-  }
-
-  public void setColor(GL2ES2 gl, float[] rgba) {
-    if (colorLocation >= 0) {
-      gl.glUniform4fv(colorLocation, 1, rgba, 0);
-    }
-  }
-
   public void setTextureUnit(GL2ES2 gl, int unit) {
     if (textureLocation >= 0) {
       gl.glUniform1i(textureLocation, unit);
@@ -62,11 +46,7 @@ public class GL2ES2ImagePipeline extends AbstractShaderPipeline {
   }
 
   protected void bufferData(GL2ES2 gl, FloatBuffer buffer) {
-    if (!gl.glIsBuffer(vertexBufferId)) {
-      int[] ids = new int[1];
-      gl.glGenBuffers(1, ids, 0);
-      vertexBufferId = ids[0];
-    }
+    vertexBufferId = ensureIsGLBuffer(gl, vertexBufferId);
 
     gl.glEnableVertexAttribArray(vertCoordLocation);
     gl.glEnableVertexAttribArray(texCoordLocation);

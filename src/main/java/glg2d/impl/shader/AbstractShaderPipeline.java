@@ -36,6 +36,8 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
   protected String fragmentShaderFileName;
 
   protected int programId = 0;
+  protected int transformLocation = -1;
+  protected int colorLocation = -1;
 
   public AbstractShaderPipeline(String vertexShaderFileName, String geometryShaderFileName, String fragmentShaderFileName) {
     this.vertexShaderFileName = vertexShaderFileName;
@@ -52,6 +54,18 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
   @Override
   public boolean isSetup() {
     return programId > 0;
+  }
+
+  public void setColor(GL2ES2 gl, float[] rgba) {
+    if (colorLocation >= 0) {
+      gl.glUniform4fv(colorLocation, 1, rgba, 0);
+    }
+  }
+
+  public void setTransform(GL2ES2 gl, float[] glMatrixData) {
+    if (transformLocation >= 0) {
+      gl.glUniformMatrix4fv(transformLocation, 1, false, glMatrixData, 0);
+    }
   }
 
   protected void createProgramAndAttach(GL2ES2 gl) {

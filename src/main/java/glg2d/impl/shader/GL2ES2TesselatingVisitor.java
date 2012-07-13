@@ -15,33 +15,25 @@
  */
 package glg2d.impl.shader;
 
-import glg2d.impl.BasicStrokeLineVisitor;
+import glg2d.impl.AbstractTesselatorVisitor;
 
-import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES2;
 
-public class GL2ES2StrokeLineVisitor extends BasicStrokeLineVisitor implements ShaderPathVisitor {
+public class GL2ES2TesselatingVisitor extends AbstractTesselatorVisitor implements ShaderPathVisitor {
   protected GL2ES2 gl;
   protected UniformBufferObject uniforms;
 
   protected AnyModePipeline pipeline;
 
-  public GL2ES2StrokeLineVisitor() {
+  public GL2ES2TesselatingVisitor() {
     this(new AnyModePipeline());
   }
 
-  public GL2ES2StrokeLineVisitor(AnyModePipeline pipeline) {
+  public GL2ES2TesselatingVisitor(AnyModePipeline pipeline) {
     this.pipeline = pipeline;
-  }
-
-  @Override
-  public void setGLContext(GL context, UniformBufferObject uniforms) {
-    setGLContext(context);
-
-    this.uniforms = uniforms;
   }
 
   @Override
@@ -54,17 +46,19 @@ public class GL2ES2StrokeLineVisitor extends BasicStrokeLineVisitor implements S
   }
 
   @Override
-  public void setStroke(BasicStroke stroke) {
-    super.setStroke(stroke);
+  public void setGLContext(GL glContext, UniformBufferObject uniforms) {
+    setGLContext(glContext);
+    this.uniforms = uniforms;
   }
 
   @Override
   public void beginPoly(int windingRule) {
     pipeline.use(gl, true);
-    pipeline.setTransform(gl, uniforms.transformHook.getGLMatrixData());
-    pipeline.setColor(gl, uniforms.colorHook.getRGBA());
 
     super.beginPoly(windingRule);
+
+    pipeline.setColor(gl, uniforms.colorHook.getRGBA());
+    pipeline.setTransform(gl, uniforms.transformHook.getGLMatrixData());
   }
 
   @Override
@@ -75,16 +69,10 @@ public class GL2ES2StrokeLineVisitor extends BasicStrokeLineVisitor implements S
   }
 
   @Override
-  protected void drawBuffer() {
+  protected void endTess() {
     FloatBuffer buf = vBuffer.getBuffer();
-    if (buf.position() == 0) {
-      return;
-    }
-
     buf.flip();
 
-    pipeline.draw(gl, GL.GL_TRIANGLE_STRIP, buf);
-
-    vBuffer.clear();
+    pipeline.draw(gl, drawMode, buf);
   }
 }
