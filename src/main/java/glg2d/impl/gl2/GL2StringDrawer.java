@@ -15,20 +15,12 @@
  */
 package glg2d.impl.gl2;
 
-import glg2d.GLG2DTextHelper;
-import glg2d.GLGraphics2D;
+import glg2d.impl.AbstractTextDrawer;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.RenderingHints;
-import java.awt.RenderingHints.Key;
-import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
 import java.text.AttributedCharacterIterator;
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.HashMap;
 
 import javax.media.opengl.GL2;
@@ -39,82 +31,12 @@ import com.jogamp.opengl.util.awt.TextRenderer;
 /**
  * Draws text for the {@code GLGraphics2D} class.
  */
-public class GL2StringDrawer implements GLG2DTextHelper {
+public class GL2StringDrawer extends AbstractTextDrawer {
   protected FontRenderCache cache = new FontRenderCache();
-
-  protected Deque<Font> fontStack = new ArrayDeque<Font>(10);
-
-  protected Font font;
-
-  protected GLGraphics2D g2d;
-
-  protected boolean antiAlias;
-
-  @Override
-  public void setG2D(GLGraphics2D g2d) {
-    this.g2d = g2d;
-  }
-
-  @Override
-  public void push(GLGraphics2D newG2d) {
-    fontStack.push(font);
-  }
-
-  @Override
-  public void pop(GLGraphics2D parentG2d) {
-    setAntiAlias(parentG2d.getRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING));
-    if (!fontStack.isEmpty()) {
-      font = fontStack.pop();
-    }
-  }
-  
-  @Override
-  public void setHint(Key key, Object value) {
-    if (key == RenderingHints.KEY_TEXT_ANTIALIASING) {
-      setAntiAlias(value);
-    }
-  }
-  
-  @Override
-  public void resetHints() {
-    setHint(RenderingHints.KEY_TEXT_ANTIALIASING, null);
-  }
 
   @Override
   public void dispose() {
     cache.dispose();
-  }
-
-  @Override
-  public void setFont(Font font) {
-    this.font = font;
-  }
-
-  @Override
-  public Font getFont() {
-    return font;
-  }
-
-  @Override
-  public FontMetrics getFontMetrics(Font font) {
-    return new GLFontMetrics(font, getFontRenderContext(), getRenderer(font));
-  }
-
-  @Override
-  public FontRenderContext getFontRenderContext() {
-    return new FontRenderContext(g2d.getTransform(), true, false);
-  }
-
-  public void setAntiAlias(Object value) {
-    boolean doAlias = true;
-    if (value == null || value == RenderingHints.VALUE_TEXT_ANTIALIAS_OFF || value == RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT) {
-      doAlias = false;
-    }
-    if (antiAlias == doAlias) {
-      return;
-    }
-
-    antiAlias = doAlias;
   }
 
   @Override
@@ -133,7 +55,7 @@ public class GL2StringDrawer implements GLG2DTextHelper {
   }
 
   protected TextRenderer getRenderer(Font font) {
-    return cache.getRenderer(font, antiAlias);
+    return cache.getRenderer(font, stack.peek().antiAlias);
   }
 
   /**
@@ -178,65 +100,6 @@ public class GL2StringDrawer implements GLG2DTextHelper {
 
     GL2 gl = g2d.getGLContext().getGL().getGL2();
     gl.glPopMatrix();
-  }
-
-  /**
-   * The default implementation is good enough for now.
-   */
-  public static class GLFontMetrics extends FontMetrics {
-    private static final long serialVersionUID = 3676850359220061793L;
-
-    protected TextRenderer renderer;
-
-    protected FontRenderContext fontRenderContext;
-
-    protected int[] cachedWidths = new int[255];
-
-    public GLFontMetrics(Font font, FontRenderContext frc, TextRenderer renderer) {
-      super(font);
-      this.renderer = renderer;
-      fontRenderContext = frc;
-    }
-
-    @Override
-    public FontRenderContext getFontRenderContext() {
-      return fontRenderContext;
-    }
-
-    @Override
-    public int charsWidth(char[] data, int off, int len) {
-      if (len <= 0) {
-        return 0;
-      }
-
-      if (font.hasLayoutAttributes()) {
-        String str = new String(data, off, len);
-        return (int) new TextLayout(str, font, getFontRenderContext()).getAdvance();
-      } else {
-        int width = 0;
-        for (int i = 0; i < len; i++) {
-          width += charWidth(data[off + i]);
-        }
-
-        return width;
-      }
-    }
-
-    @Override
-    public int charWidth(char ch) {
-      int width;
-      if (ch < 255) {
-        width = cachedWidths[ch];
-        if (width == 0) {
-          width = (int) renderer.getCharWidth(ch);
-          cachedWidths[ch] = width;
-        }
-      } else {
-        width = (int) renderer.getCharWidth(ch);
-      }
-
-      return width;
-    }
   }
 
   @SuppressWarnings("serial")
