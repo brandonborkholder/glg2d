@@ -15,7 +15,6 @@
  */
 package glg2d;
 
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.font.FontRenderContext;
@@ -34,7 +33,7 @@ public interface GLG2DTextHelper extends G2DDrawingHelper {
 
   void drawString(AttributedCharacterIterator iterator, float x, float y);
 
-  void drawString(String string, Color color, float x, float y);
+  void drawString(String string, float x, float y);
 
-  void drawString(String string, Color color, int x, int y);
+  void drawString(String string, int x, int y);
 }

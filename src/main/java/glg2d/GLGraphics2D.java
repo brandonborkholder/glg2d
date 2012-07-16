@@ -220,12 +220,12 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void drawString(String str, int x, int y) {
-    stringHelper.drawString(str, getColor(), x, y);
+    stringHelper.drawString(str, x, y);
   }
 
   @Override
   public void drawString(String str, float x, float y) {
-    stringHelper.drawString(str, getColor(), x, y);
+    stringHelper.drawString(str, x, y);
   }
 
   @Override

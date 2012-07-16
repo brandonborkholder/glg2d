@@ -40,18 +40,32 @@ public class GL2StringDrawer extends AbstractTextDrawer {
   }
 
   @Override
-  public void drawString(AttributedCharacterIterator iterator, int x, int y) {
-    // TODO
-  }
-
-  @Override
   public void drawString(AttributedCharacterIterator iterator, float x, float y) {
-    // TODO
+    drawString(iterator, (int) x, (int) y);
   }
 
   @Override
-  public void drawString(String string, Color color, float x, float y) {
-    drawString(string, color, (int) x, (int) y);
+  public void drawString(AttributedCharacterIterator iterator, int x, int y) {
+    StringBuilder builder = new StringBuilder(iterator.getEndIndex() - iterator.getBeginIndex());
+    while (iterator.next() != AttributedCharacterIterator.DONE) {
+      builder.append(iterator.current());
+    }
+
+    drawString(builder.toString(), x, y);
+  }
+
+  @Override
+  public void drawString(String string, float x, float y) {
+    drawString(string, (int) x, (int) y);
+  }
+
+  @Override
+  public void drawString(String string, int x, int y) {
+    TextRenderer renderer = getRenderer(getFont());
+
+    begin(renderer);
+    renderer.draw3D(string, x, g2d.getCanvasHeight() - y, 0, 1);
+    end(renderer);
   }
 
   protected TextRenderer getRenderer(Font font) {
@@ -62,7 +76,8 @@ public class GL2StringDrawer extends AbstractTextDrawer {
    * Sets the font color, respecting the AlphaComposite if it wants to
    * pre-multiply an alpha.
    */
-  protected void setTextColorRespectComposite(TextRenderer renderer, Color color) {
+  protected void setTextColorRespectComposite(TextRenderer renderer) {
+    Color color = g2d.getColor();
     if (g2d.getComposite() instanceof AlphaComposite) {
       float alpha = ((AlphaComposite) g2d.getComposite()).getAlpha();
       if (alpha < 1) {
@@ -74,17 +89,8 @@ public class GL2StringDrawer extends AbstractTextDrawer {
     renderer.setColor(color);
   }
 
-  @Override
-  public void drawString(String string, Color color, int x, int y) {
-    TextRenderer renderer = getRenderer(getFont());
-
-    begin(renderer, color);
-    renderer.draw3D(string, x, g2d.getCanvasHeight() - y, 0, 1);
-    end(renderer);
-  }
-
-  protected void begin(TextRenderer renderer, Color textColor) {
-    setTextColorRespectComposite(renderer, textColor);
+  protected void begin(TextRenderer renderer) {
+    setTextColorRespectComposite(renderer);
 
     GL2 gl = g2d.getGLContext().getGL().getGL2();
     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
