@@ -40,6 +40,9 @@ public class GL2ES2ColorHelper extends AbstractColorHelper implements ColorHook 
   public void setG2D(GLGraphics2D g2d) {
     if (g2d instanceof GLShaderGraphics2D) {
       ((GLShaderGraphics2D) g2d).getUniformsObject().colorHook = this;
+    } else {
+      throw new IllegalArgumentException(GLGraphics2D.class.getName() + " implementation must be instance of "
+          + GLShaderGraphics2D.class.getSimpleName());
     }
 
     super.setG2D(g2d);

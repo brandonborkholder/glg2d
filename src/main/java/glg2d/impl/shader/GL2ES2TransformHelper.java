@@ -49,6 +49,9 @@ public class GL2ES2TransformHelper implements GLG2DTransformHelper, TransformHoo
 
     if (g2d instanceof GLShaderGraphics2D) {
       ((GLShaderGraphics2D) g2d).getUniformsObject().transformHook = this;
+    } else {
+      throw new IllegalArgumentException(GLGraphics2D.class.getName() + " implementation must be instance of "
+          + GLShaderGraphics2D.class.getSimpleName());
     }
   }
 
