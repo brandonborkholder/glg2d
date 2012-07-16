@@ -18,8 +18,10 @@ package glg2d.impl.shader;
 import glg2d.GLG2DColorHelper;
 import glg2d.GLG2DImageHelper;
 import glg2d.GLG2DShapeHelper;
+import glg2d.GLG2DTextHelper;
 import glg2d.GLG2DTransformHelper;
 import glg2d.GLGraphics2D;
+import glg2d.impl.shader.text.GL2ES2TextDrawer;
 
 import javax.media.opengl.GLAutoDrawable;
 
@@ -53,5 +55,10 @@ public class GLShaderGraphics2D extends GLGraphics2D {
   @Override
   protected GLG2DShapeHelper createShapeHelper() {
     return new GL2ES2ShapeDrawer();
+  }
+
+  @Override
+  protected GLG2DTextHelper createTextHelper() {
+    return new GL2ES2TextDrawer();
   }
 }
