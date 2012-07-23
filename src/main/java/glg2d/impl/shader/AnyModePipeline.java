@@ -29,33 +29,40 @@ public class AnyModePipeline extends AbstractShaderPipeline {
   protected int vertCoordLocation = -1;
 
   public AnyModePipeline() {
-    this("StrokeLineShader.v", "FixedFuncShader.f");
+    this("FixedFuncShader.v", "FixedFuncShader.f");
   }
 
   public AnyModePipeline(String vertexShaderFileName, String fragmentShaderFileName) {
     super(vertexShaderFileName, null, fragmentShaderFileName);
   }
 
-  protected void bindBuffer(GL2ES2 gl, FloatBuffer vertexBuffer) {
+  public void bindBuffer(GL2ES2 gl) {
+    gl.glEnableVertexAttribArray(vertCoordLocation);
     vertCoordBuffer = ensureIsGLBuffer(gl, vertCoordBuffer);
 
-    int count = vertexBuffer.limit() - vertexBuffer.position();
     gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertCoordBuffer);
-    gl.glBufferData(GL.GL_ARRAY_BUFFER, Buffers.SIZEOF_FLOAT * count, vertexBuffer, GL2ES2.GL_STREAM_DRAW);
-
     gl.glVertexAttribPointer(vertCoordLocation, 2, GL.GL_FLOAT, false, 0, 0);
   }
 
-  public void draw(GL2ES2 gl, int mode, FloatBuffer vertexBuffer) {
-    gl.glEnableVertexAttribArray(vertCoordLocation);
+  public void bindBufferData(GL2ES2 gl, FloatBuffer vertexBuffer) {
+    bindBuffer(gl);
 
-    bindBuffer(gl, vertexBuffer);
+    int count = vertexBuffer.limit() - vertexBuffer.position();
+    gl.glBufferData(GL.GL_ARRAY_BUFFER, Buffers.SIZEOF_FLOAT * count, vertexBuffer, GL2ES2.GL_STREAM_DRAW);
+  }
+
+  public void unbindBuffer(GL2ES2 gl) {
+    gl.glDisableVertexAttribArray(vertCoordLocation);
+    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+  }
+
+  public void draw(GL2ES2 gl, int mode, FloatBuffer vertexBuffer) {
+    bindBufferData(gl, vertexBuffer);
 
     int numPts = (vertexBuffer.limit() - vertexBuffer.position()) / 2;
     gl.glDrawArrays(mode, 0, numPts);
 
-    gl.glDisableVertexAttribArray(vertCoordLocation);
-    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+    unbindBuffer(gl);
   }
 
   @Override

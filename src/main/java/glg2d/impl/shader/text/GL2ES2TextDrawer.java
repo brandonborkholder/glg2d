@@ -15,38 +15,33 @@
  */
 package glg2d.impl.shader.text;
 
-import glg2d.GLG2DTextHelper;
+import static glg2d.impl.AbstractShapeHelper.visitShape;
 import glg2d.GLGraphics2D;
 import glg2d.impl.AbstractTextDrawer;
 import glg2d.impl.shader.GLShaderGraphics2D;
+import glg2d.impl.shader.text.CollectingTesselator.TesselatedTriangles;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.RenderingHints.Key;
-import java.awt.font.FontRenderContext;
 import java.awt.font.GlyphVector;
-import java.awt.font.TextLayout;
 import java.text.AttributedCharacterIterator;
 import java.text.CharacterIterator;
 import java.text.StringCharacterIterator;
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.HashMap;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.fixedfunc.GLMatrixFunc;
-
-import com.jogamp.opengl.util.awt.TextRenderer;
+import javax.media.opengl.GL2ES2;
 
 public class GL2ES2TextDrawer extends AbstractTextDrawer {
-  protected FontRenderCache cache = new FontRenderCache();
-
   protected GLShaderGraphics2D g2d;
+  protected GL2ES2 gl;
+
+  protected TextPipeline pipeline;
+
+  public GL2ES2TextDrawer() {
+    this(new TextPipeline());
+  }
+
+  public GL2ES2TextDrawer(TextPipeline pipeline) {
+    this.pipeline = pipeline;
+  }
 
   @Override
   public void setG2D(GLGraphics2D g2d) {
@@ -57,12 +52,17 @@ public class GL2ES2TextDrawer extends AbstractTextDrawer {
           + GLShaderGraphics2D.class.getSimpleName());
     }
 
+    gl = g2d.getGLContext().getGL().getGL2ES2();
+    if (!pipeline.isSetup()) {
+      pipeline.setup(gl);
+    }
+
     super.setG2D(g2d);
   }
 
   @Override
   public void dispose() {
-    cache.dispose();
+    pipeline.delete(gl);
   }
 
   @Override
@@ -87,40 +87,25 @@ public class GL2ES2TextDrawer extends AbstractTextDrawer {
 
   protected void drawChars(CharacterIterator textItr, float x, float y) {
     GlyphVector glyphs = getFont().createGlyphVector(getFontRenderContext(), textItr);
-    
-    for (int i = 0; i < glyphs.getNumGlyphs(); i++) {
+
+    pipeline.use(gl, true);
+    pipeline.setColor(gl, g2d.getUniformsObject().colorHook.getRGBA());
+    pipeline.setTransform(gl, g2d.getUniformsObject().transformHook.getGLMatrixData());
+
+    for (int i = 0; i < 1; i++) {
       Shape s = glyphs.getOutline();
-    }
-  }
 
-  @SuppressWarnings("serial")
-  public static class FontRenderCache extends HashMap<Font, TextRenderer[]> {
-    public TextRenderer getRenderer(Font font, boolean antiAlias) {
-      TextRenderer[] renderers = get(font);
-      if (renderers == null) {
-        renderers = new TextRenderer[2];
-        put(font, renderers);
-      }
+      CollectingTesselator tess = new CollectingTesselator();
+      visitShape(s, tess);
+      TesselatedTriangles triangles = tess.getTesselated();
 
-      TextRenderer renderer = renderers[antiAlias ? 1 : 0];
+      pipeline.setLocation(gl, x, y + i * 10);
 
-      if (renderer == null) {
-        renderer = new TextRenderer(font, antiAlias, false);
-        renderers[antiAlias ? 1 : 0] = renderer;
-      }
-
-      return renderer;
+      pipeline.bindBuffer(gl);
+      triangles.draw(gl);
+      pipeline.unbindBuffer(gl);
     }
 
-    public void dispose() {
-      for (TextRenderer[] value : values()) {
-        if (value[0] != null) {
-          value[0].dispose();
-        }
-        if (value[1] != null) {
-          value[1].dispose();
-        }
-      }
-    }
+    pipeline.use(gl, false);
   }
 }

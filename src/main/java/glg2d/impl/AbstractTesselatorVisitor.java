@@ -54,7 +54,12 @@ public abstract class AbstractTesselatorVisitor extends SimplePathVisitor {
   @Override
   public void beginPoly(int windingRule) {
     tesselator = GLU.gluNewTess();
+    configureTesselator(windingRule);
 
+    GLU.gluTessBeginPolygon(tesselator, null);
+  }
+
+  protected void configureTesselator(int windingRule) {
     switch (windingRule) {
     case PathIterator.WIND_EVEN_ODD:
       GLU.gluTessProperty(tesselator, GLU.GLU_TESS_WINDING_RULE, GLU.GLU_TESS_WINDING_ODD);
@@ -72,7 +77,6 @@ public abstract class AbstractTesselatorVisitor extends SimplePathVisitor {
     GLU.gluTessCallback(tesselator, GLU.GLU_TESS_COMBINE, callback);
     GLU.gluTessNormal(tesselator, 0, 0, -1);
 
-    GLU.gluTessBeginPolygon(tesselator, null);
   }
 
   @Override

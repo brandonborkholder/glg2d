@@ -162,10 +162,16 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
   protected String[] readShader(Class<?> context, String name) throws ShaderException {
     try {
       InputStream stream = null;
-      if (context == null) {
-        stream = AbstractShaderPipeline.class.getClassLoader().getResourceAsStream(name);
-      } else {
+      if (context != null) {
         stream = context.getResourceAsStream(name);
+      }
+      
+      if (stream == null) {
+        stream = AbstractShaderPipeline.class.getResourceAsStream(name);
+      }
+
+      if (stream == null) {
+        stream = AbstractShaderPipeline.class.getClassLoader().getResourceAsStream(name);
       }
 
       if (stream == null) {

@@ -178,8 +178,12 @@ public abstract class AbstractShapeHelper implements GLG2DShapeHelper {
   }
 
   protected abstract void fill(Shape shape, boolean isDefinitelySimpleConvex);
-
+  
   protected void traceShape(Shape shape, PathVisitor visitor) {
+    visitShape(shape, visitor);
+  }
+
+  public static void visitShape(Shape shape, PathVisitor visitor) {
     PathIterator iterator = shape.getPathIterator(null);
     visitor.beginPoly(iterator.getWindingRule());
 
