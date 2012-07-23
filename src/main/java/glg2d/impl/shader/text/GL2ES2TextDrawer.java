@@ -18,8 +18,10 @@ package glg2d.impl.shader.text;
 import static glg2d.impl.AbstractShapeHelper.visitShape;
 import glg2d.GLGraphics2D;
 import glg2d.impl.AbstractTextDrawer;
+import glg2d.impl.gl2.GL2TesselatorVisitor;
+import glg2d.impl.shader.GL2ES2TesselatingVisitor;
 import glg2d.impl.shader.GLShaderGraphics2D;
-import glg2d.impl.shader.text.CollectingTesselator.TesselatedTriangles;
+import glg2d.impl.shader.text.CollectingTesselator.Triangles;
 
 import java.awt.Shape;
 import java.awt.font.GlyphVector;
@@ -92,14 +94,17 @@ public class GL2ES2TextDrawer extends AbstractTextDrawer {
     pipeline.setColor(gl, g2d.getUniformsObject().colorHook.getRGBA());
     pipeline.setTransform(gl, g2d.getUniformsObject().transformHook.getGLMatrixData());
 
-    for (int i = 0; i < 1; i++) {
-      Shape s = glyphs.getOutline();
+    for (int i = 0; i < glyphs.getNumGlyphs(); i++) {
+      Shape s = glyphs.getGlyphOutline(i);
 
       CollectingTesselator tess = new CollectingTesselator();
+//      GL2TesselatorVisitor tess = new GL2TesselatorVisitor();
+//      GL2ES2TesselatingVisitor tess = new GL2ES2TesselatingVisitor();
+//      tess.setGLContext(gl, g2d.getUniformsObject());
       visitShape(s, tess);
-      TesselatedTriangles triangles = tess.getTesselated();
+      Triangles triangles = tess.getTesselated();
 
-      pipeline.setLocation(gl, x, y + i * 10);
+      pipeline.setLocation(gl, x, y);
 
       pipeline.bindBuffer(gl);
       triangles.draw(gl);

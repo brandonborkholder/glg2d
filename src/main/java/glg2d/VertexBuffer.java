@@ -95,6 +95,19 @@ public class VertexBuffer {
     buffer.put(y);
   }
 
+  /**
+   * Adds multiple vertices to the buffer.
+   * 
+   * @param vertices
+   *          The buffer of new vertices to add.
+   */
+  public void addVertices(FloatBuffer vertices) {
+    int size = vertices.limit() - vertices.position();
+    ensureCapacity(size);
+
+    buffer.put(vertices);
+  }
+
   protected void ensureCapacity(int numNewFloats) {
     if (buffer.capacity() <= buffer.position() + numNewFloats) {
       FloatBuffer larger = Buffers.newDirectFloatBuffer(buffer.position() * 2);
