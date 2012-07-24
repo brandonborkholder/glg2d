@@ -18,16 +18,13 @@ package glg2d.impl.shader.text;
 import static glg2d.impl.AbstractShapeHelper.visitShape;
 import glg2d.GLGraphics2D;
 import glg2d.impl.AbstractTextDrawer;
-import glg2d.impl.gl2.GL2TesselatorVisitor;
-import glg2d.impl.shader.GL2ES2TesselatingVisitor;
 import glg2d.impl.shader.GLShaderGraphics2D;
 import glg2d.impl.shader.text.CollectingTesselator.Triangles;
 
 import java.awt.Shape;
 import java.awt.font.GlyphVector;
+import java.awt.geom.Point2D;
 import java.text.AttributedCharacterIterator;
-import java.text.CharacterIterator;
-import java.text.StringCharacterIterator;
 
 import javax.media.opengl.GL2ES2;
 
@@ -79,38 +76,48 @@ public class GL2ES2TextDrawer extends AbstractTextDrawer {
 
   @Override
   public void drawString(AttributedCharacterIterator iterator, float x, float y) {
-    drawChars(iterator, x, y);
+    char[] chars = new char[iterator.getEndIndex() - iterator.getBeginIndex()];
+    for (int i = 0; i < chars.length; i++) {
+      chars[i] = iterator.next();
+    }
+
+    drawChars(chars, x, y);
   }
 
   @Override
   public void drawString(String string, float x, float y) {
-    drawChars(new StringCharacterIterator(string), x, y);
+    drawChars(string.toCharArray(), x, y);
   }
 
-  protected void drawChars(CharacterIterator textItr, float x, float y) {
-    GlyphVector glyphs = getFont().createGlyphVector(getFontRenderContext(), textItr);
-
+  protected void drawChars(char[] string, float x, float y) {
     pipeline.use(gl, true);
     pipeline.setColor(gl, g2d.getUniformsObject().colorHook.getRGBA());
     pipeline.setTransform(gl, g2d.getUniformsObject().transformHook.getGLMatrixData());
 
-    for (int i = 0; i < glyphs.getNumGlyphs(); i++) {
-      Shape s = glyphs.getGlyphOutline(i);
+    pipeline.bindBuffer(gl);
 
-      CollectingTesselator tess = new CollectingTesselator();
-//      GL2TesselatorVisitor tess = new GL2TesselatorVisitor();
-//      GL2ES2TesselatingVisitor tess = new GL2ES2TesselatingVisitor();
-//      tess.setGLContext(gl, g2d.getUniformsObject());
-      visitShape(s, tess);
-      Triangles triangles = tess.getTesselated();
+    GlyphVector glyphs = getFont().createGlyphVector(getFontRenderContext(), string);
+    for (int i = 0; i < string.length; i++) {
+      Triangles triangles = getTesselatedGlyph(string[i]);
 
-      pipeline.setLocation(gl, x, y);
+      Point2D pt = glyphs.getGlyphPosition(i);
+      pipeline.setLocation(gl, (float) pt.getX() + x, (float) pt.getY() + y);
 
-      pipeline.bindBuffer(gl);
       triangles.draw(gl);
-      pipeline.unbindBuffer(gl);
     }
 
+    pipeline.unbindBuffer(gl);
     pipeline.use(gl, false);
+  }
+
+  protected Triangles getTesselatedGlyph(char c) {
+    GlyphVector glyphVect = getFont().createGlyphVector(getFontRenderContext(), new char[] { c });
+    Shape s = glyphVect.getGlyphOutline(0);
+
+    CollectingTesselator tess = new CollectingTesselator();
+    visitShape(s, tess);
+    Triangles triangles = tess.getTesselated();
+
+    return triangles;
   }
 }
