@@ -20,7 +20,6 @@ import static java.lang.Math.ceil;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 import static java.lang.Math.sqrt;
-import glg2d.SimplePathVisitor;
 import glg2d.VertexBuffer;
 
 import java.awt.BasicStroke;

@@ -18,7 +18,6 @@ package glg2d.impl;
 import static java.lang.Math.acos;
 import static java.lang.Math.sqrt;
 import glg2d.PathVisitor;
-import glg2d.SimplePathVisitor;
 import glg2d.VertexBuffer;
 
 import java.awt.BasicStroke;

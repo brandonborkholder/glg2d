@@ -15,7 +15,6 @@
  */
 package glg2d.impl;
 
-import glg2d.SimplePathVisitor;
 import glg2d.VertexBuffer;
 
 import java.awt.BasicStroke;

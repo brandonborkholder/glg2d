@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package glg2d;
+package glg2d.impl;
+
+import glg2d.PathVisitor;
 
 /**
  * This is a fast B&eacute;zier curve implementation. I can't use OpenGL's
@@ -32,6 +34,20 @@ public abstract class SimplePathVisitor implements PathVisitor {
   public static final int CURVE_STEPS = 30;
 
   protected int steps = CURVE_STEPS;
+
+  /**
+   * Sets the number of steps to take in a quadratic or cubic curve spline.
+   */
+  public void setNumCurveSteps(int steps) {
+    this.steps = steps;
+  }
+
+  /**
+   * Gets the number of steps to take in a quadratic or cubic curve spline.
+   */
+  public int getNumCurveSteps() {
+    return steps;
+  }
 
   @Override
   public void quadTo(float[] previousVertex, float[] control) {

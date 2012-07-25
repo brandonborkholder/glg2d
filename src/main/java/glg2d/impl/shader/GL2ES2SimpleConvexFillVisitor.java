@@ -15,8 +15,8 @@
  */
 package glg2d.impl.shader;
 
-import glg2d.SimplePathVisitor;
 import glg2d.VertexBuffer;
+import glg2d.impl.SimplePathVisitor;
 
 import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
