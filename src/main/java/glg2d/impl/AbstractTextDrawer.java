@@ -80,7 +80,7 @@ public abstract class AbstractTextDrawer implements GLG2DTextHelper {
 
   @Override
   public FontRenderContext getFontRenderContext() {
-    return new FontRenderContext(g2d.getTransform(), stack.peek().antiAlias, false);
+    return new FontRenderContext(g2d.getTransform(), stack.peek().antiAlias, true);
   }
 
   /**
