@@ -1,7 +1,5 @@
 package glg2d;
 
-import glg2d.misc.InstrumentPaint;
-
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -323,8 +321,6 @@ public class UIDemo extends JPanel {
   }
 
   public static void main(String[] args) throws Exception {
-    InstrumentPaint.instrument();
-    
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     JFrame frame = new JFrame("Swing Demo");
 

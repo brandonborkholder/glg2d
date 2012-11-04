@@ -20,20 +20,5 @@
       <artifactId>miglayout-swing</artifactId>
       <version>4.2</version>
     </dependency>
-
-    <!-- javassist and the tools jar are used to instrument paint() methods 
-      to check the Graphics object -->
-    <dependency>
-      <groupId>org.javassist</groupId>
-      <artifactId>javassist</artifactId>
-      <version>3.15.0-GA</version>
-    </dependency>
-    <dependency>
-      <groupId>com.sun</groupId>
-      <artifactId>tools</artifactId>
-      <version>none</version>
-      <systemPath>${java.home}/../lib/tools.jar</systemPath>
-      <scope>system</scope>
-    </dependency>
   </dependencies>
 </project>
