@@ -35,7 +35,7 @@
     <url>https://github.com/brandonborkholder/glg2d</url>
   </scm>
   <properties>
-    <jogl.version>2.0-rc8</jogl.version>
+    <jogl.version>2.0-rc11</jogl.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencies>
@@ -46,7 +46,7 @@
       <artifactId>jogl</artifactId>
       <version>${jogl.version}</version>
       <scope>system</scope>
-      <systemPath>${basedir}/lib/jogl-${jogl.version}/jogl.all.jar</systemPath>
+      <systemPath>${basedir}/lib/jogl-${jogl.version}/jogl-all.jar</systemPath>
       <optional>true</optional>
     </dependency>
     <dependency>

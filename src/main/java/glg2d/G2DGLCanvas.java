@@ -28,7 +28,6 @@ import javax.media.opengl.GLCapabilitiesImmutable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
-import javax.media.opengl.GLPbuffer;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.Threading;
 import javax.media.opengl.awt.GLCanvas;
@@ -61,13 +60,14 @@ public class G2DGLCanvas extends JComponent {
   private static final long serialVersionUID = -471481443599019888L;
 
   protected GLAutoDrawable canvas;
+  protected GLCapabilitiesImmutable chosenCapabilities;
 
   protected GLEventListener g2dglListener;
 
   /**
    * @see #removeNotify()
    */
-  private GLPbuffer sideContext;
+  private GLAutoDrawable sideContext;
 
   private JComponent drawableComponent;
 
@@ -210,6 +210,7 @@ public class G2DGLCanvas extends JComponent {
   protected GLAutoDrawable createGLComponent(GLCapabilitiesImmutable capabilities, GLContext shareWith) {
     GLCanvas canvas = new GLCanvas(capabilities, shareWith);
     canvas.setEnabled(false);
+    chosenCapabilities = (GLCapabilitiesImmutable) capabilities.cloneMutable();
     return canvas;
   }
 
@@ -249,7 +250,7 @@ public class G2DGLCanvas extends JComponent {
     remove((Component) canvas);
     super.removeNotify();
 
-    canvas = createGLComponent(sideContext.getChosenGLCapabilities(), sideContext.getContext());
+    canvas = createGLComponent(chosenCapabilities, sideContext.getContext());
     canvas.addGLEventListener(g2dglListener);
     add((Component) canvas, 0);
   }
@@ -257,7 +258,7 @@ public class G2DGLCanvas extends JComponent {
   private void prepareSideContext() {
     if (sideContext == null) {
       GLDrawableFactory factory = canvas.getFactory();
-      sideContext = factory.createGLPbuffer(null, canvas.getChosenGLCapabilities(), null, 1, 1, canvas.getContext());
+      sideContext = factory.createOffscreenAutoDrawable(null, chosenCapabilities, null, 1, 1, canvas.getContext());
       sideContext.addGLEventListener(g2dglListener);
     }
 
