@@ -39,23 +39,15 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencies>
-    <!-- once JOGL is in maven, this should definitely be changed. It's optional 
-      so it doesn't conflict with a dependency someone else has in their repo. -->
     <dependency>
-      <groupId>jogl</groupId>
-      <artifactId>jogl</artifactId>
-      <version>${jogl.version}</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/lib/jogl-${jogl.version}/jogl-all.jar</systemPath>
-      <optional>true</optional>
+      <groupId>org.jogamp.gluegen</groupId>
+      <artifactId>gluegen-rt-main</artifactId>
+      <version>2.0-rc11</version>
     </dependency>
     <dependency>
-      <groupId>jogl</groupId>
-      <artifactId>gluegen-rt</artifactId>
-      <version>${jogl.version}</version>
-      <scope>system</scope>
-      <systemPath>${basedir}/lib/jogl-${jogl.version}/gluegen-rt.jar</systemPath>
-      <optional>true</optional>
+      <groupId>org.jogamp.jogl</groupId>
+      <artifactId>jogl-all-main</artifactId>
+      <version>2.0-rc11</version>
     </dependency>
 
     <!-- I put the test dependencies in a separate pom so I can use the tools.jar 
