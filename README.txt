@@ -17,4 +17,4 @@ distributed separately.
 
 How to build
 
-This project uses maven, run mvn compile to complete the build.
+This project uses maven, run mvn package to build the jar in the ./target/ dir.
