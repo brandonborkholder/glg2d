@@ -1,5 +1,7 @@
 .project
 .classpath
+.settings
+.nbproject
 target
 lib/jogl-*/*.jar
 lib/jogl-*/*.zip

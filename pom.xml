@@ -42,30 +42,20 @@
     <dependency>
       <groupId>org.jogamp.gluegen</groupId>
       <artifactId>gluegen-rt-main</artifactId>
-      <version>2.0-rc11</version>
+      <version>${jogl.version}</version>
     </dependency>
     <dependency>
       <groupId>org.jogamp.jogl</groupId>
       <artifactId>jogl-all-main</artifactId>
-      <version>2.0-rc11</version>
+      <version>${jogl.version}</version>
     </dependency>
-
-    <!-- I put the test dependencies in a separate pom so I can use the tools.jar 
-      system dependency. -->
     <dependency>
-      <groupId>com.jogamp</groupId>
-      <artifactId>glg2d-test</artifactId>
-      <version>0.1-SNAPSHOT</version>
-      <type>pom</type>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
-  <repositories>
-    <repository>
-      <id>glg2d-project-local</id>
-      <url>file://${basedir}/lib</url>
-    </repository>
-  </repositories>
   <build>
     <plugins>
 
