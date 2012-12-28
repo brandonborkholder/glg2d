@@ -131,8 +131,12 @@ public class G2DGLPanel extends G2DGLCanvas {
   public void paint(Graphics g) {
     if (isGLDrawing() && getDrawableComponent() != null && canvas != null) {
       if (g2d == null) {
+        // TODO: stack blown on UIDemo ComboBox if using canvas.display();
+        /*
         ((G2DGLEventListener) g2dglListener).canvas = this;
         canvas.display();
+        */
+        getDrawableComponent().paint(g);
       } else {
         getDrawableComponent().paint(g2d);
       }

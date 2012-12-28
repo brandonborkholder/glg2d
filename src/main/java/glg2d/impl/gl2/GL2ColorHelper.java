@@ -22,6 +22,7 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Paint;
+import java.awt.GradientPaint;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
@@ -39,6 +40,9 @@ public class GL2ColorHelper extends AbstractColorHelper {
   public void setPaint(Paint paint) {
     if (paint instanceof Color) {
       setColor((Color) paint);
+    } else if (paint instanceof GradientPaint) {
+      // TODO add full support for GradientPaint
+      setColor(((GradientPaint) paint).getColor1());
     } else {
       // TODO
       throw new UnsupportedOperationException();

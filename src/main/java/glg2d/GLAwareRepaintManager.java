@@ -66,7 +66,9 @@ public class GLAwareRepaintManager extends RepaintManager {
 
         r = filter(r);
         G2DGLPanel canvas = getGLParent(r.keySet().iterator().next());
-        canvas.paintGLImmediately(r);
+        if(canvas != null) {
+           canvas.paintGLImmediately(r);
+        }
       }
     });
   }
