@@ -86,6 +86,8 @@ public class FastLineVisitor extends SimplePathVisitor {
       gl.glEnable(GL2.GL_LINE_STIPPLE);
       int factor = (int) totalLength;
       gl.glLineStipple(factor >> 4, (short) mask);
+    } else {
+      gl.glDisable(GL2.GL_LINE_STIPPLE);
     }
 
     this.stroke = stroke;
