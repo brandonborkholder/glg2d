@@ -52,7 +52,8 @@ public abstract class AbstractShapeHelper implements GLG2DShapeHelper {
 
   @Override
   public void setG2D(GLGraphics2D g2d) {
-    // nop
+    strokeStack.clear();
+    strokeStack.push(new BasicStroke());
   }
 
   @Override

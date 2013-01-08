@@ -25,7 +25,9 @@ import java.awt.RenderingHints;
 public interface G2DDrawingHelper {
   /**
    * Sets the current {@code GLGraphics2D} parent. The current {@code GL} and
-   * {@code GLContext} objects can be accessed from this.
+   * {@code GLContext} objects can be accessed from this. This should clear all
+   * internal stacks in the helper object because previous painting iterations
+   * may not have called dispose() for each time they called create().
    * 
    * @param g2d
    *          The parent context for subsequent drawing operations.
