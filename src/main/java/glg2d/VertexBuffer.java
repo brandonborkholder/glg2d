@@ -145,17 +145,6 @@ public class VertexBuffer {
       return;
     }
 
-    /*
-     * XXX This fixes a strange bug where a client-side vertex array doesn't
-     * work well on my video card under certain conditions. It's like the call
-     * to glIsBuffer(int) clear some kind of state and everything works like it
-     * should.
-     * 
-     * VisualTest.lineWidthTest() especially shows this bug when this line is
-     * removed.
-     */
-    gl.glIsBuffer(0);
-
     int count = buffer.position();
     buffer.rewind();
 
