@@ -464,7 +464,8 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
         int maxY = (int) Math.max(pts[1], Math.max(pts[3], Math.max(pts[5], pts[7])));
         return new Rectangle(minX, minY, maxX - minX, maxY - minY);
       } catch (NoninvertibleTransformException e) {
-        throw new RuntimeException("Expected exception", e);
+        // TODO: throw new RuntimeException("Expected exception", e);
+        return clip.getBounds();
       }
     }
   }
