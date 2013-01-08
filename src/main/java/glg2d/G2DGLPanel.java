@@ -15,8 +15,6 @@
  */
 package glg2d;
 
-import java.awt.Component;
-import java.awt.Container;
 import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.util.Map;
@@ -27,7 +25,6 @@ import javax.media.opengl.GLCapabilitiesImmutable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.awt.GLJPanel;
 import javax.swing.JComponent;
-import javax.swing.JViewport;
 import javax.swing.RepaintManager;
 
 /**
@@ -82,32 +79,6 @@ public class G2DGLPanel extends G2DGLCanvas {
   public G2DGLPanel(GLCapabilities capabilities, JComponent drawableComponent) {
     this(capabilities);
     setDrawableComponent(drawableComponent);
-  }
-
-  @Override
-  public void setDrawableComponent(JComponent component) {
-    super.setDrawableComponent(component);
-
-    if (component != null) {
-      forceViewportToNativeDraw(component);
-    }
-  }
-
-  /**
-   * XXX This is a workaround until I figure out how to do blitting properly in
-   * viewports.
-   */
-  private void forceViewportToNativeDraw(Container parent) {
-    for (int i = 0; i < parent.getComponentCount(); i++) {
-      Component c = parent.getComponent(i);
-      if (c instanceof JViewport) {
-        ((JViewport) c).setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
-      }
-
-      if (c instanceof Container) {
-        forceViewportToNativeDraw((Container) c);
-      }
-    }
   }
 
   @Override

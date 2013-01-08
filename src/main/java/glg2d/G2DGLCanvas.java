@@ -32,6 +32,8 @@ import javax.media.opengl.GLProfile;
 import javax.media.opengl.Threading;
 import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
+import javax.swing.JViewport;
 
 /**
  * This canvas redirects all paints to an OpenGL canvas. The drawable component
@@ -188,6 +190,8 @@ public class G2DGLCanvas extends JComponent {
 
     drawableComponent = component;
     if (drawableComponent != null) {
+      verifyHierarchy(drawableComponent);
+
       g2dglListener = createG2DListener(drawableComponent);
       canvas.addGLEventListener(g2dglListener);
       if (sideContext != null) {
@@ -195,6 +199,32 @@ public class G2DGLCanvas extends JComponent {
       }
 
       add(drawableComponent);
+    }
+  }
+
+  /**
+   * Checks the component and all children to ensure that everything is pure
+   * Swing. We can only draw lightweights.
+   * 
+   * 
+   * We'll also set PopupMenus to heavyweight and fix JViewport blitting.
+   */
+  protected void verifyHierarchy(Component comp) {
+    JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+
+    if (!(comp instanceof JComponent)) {
+      System.err.println("Drawable component and children should be pure Swing: " + comp + " does not inherit JComponent");
+    }
+
+    if (comp instanceof JViewport) {
+      ((JViewport) comp).setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
+    }
+
+    if (comp instanceof Container) {
+      Container cont = (Container) comp;
+      for (int i = 0; i < cont.getComponentCount(); i++) {
+        verifyHierarchy(cont.getComponent(i));
+      }
     }
   }
 
