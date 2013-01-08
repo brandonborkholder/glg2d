@@ -15,14 +15,15 @@
  */
 package glg2d.impl.gl2;
 
+import static glg2d.impl.GLG2DNotImplemented.notImplemented;
 import glg2d.GLGraphics2D;
 import glg2d.impl.AbstractColorHelper;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
-import java.awt.Paint;
 import java.awt.GradientPaint;
+import java.awt.Paint;
 
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2GL3;
@@ -41,11 +42,15 @@ public class GL2ColorHelper extends AbstractColorHelper {
     if (paint instanceof Color) {
       setColor((Color) paint);
     } else if (paint instanceof GradientPaint) {
-      // TODO add full support for GradientPaint
-      setColor(((GradientPaint) paint).getColor1());
-    } else {
       // TODO
-      throw new UnsupportedOperationException();
+      setColor(((GradientPaint) paint).getColor1());
+      notImplemented("setPaint(Paint) with GradientPaint");
+    } else {
+      notImplemented("setPaint(Paint) with " + paint.getClass().getSimpleName());
+      // TODO
+      // This will probably be easier to handle with a fragment shader
+      // in the shader pipeline, not sure how to handle it in the fixed-
+      // function pipeline.
     }
   }
 
@@ -82,11 +87,13 @@ public class GL2ColorHelper extends AbstractColorHelper {
 
   @Override
   public void setPaintMode() {
+    notImplemented("setPaintMode()");
     // TODO Auto-generated method stub
   }
 
   @Override
   public void setXORMode(Color c) {
+    notImplemented("setXORMode(Color)");
     // TODO Auto-generated method stub
   }
 

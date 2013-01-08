@@ -15,6 +15,7 @@
  */
 package glg2d.impl;
 
+import static glg2d.impl.GLG2DNotImplemented.notImplemented;
 import glg2d.GLG2DColorHelper;
 import glg2d.GLGraphics2D;
 
@@ -117,7 +118,7 @@ public abstract class AbstractColorHelper implements GLG2DColorHelper {
       // need to pre-multiply the alpha
       setColor(getColor());
     } else {
-      throw new UnsupportedOperationException();
+      notImplemented("setComposite(Composite) with " + comp.getClass().getSimpleName());
     }
   }
 
@@ -172,8 +173,7 @@ public abstract class AbstractColorHelper implements GLG2DColorHelper {
       try {
         return (ColorState) super.clone();
       } catch (CloneNotSupportedException e) {
-        // can't think of a reason this would happen
-        throw new RuntimeException(e);
+        throw new AssertionError(e);
       }
     }
   }

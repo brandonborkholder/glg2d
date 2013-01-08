@@ -21,6 +21,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.LayoutManager2;
 import java.io.Serializable;
+import java.util.logging.Logger;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
@@ -213,7 +214,8 @@ public class G2DGLCanvas extends JComponent {
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
     if (!(comp instanceof JComponent)) {
-      System.err.println("Drawable component and children should be pure Swing: " + comp + " does not inherit JComponent");
+      Logger.getLogger(G2DGLCanvas.class.getName()).warning("Drawable component and children should be pure Swing: " +
+          comp + " does not inherit JComponent");
     }
 
     if (comp instanceof JViewport) {

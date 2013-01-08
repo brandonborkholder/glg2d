@@ -53,6 +53,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
@@ -464,7 +466,9 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
         int maxY = (int) Math.max(pts[1], Math.max(pts[3], Math.max(pts[5], pts[7])));
         return new Rectangle(minX, minY, maxX - minX, maxY - minY);
       } catch (NoninvertibleTransformException e) {
-        // TODO: throw new RuntimeException("Expected exception", e);
+        // Not sure why this would happen
+        Logger.getLogger(GLGraphics2D.class.getName()).log(Level.WARNING, "User transform is non-invertible", e);
+
         return clip.getBounds();
       }
     }
@@ -690,7 +694,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
       clone.hints = (RenderingHints) hints.clone();
       return clone;
     } catch (CloneNotSupportedException exception) {
-      throw new RuntimeException(exception);
+      throw new AssertionError(exception);
     }
   }
 }

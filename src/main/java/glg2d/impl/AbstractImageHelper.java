@@ -15,6 +15,7 @@
  */
 package glg2d.impl;
 
+import static glg2d.impl.GLG2DNotImplemented.notImplemented;
 import glg2d.GLG2DImageHelper;
 import glg2d.GLGraphics2D;
 
@@ -189,20 +190,20 @@ public abstract class AbstractImageHelper implements GLG2DImageHelper {
 
   @Override
   public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y) {
-    // TODO Not implemented yet!
-    System.err.println("drawImage(BufferedImage, BufferedImageOp, int, int) not implemented yet!");
+    // TODO
+    notImplemented("drawImage(BufferedImage, BufferedImageOp, int, int)");
   }
 
   @Override
   public void drawImage(RenderedImage img, AffineTransform xform) {
-    // TODO Not implemented yet!
-    System.err.println("drawImage(RenderedImage, AffineTransform) not implemented yet!");
+    // TODO
+    notImplemented("drawImage(RenderedImage, AffineTransform)");
   }
 
   @Override
   public void drawImage(RenderableImage img, AffineTransform xform) {
-    // TODO Not implemented yet!
-    System.err.println("drawImage(RenderableImage, AffineTransform) not implemented yet!");
+    // TODO
+    notImplemented("drawImage(RenderableImage, AffineTransform)");
   }
 
   @SuppressWarnings("serial")

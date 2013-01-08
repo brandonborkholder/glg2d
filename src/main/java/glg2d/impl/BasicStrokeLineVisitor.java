@@ -15,6 +15,7 @@
  */
 package glg2d.impl;
 
+import static glg2d.impl.GLG2DNotImplemented.notImplemented;
 import static java.lang.Math.acos;
 import static java.lang.Math.ceil;
 import static java.lang.Math.cos;
@@ -56,6 +57,11 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
     lineOffset = stroke.getLineWidth() / 2;
     endCap = stroke.getEndCap();
     miterLimit = stroke.getMiterLimit();
+
+    // TODO
+    if (stroke.getDashArray() != null) {
+      notImplemented("BasicStroke with dash array");
+    }
   }
 
   @Override
@@ -183,7 +189,7 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
       break;
 
     default:
-      throw new IllegalStateException("This class cannot support unknown line join");
+      GLG2DNotImplemented.notImplemented("BasicStroke with unknown line join: " + lineJoin);
     }
   }
 

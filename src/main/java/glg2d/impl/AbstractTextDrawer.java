@@ -149,8 +149,7 @@ public abstract class AbstractTextDrawer implements GLG2DTextHelper {
       try {
         return (FontState) super.clone();
       } catch (CloneNotSupportedException e) {
-        // can't think of a reason this would happen
-        throw new RuntimeException(e);
+        throw new AssertionError(e);
       }
     }
   }
