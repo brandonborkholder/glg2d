@@ -1,2 +1,5 @@
-glg2d
-glg2d.shaders
+org.jogamp.glg2d
+org.jogamp.glg2d.impl
+org.jogamp.glg2d.impl.gl2
+org.jogamp.glg2d.impl.shader
+org.jogamp.glg2d.impl.shader.text
