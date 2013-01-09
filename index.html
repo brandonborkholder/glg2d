@@ -50,14 +50,60 @@
       We use the latest <a href="http://jogamp.org/jogl/www/">JOGL</a> libraries for the OpenGL implementation.
       </p>
 
-      <h2>Source</h2>
+      <h2>Get started with <span class="glg2d">GLG2D</span></h2>
       <p>
       You can find the source on GitHub at <a href="http://github.com/brandonborkholder/glg2d/">http://github.com/brandonborkholder/glg2d/</a>.
       </p>
 
       <p>
-      Check out the <a href="apidocs/index.html">Javadocs</a>.
+      GLG2D is not in Maven Central yet, but you can point your pom to our repository to fetch the artifacts.
       </p>
+
+<pre>
+&lt;project&gt;
+ ...
+ &lt;dependencies&gt;
+   &lt;dependency&gt;
+     &lt;groupId&gt;org.jogamp.glg2d&lt;/groupId&gt;
+     &lt;artifactId&gt;glg2d&lt;/artifactId&gt;
+     &lt;version&gt;0.3-SNAPSHOT&lt;/version&gt;
+   &lt;/dependency&gt;
+ &lt;/dependencies&gt;
+ &lt;repositories&gt;
+   &lt;repository&gt;
+     &lt;id&gt;glg2d-repo&lt;/id&gt;
+     &lt;url&gt;http://brandonborkholder.github.com/glg2d/maven2/&lt;/url&gt;
+   &lt;/repository&gt;
+ &lt;/repositories&gt;
+ ...
+&lt;/project&gt;
+</pre>
+
+      <p>
+      Or download directly from <a href="maven2/org/jogamp/glg2d/glg2d/">here</a> and check out the <a href="apidocs/index.html">Javadocs</a>.
+      </p>
+
+      <p>
+      It's very easy to get started using GLG2D.  As a library, GLG2D is designed to wrap your existing rendering code.  If you're using Java2D to render, most likely you're rendering a scene into a some instance of <span class="code">JComponent</span>.  In order to render your scene using OpenGL instead of Java2D, just wrap your <span class="code">JComponent</span> inside a <span class="code">GLG2DCanvas</span> or <span class="code">GLG2DPanel</span>.
+
+      <ul>
+        <li>
+        Use <a href="apidocs/index.html?org/jogamp/glg2d/GLG2DCanvas.html">GLG2DCanvas</a> when you are rendering a complex scene into a single component, with no Swing hierarchy - this is the intended use case and where you'll see a greater performance boost
+        </li>
+        <li>
+        Use <a href="apidocs/index.html?org/jogamp/glg2d/GLG2DPanel.html">GLG2DPanel</a> when you want to render an entire Swing hierarchy with GLG2D
+        </li>
+      </ul>
+      </p>
+
+<pre>
+JComponent renderPane = ...
+
+JFrame frame = new JFrame("My Game");
+frame.setContentPane(new GLG2DCanvas(renderPane));
+...
+</pre>
+      And that's it!
 
       <h2>Contact</h2>
       <p>
