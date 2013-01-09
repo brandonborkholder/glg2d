@@ -2,8 +2,7 @@ GLG2D is an effort to translate Graphics2D calls directly into OpenGL calls
 and accelerate the Java2D drawing functionality.  The existing OpenGL pipeline
 in the Oracle JVM is minimal at best and doesn't use higher-level OpenGL
 primitives, like GL_POLYGON and GLU tesselation that make drawing in OpenGL so
-fast.  Therefore, this library depends on the JOGL 2.0-rc11 library and as JOGL
-evolves, so will this library.
+fast.
 
 Find more information on http://brandonborkholder.github.com/glg2d/
 
@@ -17,4 +16,14 @@ distributed separately.
 
 How to build
 
-This project uses maven, run mvn package to build the jar in the ./target/ dir.
+This project uses maven, run mvn package to build the jar in the ./target/ dir
+or add the following to your pom.xml
+<dependency>
+ <groupId>org.jogamp.glg2d</groupId>
+ <artifactId>glg2d</artifactId>
+ <version>${glg2d.version}</version>
+</dependency>
+
+Make sure you also add the GLG2D repository at
+http://brandonborkholder.github.com/glg2d/maven2/
+
