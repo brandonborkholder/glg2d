@@ -53,7 +53,7 @@ public class GLG2DEventListener extends GLG2DSimpleEventListener {
    */
   @Override
   protected void paintGL(GLGraphics2D g2d) {
-    RepaintManager mgr = RepaintManager.currentManager(baseComponent);
+    RepaintManager mgr = RepaintManager.currentManager(comp);
     boolean doubleBuffer = mgr.isDoubleBufferingEnabled();
     mgr.setDoubleBufferingEnabled(false);
 
@@ -62,7 +62,7 @@ public class GLG2DEventListener extends GLG2DSimpleEventListener {
     if (isPaintingDirtyRects()) {
       paintDirtyRects();
     } else {
-      baseComponent.paint(g2d);
+      comp.paint(g2d);
     }
 
     canvas.g2d = null;

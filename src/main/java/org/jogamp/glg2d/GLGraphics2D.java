@@ -15,11 +15,9 @@
  */
 package org.jogamp.glg2d;
 
-
 import java.awt.AlphaComposite;
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Composite;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -67,31 +65,55 @@ import org.jogamp.glg2d.impl.gl2.GL2Transformhelper;
  * to an OpenGL canvas.
  */
 public class GLGraphics2D extends Graphics2D implements Cloneable {
+  /**
+   * The parent graphics object, if we have one. This reference is used to pass
+   * control back to the parent.
+   */
   protected GLGraphics2D parent;
 
+  /**
+   * When we are painting, this is the context we're painting into.
+   */
   protected GLContext glContext;
 
-  protected boolean isDisposed;
+  /**
+   * Ensures we only dispose() once.
+   */
+  private boolean isDisposed;
 
-  protected int canvasHeight;
+  /**
+   * Keeps the current viewport height for things like painting text.
+   */
+  private int canvasHeight;
+
+  /**
+   * All the drawing helpers or listeners to drawing events.
+   */
+  protected G2DDrawingHelper[] helpers = new G2DDrawingHelper[0];
+
+  /*
+   * The following are specific drawing helpers used explicitly.
+   */
 
   protected GLG2DShapeHelper shapeHelper;
-
   protected GLG2DImageHelper imageHelper;
-
   protected GLG2DTextHelper stringHelper;
-
   protected GLG2DTransformHelper matrixHelper;
-
   protected GLG2DColorHelper colorHelper;
 
+  /**
+   * The current clip rectangle. This implementation supports only rectangular
+   * clip areas. This clip must be treated as immutable and replaced but never
+   * changed.
+   */
   protected Rectangle clip;
 
   protected GraphicsConfiguration graphicsConfig;
 
+  /**
+   * The set of cached hints for this graphics object.
+   */
   protected RenderingHints hints;
-
-  protected G2DDrawingHelper[] helpers = new G2DDrawingHelper[0];
 
   public GLGraphics2D() {
     hints = new RenderingHints(Collections.<Key, Object> emptyMap());
@@ -175,30 +197,28 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     }
   }
 
-  protected void setupGLView(GL gl, Component component) {
-    canvasHeight = component.getHeight();
-    gl.glViewport(component.getX(), component.getY(), component.getWidth(), component.getHeight());
-  }
-
-  protected void prePaint(GLAutoDrawable drawable, Component component) {
-    setupGLView(drawable.getGL(), component);
+  /**
+   * Sets up the graphics object in preparation for drawing. Initialization such
+   * as getting the viewport
+   */
+  public void prePaint(GLAutoDrawable drawable) {
+    canvasHeight = GLG2DUtils.getViewportHeight(drawable.getGL());
     setCanvas(drawable);
-    setupState(component);
+    setDefaultState();
   }
 
-  protected void setupState(Component component) {
-    // set the GL state to use defaults from the component
-    setBackground(component.getBackground());
-    setColor(component.getForeground());
-    setFont(component.getFont());
+  protected void setDefaultState() {
+    setBackground(Color.black);
+    setColor(Color.white);
+    setFont(Font.getFont(Font.SANS_SERIF));
     setStroke(new BasicStroke());
     setComposite(AlphaComposite.SrcOver);
     setClip(null);
     setRenderingHints(null);
-    graphicsConfig = component.getGraphicsConfiguration();
+    graphicsConfig = null; // TODO this must be fixed ASAP!
   }
 
-  protected void postPaint() {
+  public void postPaint() {
     // could glFlush here, but not necessary
   }
 

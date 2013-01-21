@@ -18,16 +18,21 @@ package org.jogamp.glg2d;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLEventListener;
 import javax.swing.JComponent;
-import javax.swing.RepaintManager;
 
 /**
  * Helps wrap the {@code GLGraphics2D} object within the JOGL framework and
  * paints the component fully for each display.
  */
 public class GLG2DSimpleEventListener implements GLEventListener {
+  /**
+   * The cached graphics object.
+   */
   protected GLGraphics2D g2d;
 
-  protected JComponent baseComponent;
+  /**
+   * The component to paint.
+   */
+  protected JComponent comp;
 
   /**
    * Creates a new listener that will paint using the {@code baseComponent} on
@@ -37,7 +42,7 @@ public class GLG2DSimpleEventListener implements GLEventListener {
    * of the viewport in OpenGL.
    */
   public GLG2DSimpleEventListener(JComponent baseComponent) {
-    this.baseComponent = baseComponent;
+    this.comp = baseComponent;
   }
 
   @Override
@@ -53,7 +58,13 @@ public class GLG2DSimpleEventListener implements GLEventListener {
    * client state.
    */
   protected void prePaint(GLAutoDrawable drawable) {
-    g2d.prePaint(drawable, baseComponent);
+    setupViewport(drawable);
+    g2d.prePaint(drawable);
+    g2d.setClip(comp.getX(), comp.getY(), comp.getWidth(), comp.getHeight());
+  }
+
+  protected void setupViewport(GLAutoDrawable drawable) {
+    drawable.getGL().glViewport(comp.getX(), comp.getY(), comp.getWidth(), comp.getHeight());
   }
 
   /**
@@ -74,13 +85,12 @@ public class GLG2DSimpleEventListener implements GLEventListener {
    * </p>
    */
   protected void paintGL(GLGraphics2D g2d) {
-    RepaintManager mgr = RepaintManager.currentManager(baseComponent);
-    boolean doubleBuffer = mgr.isDoubleBufferingEnabled();
-    mgr.setDoubleBufferingEnabled(false);
+    boolean wasDoubleBuffered = comp.isDoubleBuffered();
+    comp.setDoubleBuffered(false);
 
-    baseComponent.paint(g2d);
+    comp.paint(g2d);
 
-    mgr.setDoubleBufferingEnabled(doubleBuffer);
+    comp.setDoubleBuffered(wasDoubleBuffered);
   }
 
   @Override

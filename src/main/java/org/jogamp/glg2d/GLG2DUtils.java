@@ -66,7 +66,7 @@ public class GLG2DUtils {
     return c.getComponents(null);
   }
 
-  public static int getCanvasHeight(GL gl) {
+  public static int getViewportHeight(GL gl) {
     int[] viewportDimensions = new int[4];
     gl.glGetIntegerv(GL.GL_VIEWPORT, viewportDimensions, 0);
     int canvasHeight = viewportDimensions[3];
