@@ -15,7 +15,6 @@
  */
 package org.jogamp.glg2d.impl.gl2;
 
-
 import java.awt.Color;
 import java.awt.geom.AffineTransform;
 
@@ -25,14 +24,22 @@ import javax.media.opengl.GL2ES1;
 import javax.media.opengl.fixedfunc.GLMatrixFunc;
 
 import org.jogamp.glg2d.GLG2DUtils;
+import org.jogamp.glg2d.GLGraphics2D;
 import org.jogamp.glg2d.impl.AbstractImageHelper;
 
 import com.jogamp.opengl.util.texture.Texture;
 
 public class GL2ImageDrawer extends AbstractImageHelper {
+  protected GL2 gl;
+
+  @Override
+  public void setG2D(GLGraphics2D g2d) {
+    super.setG2D(g2d);
+    gl = g2d.getGLContext().getGL().getGL2();
+  }
+
   @Override
   protected void begin(Texture texture, AffineTransform xform, Color bgcolor) {
-    GL2 gl = g2d.getGLContext().getGL().getGL2();
     gl.glTexEnvi(GL2ES1.GL_TEXTURE_ENV, GL2ES1.GL_TEXTURE_ENV_MODE, GL2ES1.GL_MODULATE);
     gl.glTexParameterf(GL2ES1.GL_TEXTURE_ENV, GL2ES1.GL_TEXTURE_ENV_MODE, GL.GL_BLEND);
 
@@ -49,7 +56,7 @@ public class GL2ImageDrawer extends AbstractImageHelper {
     gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
     gl.glPushMatrix();
 
-    if (xform != null) {
+    if (xform != null && !xform.isIdentity()) {
       GLG2DUtils.multMatrix(gl, xform);
     }
 
@@ -58,8 +65,6 @@ public class GL2ImageDrawer extends AbstractImageHelper {
 
   @Override
   protected void end(Texture texture) {
-    GL2 gl = g2d.getGLContext().getGL().getGL2();
-    gl.glEnd();
     gl.glPopMatrix();
 
     texture.disable(gl);
@@ -68,7 +73,6 @@ public class GL2ImageDrawer extends AbstractImageHelper {
 
   @Override
   protected void applyTexture(Texture texture, int dx1, int dy1, int dx2, int dy2, float sx1, float sy1, float sx2, float sy2) {
-    GL2 gl = g2d.getGLContext().getGL().getGL2();
     gl.glBegin(GL2.GL_QUADS);
 
     // SW

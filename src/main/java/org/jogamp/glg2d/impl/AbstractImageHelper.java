@@ -164,7 +164,7 @@ public abstract class AbstractImageHelper implements GLG2DImageHelper {
     Texture texture = cache.get(image);
     if (texture == null) {
       BufferedImage bufferedImage;
-      if (image instanceof BufferedImage) {
+      if (image instanceof BufferedImage && ((BufferedImage) image).getType() != BufferedImage.TYPE_CUSTOM) {
         bufferedImage = (BufferedImage) image;
       } else {
         bufferedImage = toBufferedImage(image);
@@ -173,6 +173,7 @@ public abstract class AbstractImageHelper implements GLG2DImageHelper {
       texture = AWTTextureIO.newTexture(g2d.getGLContext().getGL().getGLProfile(), bufferedImage, false);
       cache.put(image, texture);
     }
+    
 
     return texture;
   }
