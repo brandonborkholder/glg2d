@@ -52,7 +52,6 @@ import java.util.logging.Logger;
 import javax.media.opengl.GL;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
-import javax.media.opengl.Threading;
 
 import org.jogamp.glg2d.impl.gl2.GL2ColorHelper;
 import org.jogamp.glg2d.impl.gl2.GL2ImageDrawer;
@@ -692,7 +691,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
      * This is also called on the finalizer thread, which should not make OpenGL
      * calls. We also want to make sure that this only executes once.
      */
-    if (!isDisposed && Threading.isOpenGLThread()) {
+    if (!isDisposed) {
       isDisposed = true;
 
       if (parent != null) {
