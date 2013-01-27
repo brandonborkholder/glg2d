@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
 import javax.swing.JPanel;
+import javax.swing.JSlider;
 
 import com.jogamp.opengl.util.Animator;
 
@@ -39,6 +40,8 @@ public class GLG2DWindowTest
 		panel.add(new TestButton("TOP"));
 		// panel.add(panel2);
 		panel.add(new TestButton("BOTTOM"));
+    
+		panel.add(new JSlider(JSlider.HORIZONTAL));
 
 		window.setContentPane(panel);
 		window.setSize(300, 300);

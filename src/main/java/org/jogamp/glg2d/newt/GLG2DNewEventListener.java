@@ -25,10 +25,10 @@ public class GLG2DNewEventListener extends GLG2DSimpleEventListener
 	public void reshape(GLAutoDrawable drawable, int x, int y, int width,
 	        int height)
 	{
-		if (baseComponent != null)
+		if (comp != null)
 		{
-			baseComponent.setSize(width, height);
-			baseComponent.doLayout();
+			comp.setSize(width, height);
+			comp.doLayout();
 		}
 
 		super.reshape(drawable, x, y, width, height);

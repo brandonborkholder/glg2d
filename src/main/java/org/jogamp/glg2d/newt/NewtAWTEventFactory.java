@@ -3,7 +3,10 @@ package org.jogamp.glg2d.newt;
 import java.awt.AWTEvent;
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Point;
 import java.awt.event.MouseWheelEvent;
+
+import javax.swing.SwingUtilities;
 
 import jogamp.newt.awt.event.AWTNewtEventFactory;
 
@@ -26,7 +29,6 @@ public class NewtAWTEventFactory extends AWTNewtEventFactory
 	 * This is an inverse map {@link AWTNewtEventFactory#eventTypeAWT2NEWT}
 	 */
 	private final static IntIntHashMap EVENT_TYPE_NEWT_2_AWT;
-	private final static IntIntHashMap BUTTON_MASKS_NEWT_2_AWT;
 
 	private static final int KEY_NOT_FOUND = 0xFFFFFFFF;
 
@@ -39,26 +41,26 @@ public class NewtAWTEventFactory extends AWTNewtEventFactory
 		{
 			EVENT_TYPE_NEWT_2_AWT.put(entry.getValue(), entry.getKey());
 		}
-
-		BUTTON_MASKS_NEWT_2_AWT = new IntIntHashMap();
-		BUTTON_MASKS_NEWT_2_AWT.setKeyNotFoundValue(KEY_NOT_FOUND);
-		BUTTON_MASKS_NEWT_2_AWT.put(0, 0);
-
-		addButtonMask(MouseEvent.BUTTON1);
-		addButtonMask(MouseEvent.BUTTON2);
-		addButtonMask(MouseEvent.BUTTON3);
-		addButtonMask(MouseEvent.BUTTON4);
-		addButtonMask(MouseEvent.BUTTON5);
-		addButtonMask(MouseEvent.BUTTON6);
-		addButtonMask(MouseEvent.BUTTON7);
-		addButtonMask(MouseEvent.BUTTON8);
-		addButtonMask(MouseEvent.BUTTON9);
 	}
 
-	private static final void addButtonMask(int newtMask)
-	{
-		BUTTON_MASKS_NEWT_2_AWT.put(getAWTButtonDownMask(newtMask), newtMask);
-	}
+  private static int newtModifiers2Awt(int newtMods) {
+    int awtMods = 0;
+    if ((newtMods & com.jogamp.newt.event.InputEvent.SHIFT_MASK) != 0)     awtMods |= java.awt.event.InputEvent.SHIFT_MASK;
+    if ((newtMods & com.jogamp.newt.event.InputEvent.CTRL_MASK) != 0)      awtMods |= java.awt.event.InputEvent.CTRL_MASK;
+    if ((newtMods & com.jogamp.newt.event.InputEvent.META_MASK) != 0)      awtMods |= java.awt.event.InputEvent.META_MASK;
+    if ((newtMods & com.jogamp.newt.event.InputEvent.ALT_MASK) != 0)       awtMods |= java.awt.event.InputEvent.ALT_MASK;
+    if ((newtMods & com.jogamp.newt.event.InputEvent.ALT_GRAPH_MASK) != 0) awtMods |= java.awt.event.InputEvent.ALT_GRAPH_MASK;
+    return awtMods;
+  }
+  
+  private static int newtButton2Awt(int newtButton) {
+    switch (newtButton) {
+    case com.jogamp.newt.event.MouseEvent.BUTTON1: return java.awt.event.MouseEvent.BUTTON1;
+    case com.jogamp.newt.event.MouseEvent.BUTTON2: return java.awt.event.MouseEvent.BUTTON2;
+    case com.jogamp.newt.event.MouseEvent.BUTTON3: return java.awt.event.MouseEvent.BUTTON3;
+    }
+    return 0;
+  }
 
 	/**
 	 * Creates an AWT Mouse event from the provided Newt mouse event.
@@ -80,13 +82,16 @@ public class NewtAWTEventFactory extends AWTNewtEventFactory
 
 		long when = event.getWhen();
 		int modifiers = event.getModifiers();
-		int x, xAbs, y, yAbs;
-		x = xAbs = event.getX();
-		y = yAbs = event.getY();
-		Component source = root.getComponentAt(x, y);
+    Point p = new Point(event.getX(), event.getY());
+//    Point absP = new Point(p.x + root.getLocationOnScreen().x, p.y + root.getLocationOnScreen().y);
+    Point absP = p;
+		Component source = root.getComponentAt(p);
 		source = source == null ? root : source;
+    p = SwingUtilities.convertPoint(root, p, source);
 		int clickCount = event.getClickCount();
 		boolean popupTrigger = false;
+    
+		modifiers = newtModifiers2Awt(modifiers);
 
 		switch (event.getEventType())
 		{
@@ -100,15 +105,16 @@ public class NewtAWTEventFactory extends AWTNewtEventFactory
 			int wheelRotation = -1 * event.getWheelRotation();
 
 			return new java.awt.event.MouseWheelEvent(source, id, when,
-			        modifiers, x, y, xAbs, yAbs, clickCount, popupTrigger,
+			        modifiers, p.x, p.y, absP.x, absP.y, clickCount, popupTrigger,
 			        scrollType, scrollAmount, wheelRotation);
 
 		default:
 
 			int button = event.getButton();
+      button = newtButton2Awt(button);
 
 			return new java.awt.event.MouseEvent(source, id, when, modifiers,
-			        x, y, xAbs, yAbs, clickCount, popupTrigger, button);
+			        p.x, p.y, absP.x, absP.y, clickCount, popupTrigger, button);
 		}
 	}
 
