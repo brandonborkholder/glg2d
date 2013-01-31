@@ -80,7 +80,7 @@ public class GLG2DCanvas extends JComponent {
    * Returns the default, desired OpenGL capabilities needed for this component.
    */
   public static GLCapabilities getDefaultCapabalities() {
-    GLCapabilities caps = new GLCapabilities(GLProfile.getGL2ES2());
+    GLCapabilities caps = new GLCapabilities(GLProfile.getGL2ES1());
     caps.setRedBits(8);
     caps.setGreenBits(8);
     caps.setBlueBits(8);
