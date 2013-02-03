@@ -20,12 +20,17 @@ import javax.media.opengl.GLEventListener;
 import javax.swing.JComponent;
 
 /**
- * Helps wrap the {@code GLGraphics2D} object within the JOGL framework and
- * paints the component fully for each display.
+ * Wraps a {@code JComponent} and paints it using a {@code GLGraphics2D}. This
+ * object will paint the entire component fully for each frame.
+ * 
+ * <p>
+ * {@link GLG2DHeadlessListener} may also be used to listen for reshapes and
+ * update the size and layout of the painted Swing component.
+ * </p>
  */
 public class GLG2DSimpleEventListener implements GLEventListener {
   /**
-   * The cached graphics object.
+   * The cached object.
    */
   protected GLGraphics2D g2d;
 
@@ -34,15 +39,12 @@ public class GLG2DSimpleEventListener implements GLEventListener {
    */
   protected JComponent comp;
 
-  /**
-   * Creates a new listener that will paint using the {@code baseComponent} on
-   * each call to {@link #display(GLAutoDrawable)}. The provided
-   * {@code baseComponent} is used to provide default font, backgroundColor,
-   * etc. to the {@code GLGraphics2D} object. It is also used for width, height
-   * of the viewport in OpenGL.
-   */
-  public GLG2DSimpleEventListener(JComponent baseComponent) {
-    this.comp = baseComponent;
+  public GLG2DSimpleEventListener(JComponent component) {
+    if (component == null) {
+      throw new NullPointerException("component is null");
+    }
+
+    this.comp = component;
   }
 
   @Override
@@ -53,24 +55,27 @@ public class GLG2DSimpleEventListener implements GLEventListener {
   }
 
   /**
-   * Called after the canvas is set on {@code g2d} but before any painting is
-   * done. This should setup the matrices and ask {@code g2d} to setup any
-   * client state.
+   * Called before any painting is done. This should setup the matrices and ask
+   * the {@code GLGraphics2D} object to setup any client state.
    */
   protected void prePaint(GLAutoDrawable drawable) {
     setupViewport(drawable);
     g2d.prePaint(drawable);
+
+    // clip to only the component we're painting
     g2d.translate(comp.getX(), comp.getY());
     g2d.clipRect(0, 0, comp.getWidth(), comp.getHeight());
   }
 
+  /**
+   * Defines the viewport to paint into.
+   */
   protected void setupViewport(GLAutoDrawable drawable) {
     drawable.getGL().glViewport(0, 0, drawable.getWidth(), drawable.getHeight());
   }
 
   /**
-   * Called after all Java2D painting is complete. This should restore the
-   * matrices if they were modified.
+   * Called after all Java2D painting is complete.
    */
   protected void postPaint(GLAutoDrawable drawable) {
     g2d.postPaint();
@@ -96,18 +101,11 @@ public class GLG2DSimpleEventListener implements GLEventListener {
 
   @Override
   public void init(GLAutoDrawable drawable) {
-    reshape(drawable, 0, 0, drawable.getWidth(), drawable.getWidth());
+    g2d = createGraphics2D(drawable);
   }
 
   @Override
   public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
-    if (height <= 0) {
-      height = 1;
-    }
-
-    dispose(drawable);
-
-    g2d = createGraphics2D(drawable);
   }
 
   /**
