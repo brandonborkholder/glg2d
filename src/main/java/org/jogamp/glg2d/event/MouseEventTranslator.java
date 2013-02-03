@@ -41,10 +41,22 @@ public class MouseEventTranslator {
     originToTargetTransform = new AffineTransform();
   }
 
+  /**
+   * Sets the {@code AffineTransform} that is used to transform a point relative
+   * to the origin component into a point relative to the target component.
+   */
   public void setOriginToTargetTransform(AffineTransform xform) {
     originToTargetTransform = new AffineTransform(xform);
   }
 
+  /**
+   * Gets the {@code AffineTransform} that is used to transform a point relative
+   * to the origin component into a point relative to the target component.
+   * 
+   * <p>
+   * Note: the returned {@code AffineTransform} is a copy.
+   * </p>
+   */
   public AffineTransform getOriginToTargetTransform() {
     return new AffineTransform(originToTargetTransform);
   }
@@ -53,7 +65,7 @@ public class MouseEventTranslator {
       int clickCount, int button) {
     // TODO how to determine this?
     boolean isPopupTrigger = false;
-    MouseEvent e = new MouseEvent(source, id, when, modifiers, sourcePoint.x, sourcePoint.y, clickCount, isPopupTrigger, button);
+    MouseEvent e = new MouseEvent(source, id, when, modifiers, sourcePoint.x, sourcePoint.y, 0, 0, clickCount, isPopupTrigger, button);
     publish(e);
     return e;
   }
@@ -75,7 +87,7 @@ public class MouseEventTranslator {
       int scrollType, int scrollAmount, int wheelRotation) {
     // TODO how to determine this?
     boolean isPopupTrigger = false;
-    MouseWheelEvent e = new MouseWheelEvent(source, id, when, modifiers, sourcePoint.x, sourcePoint.y, clickCount, isPopupTrigger,
+    MouseWheelEvent e = new MouseWheelEvent(source, id, when, modifiers, sourcePoint.x, sourcePoint.y, 0, 0, clickCount, isPopupTrigger,
         scrollType, scrollAmount, wheelRotation);
     publish(e);
     return e;
