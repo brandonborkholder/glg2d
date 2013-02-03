@@ -6,7 +6,9 @@ import java.util.concurrent.Executors;
 
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
+import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JSlider;
 
 import com.jogamp.opengl.util.Animator;
@@ -20,45 +22,49 @@ import com.jogamp.opengl.util.Animator;
  */
 public class GLG2DWindowTest
 {
-	public static void main(String[] args)
-	{
-		GLCapabilities caps = new GLCapabilities(GLProfile.getDefault());
-		caps.setDoubleBuffered(true);
-		caps.setNumSamples(4);
-		caps.setSampleBuffers(true);
+  public static void main(String[] args)
+  {
+    GLCapabilities caps = new GLCapabilities(GLProfile.getDefault());
+    caps.setDoubleBuffered(true);
+    caps.setNumSamples(4);
+    caps.setSampleBuffers(true);
 
-		GLG2DWindow window = GLG2DWindow.create(caps);
+    GLG2DWindow window = GLG2DWindow.create(caps);
 
-		JPanel panel = new JPanel();
-		panel.setLayout(new GridLayout(0, 1));
-		panel.setBackground(Color.GREEN);
+    JPanel panel = new JPanel();
+    panel.setLayout(new GridLayout(0, 1));
+    panel.setBackground(Color.GREEN);
 
-		// JPanel panel2 = new JPanel();
-		// panel2.setOpaque(true);
-		// panel2.setBackground(Color.RED);
+    // JPanel panel2 = new JPanel();
+    // panel2.setOpaque(true);
+    // panel2.setBackground(Color.RED);
 
-		panel.add(new TestButton("TOP"));
-		// panel.add(panel2);
-		panel.add(new TestButton("BOTTOM"));
-    
-		panel.add(new JSlider(JSlider.HORIZONTAL));
+    panel.add(new JButton("TOP"));
+    // panel.add(panel2);
+    panel.add(new JButton("BOTTOM"));
 
-		window.setContentPane(panel);
-		window.setSize(300, 300);
-		// window.setFullscreen(true);
-		window.setVisible(true);
+    panel.add(new JSlider(JSlider.HORIZONTAL));
 
-		final Animator animator = new Animator();
-		animator.setRunAsFastAsPossible(true);
-		animator.add(window);
+    JProgressBar bar = new JProgressBar();
+    bar.setIndeterminate(true);
+    panel.add(bar);
 
-		Executors.newSingleThreadExecutor().execute(new Runnable()
-		{
-			@Override
-			public void run()
-			{
-				animator.start();
-			}
-		});
-	}
+    window.setContentPane(panel);
+    window.setSize(300, 300);
+    // window.setFullscreen(true);
+    window.setVisible(true);
+
+    final Animator animator = new Animator();
+    animator.setRunAsFastAsPossible(true);
+    animator.add(window);
+
+    Executors.newSingleThreadExecutor().execute(new Runnable()
+    {
+      @Override
+      public void run()
+      {
+        animator.start();
+      }
+    });
+  }
 }
