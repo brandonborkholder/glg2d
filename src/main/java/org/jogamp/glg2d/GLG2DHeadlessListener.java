@@ -45,6 +45,6 @@ public class GLG2DHeadlessListener implements GLEventListener {
   @Override
   public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
     comp.setSize(width, height);
-    comp.doLayout();
+    comp.validate();
   }
 }
