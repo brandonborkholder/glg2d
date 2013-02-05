@@ -15,36 +15,28 @@
  */
 package org.jogamp.glg2d.impl.shader;
 
-
-import java.awt.RenderingHints.Key;
 import java.awt.geom.AffineTransform;
-import java.util.ArrayDeque;
-import java.util.Deque;
 
 import javax.media.opengl.GL;
 
-import org.jogamp.glg2d.GLG2DTransformHelper;
 import org.jogamp.glg2d.GLGraphics2D;
+import org.jogamp.glg2d.impl.AbstractMatrixHelper;
 import org.jogamp.glg2d.impl.shader.UniformBufferObject.TransformHook;
 
-public class GL2ES2TransformHelper implements GLG2DTransformHelper, TransformHook {
-  protected GLGraphics2D g2d;
-
-  protected Deque<AffineTransform> transformStack = new ArrayDeque<AffineTransform>();
-
-  protected float[] glMatrix = new float[16];
+public class GL2ES2TransformHelper extends AbstractMatrixHelper implements TransformHook {
+  protected float[] glMatrix;
   protected boolean dirtyMatrix;
 
   protected int[] viewportDimensions;
 
   @Override
   public void setG2D(GLGraphics2D g2d) {
-    this.g2d = g2d;
-    transformStack.clear();
-    transformStack.push(new AffineTransform());
-    dirtyMatrix = true;
+    super.setG2D(g2d);
 
+    dirtyMatrix = true;
+    glMatrix = new float[16];
     viewportDimensions = new int[4];
+
     GL gl = g2d.getGLContext().getGL();
     gl.glGetIntegerv(GL.GL_VIEWPORT, viewportDimensions, 0);
 
@@ -57,91 +49,14 @@ public class GL2ES2TransformHelper implements GLG2DTransformHelper, TransformHoo
   }
 
   @Override
-  public void push(GLGraphics2D newG2d) {
-    transformStack.push((AffineTransform) getTransform0().clone());
-  }
-
-  @Override
-  public void pop(GLGraphics2D parentG2d) {
-    transformStack.pop();
-    dirtyMatrix = true;
-  }
-
-  @Override
-  public void setHint(Key key, Object value) {
-    // nop
-  }
-
-  @Override
-  public void resetHints() {
-    // nop
-  }
-
-  @Override
-  public void dispose() {
-  }
-
-  @Override
-  public void translate(int x, int y) {
-    translate((double) x, (double) y);
-    dirtyMatrix = true;
-  }
-
-  @Override
-  public void translate(double tx, double ty) {
-    getTransform0().translate(tx, ty);
-    dirtyMatrix = true;
-  }
-
-  @Override
-  public void rotate(double theta) {
-    getTransform0().rotate(theta);
-    dirtyMatrix = true;
-  }
-
-  @Override
-  public void rotate(double theta, double x, double y) {
-    getTransform0().rotate(theta, x, y);
-    dirtyMatrix = true;
-  }
-
-  @Override
-  public void scale(double sx, double sy) {
-    getTransform0().scale(sx, sy);
-    dirtyMatrix = true;
-  }
-
-  @Override
-  public void shear(double shx, double shy) {
-    getTransform0().shear(shx, shy);
-    dirtyMatrix = true;
-  }
-
-  @Override
-  public void transform(AffineTransform Tx) {
-    getTransform0().concatenate(Tx);
-    dirtyMatrix = true;
-  }
-
-  @Override
-  public void setTransform(AffineTransform transform) {
-    transformStack.pop();
-    transformStack.push(transform);
-    dirtyMatrix = true;
-  }
-
-  @Override
-  public AffineTransform getTransform() {
-    return (AffineTransform) getTransform0().clone();
-  }
-
-  protected AffineTransform getTransform0() {
-    return transformStack.peek();
-  }
-
-  @Override
   public float[] getGLMatrixData() {
     return getGLMatrixData(null);
+  }
+
+  @Override
+  protected void flushTransformToOpenGL() {
+    // only set dirty, we'll update lazily
+    dirtyMatrix = true;
   }
 
   @Override
@@ -164,18 +79,24 @@ public class GL2ES2TransformHelper implements GLG2DTransformHelper, TransformHoo
   protected void updateGLMatrix(AffineTransform xform) {
     // add the GL->G2D coordinate transform and perspective inline here
 
-    int x1 = viewportDimensions[0];
-    int y1 = viewportDimensions[1];
-    int x2 = viewportDimensions[2];
-    int y2 = viewportDimensions[3];
+    // Note this isn't quite the same as the GL2 implementation because GL2 has
+    // an orthographic projection matrix
 
-    glMatrix[0] = ((float) (2 * xform.getScaleX() / (x2 - x1)));
-    glMatrix[1] = ((float) (-2 * xform.getShearY() / (y2 - y1)));
+    float x1 = viewportDimensions[0];
+    float y1 = viewportDimensions[1];
+    float x2 = viewportDimensions[2];
+    float y2 = viewportDimensions[3];
+
+    float invWidth = 1f / (x2 - x1);
+    float invHeight = 1f / (y2 - y1);
+    
+    glMatrix[0] = ((float) (2 * xform.getScaleX() * invWidth));
+    glMatrix[1] = ((float) (-2 * xform.getShearY() * invHeight));
     // glMatrix[2] = 0;
     // glMatrix[3] = 0;
 
-    glMatrix[4] = ((float) (2 * xform.getShearX() / (x2 - x1)));
-    glMatrix[5] = ((float) (-2 * xform.getScaleY() / (y2 - y1)));
+    glMatrix[4] = ((float) (2 * xform.getShearX() * invWidth));
+    glMatrix[5] = ((float) (-2 * xform.getScaleY() * invHeight));
     // glMatrix[6] = 0;
     // glMatrix[7] = 0;
 
@@ -184,8 +105,8 @@ public class GL2ES2TransformHelper implements GLG2DTransformHelper, TransformHoo
     glMatrix[10] = -1;
     // glMatrix[11] = 0;
 
-    glMatrix[12] = ((float) (2 * xform.getTranslateX() / (x2 - x1) - 1));
-    glMatrix[13] = ((float) (1 - 2 * xform.getTranslateY() / (y2 - y1)));
+    glMatrix[12] = ((float) (2 * xform.getTranslateX() * invWidth - 1));
+    glMatrix[13] = ((float) (1 - 2 * xform.getTranslateY() * invHeight));
     // glMatrix[14] = 0;
     glMatrix[15] = 1;
   }

@@ -45,7 +45,7 @@ public abstract class AbstractShapeHelper implements GLG2DShapeHelper {
   protected static final Rectangle2D.Float RECT = new Rectangle2D.Float();
   protected static final Line2D.Float LINE = new Line2D.Float();
 
-  protected Deque<Stroke> strokeStack = new ArrayDeque<Stroke>(10);
+  protected Deque<Stroke> strokeStack = new ArrayDeque<Stroke>();
 
   public AbstractShapeHelper() {
     strokeStack.push(new BasicStroke());
