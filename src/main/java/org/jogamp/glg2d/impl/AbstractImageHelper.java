@@ -15,6 +15,9 @@
  */
 package org.jogamp.glg2d.impl;
 
+import static org.jogamp.glg2d.GLG2DRenderingHints.KEY_CLEAR_TEXTURES_CACHE;
+import static org.jogamp.glg2d.GLG2DRenderingHints.VALUE_CLEAR_TEXTURES_CACHE_DEFAULT;
+import static org.jogamp.glg2d.GLG2DRenderingHints.VALUE_CLEAR_TEXTURES_CACHE_EACH_PAINT;
 import static org.jogamp.glg2d.impl.GLG2DNotImplemented.notImplemented;
 
 import java.awt.Color;
@@ -25,13 +28,15 @@ import java.awt.image.BufferedImage;
 import java.awt.image.BufferedImageOp;
 import java.awt.image.ImageObserver;
 import java.awt.image.RenderedImage;
+import java.awt.image.VolatileImage;
 import java.awt.image.renderable.RenderableImage;
-import java.lang.ref.Reference;
-import java.lang.ref.ReferenceQueue;
-import java.lang.ref.WeakReference;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.jogamp.glg2d.GLG2DImageHelper;
+import org.jogamp.glg2d.GLG2DRenderingHints;
 import org.jogamp.glg2d.GLGraphics2D;
 
 import com.jogamp.opengl.util.texture.Texture;
@@ -39,27 +44,30 @@ import com.jogamp.opengl.util.texture.TextureCoords;
 import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
 
 public abstract class AbstractImageHelper implements GLG2DImageHelper {
+  private static final Logger LOGGER = Logger.getLogger(AbstractImageHelper.class.getName());
+
   /**
-   * This cache is kept for each paint operation. We don't keep track of images
-   * being changed across different painting calls. The first time we see an
-   * image, we cache the texture. Then we clear the cache for the next call to
-   * {@code display()}.
+   * See {@link GLG2DRenderingHints#KEY_CLEAR_TEXTURES_CACHE}
    */
-  protected TextureCache cache = new TextureCache();
+  protected Map<Image, Texture> imageCache = new WeakHashMap<Image, Texture>();
+  protected Object clearCachePolicy;
 
   protected GLGraphics2D g2d;
 
   protected abstract void begin(Texture texture, AffineTransform xform, Color bgcolor);
 
-  protected abstract void applyTexture(Texture texture, int dx1, int dy1, int dx2, int dy2, float sx1, float sy1,
-      float sx2, float sy2);
+  protected abstract void applyTexture(Texture texture, int dx1, int dy1, int dx2, int dy2,
+      float sx1, float sy1, float sx2, float sy2);
 
   protected abstract void end(Texture texture);
 
   @Override
   public void setG2D(GLGraphics2D g2d) {
     this.g2d = g2d;
-    cache.clear();
+
+    if (clearCachePolicy == VALUE_CLEAR_TEXTURES_CACHE_EACH_PAINT) {
+      imageCache.clear();
+    }
   }
 
   @Override
@@ -74,17 +82,19 @@ public abstract class AbstractImageHelper implements GLG2DImageHelper {
 
   @Override
   public void setHint(Key key, Object value) {
-    // nop
+    if (key == KEY_CLEAR_TEXTURES_CACHE) {
+      clearCachePolicy = value;
+    }
   }
 
   @Override
   public void resetHints() {
-    // nop
+    clearCachePolicy = VALUE_CLEAR_TEXTURES_CACHE_DEFAULT;
   }
 
   @Override
   public void dispose() {
-    cache.clear();
+    imageCache.clear();
   }
 
   @Override
@@ -130,6 +140,9 @@ public abstract class AbstractImageHelper implements GLG2DImageHelper {
 
   protected boolean drawImage(Image img, AffineTransform xform, Color color, ImageObserver observer) {
     Texture texture = getTexture(img, observer);
+    if (texture == null) {
+      return false;
+    }
 
     begin(texture, xform, color);
     applyTexture(texture);
@@ -161,7 +174,7 @@ public abstract class AbstractImageHelper implements GLG2DImageHelper {
    * </p>
    */
   protected Texture getTexture(Image image, ImageObserver observer) {
-    Texture texture = cache.get(image);
+    Texture texture = imageCache.get(image);
     if (texture == null) {
       BufferedImage bufferedImage;
       if (image instanceof BufferedImage && ((BufferedImage) image).getType() != BufferedImage.TYPE_CUSTOM) {
@@ -170,15 +183,36 @@ public abstract class AbstractImageHelper implements GLG2DImageHelper {
         bufferedImage = toBufferedImage(image);
       }
 
-      texture = AWTTextureIO.newTexture(g2d.getGLContext().getGL().getGLProfile(), bufferedImage, false);
-      cache.put(image, texture);
+      if (bufferedImage != null) {
+        // we'll assume the image is complete and can be rendered
+        texture = AWTTextureIO.newTexture(g2d.getGLContext().getGL().getGLProfile(), bufferedImage, false);
+        addToCache(image, texture);
+      }
     }
-    
 
     return texture;
   }
 
+  protected void addToCache(Image image, Texture texture) {
+    if (clearCachePolicy instanceof Number) {
+      int maxSize = ((Number) clearCachePolicy).intValue();
+      if (imageCache.size() > maxSize) {
+        if (LOGGER.isLoggable(Level.FINE)) {
+          LOGGER.fine("Clearing texture cache with size " + imageCache.size());
+        }
+
+        imageCache.clear();
+      }
+    }
+
+    imageCache.put(image, texture);
+  }
+
   protected BufferedImage toBufferedImage(Image image) {
+    if (image instanceof VolatileImage) {
+      return ((VolatileImage) image).getSnapshot();
+    }
+
     int width = image.getWidth(null);
     int height = image.getHeight(null);
     if (width < 0 || height < 0) {
@@ -192,71 +226,16 @@ public abstract class AbstractImageHelper implements GLG2DImageHelper {
 
   @Override
   public void drawImage(BufferedImage img, BufferedImageOp op, int x, int y) {
-    // TODO
     notImplemented("drawImage(BufferedImage, BufferedImageOp, int, int)");
   }
 
   @Override
   public void drawImage(RenderedImage img, AffineTransform xform) {
-    // TODO
     notImplemented("drawImage(RenderedImage, AffineTransform)");
   }
 
   @Override
   public void drawImage(RenderableImage img, AffineTransform xform) {
-    // TODO
     notImplemented("drawImage(RenderableImage, AffineTransform)");
   }
-
-  @SuppressWarnings("serial")
-  protected static class TextureCache extends HashMap<WeakKey<Image>, Texture> {
-    private ReferenceQueue<Image> queue = new ReferenceQueue<Image>();
-
-    public void expungeStaleEntries() {
-      Reference<? extends Image> ref = queue.poll();
-      while (ref != null) {
-        remove(ref);
-        ref = queue.poll();
-      }
-    }
-
-    public Texture get(Image image) {
-      expungeStaleEntries();
-      WeakKey<Image> key = new WeakKey<Image>(image, null);
-      return get(key);
-    }
-
-    public Texture put(Image image, Texture texture) {
-      expungeStaleEntries();
-      WeakKey<Image> key = new WeakKey<Image>(image, queue);
-      return put(key, texture);
-    }
-  }
-
-  protected static class WeakKey<T> extends WeakReference<T> {
-    private final int hash;
-
-    public WeakKey(T value, ReferenceQueue<T> queue) {
-      super(value, queue);
-      hash = value.hashCode();
-    }
-
-    @Override
-    public int hashCode() {
-      return hash;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-      if (this == obj) {
-        return true;
-      } else if (obj instanceof WeakKey) {
-        WeakKey<?> other = (WeakKey<?>) obj;
-        return other.hash == hash && get() == other.get();
-      } else {
-        return false;
-      }
-    }
-  }
-
 }
