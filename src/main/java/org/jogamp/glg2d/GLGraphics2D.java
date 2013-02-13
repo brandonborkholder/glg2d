@@ -188,7 +188,10 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     return colorHelper;
   }
 
-  protected void setCanvas(GLAutoDrawable drawable) {
+  /**
+   * Making setCanvas public 3D and 2D can be mixed   
+   */
+  public void setCanvas(GLAutoDrawable drawable) {
     glContext = drawable.getContext();
 
     for (G2DDrawingHelper helper : helpers) {

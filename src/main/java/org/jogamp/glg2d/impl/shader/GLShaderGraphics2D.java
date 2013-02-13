@@ -34,7 +34,7 @@ public class GLShaderGraphics2D extends GLGraphics2D {
   }
 
   @Override
-  protected void setCanvas(GLAutoDrawable drawable) {
+  public void setCanvas(GLAutoDrawable drawable) {
     super.setCanvas(drawable);
   }
 
