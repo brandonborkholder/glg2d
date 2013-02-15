@@ -88,9 +88,11 @@ public class GLG2DWindowToolkit extends Toolkit implements
 	@Override
 	protected LightweightPeer createComponent(Component target)
 	{
-		LightweightPeer peer = new GLG2DLightweightPeer(target);
+		// LightweightPeer peer = new GLG2DLightweightPeer(target);
+		//
+		// return peer;
 
-		return peer;
+		return super.createComponent(target);
 	}
 
 	@Override

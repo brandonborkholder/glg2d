@@ -44,8 +44,6 @@ public class GLG2DWindowPeer implements FramePeer
 		if (target instanceof GLG2DFrame)
 		{
 			frame = (GLG2DFrame) target;
-
-			GLWindow window = frame.getWindow();
 		}
 		else
 		{

@@ -4,6 +4,7 @@ import java.util.concurrent.Executors;
 
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 
 import org.jogamp.glg2d.GLG2DPanel;
@@ -17,9 +18,9 @@ import com.jogamp.opengl.util.Animator;
  * @author Dan Avila
  * 
  */
-public class GLG2DWindowTest
+public abstract class GLG2DWindowTest
 {
-	public static void main(String[] args)
+	public GLG2DWindowTest()
 	{
 		// FIXME: Nimbus causes a NullPointerException
 
@@ -42,13 +43,6 @@ public class GLG2DWindowTest
 		// }
 		// }
 
-		// createAndShowGLG2DPanel();
-
-		createAndShowNewtPanel();
-	}
-
-	private static void createAndShowNewtPanel()
-	{
 		GLCapabilities caps = new GLCapabilities(GLProfile.getDefault());
 		caps.setDoubleBuffered(true);
 		caps.setNumSamples(4);
@@ -56,7 +50,7 @@ public class GLG2DWindowTest
 
 		GLG2DWindow window = GLG2DWindow.create(caps);
 
-		ContentPane pane = new ContentPane();
+		JComponent pane = getContentPane();
 
 		window.setContentPane(pane);
 		window.setSize(600, 600);
@@ -75,6 +69,8 @@ public class GLG2DWindowTest
 			}
 		});
 	}
+
+	protected abstract JComponent getContentPane();
 
 	private static void createAndShowGLG2DPanel()
 	{
