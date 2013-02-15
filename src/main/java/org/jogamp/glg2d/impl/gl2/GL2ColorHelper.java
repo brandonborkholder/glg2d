@@ -21,6 +21,7 @@ import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.GradientPaint;
+import java.awt.MultipleGradientPaint;
 import java.awt.Paint;
 
 import javax.media.opengl.GL2;
@@ -43,12 +44,13 @@ public class GL2ColorHelper extends AbstractColorHelper {
     if (paint instanceof Color) {
       setColor((Color) paint);
     } else if (paint instanceof GradientPaint) {
-      // TODO
       setColor(((GradientPaint) paint).getColor1());
       notImplemented("setPaint(Paint) with GradientPaint");
+    } else if (paint instanceof MultipleGradientPaint) {
+      setColor(((MultipleGradientPaint) paint).getColors()[0]);
+      notImplemented("setPaint(Paint) with MultipleGradientPaint");
     } else {
       notImplemented("setPaint(Paint) with " + paint.getClass().getSimpleName());
-      // TODO
       // This will probably be easier to handle with a fragment shader
       // in the shader pipeline, not sure how to handle it in the fixed-
       // function pipeline.
