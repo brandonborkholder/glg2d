@@ -1,15 +1,12 @@
 package org.jogamp.glg2d.newt;
 
-import java.awt.Color;
-import java.awt.GridLayout;
 import java.util.concurrent.Executors;
 
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JSlider;
+import javax.swing.JFrame;
+
+import org.jogamp.glg2d.GLG2DPanel;
 
 import com.jogamp.opengl.util.Animator;
 
@@ -22,49 +19,75 @@ import com.jogamp.opengl.util.Animator;
  */
 public class GLG2DWindowTest
 {
-  public static void main(String[] args)
-  {
-    GLCapabilities caps = new GLCapabilities(GLProfile.getDefault());
-    caps.setDoubleBuffered(true);
-    caps.setNumSamples(4);
-    caps.setSampleBuffers(true);
+	public static void main(String[] args)
+	{
+		// FIXME: Nimbus causes a NullPointerException
 
-    GLG2DWindow window = GLG2DWindow.create(caps);
+		// for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels())
+		// {
+		// if ("nimbus".equals(info.getName().toLowerCase()))
+		// {
+		// try
+		// {
+		// UIManager.setLookAndFeel(info.getClassName());
+		// }
+		// catch (ClassNotFoundException | InstantiationException
+		// | IllegalAccessException
+		// | UnsupportedLookAndFeelException e)
+		// {
+		// // TODO Auto-generated catch block
+		// e.printStackTrace();
+		// }
+		// break;
+		// }
+		// }
 
-    JPanel panel = new JPanel();
-    panel.setLayout(new GridLayout(0, 1));
-    panel.setBackground(Color.GREEN);
+		// createAndShowGLG2DPanel();
 
-    // JPanel panel2 = new JPanel();
-    // panel2.setOpaque(true);
-    // panel2.setBackground(Color.RED);
+		createAndShowNewtPanel();
+	}
 
-    panel.add(new JButton("TOP"));
-    // panel.add(panel2);
-    panel.add(new JButton("BOTTOM"));
+	private static void createAndShowNewtPanel()
+	{
+		GLCapabilities caps = new GLCapabilities(GLProfile.getDefault());
+		caps.setDoubleBuffered(true);
+		caps.setNumSamples(4);
+		caps.setSampleBuffers(true);
 
-    panel.add(new JSlider(JSlider.HORIZONTAL));
+		GLG2DWindow window = GLG2DWindow.create(caps);
 
-    JProgressBar bar = new JProgressBar();
-    bar.setIndeterminate(true);
-    panel.add(bar);
+		ContentPane pane = new ContentPane();
 
-    window.setContentPane(panel);
-    window.setSize(300, 300);
-    // window.setFullscreen(true);
-    window.setVisible(true);
+		window.setContentPane(pane);
+		window.setSize(600, 600);
+		window.setVisibler(true);
 
-    final Animator animator = new Animator();
-    animator.setRunAsFastAsPossible(true);
-    animator.add(window);
+		final Animator animator = new Animator();
+		animator.setRunAsFastAsPossible(true);
+		animator.add(window);
 
-    Executors.newSingleThreadExecutor().execute(new Runnable()
-    {
-      @Override
-      public void run()
-      {
-        animator.start();
-      }
-    });
-  }
+		Executors.newSingleThreadExecutor().execute(new Runnable()
+		{
+			@Override
+			public void run()
+			{
+				animator.start();
+			}
+		});
+	}
+
+	private static void createAndShowGLG2DPanel()
+	{
+		JFrame window = new JFrame();
+
+		window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		GLG2DPanel panel = new GLG2DPanel();
+		panel.setDrawableComponent(new ContentPane());
+
+		window.setContentPane(panel);
+		window.setSize(600, 600);
+
+		window.setVisible(true);
+	}
 }
