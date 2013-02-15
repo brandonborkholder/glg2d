@@ -50,9 +50,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.media.opengl.GL;
-import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLContext;
+import javax.media.opengl.GLDrawable;
 
+import org.jogamp.glg2d.impl.GLGraphicsConfiguration;
 import org.jogamp.glg2d.impl.gl2.GL2ColorHelper;
 import org.jogamp.glg2d.impl.gl2.GL2ImageDrawer;
 import org.jogamp.glg2d.impl.gl2.GL2ShapeDrawer;
@@ -71,8 +72,9 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   protected GLGraphics2D parent;
 
   /**
-   * When we are painting, this is the context we're painting into.
+   * When we are painting, this is the drawable/context we're painting into.
    */
+  protected GLDrawable glDrawable;
   protected GLContext glContext;
 
   /**
@@ -188,8 +190,9 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     return colorHelper;
   }
 
-  protected void setCanvas(GLAutoDrawable drawable) {
-    glContext = drawable.getContext();
+  protected void setCanvas(GLContext context) {
+    glDrawable = context.getGLDrawable();
+    glContext = context;
 
     for (G2DDrawingHelper helper : helpers) {
       helper.setG2D(this);
@@ -200,9 +203,9 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
    * Sets up the graphics object in preparation for drawing. Initialization such
    * as getting the viewport
    */
-  public void prePaint(GLAutoDrawable drawable) {
-    canvasHeight = GLG2DUtils.getViewportHeight(drawable.getGL());
-    setCanvas(drawable);
+  public void prePaint(GLContext context) {
+    canvasHeight = GLG2DUtils.getViewportHeight(context.getGL());
+    setCanvas(context);
     setDefaultState();
   }
 
@@ -214,7 +217,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     setComposite(AlphaComposite.SrcOver);
     setClip(null);
     setRenderingHints(null);
-    graphicsConfig = null; // TODO this must be fixed ASAP!
+    graphicsConfig = new GLGraphicsConfiguration(glDrawable);
   }
 
   public void postPaint() {
@@ -540,7 +543,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   protected void scissor(boolean enable) {
-    GL gl = glContext.getGL();
+    GL gl = getGLContext().getGL();
     if (enable) {
       gl.glScissor(clip.x, canvasHeight - clip.y - clip.height, Math.max(clip.width, 0), Math.max(clip.height, 0));
       gl.glEnable(GL.GL_SCISSOR_TEST);

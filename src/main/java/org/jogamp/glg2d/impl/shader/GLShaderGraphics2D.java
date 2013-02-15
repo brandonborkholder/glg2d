@@ -16,8 +16,6 @@
 package org.jogamp.glg2d.impl.shader;
 
 
-import javax.media.opengl.GLAutoDrawable;
-
 import org.jogamp.glg2d.GLG2DColorHelper;
 import org.jogamp.glg2d.GLG2DImageHelper;
 import org.jogamp.glg2d.GLG2DShapeHelper;
@@ -31,11 +29,6 @@ public class GLShaderGraphics2D extends GLGraphics2D {
 
   public UniformBufferObject getUniformsObject() {
     return uniforms;
-  }
-
-  @Override
-  protected void setCanvas(GLAutoDrawable drawable) {
-    super.setCanvas(drawable);
   }
 
   @Override

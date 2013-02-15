@@ -60,7 +60,7 @@ public class GLG2DSimpleEventListener implements GLEventListener {
    */
   protected void prePaint(GLAutoDrawable drawable) {
     setupViewport(drawable);
-    g2d.prePaint(drawable);
+    g2d.prePaint(drawable.getContext());
 
     // clip to only the component we're painting
     g2d.translate(comp.getX(), comp.getY());
