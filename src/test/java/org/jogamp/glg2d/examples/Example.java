@@ -6,6 +6,7 @@ import java.awt.GridLayout;
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -34,8 +35,10 @@ public class Example {
     JPanel panel2 = new JPanel(new GridLayout(0, 1));
     panel2.add(radio1);
     panel2.add(radio2);
+    
+    JComboBox b = new JComboBox(new String[] {"3", "4"});
 
-    panel.add(panel2, BorderLayout.WEST);
+    panel.add(b, BorderLayout.WEST);
 
     panel.setBorder(BorderFactory.createTitledBorder("Border"));
 
