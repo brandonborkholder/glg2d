@@ -2,13 +2,10 @@ package org.jogamp.glg2d.examples;
 
 import java.applet.Applet;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Window;
-import java.awt.peer.FramePeer;
 import java.lang.reflect.Field;
 
 import javax.swing.JComponent;
-import javax.swing.JFrame;
 import javax.swing.JPopupMenu;
 import javax.swing.PopupFactory;
 import javax.swing.RepaintManager;
@@ -17,6 +14,8 @@ import org.jogamp.glg2d.GLG2DCanvas;
 import org.jogamp.glg2d.GLG2DHeadlessListener;
 import org.jogamp.glg2d.GLG2DSimpleEventListener;
 import org.jogamp.glg2d.event.NewtMouseEventTranslator;
+import org.jogamp.glg2d.newt.HackedToolkit;
+import org.jogamp.glg2d.newt.NewtHiddenParent;
 
 import com.jogamp.newt.event.WindowAdapter;
 import com.jogamp.newt.event.WindowEvent;

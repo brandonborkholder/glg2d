@@ -1,4 +1,4 @@
-package org.jogamp.glg2d.examples;
+package org.jogamp.glg2d.newt;
 
 import static org.jogamp.glg2d.impl.GLG2DNotImplemented.notImplemented;
 

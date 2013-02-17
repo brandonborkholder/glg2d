@@ -1,4 +1,4 @@
-package org.jogamp.glg2d.examples;
+package org.jogamp.glg2d.newt;
 
 import java.awt.Button;
 import java.awt.Canvas;
