@@ -28,7 +28,9 @@ import com.jogamp.opengl.util.Animator;
  */
 public class NewtExample {
   public static void main(String[] args) {
-    GLWindow window = GLWindow.create(GLG2DCanvas.getDefaultCapabalities());
+    HackedToolkit.init();
+    
+    final GLWindow window = GLWindow.create(GLG2DCanvas.getDefaultCapabalities());
     window.setTitle("GLG2D Newt Example");
     window.setSize(300, 300);
     
@@ -46,26 +48,7 @@ public class NewtExample {
 
     JComponent comp = Example.createComponent();
     
-    JFrame hidden = new JFrame() {
-      {
-//        try {
-//        Field f = Component.class.getDeclaredField("peer");
-//        f.setAccessible(true);
-//        f.set(this, new MyPeer());
-//        } catch(Exception e) {
-//          e.printStackTrace();
-//        }
-      }
-      
-      @Override
-      public boolean isShowing() {
-        return true;
-      }
-      
-      public void show() {
-        super.show();
-      }
-    };
+    NewtHiddenParent hidden = new NewtHiddenParent(window);
     
     try {
       Field f = PopupFactory.class.getDeclaredField("forceHeavyWeightPopupKey");
