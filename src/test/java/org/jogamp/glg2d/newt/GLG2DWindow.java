@@ -3,7 +3,7 @@ package org.jogamp.glg2d.newt;
 import javax.media.nativewindow.NativeWindow;
 import javax.media.opengl.GLCapabilitiesImmutable;
 import javax.swing.JComponent;
-import javax.swing.JRootPane;
+import javax.swing.JFrame;
 
 import org.jogamp.glg2d.GLG2DHeadlessListener;
 import org.jogamp.glg2d.GLG2DSimpleEventListener;
@@ -33,9 +33,9 @@ public class GLG2DWindow extends GLWindow
 {
 	private GLG2DSimpleEventListener painterListener;
 	private GLG2DHeadlessListener reshapeListener;
-  private NewtMouseEventTranslator evtListener;
+	private NewtMouseEventTranslator evtListener;
 
-  private JRootPane container = new JRootPane();
+	private JFrame container = new GLG2DFrame(this);
 
 	/**
 	 * Creates a new GLG2DWindow.
@@ -73,15 +73,22 @@ public class GLG2DWindow extends GLWindow
 
 			this.removeGLEventListener(painterListener);
 			this.removeGLEventListener(reshapeListener);
-      painterListener = new GLG2DSimpleEventListener(component);
-      reshapeListener = new GLG2DHeadlessListener(component);
-      addGLEventListener(painterListener);
-      addGLEventListener(reshapeListener);
-      
+			painterListener = new GLG2DSimpleEventListener(
+			        container.getRootPane());
+			reshapeListener = new GLG2DHeadlessListener(container.getRootPane());
+			addGLEventListener(painterListener);
+			addGLEventListener(reshapeListener);
+
 			this.removeMouseListener(evtListener);
 			this.evtListener = new NewtMouseEventTranslator(component);
-      addMouseListener(evtListener);
+			addMouseListener(evtListener);
 		}
+	}
+
+	public void setVisibler(boolean visible)
+	{
+		container.setVisible(visible);
+		setVisible(true);
 	}
 
 	public static GLG2DWindow create(GLCapabilitiesImmutable caps)
