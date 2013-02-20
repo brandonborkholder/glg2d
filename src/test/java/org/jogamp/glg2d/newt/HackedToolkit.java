@@ -22,7 +22,6 @@ import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.JobAttributes;
-import java.awt.KeyboardFocusManager;
 import java.awt.Label;
 import java.awt.List;
 import java.awt.Menu;
@@ -62,7 +61,6 @@ import java.awt.peer.DialogPeer;
 import java.awt.peer.FileDialogPeer;
 import java.awt.peer.FontPeer;
 import java.awt.peer.FramePeer;
-import java.awt.peer.KeyboardFocusManagerPeer;
 import java.awt.peer.LabelPeer;
 import java.awt.peer.ListPeer;
 import java.awt.peer.MenuBarPeer;
@@ -83,9 +81,7 @@ import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.Properties;
 
-import sun.awt.KeyboardFocusManagerPeerProvider;
-
-public class HackedToolkit extends Toolkit implements KeyboardFocusManagerPeerProvider {
+public class HackedToolkit extends Toolkit {
   private static Toolkit delegate;
 
   public static void init() {
@@ -550,10 +546,5 @@ public class HackedToolkit extends Toolkit implements KeyboardFocusManagerPeerPr
     } catch (Exception e) {
       throw new RuntimeException("Could not delegate to toolkit", e);
     }
-  }
-
-  @Override
-  public KeyboardFocusManagerPeer createKeyboardFocusManagerPeer(KeyboardFocusManager arg) {
-    return ((KeyboardFocusManagerPeerProvider) delegate).createKeyboardFocusManagerPeer(arg);
   }
 }
