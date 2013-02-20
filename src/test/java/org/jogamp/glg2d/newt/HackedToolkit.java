@@ -22,6 +22,7 @@ import java.awt.HeadlessException;
 import java.awt.Image;
 import java.awt.Insets;
 import java.awt.JobAttributes;
+import java.awt.KeyboardFocusManager;
 import java.awt.Label;
 import java.awt.List;
 import java.awt.Menu;
@@ -61,6 +62,7 @@ import java.awt.peer.DialogPeer;
 import java.awt.peer.FileDialogPeer;
 import java.awt.peer.FontPeer;
 import java.awt.peer.FramePeer;
+import java.awt.peer.KeyboardFocusManagerPeer;
 import java.awt.peer.LabelPeer;
 import java.awt.peer.ListPeer;
 import java.awt.peer.MenuBarPeer;
@@ -81,11 +83,13 @@ import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.Properties;
 
-public class HackedToolkit extends Toolkit {
+import sun.awt.KeyboardFocusManagerPeerProvider;
+
+public class HackedToolkit extends Toolkit implements KeyboardFocusManagerPeerProvider {
   private static Toolkit delegate;
 
   public static void init() {
-    final String actualToolkit = System.getProperty("awt.toolkit", "sun.awt.X11.XToolkit");
+    final String actualToolkit = System.getProperty("awt.toolkit");
     delegate = AccessController.doPrivileged(new PrivilegedAction<Toolkit>() {
       @Override
       public Toolkit run() {
@@ -546,5 +550,10 @@ public class HackedToolkit extends Toolkit {
     } catch (Exception e) {
       throw new RuntimeException("Could not delegate to toolkit", e);
     }
+  }
+
+  @Override
+  public KeyboardFocusManagerPeer createKeyboardFocusManagerPeer(KeyboardFocusManager arg) {
+    return ((KeyboardFocusManagerPeerProvider) delegate).createKeyboardFocusManagerPeer(arg);
   }
 }

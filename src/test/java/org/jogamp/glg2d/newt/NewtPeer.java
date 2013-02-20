@@ -24,6 +24,7 @@ import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
 import java.awt.image.VolatileImage;
+import java.awt.peer.ComponentPeer;
 import java.awt.peer.ContainerPeer;
 import java.awt.peer.WindowPeer;
 
@@ -34,7 +35,6 @@ import sun.java2d.pipe.Region;
 
 import com.jogamp.newt.Window;
 
-@SuppressWarnings("restriction")
 public class NewtPeer implements WindowPeer {
   protected final Window newtWindow;
 
@@ -50,8 +50,8 @@ public class NewtPeer implements WindowPeer {
   public Point getLocationOnScreen() {
     return new Point(newtWindow.getX(), newtWindow.getY());
   }
-
-  @Override
+  
+   // JDK 6 only
   public Rectangle getBounds() {
     int w = newtWindow.getWidth();
     int h = newtWindow.getHeight();
@@ -71,23 +71,19 @@ public class NewtPeer implements WindowPeer {
    */
 
   @Override
-  public Insets insets() {
-    return getInsets();
-  }
-
-  @Override
   public Toolkit getToolkit() {
     return Toolkit.getDefaultToolkit();
   }
+  
+  // JDK 6 only
+  public Insets insets() {
+    return getInsets();
+  }
+ 
 
   /*
    * NOT implemented
    */
-
-  @Override
-  public void reshape(int x, int y, int width, int height) {
-    notImplemented("EmptyWindowPeer.reshape");
-  }
 
   @Override
   public void setBounds(int x, int y, int width, int height, int op) {
@@ -361,64 +357,80 @@ public class NewtPeer implements WindowPeer {
   public void applyShape(Region shape) {
     notImplemented("EmptyWindowPeer.applyShape");
   }
-
-  @Override
+  
+  // JDK 6 only
   public boolean requestWindowFocus() {
     notImplemented("EmptyWindowPeer.requestWindowFocus");
     return false;
   }
 
-  @Override
+  // JDK 6 only
   public boolean isPaintPending() {
     notImplemented("EmptyWindowPeer.isPaintPending");
     return false;
   }
 
-  @Override
+  // JDK 6 only
   public void restack() {
     notImplemented("EmptyWindowPeer.restack");
   }
 
-  @Override
+  // JDK 6 only
   public boolean isRestackSupported() {
     notImplemented("EmptyWindowPeer.isRestackSupported");
     return false;
   }
 
-  @Override
+  // JDK 6 only
   public void repaint(long tm, int x, int y, int width, int height) {
     notImplemented("EmptyWindowPeer.repaint");
   }
 
-  @Override
+  // JDK 6 only
   public Dimension preferredSize() {
     notImplemented("EmptyWindowPeer.preferredSize");
     return null;
   }
 
-  @Override
+  // JDK 6 only
   public Dimension minimumSize() {
     notImplemented("EmptyWindowPeer.minimumSize");
     return null;
   }
 
-  @Override
+  // JDK 6 only
   public void show() {
     notImplemented("EmptyWindowPeer.show");
   }
 
-  @Override
+  // JDK 6 only
   public void hide() {
     notImplemented("EmptyWindowPeer.hide");
   }
 
-  @Override
+  // JDK 6 only
   public void enable() {
     notImplemented("EmptyWindowPeer.enable");
   }
 
-  @Override
+  // JDK 6 only
   public void disable() {
     notImplemented("EmptyWindowPeer.disable");
+  }
+
+  // JDK 6 only
+  public void reshape(int x, int y, int width, int height) {
+    notImplemented("EmptyWindowPeer.reshape");
+  }
+  
+  // JDK 7 only
+  public void setZOrder(ComponentPeer above) {
+    notImplemented("EmptyWindowPeer.setZOrder");
+  }
+
+  // JDK 7 only
+  public boolean updateGraphicsData(GraphicsConfiguration gc) {
+    notImplemented("EmptyWindowPeer.updateGraphicsData");
+    return false;
   }
 }
