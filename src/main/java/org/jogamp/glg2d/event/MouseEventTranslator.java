@@ -50,6 +50,10 @@ public class MouseEventTranslator {
 
   protected Component target;
 
+  protected Component lastUnderCursor;
+  protected Component lastSource;
+  protected MouseEvent dragging;
+
   public MouseEventTranslator(Component target) {
     this.target = target;
     queue = Toolkit.getDefaultToolkit().getSystemEventQueue();
@@ -76,19 +80,68 @@ public class MouseEventTranslator {
     return new AffineTransform(originToTargetTransform);
   }
 
+  protected void publishLatentEvent(Component underCursor, int id, int when, int modifiers, Point point, int clickCount, int button) {
+    Point lastSrcPt = SwingUtilities.convertPoint(underCursor, point, lastSource);
+
+    // always publish mouse exiting event first
+    if (id == MouseEvent.MOUSE_EXITED) {
+      publish(new MouseEvent(underCursor, MouseEvent.MOUSE_EXITED, when, modifiers, point.x, point.y, 0, 0,
+          clickCount, false, button));
+    }
+
+    if (dragging != null) {
+      if (id != MouseEvent.MOUSE_DRAGGED) {
+        // not dragging anymore
+        publish(new MouseEvent(lastSource, MouseEvent.MOUSE_RELEASED, when, dragging.getModifiers(), lastSrcPt.x, lastSrcPt.y, 0, 0,
+            dragging.getClickCount(), false, dragging.getButton()));
+      } else if (lastUnderCursor == lastSource && lastUnderCursor != underCursor) {
+        // mouse was on the last source, but isn't now
+        publish(new MouseEvent(lastSource, MouseEvent.MOUSE_EXITED, when, modifiers, lastSrcPt.x, lastSrcPt.y, 0, 0,
+            clickCount, false, button));
+      } else if (underCursor == lastSource && lastUnderCursor != underCursor) {
+        // mouse is now on the last source, but wasn't before
+        publish(new MouseEvent(lastSource, MouseEvent.MOUSE_ENTERED, when, modifiers, lastSrcPt.x, lastSrcPt.y, 0, 0,
+            clickCount, false, button));
+      }
+    } else if (lastSource != null && lastSource != underCursor) {
+      publish(new MouseEvent(lastSource, MouseEvent.MOUSE_EXITED, when, modifiers, lastSrcPt.x, lastSrcPt.y, 0, 0,
+          clickCount, false, button));
+
+      publish(new MouseEvent(underCursor, MouseEvent.MOUSE_ENTERED, when, modifiers, point.x, point.y, 0, 0,
+          clickCount, false, button));
+    }
+
+    assert dragging == null || lastSource != null;
+  }
+
   public MouseEvent publishMouseEvent(Component source, int id, long when, int modifiers, Point sourcePoint,
       int clickCount, int button) {
-    // TODO how to determine this?
-    boolean isPopupTrigger = false;
-    MouseEvent e = new MouseEvent(source, id, when, modifiers, sourcePoint.x, sourcePoint.y, 0, 0, clickCount, isPopupTrigger, button);
+    publishLatentEvent(source, id, id, modifiers, sourcePoint, clickCount, button);
+
+    lastUnderCursor = source;
+    if (id == MouseEvent.MOUSE_DRAGGED) {
+      sourcePoint = SwingUtilities.convertPoint(source, sourcePoint, lastSource);
+      source = lastSource;
+    }
+
+    // TODO how to determine isPopupTrigger
+    MouseEvent e = new MouseEvent(source, id, when, modifiers, sourcePoint.x, sourcePoint.y, 0, 0, clickCount, false, button);
     publish(e);
+
+    if (id == MouseEvent.MOUSE_DRAGGED) {
+      dragging = e;
+    } else {
+      dragging = null;
+    }
+
+    lastSource = source;
     return e;
   }
 
   public MouseEvent publishMouseEvent(int id, long when, int modifiers, int clickCount, int button, Point clickedOnOrigin) {
     Point clickedOnTarget = originPointToTarget(clickedOnOrigin);
 
-    Component source = getSourceComponent(clickedOnTarget);
+    Component source = getSourceComponent(id, clickedOnTarget);
     if (source == null) {
       return null;
     }
@@ -111,7 +164,7 @@ public class MouseEventTranslator {
   public MouseWheelEvent publishMouseWheelEvent(int id, long when, int modifiers, int wheelRotation, Point mouseOnOrigin) {
     Point clickedOnTarget = originPointToTarget(mouseOnOrigin);
 
-    Component source = getSourceComponent(clickedOnTarget);
+    Component source = getSourceComponent(id, clickedOnTarget);
     if (source == null) {
       return null;
     }
@@ -142,11 +195,12 @@ public class MouseEventTranslator {
   /**
    * Gets the source component at the given target-relative point.
    */
-  protected Component getSourceComponent(Point pt) {
+  protected Component getSourceComponent(int eventId, Point pt) {
     return SwingUtilities.getDeepestComponentAt(target, pt.x, pt.y);
   }
 
   protected void publish(AWTEvent e) {
+    System.out.println(e);
     queue.postEvent(e);
   }
 }
