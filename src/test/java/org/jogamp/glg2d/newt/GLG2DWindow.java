@@ -1,9 +1,12 @@
 package org.jogamp.glg2d.newt;
 
+import java.awt.BorderLayout;
+
 import javax.media.nativewindow.NativeWindow;
 import javax.media.opengl.GLCapabilitiesImmutable;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JRootPane;
 
 import org.jogamp.glg2d.GLG2DHeadlessListener;
 import org.jogamp.glg2d.GLG2DSimpleEventListener;
@@ -35,7 +38,7 @@ public class GLG2DWindow extends GLWindow
 	private GLG2DHeadlessListener reshapeListener;
 	private NewtMouseEventTranslator evtListener;
 
-	private JFrame container = new GLG2DFrame(this);
+  private JRootPane container = new JRootPane();
 
 	/**
 	 * Creates a new GLG2DWindow.
@@ -70,6 +73,10 @@ public class GLG2DWindow extends GLWindow
 		if (component != null)
 		{
 			this.container.setContentPane(component);
+      
+			NewtHiddenParent hidden = new NewtHiddenParent(this);
+			hidden.setVisible(true);
+			hidden.add(container, BorderLayout.CENTER);
 
 			this.removeGLEventListener(painterListener);
 			this.removeGLEventListener(reshapeListener);
@@ -83,12 +90,6 @@ public class GLG2DWindow extends GLWindow
 			this.evtListener = new NewtMouseEventTranslator(component);
 			addMouseListener(evtListener);
 		}
-	}
-
-	public void setVisibler(boolean visible)
-	{
-		container.setVisible(visible);
-		setVisible(true);
 	}
 
 	public static GLG2DWindow create(GLCapabilitiesImmutable caps)

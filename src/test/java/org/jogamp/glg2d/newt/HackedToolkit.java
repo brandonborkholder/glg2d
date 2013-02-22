@@ -1,5 +1,6 @@
 package org.jogamp.glg2d.newt;
 
+import java.applet.Applet;
 import java.awt.Button;
 import java.awt.Canvas;
 import java.awt.Checkbox;
@@ -81,6 +82,10 @@ import java.security.PrivilegedAction;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.swing.JComponent;
+import javax.swing.JPopupMenu;
+import javax.swing.RepaintManager;
+
 public class HackedToolkit extends Toolkit {
   private static Toolkit delegate;
 
@@ -103,6 +108,26 @@ public class HackedToolkit extends Toolkit {
       }
     });
 
+    System.setProperty("swing.handleTopLevelPaint", "false");
+    JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+    RepaintManager.setCurrentManager(new RepaintManager() {
+      @Override
+      public void addDirtyRegion(Applet applet, int x, int y, int w, int h) {
+      }
+
+      @Override
+      public void addDirtyRegion(JComponent c, int x, int y, int w, int h) {
+      }
+
+      @Override
+      public void addDirtyRegion(Window window, int x, int y, int w, int h) {
+      }
+
+      @Override
+      public synchronized void addInvalidComponent(JComponent invalidComponent) {
+      }
+    });
+
     System.setProperty("awt.toolkit", HackedToolkit.class.getName());
     Toolkit.getDefaultToolkit();
   }
@@ -111,181 +136,225 @@ public class HackedToolkit extends Toolkit {
     return (HackedToolkit) Toolkit.getDefaultToolkit();
   }
 
+  @Override
   public void setDynamicLayout(boolean dynamic) throws HeadlessException {
     delegate.setDynamicLayout(dynamic);
   }
 
+  @Override
   public boolean isDynamicLayoutActive() throws HeadlessException {
     return delegate.isDynamicLayoutActive();
   }
 
+  @Override
   public Dimension getScreenSize() throws HeadlessException {
     return delegate.getScreenSize();
   }
 
+  @Override
   public int getScreenResolution() throws HeadlessException {
     return delegate.getScreenResolution();
   }
 
+  @Override
   public Insets getScreenInsets(GraphicsConfiguration gc) throws HeadlessException {
     return delegate.getScreenInsets(gc);
   }
 
+  @Override
   public ColorModel getColorModel() throws HeadlessException {
     return delegate.getColorModel();
   }
 
+  @Override
   @SuppressWarnings("deprecation")
   public String[] getFontList() {
     return delegate.getFontList();
   }
 
+  @Override
   @SuppressWarnings("deprecation")
   public FontMetrics getFontMetrics(Font font) {
     return delegate.getFontMetrics(font);
   }
 
+  @Override
   public void sync() {
     delegate.sync();
   }
 
+  @Override
   public Image getImage(String filename) {
     return delegate.getImage(filename);
   }
 
+  @Override
   public Image getImage(URL url) {
     return delegate.getImage(url);
   }
 
+  @Override
   public Image createImage(String filename) {
     return delegate.createImage(filename);
   }
 
+  @Override
   public Image createImage(URL url) {
     return delegate.createImage(url);
   }
 
+  @Override
   public boolean prepareImage(Image image, int width, int height, ImageObserver observer) {
     return delegate.prepareImage(image, width, height, observer);
   }
 
+  @Override
   public int checkImage(Image image, int width, int height, ImageObserver observer) {
     return delegate.checkImage(image, width, height, observer);
   }
 
+  @Override
   public Image createImage(ImageProducer producer) {
     return delegate.createImage(producer);
   }
 
+  @Override
   public Image createImage(byte[] imagedata) {
     return delegate.createImage(imagedata);
   }
 
+  @Override
   public Image createImage(byte[] imagedata, int imageoffset, int imagelength) {
     return delegate.createImage(imagedata, imageoffset, imagelength);
   }
 
+  @Override
   public PrintJob getPrintJob(Frame frame, String jobtitle, Properties props) {
     return delegate.getPrintJob(frame, jobtitle, props);
   }
 
+  @Override
   public PrintJob getPrintJob(Frame frame, String jobtitle, JobAttributes jobAttributes, PageAttributes pageAttributes) {
     return delegate.getPrintJob(frame, jobtitle, jobAttributes, pageAttributes);
   }
 
+  @Override
   public void beep() {
     delegate.beep();
   }
 
+  @Override
   public Clipboard getSystemClipboard() throws HeadlessException {
     return delegate.getSystemClipboard();
   }
 
+  @Override
   public Clipboard getSystemSelection() throws HeadlessException {
-    return delegate.getSystemSelection();
+    return null;
   }
 
+  @Override
   public int getMenuShortcutKeyMask() throws HeadlessException {
     return delegate.getMenuShortcutKeyMask();
   }
 
+  @Override
   public boolean getLockingKeyState(int keyCode) throws UnsupportedOperationException {
     return delegate.getLockingKeyState(keyCode);
   }
 
+  @Override
   public void setLockingKeyState(int keyCode, boolean on) throws UnsupportedOperationException {
     delegate.setLockingKeyState(keyCode, on);
   }
 
+  @Override
   public Cursor createCustomCursor(Image cursor, Point hotSpot, String name) throws IndexOutOfBoundsException, HeadlessException {
     return delegate.createCustomCursor(cursor, hotSpot, name);
   }
 
+  @Override
   public Dimension getBestCursorSize(int preferredWidth, int preferredHeight) throws HeadlessException {
     return delegate.getBestCursorSize(preferredWidth, preferredHeight);
   }
 
+  @Override
   public int getMaximumCursorColors() throws HeadlessException {
     return delegate.getMaximumCursorColors();
   }
 
+  @Override
   public boolean isFrameStateSupported(int state) throws HeadlessException {
     return delegate.isFrameStateSupported(state);
   }
 
+  @Override
   public DragSourceContextPeer createDragSourceContextPeer(DragGestureEvent dge) throws InvalidDnDOperationException {
     return delegate.createDragSourceContextPeer(dge);
   }
 
+  @Override
   public <T extends DragGestureRecognizer> T createDragGestureRecognizer(Class<T> abstractRecognizerClass, DragSource ds, Component c,
       int srcActions, DragGestureListener dgl) {
     return delegate.createDragGestureRecognizer(abstractRecognizerClass, ds, c, srcActions, dgl);
   }
 
+  @Override
   public void addPropertyChangeListener(String name, PropertyChangeListener pcl) {
     delegate.addPropertyChangeListener(name, pcl);
   }
 
+  @Override
   public void removePropertyChangeListener(String name, PropertyChangeListener pcl) {
     delegate.removePropertyChangeListener(name, pcl);
   }
 
+  @Override
   public PropertyChangeListener[] getPropertyChangeListeners() {
     return delegate.getPropertyChangeListeners();
   }
 
+  @Override
   public PropertyChangeListener[] getPropertyChangeListeners(String propertyName) {
     return delegate.getPropertyChangeListeners(propertyName);
   }
 
+  @Override
   public boolean isAlwaysOnTopSupported() {
     return delegate.isAlwaysOnTopSupported();
   }
 
+  @Override
   public boolean isModalityTypeSupported(ModalityType modalityType) {
     return delegate.isModalityTypeSupported(modalityType);
   }
 
+  @Override
   public boolean isModalExclusionTypeSupported(ModalExclusionType modalExclusionType) {
     return delegate.isModalExclusionTypeSupported(modalExclusionType);
   }
 
+  @Override
   public void addAWTEventListener(AWTEventListener listener, long eventMask) {
     delegate.addAWTEventListener(listener, eventMask);
   }
 
+  @Override
   public void removeAWTEventListener(AWTEventListener listener) {
     delegate.removeAWTEventListener(listener);
   }
 
+  @Override
   public AWTEventListener[] getAWTEventListeners() {
     return delegate.getAWTEventListeners();
   }
 
+  @Override
   public AWTEventListener[] getAWTEventListeners(long eventMask) {
     return delegate.getAWTEventListeners(eventMask);
   }
 
+  @Override
   public Map<TextAttribute, ?> mapInputMethodHighlight(InputMethodHighlight highlight) throws HeadlessException {
     return delegate.mapInputMethodHighlight(highlight);
   }

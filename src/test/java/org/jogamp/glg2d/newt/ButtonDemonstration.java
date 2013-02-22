@@ -3,6 +3,8 @@ package org.jogamp.glg2d.newt;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import javax.swing.AbstractButton;
 import javax.swing.JButton;
@@ -36,6 +38,29 @@ public class ButtonDemonstration extends GLG2DWindowTest
 		{
 			AbstractButton button = createRandomButtonType();
 			button.addActionListener(new PrintIfVisibleAction());
+      MouseAdapter l = new MouseAdapter() {
+        @Override
+        public void mouseEntered(MouseEvent e) {
+//          System.out.println(e);
+        }
+        
+        @Override
+        public void mouseExited(MouseEvent e) {
+//          System.out.println(e);
+        }
+        
+        @Override
+        public void mouseDragged(MouseEvent e) {
+//          System.out.println(e);
+        }
+        
+        @Override
+        public void mouseMoved(MouseEvent e) {
+//          System.out.println(e);
+        }
+      };
+      button.addMouseListener(l);
+      button.addMouseMotionListener(l);
 
 			buttonPanel.add(button);
 		}

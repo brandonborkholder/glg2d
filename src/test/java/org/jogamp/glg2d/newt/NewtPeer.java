@@ -271,7 +271,7 @@ public class NewtPeer implements WindowPeer {
   @Override
   public boolean isFocusable() {
     notImplemented("EmptyWindowPeer.isFocusable");
-    return false;
+    return true;
   }
 
   @Override

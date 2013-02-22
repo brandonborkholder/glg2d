@@ -9,6 +9,7 @@ import javax.swing.JPasswordField;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JViewport;
 
 /**
  * This demonstration two issues:
@@ -39,8 +40,13 @@ public class TextPanel extends GLG2DWindowTest
 			text += "Text area.\n";
 		}
 
-		textPanel.add(new JScrollPane(new JTextArea(text)));
-		textPanel.add(new JTextField("Text field."));
+		JScrollPane scroller = new JScrollPane(new JTextArea(text));
+    scroller.getViewport().setScrollMode(JViewport.SIMPLE_SCROLL_MODE);
+    textPanel.add(scroller);
+		JTextField f = new JTextField("Text field.");
+    f.requestFocusInWindow();
+    f.setCaretPosition(3);
+    textPanel.add(f);
 		textPanel.add(new JFormattedTextField("Formatted text field."));
 		textPanel.add(new JPasswordField("Password"));
 
