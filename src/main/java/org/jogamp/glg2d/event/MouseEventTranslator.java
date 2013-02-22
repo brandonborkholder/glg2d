@@ -80,15 +80,19 @@ public class MouseEventTranslator {
     return new AffineTransform(originToTargetTransform);
   }
 
-  protected void publishLatentEvent(Component underCursor, int id, int when, int modifiers, Point point, int clickCount, int button) {
+  public void publishMouseEvent(Component underCursor, int id, long when, int modifiers, Point point, int clickCount, int button) {
     Point lastSrcPt = SwingUtilities.convertPoint(underCursor, point, lastSource);
+
+    boolean published = false;
 
     // always publish mouse exiting event first
     if (id == MouseEvent.MOUSE_EXITED) {
       publish(new MouseEvent(underCursor, MouseEvent.MOUSE_EXITED, when, modifiers, point.x, point.y, 0, 0,
           clickCount, false, button));
+      published = true;
     }
 
+    // take special action if dragging
     if (dragging != null) {
       if (id != MouseEvent.MOUSE_DRAGGED) {
         // not dragging anymore
@@ -103,7 +107,24 @@ public class MouseEventTranslator {
         publish(new MouseEvent(lastSource, MouseEvent.MOUSE_ENTERED, when, modifiers, lastSrcPt.x, lastSrcPt.y, 0, 0,
             clickCount, false, button));
       }
-    } else if (lastSource != null && lastSource != underCursor) {
+
+      published = true;
+    }
+
+    // publish to last source component
+    if (id == MouseEvent.MOUSE_DRAGGED) {
+      MouseEvent e = new MouseEvent(lastSource, MouseEvent.MOUSE_DRAGGED, when, modifiers, lastSrcPt.x, lastSrcPt.y, 0, 0,
+          clickCount, false, button);
+      publish(e);
+      dragging = e;
+
+      published = true;
+    } else {
+      dragging = null;
+    }
+
+    // not dragging, but mouse moved from one over one component to over another
+    if (dragging == null && lastSource != null && lastSource != underCursor) {
       publish(new MouseEvent(lastSource, MouseEvent.MOUSE_EXITED, when, modifiers, lastSrcPt.x, lastSrcPt.y, 0, 0,
           clickCount, false, button));
 
@@ -111,44 +132,29 @@ public class MouseEventTranslator {
           clickCount, false, button));
     }
 
+    if (!published) {
+      publish(new MouseEvent(underCursor, id, when, modifiers, point.x, point.y, 0, 0, clickCount, false, button));
+    }
+
+    assert dragging == null || lastUnderCursor != null;
     assert dragging == null || lastSource != null;
+    assert (lastSource == null) == (lastUnderCursor == null);
+
+    lastUnderCursor = underCursor;
+    lastSource = id == MouseEvent.MOUSE_DRAGGED ? lastSource : underCursor;
   }
 
-  public MouseEvent publishMouseEvent(Component source, int id, long when, int modifiers, Point sourcePoint,
-      int clickCount, int button) {
-    publishLatentEvent(source, id, id, modifiers, sourcePoint, clickCount, button);
-
-    lastUnderCursor = source;
-    if (id == MouseEvent.MOUSE_DRAGGED) {
-      sourcePoint = SwingUtilities.convertPoint(source, sourcePoint, lastSource);
-      source = lastSource;
-    }
-
-    // TODO how to determine isPopupTrigger
-    MouseEvent e = new MouseEvent(source, id, when, modifiers, sourcePoint.x, sourcePoint.y, 0, 0, clickCount, false, button);
-    publish(e);
-
-    if (id == MouseEvent.MOUSE_DRAGGED) {
-      dragging = e;
-    } else {
-      dragging = null;
-    }
-
-    lastSource = source;
-    return e;
-  }
-
-  public MouseEvent publishMouseEvent(int id, long when, int modifiers, int clickCount, int button, Point clickedOnOrigin) {
+  public void publishMouseEvent(int id, long when, int modifiers, int clickCount, int button, Point clickedOnOrigin) {
     Point clickedOnTarget = originPointToTarget(clickedOnOrigin);
 
     Component source = getSourceComponent(id, clickedOnTarget);
     if (source == null) {
-      return null;
+      return;
     }
 
     Point clickedOnSource = targetPointToSource(source, clickedOnTarget);
 
-    return publishMouseEvent(source, id, when, modifiers, clickedOnSource, clickCount, button);
+    publishMouseEvent(source, id, when, modifiers, clickedOnSource, clickCount, button);
   }
 
   public MouseWheelEvent publishMouseWheelEvent(Component source, int id, long when, int modifiers, Point sourcePoint, int clickCount,
@@ -200,7 +206,6 @@ public class MouseEventTranslator {
   }
 
   protected void publish(AWTEvent e) {
-    System.out.println(e);
     queue.postEvent(e);
   }
 }
