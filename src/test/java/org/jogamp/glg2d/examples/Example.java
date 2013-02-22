@@ -14,7 +14,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
-public class Example {
+class Example {
   public static JComponent createComponent() {
     JPanel panel = new JPanel(new BorderLayout());
     panel.setDoubleBuffered(false);

@@ -36,6 +36,8 @@ import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JViewport;
 
+import com.jogamp.opengl.util.Animator;
+
 /**
  * This canvas redirects all paints to an OpenGL canvas. The drawable component
  * can be any JComponent. This is a simple implementation to allow manual
@@ -66,6 +68,8 @@ public class GLG2DCanvas extends JComponent {
   protected GLCapabilitiesImmutable chosenCapabilities;
 
   protected GLEventListener g2dglListener;
+
+  protected Animator animator;
 
   /**
    * @see #removeNotify()
@@ -115,6 +119,9 @@ public class GLG2DCanvas extends JComponent {
     setLayout(new GLOverlayLayout());
     add((Component) canvas);
 
+    animator = new Animator(canvas);
+    animator.setRunAsFastAsPossible(false);
+
     setGLDrawing(true);
   }
 
@@ -160,6 +167,12 @@ public class GLG2DCanvas extends JComponent {
       firePropertyChange("gldrawing", !drawGL, drawGL);
 
       repaint();
+
+      if (drawGL && isShowing()) {
+        animator.start();
+      } else {
+        animator.stop();
+      }
     }
   }
 
@@ -282,9 +295,20 @@ public class GLG2DCanvas extends JComponent {
     remove((Component) canvas);
     super.removeNotify();
 
+    animator.stop();
+
     canvas = createGLComponent(chosenCapabilities, sideContext.getContext());
     canvas.addGLEventListener(g2dglListener);
     add((Component) canvas, 0);
+  }
+
+  @Override
+  public void addNotify() {
+    super.addNotify();
+
+    if (isGLDrawing()) {
+      animator.start();
+    }
   }
 
   private void prepareSideContext() {

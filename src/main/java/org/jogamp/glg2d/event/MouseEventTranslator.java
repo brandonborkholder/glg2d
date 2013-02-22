@@ -81,7 +81,7 @@ public class MouseEventTranslator {
   }
 
   public void publishMouseEvent(Component underCursor, int id, long when, int modifiers, Point point, int clickCount, int button) {
-    Point lastSrcPt = SwingUtilities.convertPoint(underCursor, point, lastSource);
+    Point lastSrcPt = lastSource == null ? point : SwingUtilities.convertPoint(underCursor, point, lastSource);
 
     boolean published = false;
 

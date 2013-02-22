@@ -16,7 +16,6 @@ import javax.swing.RepaintManager;
 
 import org.jogamp.glg2d.GLG2DCanvas;
 import org.jogamp.glg2d.GLG2DPanel;
-import org.jogamp.glg2d.examples.Example;
 
 import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.Animator;
