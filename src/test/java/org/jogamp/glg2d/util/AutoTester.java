@@ -1,6 +1,5 @@
 package org.jogamp.glg2d.util;
 
-
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
@@ -14,7 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JSplitPane;
 
 import org.jogamp.glg2d.GLG2DCanvas;
-import org.jogamp.glg2d.GLG2DEventListener;
+import org.jogamp.glg2d.GLG2DSimpleEventListener;
 import org.jogamp.glg2d.GLGraphics2D;
 import org.junit.Assert;
 
@@ -81,7 +80,7 @@ public class AutoTester implements Tester {
   public static BufferedImage drawGL(final Painter painter) {
     JPanel panel = new JPanel();
     panel.setSize(pixels, pixels);
-    buffer.addGLEventListener(new GLG2DEventListener(panel) {
+    buffer.addGLEventListener(new GLG2DSimpleEventListener(panel) {
       @Override
       protected void paintGL(GLGraphics2D g2d) {
         painter.paint(g2d);

@@ -1,23 +1,14 @@
 package org.jogamp.glg2d.newt;
 
-import java.applet.Applet;
-import java.awt.BorderLayout;
-import java.awt.Window;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.util.concurrent.Executors;
 
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLProfile;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-import javax.swing.JPopupMenu;
-import javax.swing.RepaintManager;
 
 import org.jogamp.glg2d.GLG2DCanvas;
-import org.jogamp.glg2d.GLG2DPanel;
 
-import com.jogamp.newt.opengl.GLWindow;
 import com.jogamp.opengl.util.Animator;
 
 /**
@@ -80,7 +71,7 @@ public abstract class GLG2DWindowTest
 
     window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-    GLG2DPanel panel = new GLG2DPanel();
+    GLG2DCanvas panel = new GLG2DCanvas();
     panel.setDrawableComponent(new ContentPane());
 
     window.setContentPane(panel);

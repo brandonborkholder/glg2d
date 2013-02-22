@@ -35,6 +35,7 @@ import javax.media.opengl.awt.GLCanvas;
 import javax.swing.JComponent;
 import javax.swing.JPopupMenu;
 import javax.swing.JViewport;
+import javax.swing.RepaintManager;
 
 import com.jogamp.opengl.util.Animator;
 
@@ -123,6 +124,8 @@ public class GLG2DCanvas extends JComponent {
     animator.setRunAsFastAsPossible(false);
 
     setGLDrawing(true);
+
+    RepaintManager.setCurrentManager(GLAwareRepaintManager.INSTANCE);
   }
 
   /**
@@ -225,6 +228,10 @@ public class GLG2DCanvas extends JComponent {
    */
   protected void verifyHierarchy(Component comp) {
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
+
+    if (comp instanceof JComponent) {
+      ((JComponent) comp).setDoubleBuffered(false);
+    }
 
     if (!(comp instanceof JComponent)) {
       Logger.getLogger(GLG2DCanvas.class.getName()).warning("Drawable component and children should be pure Swing: " +

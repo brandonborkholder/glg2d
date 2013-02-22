@@ -16,85 +16,31 @@
 package org.jogamp.glg2d;
 
 import java.awt.Container;
-import java.awt.Rectangle;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.Map;
 
 import javax.media.opengl.GLAutoDrawable;
 import javax.swing.JComponent;
 import javax.swing.RepaintManager;
-import javax.swing.SwingUtilities;
 
 public class GLAwareRepaintManager extends RepaintManager {
   public static RepaintManager INSTANCE = new GLAwareRepaintManager();
 
-  private Map<JComponent, Rectangle> rects = new IdentityHashMap<JComponent, Rectangle>();
-
-  private volatile boolean queued = false;
-
   @Override
   public void addDirtyRegion(JComponent c, int x, int y, int w, int h) {
-    GLG2DPanel canvas = getGLParent(c);
+    GLG2DCanvas canvas = getGLParent(c);
     if (canvas == null || c instanceof GLAutoDrawable) {
       super.addDirtyRegion(c, x, y, w, h);
     } else {
-      synchronized (rects) {
-        if (!rects.containsKey(c)) {
-          rects.put(c, new Rectangle(0, 0, c.getWidth(), c.getHeight()));
-        }
-
-        if (!queued && rects.size() > 0) {
-          queued = true;
-          queue();
-        }
-      }
+      canvas.repaint();
     }
   }
 
-  private void queue() {
-    SwingUtilities.invokeLater(new Runnable() {
-      @Override
-      public void run() {
-        Map<JComponent, Rectangle> r;
-        synchronized (rects) {
-          r = new IdentityHashMap<JComponent, Rectangle>(rects);
-          queued = false;
-
-          rects.clear();
-        }
-
-        r = filter(r);
-        GLG2DPanel canvas = getGLParent(r.keySet().iterator().next());
-        if(canvas != null) {
-           canvas.paintGLImmediately(r);
-        }
-      }
-    });
-  }
-
-  private Map<JComponent, Rectangle> filter(Map<JComponent, Rectangle> rects) {
-    Iterator<JComponent> itr = rects.keySet().iterator();
-    while (itr.hasNext()) {
-      JComponent desc = itr.next();
-      for (JComponent key : rects.keySet()) {
-        if (desc != key && SwingUtilities.isDescendingFrom(desc, key)) {
-          itr.remove();
-          break;
-        }
-      }
-    }
-
-    return rects;
-  }
-
-  protected GLG2DPanel getGLParent(JComponent component) {
+  protected GLG2DCanvas getGLParent(JComponent component) {
     Container c = component.getParent();
     while (true) {
       if (c == null) {
         return null;
-      } else if (c instanceof GLG2DPanel) {
-        return (GLG2DPanel) c;
+      } else if (c instanceof GLG2DCanvas) {
+        return (GLG2DCanvas) c;
       } else {
         c = c.getParent();
       }

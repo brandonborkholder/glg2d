@@ -14,6 +14,8 @@ import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.SwingConstants;
 
+import org.jogamp.glg2d.GLGraphics2D;
+
 class Example {
   public static JComponent createComponent() {
     JPanel panel = new JPanel(new BorderLayout());
@@ -21,7 +23,16 @@ class Example {
 
     panel.add(new JButton("Press me!"), BorderLayout.NORTH);
 
-    JProgressBar bar = new JProgressBar();
+    JProgressBar bar = new JProgressBar() {
+      protected void paintComponent(java.awt.Graphics g) {
+       if (g instanceof GLGraphics2D
+           ) {
+         super.paintComponent(g);
+       } else {
+         System.out.println(g.getClass());
+       }
+      }
+    };
     bar.setIndeterminate(true);
     panel.add(bar, BorderLayout.SOUTH);
     panel.add(new JSlider(SwingConstants.VERTICAL, 0, 10, 3), BorderLayout.EAST);

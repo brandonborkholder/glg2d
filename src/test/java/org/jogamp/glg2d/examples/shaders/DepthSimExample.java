@@ -1,6 +1,5 @@
 package org.jogamp.glg2d.examples.shaders;
 
-
 import java.awt.Dimension;
 import java.awt.RenderingHints.Key;
 import java.awt.event.ActionEvent;
@@ -14,8 +13,8 @@ import javax.swing.Timer;
 import javax.swing.UIManager;
 
 import org.jogamp.glg2d.G2DDrawingHelper;
-import org.jogamp.glg2d.GLG2DEventListener;
-import org.jogamp.glg2d.GLG2DPanel;
+import org.jogamp.glg2d.GLG2DCanvas;
+import org.jogamp.glg2d.GLG2DSimpleEventListener;
 import org.jogamp.glg2d.GLGraphics2D;
 import org.jogamp.glg2d.UIDemo;
 
@@ -25,10 +24,10 @@ public class DepthSimExample {
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
     final JFrame frame = new JFrame("Depth Shaker Example");
-    frame.setContentPane(new GLG2DPanel(new UIDemo()) {
+    frame.setContentPane(new GLG2DCanvas(new UIDemo()) {
       @Override
-      protected GLG2DEventListener createG2DListener(JComponent drawingComponent) {
-        return new GLG2DEventListener(drawingComponent) {
+      protected GLG2DSimpleEventListener createG2DListener(JComponent drawingComponent) {
+        return new GLG2DSimpleEventListener(drawingComponent) {
           @Override
           protected GLGraphics2D createGraphics2D(GLAutoDrawable drawable) {
             return new GLGraphics2D() {

@@ -26,6 +26,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
@@ -47,8 +48,6 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-
-import org.jogamp.glg2d.GLG2DPanel;
 
 @SuppressWarnings("serial")
 public class UIDemo extends JPanel {
@@ -325,9 +324,11 @@ public class UIDemo extends JPanel {
   public static void main(String[] args) throws Exception {
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     JFrame frame = new JFrame("Swing Demo");
+    
+    JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
 //     frame.setContentPane(new UIDemo());
-    frame.setContentPane(new GLG2DPanel(new UIDemo()));
+    frame.setContentPane(new GLG2DCanvas(new UIDemo()));
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setPreferredSize(new Dimension(1024, 768));
     frame.pack();
