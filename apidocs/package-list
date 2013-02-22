@@ -1,4 +1,5 @@
 org.jogamp.glg2d
+org.jogamp.glg2d.event
 org.jogamp.glg2d.impl
 org.jogamp.glg2d.impl.gl2
 org.jogamp.glg2d.impl.shader
