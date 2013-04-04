@@ -13,7 +13,7 @@ do
 <!doctype html>
 <html>
   <head>
-    <title>Listing of $NAME</title>
+    <title>GLG2D File Listing of $NAME</title>
     <style type="text/css">
     body {
       margin-top: 1.0em;
@@ -30,7 +30,7 @@ do
   </head>
   <body>
     <div id="container">
-      <h2>Listing of $NAME</h2>
+      <h2><a href="http://brandonborkholder.github.com/glg2d/">GLG2D</a> Listing of $NAME</h2>
       <div class="link"><a href="..">..</a></div>
 END
 
