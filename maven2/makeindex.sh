@@ -13,7 +13,7 @@ do
 <!doctype html>
 <html>
   <head>
-    <title>Listing of $NAME</title
+    <title>Listing of $NAME</title>
     <style type="text/css">
     body {
       margin-left: auto;
