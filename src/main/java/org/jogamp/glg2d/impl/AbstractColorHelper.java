@@ -119,7 +119,7 @@ public abstract class AbstractColorHelper implements GLG2DColorHelper {
       // need to pre-multiply the alpha
       setColor(getColor());
     } else {
-      notImplemented("setComposite(Composite) with " + comp.getClass().getSimpleName());
+      notImplemented("setComposite(Composite) with " + comp == null ? "null Composite" : comp.getClass().getSimpleName());
     }
   }
 
