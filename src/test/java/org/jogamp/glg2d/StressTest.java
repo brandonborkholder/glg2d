@@ -7,10 +7,10 @@ import java.awt.Image;
 import java.awt.geom.CubicCurve2D;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferedImage;
 import java.util.Random;
 
 import javax.imageio.ImageIO;
-
 
 import org.jogamp.glg2d.util.CustomPainter;
 import org.jogamp.glg2d.util.TestWindow;
@@ -174,6 +174,33 @@ public class StressTest {
     painter.waitAndLogTimes("images");
   }
 
+  @Test
+  public void newImageMemoryTest() throws Exception {
+    TimedPainter painter = new TimedPainter() {
+      Random r = new Random();
+
+      @Override
+      public void paint(Graphics2D g2d) {
+        int w = 500;
+        int h = 500;
+        BufferedImage img = new BufferedImage(w, h, BufferedImage.TYPE_3BYTE_BGR);
+
+        Graphics2D ig2d = img.createGraphics();
+        ig2d.setStroke(new BasicStroke(5));
+        ig2d.setColor(Color.white);
+        for (int i = 0; i < 10; i++) {
+          ig2d.drawArc(r.nextInt(w), r.nextInt(h), r.nextInt(w / 2), r.nextInt(h / 2), r.nextInt(360), r.nextInt(360));
+        }
+        ig2d.dispose();
+
+        g2d.drawImage(img, null, null);
+      }
+    };
+
+    tester.setPainter(painter);
+    painter.waitIndefinitely("icons");
+  }
+
   static abstract class TimedPainter implements CustomPainter {
     long[] times = new long[2];
 
@@ -197,6 +224,12 @@ public class StressTest {
 
       System.out.println(String.format("JOGL for %s took an average of %.3f ms", type, times[0] / 1e6 / calls[0]));
       System.out.println(String.format("Java2D for %s took an average of %.3f ms", type, times[1] / 1e6 / calls[1]));
+    }
+
+    public void waitIndefinitely(String type) throws InterruptedException {
+      while (true) {
+        waitAndLogTimes(type);
+      }
     }
   }
 }

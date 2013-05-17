@@ -30,8 +30,10 @@ import java.awt.image.ImageObserver;
 import java.awt.image.RenderedImage;
 import java.awt.image.VolatileImage;
 import java.awt.image.renderable.RenderableImage;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,7 +51,7 @@ public abstract class AbstractImageHelper implements GLG2DImageHelper {
   /**
    * See {@link GLG2DRenderingHints#KEY_CLEAR_TEXTURES_CACHE}
    */
-  protected Map<Image, Texture> imageCache = new WeakHashMap<Image, Texture>();
+  protected TextureCache imageCache = new TextureCache();
   protected Object clearCachePolicy;
 
   protected GLGraphics2D g2d;
@@ -184,13 +186,21 @@ public abstract class AbstractImageHelper implements GLG2DImageHelper {
       }
 
       if (bufferedImage != null) {
-        // we'll assume the image is complete and can be rendered
-        texture = AWTTextureIO.newTexture(g2d.getGLContext().getGL().getGLProfile(), bufferedImage, false);
+        texture = create(bufferedImage);
         addToCache(image, texture);
       }
     }
 
     return texture;
+  }
+
+  protected Texture create(BufferedImage image) {
+    // we'll assume the image is complete and can be rendered
+    return AWTTextureIO.newTexture(g2d.getGLContext().getGL().getGLProfile(), image, false);
+  }
+
+  protected void destroy(Texture texture) {
+    texture.destroy(g2d.getGLContext().getGL());
   }
 
   protected void addToCache(Image image, Texture texture) {
@@ -237,5 +247,64 @@ public abstract class AbstractImageHelper implements GLG2DImageHelper {
   @Override
   public void drawImage(RenderableImage img, AffineTransform xform) {
     notImplemented("drawImage(RenderableImage, AffineTransform)");
+  }
+
+  /**
+   * We could use a WeakHashMap here, but we want access to the ReferenceQueue
+   * so we can dispose the Textures when the Image is no longer referenced.
+   */
+  @SuppressWarnings("serial")
+  protected class TextureCache extends HashMap<WeakKey<Image>, Texture> {
+    private ReferenceQueue<Image> queue = new ReferenceQueue<Image>();
+
+    public void expungeStaleEntries() {
+      Reference<? extends Image> ref = queue.poll();
+      while (ref != null) {
+        Texture texture = remove(ref);
+        if (texture != null) {
+          destroy(texture);
+        }
+
+        ref = queue.poll();
+      }
+    }
+
+    public Texture get(Image image) {
+      expungeStaleEntries();
+      WeakKey<Image> key = new WeakKey<Image>(image, null);
+      return get(key);
+    }
+
+    public Texture put(Image image, Texture texture) {
+      expungeStaleEntries();
+      WeakKey<Image> key = new WeakKey<Image>(image, queue);
+      return put(key, texture);
+    }
+  }
+
+  protected static class WeakKey<T> extends WeakReference<T> {
+    private final int hash;
+
+    public WeakKey(T value, ReferenceQueue<T> queue) {
+      super(value, queue);
+      hash = value.hashCode();
+    }
+
+    @Override
+    public int hashCode() {
+      return hash;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+      if (this == obj) {
+        return true;
+      } else if (obj instanceof WeakKey) {
+        WeakKey<?> other = (WeakKey<?>) obj;
+        return other.hash == hash && get() == other.get();
+      } else {
+        return false;
+      }
+    }
   }
 }
