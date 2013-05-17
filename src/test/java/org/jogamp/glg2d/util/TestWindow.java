@@ -98,7 +98,7 @@ public class TestWindow extends JFrame implements Tester {
       }
     });
 
-    new Timer(100, new ActionListener() {
+    new Timer(20, new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         repaint();

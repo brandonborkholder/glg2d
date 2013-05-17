@@ -4,6 +4,7 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
+import java.awt.RenderingHints;
 import java.awt.geom.CubicCurve2D;
 import java.awt.geom.QuadCurve2D;
 import java.awt.geom.Rectangle2D;
@@ -16,10 +17,12 @@ import org.jogamp.glg2d.util.CustomPainter;
 import org.jogamp.glg2d.util.TestWindow;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class StressTest {
   static final long TESTINGTIME = 10000;
+  static final boolean USE_ANTIALIAS = true;
 
   static TestWindow tester;
 
@@ -37,7 +40,7 @@ public class StressTest {
 
   @Test
   public void shapeTest() throws Exception {
-    final int numshapes = 10000;
+    final int numshapes = 1000;
     TimedPainter painter = new TimedPainter() {
       @Override
       protected void paint(Graphics2D g2d) {
@@ -60,7 +63,7 @@ public class StressTest {
 
   @Test
   public void lineTest() throws Exception {
-    final int numlines = 10000;
+    final int numlines = 100;
     TimedPainter painter = new TimedPainter() {
       @Override
       protected void paint(Graphics2D g2d) {
@@ -88,7 +91,7 @@ public class StressTest {
 
   @Test
   public void quadCurvedLineTest() throws Exception {
-    final int numcurves = 10000;
+    final int numcurves = 100;
     TimedPainter painter = new TimedPainter() {
       @Override
       protected void paint(Graphics2D g2d) {
@@ -111,7 +114,7 @@ public class StressTest {
 
   @Test
   public void arcTest() throws Exception {
-    final int numarcs = 10000;
+    final int numarcs = 1000;
     TimedPainter painter = new TimedPainter() {
       @Override
       protected void paint(Graphics2D g2d) {
@@ -133,7 +136,7 @@ public class StressTest {
 
   @Test
   public void cubicCurvedLineTest() throws Exception {
-    final int numcurves = 10000;
+    final int numcurves = 100;
     TimedPainter painter = new TimedPainter() {
       @Override
       protected void paint(Graphics2D g2d) {
@@ -157,7 +160,7 @@ public class StressTest {
 
   @Test
   public void imageTest() throws Exception {
-    final int numimages = 1000;
+    final int numimages = 100;
     final Image image = ImageIO.read(StressTest.class.getClassLoader().getResource("duke.gif"));
     TimedPainter painter = new TimedPainter() {
       @Override
@@ -175,6 +178,7 @@ public class StressTest {
   }
 
   @Test
+  @Ignore
   public void newImageMemoryTest() throws Exception {
     TimedPainter painter = new TimedPainter() {
       Random r = new Random();
@@ -198,7 +202,7 @@ public class StressTest {
     };
 
     tester.setPainter(painter);
-    painter.waitIndefinitely("icons");
+    painter.waitIndefinitely("icon memory");
   }
 
   static abstract class TimedPainter implements CustomPainter {
@@ -208,6 +212,10 @@ public class StressTest {
 
     @Override
     public void paint(Graphics2D g2d, boolean jogl) {
+      if (USE_ANTIALIAS) {
+        g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+      }
+
       long start = System.nanoTime();
       paint(g2d);
       long end = System.nanoTime();
