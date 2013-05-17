@@ -9,6 +9,8 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -24,6 +26,7 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 @SuppressWarnings("serial")
 public class GraphTest extends JFrame {
@@ -53,19 +56,19 @@ public class GraphTest extends JFrame {
     paintingComponent.setOpaque(true);
 
 //    setContentPane(paintingComponent);
-     setContentPane(new GLG2DCanvas(paintingComponent));
+    setContentPane(new GLG2DCanvas(paintingComponent));
 
     MouseHandler handler = new MouseHandler();
     getContentPane().addMouseListener(handler);
     getContentPane().addMouseMotionListener(handler);
     getContentPane().addMouseWheelListener(handler);
 
-//    new Timer(10, new ActionListener() {
-//      @Override
-//      public void actionPerformed(ActionEvent e) {
-//        getContentPane().repaint();
-//      }
-//    }).start();
+    new Timer(10, new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        getContentPane().repaint();
+      }
+    }).start();
   }
 
   private double getFPS() {

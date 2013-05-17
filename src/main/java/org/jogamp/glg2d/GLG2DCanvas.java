@@ -47,7 +47,7 @@ import com.jogamp.opengl.util.Animator;
  * is more appropriate when rendering a complex scene using
  * {@link JComponent#paintComponent(Graphics)} and the {@code Graphics2D}
  * object. If the drawable component contains child components, use
- * {@link GLG2DPanel}.
+ * {@code GLG2DPanel}.
  * 
  * <p>
  * GL drawing can be enabled or disabled using the {@code setGLDrawing(boolean)}
@@ -59,7 +59,10 @@ import com.jogamp.opengl.util.Animator;
  * Override {@link #createGLComponent(GLCapabilitiesImmutable, GLContext)} to
  * create the OpenGL canvas. The returned canvas may be a {@code GLJPanel} or a
  * {@code GLCanvas}. {@link #createG2DListener(JComponent)} is used to create
- * the {@code GLEventListener} that will draw to the OpenGL canvas.
+ * the {@code GLEventListener} that will draw to the OpenGL canvas. Use
+ * {@link #getGLDrawable()} if you want to attach an {@code Animator}.
+ * Otherwise, paints will only happen when requested (either with
+ * {@code repaint()} or from AWT).
  * </p>
  */
 public class GLG2DCanvas extends JComponent {
@@ -69,8 +72,6 @@ public class GLG2DCanvas extends JComponent {
   protected GLCapabilitiesImmutable chosenCapabilities;
 
   protected GLEventListener g2dglListener;
-
-  protected Animator animator;
 
   /**
    * @see #removeNotify()
@@ -120,9 +121,6 @@ public class GLG2DCanvas extends JComponent {
     setLayout(new GLOverlayLayout());
     add((Component) canvas);
 
-    animator = new Animator(canvas);
-    animator.setRunAsFastAsPossible(false);
-
     setGLDrawing(true);
 
     RepaintManager.setCurrentManager(GLAwareRepaintManager.INSTANCE);
@@ -170,12 +168,6 @@ public class GLG2DCanvas extends JComponent {
       firePropertyChange("gldrawing", !drawGL, drawGL);
 
       repaint();
-
-      if (drawGL && isShowing()) {
-        animator.start();
-      } else {
-        animator.stop();
-      }
     }
   }
 
@@ -251,6 +243,20 @@ public class GLG2DCanvas extends JComponent {
   }
 
   /**
+   * Gets the {@code GLAutoDrawable} used for drawing. By default this is a
+   * {@link GLCanvas}, but can be changed by overriding
+   * {@link #createGLComponent(GLCapabilitiesImmutable, GLContext)}.
+   * 
+   * <p>
+   * Use the returned {@code GLAutoDrawable} as input to an {@link Animator} to
+   * automate painting.
+   * </p>
+   */
+  public GLAutoDrawable getGLDrawable() {
+    return canvas;
+  }
+
+  /**
    * Creates a {@code Component} that is also a {@code GLAutoDrawable}. This is
    * where all the drawing takes place. The advantage of a {@code GLCanvas} is
    * that it is faster, but a {@code GLJPanel} is more portable. The component
@@ -302,20 +308,9 @@ public class GLG2DCanvas extends JComponent {
     remove((Component) canvas);
     super.removeNotify();
 
-    animator.stop();
-
     canvas = createGLComponent(chosenCapabilities, sideContext.getContext());
     canvas.addGLEventListener(g2dglListener);
     add((Component) canvas, 0);
-  }
-
-  @Override
-  public void addNotify() {
-    super.addNotify();
-
-    if (isGLDrawing()) {
-      animator.start();
-    }
   }
 
   private void prepareSideContext() {
