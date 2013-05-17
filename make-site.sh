@@ -17,7 +17,7 @@ mvn clean
 mvn javadoc:javadoc -Dshow=public
 
 # Deploy to local repo
-mvn package javadoc:jar source:jar
+mvn -Dmaven.test.skip=true package javadoc:jar source:jar
 mvn deploy:deploy-file -Dfile=target/glg2d-$VER.jar \
   -Dsources=target/glg2d-$VER-sources.jar \
   -Djavadoc=target/glg2d-$VER-javadoc.jar \
@@ -32,11 +32,8 @@ mv target/site/apidocs .
 git add apidocs
 
 # Copy back the repo
-git rm -r maven2
 rm -rf maven2
-cp -r m2repo maven2
-git add maven2
-rm -rf m2repo
+mv m2repo maven2
 
 cd maven2
 
