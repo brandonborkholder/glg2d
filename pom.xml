@@ -178,6 +178,7 @@
           <detectLinks>true</detectLinks>
           <links>
             <link>http://jogamp.org/deployment/v${jogl.version}/javadoc/jogl/javadoc/</link>
+            <link>http://jogamp.org/deployment/v${jogl.version}/javadoc/gluegen/javadoc/</link>
           </links>
           <archive>
             <manifestEntries>

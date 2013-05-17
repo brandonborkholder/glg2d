@@ -42,12 +42,10 @@ import com.jogamp.opengl.util.Animator;
 /**
  * This canvas redirects all paints to an OpenGL canvas. The drawable component
  * can be any JComponent. This is a simple implementation to allow manual
- * painting of a JComponent scene to OpenGL. If you want to intercept Swing
- * repaints in child components, use {@link GLG2DPanel}. A {@code G2DGLCanvas}
- * is more appropriate when rendering a complex scene using
+ * painting of a JComponent scene to OpenGL. A {@code G2DGLCanvas} is more
+ * appropriate when rendering a complex scene using
  * {@link JComponent#paintComponent(Graphics)} and the {@code Graphics2D}
- * object. If the drawable component contains child components, use
- * {@code GLG2DPanel}.
+ * object.
  * 
  * <p>
  * GL drawing can be enabled or disabled using the {@code setGLDrawing(boolean)}

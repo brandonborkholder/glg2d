@@ -51,8 +51,9 @@ public interface G2DDrawingHelper {
    * notice to pop any necessary information off the stack. This is used in
    * conjunction with {@link #push(GLGraphics2D)}.
    * 
-   * @param newG2d
-   *          The new context, top of the stack.
+   * @param parentG2d
+   *          The new context, top of the stack - which is actually the parent
+   *          of what was popped.
    */
   void pop(GLGraphics2D parentG2d);
 
