@@ -117,6 +117,7 @@
       <plugin>
         <groupId>com.github.koraktor</groupId>
         <artifactId>mavanagaiata</artifactId>
+        <version>0.5.0</version>
         <executions>
           <execution>
             <goals>
@@ -124,6 +125,9 @@
               <goal>commit</goal>
             </goals>
             <phase>prepare-package</phase>
+            <configuration>
+              <skipNoGit>true</skipNoGit>
+            </configuration>
           </execution>
         </executions>
       </plugin>
