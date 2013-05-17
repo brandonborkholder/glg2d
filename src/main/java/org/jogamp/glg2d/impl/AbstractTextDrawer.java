@@ -16,14 +16,15 @@
 package org.jogamp.glg2d.impl;
 
 
+import static java.lang.Math.ceil;
+
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.RenderingHints;
 import java.awt.RenderingHints.Key;
 import java.awt.font.FontRenderContext;
-import java.awt.font.TextLayout;
+import java.awt.geom.Rectangle2D;
 import java.util.ArrayDeque;
-import java.util.Arrays;
 import java.util.Deque;
 
 import org.jogamp.glg2d.GLG2DTextHelper;
@@ -92,12 +93,9 @@ public abstract class AbstractTextDrawer implements GLG2DTextHelper {
 
     protected FontRenderContext fontRenderContext;
 
-    protected int[] cachedWidths = new int[255];
-
     public GLFontMetrics(Font font, FontRenderContext frc) {
       super(font);
       fontRenderContext = frc;
-      Arrays.fill(cachedWidths, -1);
     }
 
     @Override
@@ -111,33 +109,8 @@ public abstract class AbstractTextDrawer implements GLG2DTextHelper {
         return 0;
       }
 
-      if (font.hasLayoutAttributes()) {
-        String str = new String(data, off, len);
-        return (int) new TextLayout(str, font, getFontRenderContext()).getAdvance();
-      } else {
-        int width = 0;
-        for (int i = 0; i < len; i++) {
-          width += charWidth(data[off + i]);
-        }
-
-        return width;
-      }
-    }
-
-    @Override
-    public int charWidth(char ch) {
-      int width;
-      if (ch < 255) {
-        width = cachedWidths[ch];
-        if (width < 0) {
-          width = (int) getFont().getStringBounds(new char[] { ch }, 0, 1, getFontRenderContext()).getWidth();
-          cachedWidths[ch] = width;
-        }
-      } else {
-        width = (int) getFont().getStringBounds(new char[] { ch }, 0, 1, getFontRenderContext()).getWidth();
-      }
-
-      return width;
+      Rectangle2D bounds = font.getStringBounds(data, off, len, getFontRenderContext());
+      return (int) ceil(bounds.getWidth());
     }
   }
 
