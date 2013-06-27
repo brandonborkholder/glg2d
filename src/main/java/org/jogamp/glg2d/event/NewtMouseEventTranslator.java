@@ -71,7 +71,7 @@ public class NewtMouseEventTranslator extends MouseEventTranslator implements Mo
     int id = newtType2Awt(e.getEventType());
     int modifiers = newtModifiers2Awt(e.getModifiers());
     long when = e.getWhen();
-    int wheelRotation = -e.getWheelRotation();
+    int wheelRotation = Math.round(-e.getRotation()[0]);
     publishMouseWheelEvent(id, when, modifiers, wheelRotation, new Point(e.getX(), e.getY()));
   }
 

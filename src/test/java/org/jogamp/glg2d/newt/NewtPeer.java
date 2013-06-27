@@ -20,6 +20,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.event.PaintEvent;
+import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.ImageObserver;
 import java.awt.image.ImageProducer;
@@ -101,8 +102,8 @@ public class NewtPeer implements WindowPeer {
   }
 
   @Override
-  public void setAlwaysOnTop(boolean alwaysOnTop) {
-    notImplemented("EmptyWindowPeer.setAlwaysOnTop");
+  public void updateAlwaysOnTopState() {
+    notImplemented("EmptyWindowPeer.updateAlwaysOnTopState");
   }
 
   @Override
@@ -136,7 +137,7 @@ public class NewtPeer implements WindowPeer {
   }
 
   @Override
-  public void updateWindow() {
+  public void updateWindow(BufferedImage arg0) {
     notImplemented("EmptyWindowPeer.updateWindow");
   }
 
