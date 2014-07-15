@@ -5,7 +5,7 @@ import java.awt.Dimension;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-import org.jogamp.glg2d.GLG2DCanvas;
+import org.jogamp.glg2d.GLG2DPanel;
 
 public class AWTExample {
   public static void main(String[] args) {
@@ -15,7 +15,7 @@ public class AWTExample {
 
     JComponent comp = Example.createComponent();
 
-    frame.setContentPane(new GLG2DCanvas(comp));
+    frame.setContentPane(new GLG2DPanel(comp));
 
     frame.pack();
     frame.setVisible(true);

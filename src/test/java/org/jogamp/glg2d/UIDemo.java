@@ -69,7 +69,7 @@ public class UIDemo extends JPanel {
 
     JPanel rightSubPanel = new JPanel(new BorderLayout());
     rightPanel.add(rightSubPanel, BorderLayout.CENTER);
-    
+
     JPanel rightSubPanel2 = new JPanel(new BorderLayout());
     rightSubPanel2.add(createInputComponent(), BorderLayout.NORTH);
     rightSubPanel2.add(createMDIComponent(), BorderLayout.CENTER);
@@ -210,7 +210,7 @@ public class UIDemo extends JPanel {
 
     return panel;
   }
-  
+
   JComponent createMDIComponent() {
     JDesktopPane pane = new JDesktopPane();
     pane.setDragMode(JDesktopPane.LIVE_DRAG_MODE);
@@ -230,12 +230,12 @@ public class UIDemo extends JPanel {
       menu.add(new JMenuItem("Close"));
       bar.add(menu);
       frame1.setJMenuBar(bar);
-      
+
       frame1.setSize(200, 200);
       frame1.setLocation(100 * i, 5 * i);
       frame1.setVisible(true);
     }
-    
+
     return pane;
   }
 
@@ -324,11 +324,11 @@ public class UIDemo extends JPanel {
   public static void main(String[] args) throws Exception {
     UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
     JFrame frame = new JFrame("Swing Demo");
-    
+
     JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
 //     frame.setContentPane(new UIDemo());
-    frame.setContentPane(new GLG2DCanvas(new UIDemo()));
+    frame.setContentPane(new GLG2DPanel(new UIDemo()));
     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     frame.setPreferredSize(new Dimension(1024, 768));
     frame.pack();
