@@ -90,7 +90,7 @@ public class GLGraphicsConfiguration extends GraphicsConfiguration {
 
   @Override
   public Rectangle getBounds() {
-    return new Rectangle(target.getWidth(), target.getHeight());
+    return new Rectangle(target.getSurfaceWidth(), target.getSurfaceHeight());
   }
 
   public GLDrawable getTarget() {

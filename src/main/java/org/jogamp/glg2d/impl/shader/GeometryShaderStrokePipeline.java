@@ -179,9 +179,9 @@ public class GeometryShaderStrokePipeline extends AbstractShaderPipeline {
     super.attachShaders(gl);
 
     GL2GL3 gl3 = gl.getGL2GL3();
-    gl3.glProgramParameteri(programId, GL2GL3.GL_GEOMETRY_INPUT_TYPE_ARB, GL.GL_LINES);
-    gl3.glProgramParameteri(programId, GL2GL3.GL_GEOMETRY_OUTPUT_TYPE_ARB, GL.GL_TRIANGLE_STRIP);
-    gl3.glProgramParameteri(programId, GL2GL3.GL_GEOMETRY_VERTICES_OUT_ARB, maxVerticesOut);
+    gl3.glProgramParameteriARB(programId, GL2GL3.GL_GEOMETRY_INPUT_TYPE_ARB, GL.GL_LINES);
+    gl3.glProgramParameteriARB(programId, GL2GL3.GL_GEOMETRY_OUTPUT_TYPE_ARB, GL.GL_TRIANGLE_STRIP);
+    gl3.glProgramParameteriARB(programId, GL2GL3.GL_GEOMETRY_VERTICES_OUT_ARB, maxVerticesOut);
   }
 
   @Override

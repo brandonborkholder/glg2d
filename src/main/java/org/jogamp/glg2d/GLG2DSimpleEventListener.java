@@ -71,7 +71,7 @@ public class GLG2DSimpleEventListener implements GLEventListener {
    * Defines the viewport to paint into.
    */
   protected void setupViewport(GLAutoDrawable drawable) {
-    drawable.getGL().glViewport(0, 0, drawable.getWidth(), drawable.getHeight());
+    drawable.getGL().glViewport(0, 0, drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
   }
 
   /**
