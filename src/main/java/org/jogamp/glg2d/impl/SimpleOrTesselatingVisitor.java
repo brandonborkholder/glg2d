@@ -276,8 +276,10 @@ public class SimpleOrTesselatingVisitor extends SimplePathVisitor {
 
     float[] vertex = new float[2];
 
-    buf.get(vertex);
-    visitor.moveTo(vertex);
+    if (buf.hasRemaining()) {
+	    buf.get(vertex);
+	    visitor.moveTo(vertex);
+    }
 
     while (buf.hasRemaining()) {
       buf.get(vertex);
