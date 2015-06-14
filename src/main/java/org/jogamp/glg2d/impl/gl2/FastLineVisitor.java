@@ -162,6 +162,8 @@ public class FastLineVisitor extends SimplePathVisitor {
       buf.position(p);
       buffer.drawBuffer(gl, GL2.GL_POINTS);
     }
+    
+    buffer.clear();
   }
 
   @Override
