@@ -37,11 +37,15 @@ public abstract class AbstractTesselatorVisitor extends SimplePathVisitor {
 
   protected GLUtessellatorCallback callback;
 
-  protected boolean contourClosed = true;
+  /**
+   * Last command was a move to. This is where drawing starts.
+   */
+  protected float[] drawStart = new float[2];
+  protected boolean drawing = false;
 
   protected int drawMode;
   protected VertexBuffer vBuffer = new VertexBuffer(1024);
-
+  
   public AbstractTesselatorVisitor() {
     callback = new TessellatorCallback();
   }
@@ -81,33 +85,51 @@ public abstract class AbstractTesselatorVisitor extends SimplePathVisitor {
 
   @Override
   public void moveTo(float[] vertex) {
-    GLU.gluTessBeginContour(tesselator);
-    double[] v = new double[] { vertex[0], vertex[1], 0 };
-    GLU.gluTessVertex(tesselator, v, 0, v);
-    contourClosed = false;
+    endIfRequired();
+    drawStart[0] = vertex[0];
+    drawStart[1] = vertex[1];
   }
 
   @Override
   public void lineTo(float[] vertex) {
-    double[] v = new double[] { vertex[0], vertex[1], 0 };
+    startIfRequired();
+    addVertex(vertex);
+  }
+
+  private void addVertex(float[] vertex) {
+    double[] v = new double[3];
+    v[0] = vertex[0];
+    v[1] = vertex[1];
     GLU.gluTessVertex(tesselator, v, 0, v);
   }
 
   @Override
   public void closeLine() {
-    GLU.gluTessEndContour(tesselator);
-    contourClosed = true;
+    endIfRequired();
   }
 
   @Override
   public void endPoly() {
     // shapes may just end on the starting point without calling closeLine
-    if (!contourClosed) {
-      closeLine();
-    }
+    endIfRequired();
 
     GLU.gluTessEndPolygon(tesselator);
     GLU.gluDeleteTess(tesselator);
+  }
+
+  private void startIfRequired() {
+    if (!drawing) {
+      GLU.gluTessBeginContour(tesselator);
+      addVertex(drawStart);
+      drawing = true;
+    }
+  }
+
+  private void endIfRequired() {
+	if (drawing) {
+      GLU.gluTessEndContour(tesselator);
+      drawing = false;
+    }
   }
 
   protected void beginTess(int type) {
