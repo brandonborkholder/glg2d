@@ -110,7 +110,7 @@ public class VertexBuffer {
 
   protected void ensureCapacity(int numNewFloats) {
     if (buffer.capacity() <= buffer.position() + numNewFloats) {
-      FloatBuffer larger = Buffers.newDirectFloatBuffer(buffer.position() * 2);
+      FloatBuffer larger = Buffers.newDirectFloatBuffer(Math.max(buffer.position() * 2, buffer.position() + numNewFloats));
       deviceBufferId = -deviceBufferId;
       int position = buffer.position();
       buffer.rewind();
