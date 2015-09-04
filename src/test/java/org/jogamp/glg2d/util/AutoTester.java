@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.Raster;
 
 import javax.media.opengl.GLDrawableFactory;
-import javax.media.opengl.GLPbuffer;
+import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -17,13 +17,14 @@ import org.jogamp.glg2d.GLG2DSimpleEventListener;
 import org.jogamp.glg2d.GLGraphics2D;
 import org.junit.Assert;
 
-import com.jogamp.opengl.util.awt.Screenshot;
+import com.jogamp.opengl.util.awt.AWTGLReadBufferUtil;
 
 public class AutoTester implements Tester {
   static final int pixels = 500;
 
-  static GLPbuffer buffer = GLDrawableFactory.getFactory(GLProfile.getMaxFixedFunc(true))
-      .createGLPbuffer(null, GLG2DCanvas.getDefaultCapabalities(), null, pixels, pixels, null);
+
+  static GLOffscreenAutoDrawable buffer = GLDrawableFactory.getFactory(GLProfile.getMaxFixedFunc(true))
+          .createOffscreenAutoDrawable(null, GLG2DCanvas.getDefaultCapabalities(), null, pixels, pixels);
 
   private Painter p;
 
@@ -89,7 +90,7 @@ public class AutoTester implements Tester {
 
     buffer.display();
     buffer.getContext().makeCurrent();
-    BufferedImage img = Screenshot.readToBufferedImage(buffer.getWidth(), buffer.getHeight(), true);
-    return img;
+    AWTGLReadBufferUtil util = new AWTGLReadBufferUtil(GLG2DCanvas.getDefaultCapabalities().getGLProfile(), false);
+    return util.readPixelsToBufferedImage( buffer.getContext().getGL( ), true );
   }
 }

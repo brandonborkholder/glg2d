@@ -29,6 +29,7 @@ import javax.media.opengl.GLCapabilitiesImmutable;
 import javax.media.opengl.GLContext;
 import javax.media.opengl.GLDrawableFactory;
 import javax.media.opengl.GLEventListener;
+import javax.media.opengl.GLOffscreenAutoDrawable;
 import javax.media.opengl.GLProfile;
 import javax.media.opengl.Threading;
 import javax.media.opengl.awt.GLCanvas;
@@ -46,13 +47,13 @@ import com.jogamp.opengl.util.Animator;
  * appropriate when rendering a complex scene using
  * {@link JComponent#paintComponent(Graphics)} and the {@code Graphics2D}
  * object.
- * 
+ *
  * <p>
  * GL drawing can be enabled or disabled using the {@code setGLDrawing(boolean)}
  * method. If GL drawing is enabled, all full paint requests are intercepted and
  * the drawable component is drawn to the OpenGL canvas.
  * </p>
- * 
+ *
  * <p>
  * Override {@link #createGLComponent(GLCapabilitiesImmutable, GLContext)} to
  * create the OpenGL canvas. The returned canvas may be a {@code GLJPanel} or a
@@ -154,7 +155,7 @@ public class GLG2DCanvas extends JComponent {
   /**
    * Sets the drawing path, {@code true} for OpenGL, {@code false} for normal
    * Java2D.
-   * 
+   *
    * @see #isGLDrawing()
    */
   public void setGLDrawing(boolean drawGL) {
@@ -212,8 +213,8 @@ public class GLG2DCanvas extends JComponent {
   /**
    * Checks the component and all children to ensure that everything is pure
    * Swing. We can only draw lightweights.
-   * 
-   * 
+   *
+   *
    * We'll also set PopupMenus to heavyweight and fix JViewport blitting.
    */
   protected void verifyHierarchy(Component comp) {
@@ -244,7 +245,7 @@ public class GLG2DCanvas extends JComponent {
    * Gets the {@code GLAutoDrawable} used for drawing. By default this is a
    * {@link GLCanvas}, but can be changed by overriding
    * {@link #createGLComponent(GLCapabilitiesImmutable, GLContext)}.
-   * 
+   *
    * <p>
    * Use the returned {@code GLAutoDrawable} as input to an {@link Animator} to
    * automate painting.
@@ -264,7 +265,11 @@ public class GLG2DCanvas extends JComponent {
    * though it is disabled. A {@code GLJPanel} supports this better.
    */
   protected GLAutoDrawable createGLComponent(GLCapabilitiesImmutable capabilities, GLContext shareWith) {
-    GLCanvas canvas = new GLCanvas(capabilities, shareWith);
+    GLCanvas canvas = new GLCanvas(capabilities);
+    if (shareWith != null) {
+        canvas.setSharedContext(shareWith);
+    }
+
     canvas.setEnabled(false);
     chosenCapabilities = (GLCapabilitiesImmutable) capabilities.cloneMutable();
     return canvas;
@@ -314,7 +319,8 @@ public class GLG2DCanvas extends JComponent {
   private void prepareSideContext() {
     if (sideContext == null) {
       GLDrawableFactory factory = canvas.getFactory();
-      sideContext = factory.createOffscreenAutoDrawable(null, chosenCapabilities, null, 1, 1, canvas.getContext());
+      sideContext = factory.createOffscreenAutoDrawable(null, chosenCapabilities, null, 1, 1);
+      ((GLOffscreenAutoDrawable) sideContext).setSharedContext(canvas.getContext());
       sideContext.addGLEventListener(g2dglListener);
     }
 

@@ -19,7 +19,7 @@ public class FBOExample {
     GLCapabilities caps = GLG2DCanvas.getDefaultCapabalities();
     caps.setFBO(true);
     caps.setOnscreen(false);
-    GLAutoDrawable offscreen = getFactory(GLProfile.getGL2ES1()).createOffscreenAutoDrawable(null, caps, null, size, size, null);
+    GLAutoDrawable offscreen = getFactory(GLProfile.getGL2ES1()).createOffscreenAutoDrawable(null, caps, null, size, size);
 
     JComponent comp = Example.createComponent();
 

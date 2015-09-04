@@ -28,7 +28,7 @@ import javax.media.opengl.GLDrawable;
 
 /**
  * Fulfills the contract of a {@code GraphicsConfiguration}.
- * 
+ *
  * <p>
  * Implementation note: this object is intended primarily to allow callers to
  * create compatible images. The transforms and bounds should be thought out
@@ -90,7 +90,7 @@ public class GLGraphicsConfiguration extends GraphicsConfiguration {
 
   @Override
   public Rectangle getBounds() {
-    return new Rectangle(target.getWidth(), target.getHeight());
+    return new Rectangle(target.getSurfaceWidth(), target.getSurfaceHeight());
   }
 
   public GLDrawable getTarget() {

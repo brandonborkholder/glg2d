@@ -32,7 +32,7 @@ import javax.swing.Timer;
 import org.jogamp.glg2d.event.AWTMouseEventTranslator;
 
 import com.jogamp.opengl.util.FPSAnimator;
-import com.jogamp.opengl.util.awt.Screenshot;
+import com.jogamp.opengl.util.awt.AWTGLReadBufferUtil;
 
 public class ImageTest {
   static JLabel icon;
@@ -42,8 +42,7 @@ public class ImageTest {
     GLCapabilities caps = GLG2DCanvas.getDefaultCapabalities();
     caps.setFBO(true);
     caps.setOnscreen(false);
-    GLAutoDrawable offscreen = GLDrawableFactory.getFactory(GLProfile.getGL2ES1()).createOffscreenAutoDrawable(null, caps, null, size, size,
-        null);
+    GLAutoDrawable offscreen = GLDrawableFactory.getFactory(GLProfile.getGL2ES1()).createOffscreenAutoDrawable(null, caps, null, size, size);
 
     JComponent comp = createComponent();
 
@@ -100,14 +99,14 @@ public class ImageTest {
         "The mouse events are being registered with the visible frame, translated and then re-sent to the offscreen " +
         "component.  The offscreen component handles them, paints itself to the an FBO, which is captured into a " +
         "BufferedImage, which is then painted here");
-    
+
     panel.add(txt, BorderLayout.CENTER);
 
     JProgressBar bar = new JProgressBar();
     bar.setIndeterminate(true);
     panel.add(bar, BorderLayout.SOUTH);
     panel.add(new JSlider(SwingConstants.VERTICAL, 0, 10, 3), BorderLayout.EAST);
-    
+
     panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
     return panel;
@@ -124,7 +123,8 @@ public class ImageTest {
 
     @Override
     public void display(GLAutoDrawable drawable) {
-      final BufferedImage img = Screenshot.readToBufferedImage(size, size);
+      AWTGLReadBufferUtil util = new AWTGLReadBufferUtil(GLG2DCanvas.getDefaultCapabalities().getGLProfile(), false);
+      final BufferedImage img = util.readPixelsToBufferedImage(drawable.getContext().getGL(), true);
       SwingUtilities.invokeLater(new Runnable() {
         @Override
         public void run() {
