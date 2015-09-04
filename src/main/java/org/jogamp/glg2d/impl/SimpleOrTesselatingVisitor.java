@@ -124,7 +124,7 @@ public class SimpleOrTesselatingVisitor extends SimplePathVisitor {
     if (firstContour) {
       firstContour = false;
     } else if (isConvexSoFar) {
-      setUseTesselator(true);
+      setUseTesselator(false);
     }
 
     if (isConvexSoFar) {
@@ -134,6 +134,7 @@ public class SimpleOrTesselatingVisitor extends SimplePathVisitor {
       buffer.clear();
       buffer.addVertex(vertex[0], vertex[1]);
     } else {
+      tesselatorFallback.closeLine();
       tesselatorFallback.moveTo(vertex);
     }
   }
