@@ -20,7 +20,7 @@ import java.awt.BasicStroke;
 import java.awt.Shape;
 import java.awt.Stroke;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import org.jogamp.glg2d.GLGraphics2D;
 import org.jogamp.glg2d.PathVisitor;

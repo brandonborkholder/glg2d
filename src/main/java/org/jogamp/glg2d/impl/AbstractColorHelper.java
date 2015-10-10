@@ -25,7 +25,7 @@ import java.awt.RenderingHints.Key;
 import java.util.ArrayDeque;
 import java.util.Deque;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import org.jogamp.glg2d.GLG2DColorHelper;
 import org.jogamp.glg2d.GLGraphics2D;

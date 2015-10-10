@@ -18,11 +18,11 @@ package org.jogamp.glg2d;
 import java.awt.Component;
 import java.awt.Graphics;
 
-import javax.media.opengl.GLAutoDrawable;
-import javax.media.opengl.GLCapabilities;
-import javax.media.opengl.GLCapabilitiesImmutable;
-import javax.media.opengl.GLContext;
-import javax.media.opengl.awt.GLCanvas;
+import com.jogamp.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLCapabilities;
+import com.jogamp.opengl.GLCapabilitiesImmutable;
+import com.jogamp.opengl.GLContext;
+import com.jogamp.opengl.awt.GLCanvas;
 import javax.swing.JComponent;
 
 import org.jogamp.glg2d.event.AWTMouseEventTranslator;

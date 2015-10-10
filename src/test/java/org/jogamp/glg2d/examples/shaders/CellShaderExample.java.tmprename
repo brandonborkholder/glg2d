@@ -15,7 +15,7 @@ import glg2d.impl.shader.Shader;
 
 import java.awt.Dimension;
 
-import javax.media.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLAutoDrawable;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.UIManager;

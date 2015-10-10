@@ -22,9 +22,10 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.GL2GL3;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.GL2GL3;
+import com.jogamp.opengl.GL3ES3;
 
 public abstract class AbstractShaderPipeline implements ShaderPipeline {
   protected int vertexShaderId = 0;
@@ -92,7 +93,7 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
     }
 
     if (geometryShaderFileName != null) {
-      geometryShaderId = compileShader(gl, GL2GL3.GL_GEOMETRY_SHADER_ARB, getClass(), geometryShaderFileName);
+      geometryShaderId = compileShader(gl, GL3ES3.GL_GEOMETRY_SHADER, getClass(), geometryShaderFileName);
       gl.glAttachShader(programId, geometryShaderId);
     }
 

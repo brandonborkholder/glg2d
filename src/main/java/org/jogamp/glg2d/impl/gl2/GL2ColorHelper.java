@@ -24,8 +24,8 @@ import java.awt.GradientPaint;
 import java.awt.MultipleGradientPaint;
 import java.awt.Paint;
 
-import javax.media.opengl.GL2;
-import javax.media.opengl.GL2GL3;
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.GL2GL3;
 
 import org.jogamp.glg2d.GLGraphics2D;
 import org.jogamp.glg2d.impl.AbstractColorHelper;

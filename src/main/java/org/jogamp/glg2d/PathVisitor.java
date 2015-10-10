@@ -17,7 +17,7 @@ package org.jogamp.glg2d;
 
 import java.awt.BasicStroke;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 /**
  * Receives the calls from a {@link java.awt.geom.PathIterator} and draws the

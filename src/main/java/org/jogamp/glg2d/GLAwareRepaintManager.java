@@ -17,7 +17,7 @@ package org.jogamp.glg2d;
 
 import java.awt.Container;
 
-import javax.media.opengl.GLAutoDrawable;
+import com.jogamp.opengl.GLAutoDrawable;
 import javax.swing.JComponent;
 import javax.swing.RepaintManager;
 

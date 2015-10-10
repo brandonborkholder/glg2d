@@ -18,9 +18,9 @@ package org.jogamp.glg2d.impl.shader.text;
 
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES2;
-import javax.media.opengl.glu.GLU;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES2;
+import com.jogamp.opengl.glu.GLU;
 
 import org.jogamp.glg2d.impl.AbstractTesselatorVisitor;
 

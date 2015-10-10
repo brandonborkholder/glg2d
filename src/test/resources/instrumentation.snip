@@ -5,7 +5,7 @@ if ($1.getClass().getName().startsWith("glg2d.")) {
   boolean glg2dDescendent = false;
   java.awt.Component comp = this.getParent();
   while (comp != null) {
-    if (comp.getClass().getName().startsWith("javax.media.opengl.")) {
+    if (comp.getClass().getName().startsWith("com.jogamp.opengl.")) {
       glg2dDescendent = true;
       break;
     }
