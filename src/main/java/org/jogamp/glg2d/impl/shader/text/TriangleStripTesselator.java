@@ -21,7 +21,7 @@ import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import org.jogamp.glg2d.impl.AbstractTesselatorVisitor;
 

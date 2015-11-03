@@ -24,7 +24,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.DirectColorModel;
 
-import javax.media.opengl.GLDrawable;
+import com.jogamp.opengl.GLDrawable;
 
 /**
  * Fulfills the contract of a {@code GraphicsConfiguration}.

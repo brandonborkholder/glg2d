@@ -16,7 +16,7 @@
 package org.jogamp.glg2d.impl.shader;
 
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import org.jogamp.glg2d.PathVisitor;
 

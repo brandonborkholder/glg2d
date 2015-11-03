@@ -22,7 +22,7 @@ import java.awt.font.GlyphVector;
 import java.awt.geom.Point2D;
 import java.text.AttributedCharacterIterator;
 
-import javax.media.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES2;
 
 import org.jogamp.glg2d.GLGraphics2D;
 import org.jogamp.glg2d.impl.AbstractTextDrawer;

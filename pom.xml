@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jogamp.glg2d</groupId>
   <artifactId>glg2d</artifactId>
-  <version>0.4-SNAPSHOT</version>
+  <version>0.5-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>GLG2D</name>
   <description>Java2D to OpenGL bridge</description>
@@ -35,7 +35,7 @@
     <url>https://github.com/brandonborkholder/glg2d</url>
   </scm>
   <properties>
-    <jogl.version>2.2.0</jogl.version>
+    <jogl.version>2.3.2</jogl.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
   <dependencies>

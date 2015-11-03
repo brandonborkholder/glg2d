@@ -17,7 +17,7 @@ package org.jogamp.glg2d.impl.shader;
 
 import java.awt.geom.AffineTransform;
 
-import javax.media.opengl.GL;
+import com.jogamp.opengl.GL;
 
 import org.jogamp.glg2d.GLGraphics2D;
 import org.jogamp.glg2d.impl.AbstractMatrixHelper;

@@ -19,8 +19,8 @@ package org.jogamp.glg2d.impl.shader;
 import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
 
-import javax.media.opengl.GL;
-import javax.media.opengl.GL2ES2;
+import com.jogamp.opengl.GL;
+import com.jogamp.opengl.GL2ES2;
 
 import org.jogamp.glg2d.VertexBuffer;
 import org.jogamp.glg2d.impl.SimplePathVisitor;

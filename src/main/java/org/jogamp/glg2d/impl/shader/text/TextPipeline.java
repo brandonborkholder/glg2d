@@ -15,7 +15,7 @@
  */
 package org.jogamp.glg2d.impl.shader.text;
 
-import javax.media.opengl.GL2ES2;
+import com.jogamp.opengl.GL2ES2;
 
 import org.jogamp.glg2d.impl.shader.AnyModePipeline;
 
