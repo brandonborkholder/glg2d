@@ -313,7 +313,9 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   @Override
   public void setRenderingHint(Key hintKey, Object hintValue) {
-    if (!hintKey.isCompatibleValue(hintValue)) {
+    if (hintValue == null) {
+      hints.remove(hintKey);
+    } else if (!hintKey.isCompatibleValue(hintValue)) {
       throw new IllegalArgumentException(hintValue + " is not compatible with " + hintKey);
     } else {
       for (G2DDrawingHelper helper : helpers) {

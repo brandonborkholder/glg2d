@@ -56,7 +56,7 @@ public abstract class AbstractTextDrawer implements GLG2DTextHelper {
   @Override
   public void setHint(Key key, Object value) {
     if (key == RenderingHints.KEY_TEXT_ANTIALIASING) {
-      stack.peek().antiAlias = value == RenderingHints.VALUE_TEXT_ANTIALIAS_ON;
+      stack.peek().antiAlias = value != null && value != RenderingHints.VALUE_TEXT_ANTIALIAS_OFF && value != RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT;
     }
   }
 
