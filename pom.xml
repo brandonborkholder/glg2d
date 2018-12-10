@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jogamp.glg2d</groupId>
   <artifactId>glg2d</artifactId>
-  <version>0.5.1-opengrabeso-SNAPSHOT</version>
+  <version>0.5.1-opengrabeso</version>
   <packaging>jar</packaging>
   <name>GLG2D</name>
   <description>Java2D to OpenGL bridge</description>
@@ -16,6 +16,18 @@
       <distribution>repo</distribution>
     </license>
   </licenses>
+
+  <distributionManagement>
+    <repository>
+      <id>gamatron</id>
+      <url>https://www.gamatron.net/nexus/repository/maven-releases/</url>
+    </repository>
+    <snapshotRepository>
+      <id>gamatron</id>
+      <url>https://www.gamatron.net/nexus/repository/maven-snapshots/</url>
+    </snapshotRepository>
+  </distributionManagement>
+
   <developers>
     <developer>
       <id>borkholder</id>
@@ -29,10 +41,10 @@
     </developer>
   </developers>
   <scm>
-    <connection>scm:git:https://github.com/brandonborkholder/glg2d.git</connection>
-    <developerConnection>scm:git:[fetch=]https://github.com/brandonborkholder/glg2d.git[push=]git@github.com:brandonborkholder/glg2d.git</developerConnection>
+    <connection>scm:git:https://github.com/OpenGrabeso/glg2d.git</connection>
+    <developerConnection>scm:git:[fetch=]https://github.com/OpenGrabeso/glg2d.git[push=]git@github.com:brandonborkholder/glg2d.git</developerConnection>
     <tag>HEAD</tag>
-    <url>https://github.com/brandonborkholder/glg2d</url>
+    <url>https://github.com/OpenGrabeso/glg2d</url>
   </scm>
   <properties>
     <jogl.version>2.3.2</jogl.version>
@@ -154,6 +166,13 @@
           </archive>
         </configuration>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-deploy-plugin</artifactId>
+        <version>2.8.2</version>
+      </plugin>
+
 
       <!-- source jar -->
       <plugin>
