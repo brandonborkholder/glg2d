@@ -27,7 +27,7 @@ import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 
 import org.jogamp.glg2d.impl.AbstractTextDrawer;
 
-import com.jogamp.opengl.util.awt.TextRenderer;
+import com.opengrabeso.ogltext.util.awt.TextRenderer;
 
 /**
  * Draws text for the {@code GLGraphics2D} class.
