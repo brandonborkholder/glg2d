@@ -25,6 +25,7 @@ import java.util.HashMap;
 import org.jogamp.glg2d.impl.AbstractTextDrawer;
 
 import com.github.opengrabeso.ogltext.util.awt.TextRenderer;
+import org.jogamp.glg2d.impl.shader.GLShaderGraphics2D;
 
 /**
  * Draws text for the {@code GLGraphics2D} class.
@@ -62,7 +63,7 @@ public class GL2StringDrawer extends AbstractTextDrawer {
     TextRenderer renderer = getRenderer(getFont());
 
     begin(renderer);
-    renderer.draw3D(string, x, g2d.getCanvasHeight() - y, 0, 1);
+    renderer.draw3D(string, x, y, 0, 1);
     end(renderer);
   }
 
@@ -90,11 +91,13 @@ public class GL2StringDrawer extends AbstractTextDrawer {
   protected void begin(TextRenderer renderer) {
     setTextColorRespectComposite(renderer);
 
-    renderer.beginRendering(g2d.getCanvasWidth(), g2d.getCanvasHeight());
+    float[] matrix = ((GLShaderGraphics2D) g2d).getUniformsObject().transformHook.getGLMatrixData();
+    renderer.setTransform(matrix);
+    renderer.begin3DRendering();
   }
 
   protected void end(TextRenderer renderer) {
-    renderer.endRendering();
+    renderer.end3DRendering();
   }
 
   @SuppressWarnings("serial")
@@ -109,7 +112,7 @@ public class GL2StringDrawer extends AbstractTextDrawer {
       TextRenderer renderer = renderers[antiAlias ? 1 : 0];
 
       if (renderer == null) {
-        renderer = new TextRenderer(font, antiAlias, false);
+        renderer = new TextRenderer(font, antiAlias, false, false);
         renderers[antiAlias ? 1 : 0] = renderer;
       }
 

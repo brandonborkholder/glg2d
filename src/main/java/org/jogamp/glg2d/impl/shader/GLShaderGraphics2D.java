@@ -22,7 +22,7 @@ import org.jogamp.glg2d.GLG2DShapeHelper;
 import org.jogamp.glg2d.GLG2DTextHelper;
 import org.jogamp.glg2d.GLG2DTransformHelper;
 import org.jogamp.glg2d.GLGraphics2D;
-import org.jogamp.glg2d.impl.gl2.GL2StringDrawer;
+import org.jogamp.glg2d.impl.shader.GL3StringDrawer;
 
 public class GLShaderGraphics2D extends GLGraphics2D {
   protected UniformBufferObject uniforms = new UniformBufferObject();
@@ -53,6 +53,6 @@ public class GLShaderGraphics2D extends GLGraphics2D {
 
   @Override
   protected GLG2DTextHelper createTextHelper() {
-    return new GL2StringDrawer();
+    return new GL3StringDrawer();
   }
 }
