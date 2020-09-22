@@ -22,9 +22,6 @@ import java.awt.Font;
 import java.text.AttributedCharacterIterator;
 import java.util.HashMap;
 
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
-
 import org.jogamp.glg2d.impl.AbstractTextDrawer;
 
 import com.github.opengrabeso.ogltext.util.awt.TextRenderer;
