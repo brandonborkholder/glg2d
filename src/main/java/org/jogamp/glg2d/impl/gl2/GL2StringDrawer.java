@@ -93,20 +93,11 @@ public class GL2StringDrawer extends AbstractTextDrawer {
   protected void begin(TextRenderer renderer) {
     setTextColorRespectComposite(renderer);
 
-    GL2 gl = g2d.getGLContext().getGL().getGL2();
-    gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
-    gl.glPushMatrix();
-    gl.glScalef(1, -1, 1);
-    gl.glTranslatef(0, -g2d.getCanvasHeight(), 0);
-
-    renderer.begin3DRendering();
+    renderer.beginRendering(g2d.getCanvasWidth(), g2d.getCanvasHeight());
   }
 
   protected void end(TextRenderer renderer) {
-    renderer.end3DRendering();
-
-    GL2 gl = g2d.getGLContext().getGL().getGL2();
-    gl.glPopMatrix();
+    renderer.endRendering();
   }
 
   @SuppressWarnings("serial")

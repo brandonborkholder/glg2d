@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jogamp.glg2d</groupId>
   <artifactId>glg2d</artifactId>
-  <version>0.5.3-opengrabeso</version>
+  <version>0.5.4-opengrabeso-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>GLG2D</name>
   <description>Java2D to OpenGL bridge</description>

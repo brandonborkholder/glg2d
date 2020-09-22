@@ -87,6 +87,8 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
    */
   private int canvasHeight;
 
+  private int canvasWidth;
+
   /**
    * All the drawing helpers or listeners to drawing events.
    */
@@ -205,6 +207,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
    */
   public void prePaint(GLContext context) {
     canvasHeight = GLG2DUtils.getViewportHeight(context.getGL());
+    canvasWidth = GLG2DUtils.getViewportWidth(context.getGL());
     setCanvas(context);
     setDefaultState();
   }
@@ -230,6 +233,10 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
 
   public int getCanvasHeight() {
     return canvasHeight;
+  }
+
+  public int getCanvasWidth() {
+    return canvasWidth;
   }
 
   public void glDispose() {

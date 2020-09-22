@@ -41,6 +41,13 @@ public class GLG2DUtils {
     return canvasHeight;
   }
 
+  public static int getViewportWidth(GL gl) {
+    int[] viewportDimensions = new int[4];
+    gl.glGetIntegerv(GL.GL_VIEWPORT, viewportDimensions, 0);
+    int canvasWidth = viewportDimensions[2];
+    return canvasWidth;
+  }
+
   public static void logGLError(GL gl) {
     int error = gl.glGetError();
     if (error != GL.GL_NO_ERROR) {
