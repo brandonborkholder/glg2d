@@ -46,12 +46,9 @@
 
   <repositories>
     <repository>
-      <id>opengrabeso</id>
-      <layout>default</layout>
-      <name>GitHub OpenGrabeso Packages Repo</name>
-      <releases><enabled>true</enabled></releases>
-      <snapshots><enabled>false</enabled></snapshots>
-      <url>https://maven.pkg.github.com/opengrabeso/text-renderer</url>
+      <id>github</id>
+      <name>GitHub OpenGrabeso Apache Maven Packages</name>
+      <url>https://maven.pkg.github.com/OpenGrabeso/_</url>
     </repository>
   </repositories>
 
