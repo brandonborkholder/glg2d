@@ -14,9 +14,7 @@ jobs:
         with:
           java-version: 1.8
       - name: Build with Maven
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           mkdir -p ~/.m2
-          printf "<settings><servers><server><id>github</id><username>${{ secrets.GITHUB_USERNAME }}</username><password>${{ secrets.GITHUB_USERTOKEN }}</password></server></servers></settings>" > ~/.m2/settings.xml
+          printf "<settings><servers><server><id>github</id><username>${{ secrets.ORG_USERNAME }}</username><password>${{ secrets.ORG_TOKEN }}</password></server></servers></settings>" > ~/.m2/settings.xml
           mvn -B package --file pom.xml
