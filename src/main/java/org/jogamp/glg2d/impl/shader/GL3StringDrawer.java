@@ -40,7 +40,6 @@ public class GL3StringDrawer extends GL2StringDrawer {
 
         float[] matrix = ((GLShaderGraphics2D) g2d).getUniformsObject().transformHook.getGLMatrixData();
         renderer.setTransform(matrix);
-        renderer.begin3DRendering();
     }
 
     @Override
