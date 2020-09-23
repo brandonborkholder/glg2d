@@ -22,16 +22,22 @@ import java.awt.Font;
 import java.text.AttributedCharacterIterator;
 import java.util.HashMap;
 
+import com.jogamp.opengl.GL2;
+import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
+
 import org.jogamp.glg2d.impl.AbstractTextDrawer;
 
 import com.github.opengrabeso.ogltext.util.awt.TextRenderer;
-import org.jogamp.glg2d.impl.shader.GLShaderGraphics2D;
 
 /**
  * Draws text for the {@code GLGraphics2D} class.
  */
 public class GL2StringDrawer extends AbstractTextDrawer {
   protected FontRenderCache cache = new FontRenderCache();
+
+  protected TextRenderer createTextRenderer(Font font, boolean antialias) {
+      return new TextRenderer(font, antialias, false, false);
+  }
 
   @Override
   public void dispose() {
@@ -63,7 +69,11 @@ public class GL2StringDrawer extends AbstractTextDrawer {
     TextRenderer renderer = getRenderer(getFont());
 
     begin(renderer);
-    renderer.draw3D(string, x, y, 0, 1, false);
+    if (useVerticalFlip()) {
+        renderer.draw3D(string, x, y, 0, 1, true);
+    } else {
+        renderer.draw3D(string, x, g2d.getCanvasHeight() - y, 0, 1, false);
+    }
     end(renderer);
   }
 
@@ -88,20 +98,34 @@ public class GL2StringDrawer extends AbstractTextDrawer {
     renderer.setColor(color);
   }
 
+  protected void setupMatrix(TextRenderer renderer) {
+      GL2 gl = g2d.getGLContext().getGL().getGL2();
+      gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+      gl.glPushMatrix();
+      gl.glScalef(1, -1, 1);
+      gl.glTranslatef(0, -g2d.getCanvasHeight(), 0);
+  }
+
+  protected boolean useVerticalFlip() {return false;}
+
+  protected void cleanupMatrix(TextRenderer renderer) {
+      GL2 gl = g2d.getGLContext().getGL().getGL2();
+      gl.glPopMatrix();
+  }
+
   protected void begin(TextRenderer renderer) {
     setTextColorRespectComposite(renderer);
-
-    float[] matrix = ((GLShaderGraphics2D) g2d).getUniformsObject().transformHook.getGLMatrixData();
-    renderer.setTransform(matrix);
+    setupMatrix(renderer);
     renderer.begin3DRendering();
   }
 
   protected void end(TextRenderer renderer) {
     renderer.end3DRendering();
+    cleanupMatrix(renderer);
   }
 
   @SuppressWarnings("serial")
-  public static class FontRenderCache extends HashMap<Font, TextRenderer[]> {
+  public class FontRenderCache extends HashMap<Font, TextRenderer[]> {
     public TextRenderer getRenderer(Font font, boolean antiAlias) {
       TextRenderer[] renderers = get(font);
       if (renderers == null) {
@@ -112,7 +136,7 @@ public class GL2StringDrawer extends AbstractTextDrawer {
       TextRenderer renderer = renderers[antiAlias ? 1 : 0];
 
       if (renderer == null) {
-        renderer = new TextRenderer(font, antiAlias, false, false);
+        renderer = createTextRenderer(font, antiAlias);
         renderers[antiAlias ? 1 : 0] = renderer;
       }
 
