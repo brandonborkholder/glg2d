@@ -63,7 +63,7 @@ public class GL2StringDrawer extends AbstractTextDrawer {
     TextRenderer renderer = getRenderer(getFont());
 
     begin(renderer);
-    renderer.draw3D(string, x, y, 0, 1);
+    renderer.draw3D(string, x, y, 0, 1, false);
     end(renderer);
   }
 
