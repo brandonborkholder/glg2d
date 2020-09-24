@@ -44,6 +44,5 @@ public class GL3StringDrawer extends GL2StringDrawer {
 
     @Override
     protected void cleanupMatrix(TextRenderer renderer) {
-        super.cleanupMatrix(renderer);
     }
 }
