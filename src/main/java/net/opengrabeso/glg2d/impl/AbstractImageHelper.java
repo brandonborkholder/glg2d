@@ -33,16 +33,19 @@ import java.awt.image.renderable.RenderableImage;
 import java.lang.ref.Reference;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.WeakReference;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.github.opengrabeso.jaagl.GL;
 import net.opengrabeso.glg2d.GLG2DImageHelper;
 import net.opengrabeso.glg2d.GLG2DRenderingHints;
 import net.opengrabeso.glg2d.GLGraphics2D;
 
 import net.opengrabeso.opengl.util.texture.Texture;
-import com.jogamp.opengl.util.texture.TextureCoords;
+import com.github.opengrabeso.ogltext.util.texture.TextureCoords;
+import net.opengrabeso.opengl.util.texture.TextureData;
 
 public abstract class AbstractImageHelper implements GLG2DImageHelper {
   private static final Logger LOGGER = Logger.getLogger(AbstractImageHelper.class.getName());
@@ -194,7 +197,32 @@ public abstract class AbstractImageHelper implements GLG2DImageHelper {
   }
 
   protected Texture create(BufferedImage image) {
-      throw new UnsupportedOperationException("Texture.create(image)");
+
+      //from https://stackoverflow.com/a/59858058/16673
+
+      int[] pixels = new int[image.getWidth() * image.getHeight()];
+      image.getRGB(0, 0, image.getWidth(), image.getHeight(), pixels, 0, image.getWidth());
+      ByteBuffer buffer = ByteBuffer.allocateDirect(image.getWidth() * image.getHeight() * 4);
+
+      for(int h = 0; h < image.getHeight(); h++) {
+          for(int w = 0; w < image.getWidth(); w++) {
+              int pixel = pixels[h * image.getWidth() + w];
+
+              buffer.put((byte) ((pixel >> 16) & 0xFF));
+              buffer.put((byte) ((pixel >> 8) & 0xFF));
+              buffer.put((byte) (pixel & 0xFF));
+              buffer.put((byte) ((pixel >> 24) & 0xFF));
+          }
+      }
+
+      buffer.flip();
+
+      GL gl = g2d.getGL();
+      TextureData data = new TextureData(
+              gl.GL_RGBA(), image.getWidth(), image.getHeight(), 0, gl.GL_RGBA(), gl.GL_UNSIGNED_BYTE(),
+              false, false, true, buffer, null
+      );
+      return new Texture(gl, data);
     // we'll assume the image is complete and can be rendered
     //return AWTTextureIO.newTexture(g2d.getGLContext().getGL().getGLProfile(), image, false);
   }

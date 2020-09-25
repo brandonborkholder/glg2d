@@ -41,9 +41,7 @@ import java.nio.*;
 
 import com.github.opengrabeso.jaagl.*;
 
-import com.jogamp.opengl.util.texture.TextureCoords;
-import com.jogamp.opengl.util.texture.TextureIO;
-import jogamp.opengl.*;
+import com.github.opengrabeso.ogltext.util.texture.TextureCoords;
 
 import com.jogamp.opengl.GLExtensions;
 
@@ -178,19 +176,8 @@ public class Texture {
     public String toString() {
         final String targetS = target == imageTarget ? Integer.toHexString(target) : Integer.toHexString(target) + " - image "+Integer.toHexString(imageTarget);
         return "Texture[target "+targetS+", name "+texID+", "+
-                imgWidth+"/"+texWidth+" x "+imgHeight+"/"+texHeight+", y-flip "+mustFlipVertically+
-                ", "+estimatedMemorySize+" bytes]";
+                imgWidth+"/"+texWidth+" x "+imgHeight+"/"+texHeight+", y-flip "+mustFlipVertically+ "]";
     }
-
-    /** An estimate of the amount of texture memory this texture consumes. */
-    private int estimatedMemorySize;
-
-    private static final boolean DEBUG = Debug.debug("Texture");
-    private static final boolean VERBOSE = Debug.verbose();
-
-    // For testing alternate code paths on more capable hardware
-    private static final boolean disableNPOT    = Debug.isPropertyDefined("jogl.texture.nonpot", true);
-    private static final boolean disableTexRect = Debug.isPropertyDefined("jogl.texture.notexrect", true);
 
     public Texture(final GL gl, final TextureData data) {
         this.texID = 0;
@@ -264,7 +251,9 @@ public class Texture {
      * @param gl the current GL object
      */
     public void enable(final GL gl) {
-        gl.glEnable(target);
+        if (!gl.isGL3()) {
+            gl.glEnable(target);
+        }
     }
 
     /**
@@ -281,7 +270,9 @@ public class Texture {
      * @param gl the current GL object
      */
     public void disable(final GL gl) {
-        gl.glDisable(target);
+        if (!gl.isGL3()) {
+            gl.glDisable(target);
+        }
     }
 
     /**
@@ -555,9 +546,6 @@ public class Texture {
             (this.target == gl.GL_TEXTURE_2D())) {
             this.target = texTarget;
         }
-
-        // This estimate will be wrong for cube maps
-        estimatedMemorySize = data.getEstimatedMemorySize();
     }
 
     /**
@@ -659,15 +647,6 @@ public class Texture {
      */
     public int getTextureObject() {
         return texID;
-    }
-
-    /** Returns an estimate of the amount of texture memory in bytes
-        this Texture consumes. It should only be treated as an estimate;
-        most applications should not need to query this but instead let
-        the OpenGL implementation page textures in and out as
-        necessary. */
-    public int getEstimatedMemorySize() {
-        return estimatedMemorySize;
     }
 
     /** Indicates whether this Texture is using automatic mipmap
@@ -780,15 +759,6 @@ public class Texture {
             gl.glGetIntegerv(gl.GL_UNPACK_SKIP_ROWS(),   skipRows,   0); // save skipped rows
             gl.glGetIntegerv(gl.GL_UNPACK_SKIP_PIXELS(), skipPixels, 0); // save skipped pixels
             gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT(), data.getAlignment());
-            if (DEBUG && VERBOSE) {
-                System.out.println("Row length  = " + rowlen);
-                System.out.println("skip pixels = " + srcx);
-                System.out.println("skip rows   = " + srcy);
-                System.out.println("dstx        = " + dstx);
-                System.out.println("dsty        = " + dsty);
-                System.out.println("width       = " + width);
-                System.out.println("height      = " + height);
-            }
             gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH(), rowlen);
             gl.glPixelStorei(gl.GL_UNPACK_SKIP_ROWS(), srcy);
             gl.glPixelStorei(gl.GL_UNPACK_SKIP_PIXELS(), srcx);
@@ -826,13 +796,4 @@ public class Texture {
         return 0 != texID;
     }
 
-    private static boolean haveTexRect(final GL gl) {
-        return (!disableTexRect &&
-                TextureIO.isTexRectEnabled() &&
-                gl.isExtensionAvailable(GLExtensions.ARB_texture_rectangle));
-    }
-
-    private static boolean preferTexRect(final GL gl) {
-        return false;
-    }
 }
