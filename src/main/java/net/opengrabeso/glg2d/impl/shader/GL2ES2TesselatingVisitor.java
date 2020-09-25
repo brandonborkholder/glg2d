@@ -18,13 +18,13 @@ package net.opengrabeso.glg2d.impl.shader;
 
 import java.nio.FloatBuffer;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2ES2;
+import com.github.opengrabeso.jaagl.GL;
+import com.github.opengrabeso.jaagl.GL2GL3;
 
 import net.opengrabeso.glg2d.impl.AbstractTesselatorVisitor;
 
 public class GL2ES2TesselatingVisitor extends AbstractTesselatorVisitor implements ShaderPathVisitor {
-  protected GL2ES2 gl;
+  protected GL2GL3 gl;
   protected UniformBufferObject uniforms;
 
   protected AnyModePipeline pipeline;
@@ -39,7 +39,7 @@ public class GL2ES2TesselatingVisitor extends AbstractTesselatorVisitor implemen
 
   @Override
   public void setGLContext(GL context) {
-    gl = context.getGL2ES2();
+    gl = context.getGL2GL3();
 
     if (!pipeline.isSetup()) {
       pipeline.setup(gl);

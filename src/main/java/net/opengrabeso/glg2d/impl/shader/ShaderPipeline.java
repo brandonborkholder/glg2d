@@ -15,14 +15,14 @@
  */
 package net.opengrabeso.glg2d.impl.shader;
 
-import com.jogamp.opengl.GL2ES2;
+import com.github.opengrabeso.jaagl.GL2GL3;
 
 public interface ShaderPipeline {
-  void setup(GL2ES2 gl);
+  void setup(GL2GL3 gl);
 
   boolean isSetup();
 
-  void use(GL2ES2 gl, boolean use);
+  void use(GL2GL3 gl, boolean use);
 
-  void delete(GL2ES2 gl);
+  void delete(GL2GL3 gl);
 }

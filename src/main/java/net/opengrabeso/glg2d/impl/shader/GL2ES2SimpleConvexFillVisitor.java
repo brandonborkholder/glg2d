@@ -19,14 +19,14 @@ package net.opengrabeso.glg2d.impl.shader;
 import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2ES2;
+import com.github.opengrabeso.jaagl.GL;
+import com.github.opengrabeso.jaagl.GL2GL3;
 
 import net.opengrabeso.glg2d.VertexBuffer;
 import net.opengrabeso.glg2d.impl.SimplePathVisitor;
 
 public class GL2ES2SimpleConvexFillVisitor extends SimplePathVisitor implements ShaderPathVisitor {
-  protected GL2ES2 gl;
+  protected GL2GL3 gl;
   protected UniformBufferObject uniforms;
 
   protected VertexBuffer vBuffer = new VertexBuffer(1024);
@@ -50,7 +50,7 @@ public class GL2ES2SimpleConvexFillVisitor extends SimplePathVisitor implements 
 
   @Override
   public void setGLContext(GL context) {
-    gl = context.getGL2ES2();
+    gl = context.getGL2GL3();
 
     if (!pipeline.isSetup()) {
       pipeline.setup(gl);
@@ -111,7 +111,7 @@ public class GL2ES2SimpleConvexFillVisitor extends SimplePathVisitor implements 
 
     setupCentroid(buf);
 
-    pipeline.draw(gl, GL.GL_TRIANGLE_FAN, buf);
+    pipeline.draw(gl, gl.GL_TRIANGLE_FAN(), buf);
 
     vBuffer.clear();
     vBuffer.addVertex(0, 0);

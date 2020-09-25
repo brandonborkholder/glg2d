@@ -21,7 +21,7 @@ import static java.lang.Math.sqrt;
 import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
 
-import com.jogamp.opengl.GL;
+import com.github.opengrabeso.jaagl.GL;
 
 import net.opengrabeso.glg2d.PathVisitor;
 import net.opengrabeso.glg2d.VertexBuffer;

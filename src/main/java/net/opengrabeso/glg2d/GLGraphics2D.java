@@ -63,6 +63,8 @@ import net.opengrabeso.glg2d.impl.gl2.*;
 public class GLGraphics2D extends Graphics2D implements Cloneable {
   protected final com.github.opengrabeso.jaagl.GL gl;
 
+  final public com.github.opengrabeso.jaagl.GL getGL() {return gl;}
+
   private com.github.opengrabeso.jaagl.GL2 getGL2() {return (com.github.opengrabeso.jaagl.GL2)gl;}
     /**
    * The parent graphics object, if we have one. This reference is used to pass

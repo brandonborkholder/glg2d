@@ -41,9 +41,8 @@ import net.opengrabeso.glg2d.GLG2DImageHelper;
 import net.opengrabeso.glg2d.GLG2DRenderingHints;
 import net.opengrabeso.glg2d.GLGraphics2D;
 
-import com.jogamp.opengl.util.texture.Texture;
+import net.opengrabeso.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureCoords;
-import com.jogamp.opengl.util.texture.awt.AWTTextureIO;
 
 public abstract class AbstractImageHelper implements GLG2DImageHelper {
   private static final Logger LOGGER = Logger.getLogger(AbstractImageHelper.class.getName());
@@ -195,12 +194,13 @@ public abstract class AbstractImageHelper implements GLG2DImageHelper {
   }
 
   protected Texture create(BufferedImage image) {
+      throw new UnsupportedOperationException("Texture.create(image)");
     // we'll assume the image is complete and can be rendered
-    return AWTTextureIO.newTexture(g2d.getGLContext().getGL().getGLProfile(), image, false);
+    //return AWTTextureIO.newTexture(g2d.getGLContext().getGL().getGLProfile(), image, false);
   }
 
   protected void destroy(Texture texture) {
-    texture.destroy(g2d.getGLContext().getGL());
+    texture.destroy(g2d.getGL());
   }
 
   protected void addToCache(Image image, Texture texture) {

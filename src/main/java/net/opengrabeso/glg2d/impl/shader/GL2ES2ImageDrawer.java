@@ -20,18 +20,19 @@ import java.awt.Color;
 import java.awt.geom.AffineTransform;
 import java.nio.FloatBuffer;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2ES2;
+import com.github.opengrabeso.jaagl.GL;
+import com.github.opengrabeso.jaagl.GL2GL3;
 
+import com.github.opengrabeso.jaagl.jogl.JoGL;
+import net.opengrabeso.opengl.util.texture.Texture;
 import net.opengrabeso.glg2d.GLGraphics2D;
 import net.opengrabeso.glg2d.impl.AbstractImageHelper;
 
 import com.jogamp.common.nio.Buffers;
-import com.jogamp.opengl.util.texture.Texture;
 
 public class GL2ES2ImageDrawer extends AbstractImageHelper {
   protected GLShaderGraphics2D g2d;
-  protected GL2ES2 gl;
+  protected GL2GL3 gl;
 
   protected FloatBuffer vertTexCoords = Buffers.newDirectFloatBuffer(16);
   protected GL2ES2ImagePipeline shader;
@@ -57,7 +58,7 @@ public class GL2ES2ImageDrawer extends AbstractImageHelper {
           + GLShaderGraphics2D.class.getSimpleName());
     }
 
-    gl = g2d.getGLContext().getGL().getGL2ES2();
+    gl = JoGL.wrap(g2d.getGLContext().getGL().getGL3());
     if (!shader.isSetup()) {
       shader.setup(gl);
     }
@@ -78,10 +79,10 @@ public class GL2ES2ImageDrawer extends AbstractImageHelper {
      */
     g2d.setComposite(g2d.getComposite());
 
-    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MIN_FILTER, GL.GL_NEAREST);
-    gl.glTexParameteri(GL.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
+    gl.glTexParameteri(gl.GL_TEXTURE_2D(), gl.GL_TEXTURE_MIN_FILTER(), gl.GL_NEAREST());
+    gl.glTexParameteri(gl.GL_TEXTURE_2D(), gl.GL_TEXTURE_MAG_FILTER(), gl.GL_NEAREST());
 
-    gl.glActiveTexture(GL.GL_TEXTURE0);
+    gl.glActiveTexture(gl.GL_TEXTURE0());
     texture.enable(gl);
     texture.bind(gl);
 

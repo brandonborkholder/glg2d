@@ -19,8 +19,8 @@ package net.opengrabeso.glg2d.impl.gl2;
 import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
+import com.github.opengrabeso.jaagl.GL;
+import com.github.opengrabeso.jaagl.GL2;
 
 import net.opengrabeso.glg2d.VertexBuffer;
 import net.opengrabeso.glg2d.impl.SimplePathVisitor;
@@ -84,11 +84,11 @@ public class FastLineVisitor extends SimplePathVisitor {
        * XXX Should actually use the stroke phase, but not sure how yet.
        */
 
-      gl.glEnable(GL2.GL_LINE_STIPPLE);
+      gl.glEnable(gl.GL_LINE_STIPPLE());
       int factor = (int) totalLength;
       gl.glLineStipple(factor >> 4, (short) mask);
     } else {
-      gl.glDisable(GL2.GL_LINE_STIPPLE);
+      gl.glDisable(gl.GL_LINE_STIPPLE());
     }
 
     this.stroke = stroke;
@@ -112,7 +112,7 @@ public class FastLineVisitor extends SimplePathVisitor {
       return false;
     }
 
-    gl.glGetFloatv(GL2.GL_MODELVIEW_MATRIX, testMatrix, 0);
+    gl.glGetFloatv(gl.GL_MODELVIEW_MATRIX(), testMatrix, 0);
 
     float scaleX = Math.abs(testMatrix[0]);
     float scaleY = Math.abs(testMatrix[5]);
@@ -150,7 +150,7 @@ public class FastLineVisitor extends SimplePathVisitor {
   protected void drawLine(boolean close) {
     FloatBuffer buf = buffer.getBuffer();
     int p = buf.position();
-    buffer.drawBuffer(gl, close ? GL2.GL_LINE_LOOP : GL2.GL_LINE_STRIP);
+    buffer.drawBuffer(gl, close ? gl.GL_LINE_LOOP() : gl.GL_LINE_STRIP());
 
     /*
      * We'll ignore butt endcaps, but we'll pretend like we're drawing round,
@@ -160,7 +160,7 @@ public class FastLineVisitor extends SimplePathVisitor {
      */
     if (stroke.getDashArray() == null) {
       buf.position(p);
-      buffer.drawBuffer(gl, GL2.GL_POINTS);
+      buffer.drawBuffer(gl, gl.GL_POINTS());
     }
     
     buffer.clear();
@@ -173,17 +173,17 @@ public class FastLineVisitor extends SimplePathVisitor {
     /*
      * pen hangs down and to the right. See java.awt.Graphics
      */
-    gl.glMatrixMode(GL2.GL_MODELVIEW);
+    gl.glMatrixMode(gl.GL_MODELVIEW());
     gl.glPushMatrix();
     gl.glTranslatef(0.5f, 0.5f, 0);
 
-    gl.glPushAttrib(GL2.GL_LINE_BIT | GL2.GL_POINT_BIT);
+    gl.glPushAttrib(gl.GL_LINE_BIT() | gl.GL_POINT_BIT());
   }
 
   @Override
   public void endPoly() {
     drawLine(false);
-    gl.glDisable(GL2.GL_LINE_STIPPLE);
+    gl.glDisable(gl.GL_LINE_STIPPLE());
     gl.glPopMatrix();
 
     gl.glPopAttrib();

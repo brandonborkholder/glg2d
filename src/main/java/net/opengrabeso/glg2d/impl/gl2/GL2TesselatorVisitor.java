@@ -16,8 +16,8 @@
 package net.opengrabeso.glg2d.impl.gl2;
 
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
+import com.github.opengrabeso.jaagl.GL;
+import com.github.opengrabeso.jaagl.GL2;
 
 import net.opengrabeso.glg2d.impl.AbstractTesselatorVisitor;
 

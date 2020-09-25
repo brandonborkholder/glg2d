@@ -18,8 +18,8 @@ package net.opengrabeso.glg2d.impl.gl2;
 
 import java.awt.BasicStroke;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
+import com.github.opengrabeso.jaagl.GL;
+import com.github.opengrabeso.jaagl.GL2;
 
 import net.opengrabeso.glg2d.VertexBuffer;
 import net.opengrabeso.glg2d.impl.SimplePathVisitor;
@@ -50,12 +50,12 @@ public class FillSimpleConvexPolygonVisitor extends SimplePathVisitor {
     /*
      * We don't care what the winding rule is, we disable face culling.
      */
-    gl.glDisable(GL.GL_CULL_FACE);
+    gl.glDisable(gl.GL_CULL_FACE());
   }
 
   @Override
   public void closeLine() {
-    vBuffer.drawBuffer(gl, GL2.GL_POLYGON);
+    vBuffer.drawBuffer(gl, gl.GL_POLYGON());
   }
 
   @Override

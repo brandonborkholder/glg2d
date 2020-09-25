@@ -17,7 +17,7 @@ package net.opengrabeso.glg2d;
 
 import java.awt.BasicStroke;
 
-import com.jogamp.opengl.GL;
+import com.github.opengrabeso.jaagl.GL;
 
 /**
  * Receives the calls from a {@link java.awt.geom.PathIterator} and draws the

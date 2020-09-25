@@ -22,8 +22,8 @@ import java.awt.RenderingHints.Key;
 import java.awt.Shape;
 import java.awt.Stroke;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
+import com.github.opengrabeso.jaagl.GL;
+import com.github.opengrabeso.jaagl.GL2;
 
 import net.opengrabeso.glg2d.impl.AbstractShapeHelper;
 import net.opengrabeso.glg2d.impl.SimpleOrTesselatingVisitor;
@@ -47,7 +47,7 @@ public class GL2ShapeDrawer extends AbstractShapeHelper {
   @Override
   public void setG2D(GLGraphics2D g2d) {
     super.setG2D(g2d);
-    GL gl = g2d.getGLContext().getGL();
+    GL gl = g2d.getGL();
     simpleFillVisitor.setGLContext(gl);
     complexFillVisitor.setGLContext(gl);
     simpleStrokeVisitor.setGLContext(gl);
@@ -62,9 +62,9 @@ public class GL2ShapeDrawer extends AbstractShapeHelper {
 
     if (key == RenderingHints.KEY_ANTIALIASING) {
       if (value == RenderingHints.VALUE_ANTIALIAS_ON) {
-        gl.glEnable(GL.GL_MULTISAMPLE);
+        gl.glEnable(gl.GL_MULTISAMPLE());
       } else {
-        gl.glDisable(GL.GL_MULTISAMPLE);
+        gl.glDisable(gl.GL_MULTISAMPLE());
       }
     }
   }

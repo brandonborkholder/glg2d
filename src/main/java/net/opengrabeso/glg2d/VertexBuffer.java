@@ -17,9 +17,8 @@ package net.opengrabeso.glg2d;
 
 import java.nio.FloatBuffer;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.fixedfunc.GLPointerFunc;
+import com.github.opengrabeso.jaagl.GL;
+import com.github.opengrabeso.jaagl.GL2;
 
 import com.jogamp.common.nio.Buffers;
 
@@ -148,11 +147,11 @@ public class VertexBuffer {
     int count = buffer.position();
     buffer.rewind();
 
-    gl.glVertexPointer(2, GL.GL_FLOAT, 0, buffer);
+    gl.glVertexPointer(2, gl.GL_FLOAT(), 0, buffer);
 
-    gl.glEnableClientState(GLPointerFunc.GL_VERTEX_ARRAY);
+    gl.glEnableClientState(gl.GL_VERTEX_ARRAY());
     gl.glDrawArrays(mode, 0, count / 2);
-    gl.glDisableClientState(GLPointerFunc.GL_VERTEX_ARRAY);
+    gl.glDisableClientState(gl.GL_VERTEX_ARRAY());
 
     buffer.position(count);
   }

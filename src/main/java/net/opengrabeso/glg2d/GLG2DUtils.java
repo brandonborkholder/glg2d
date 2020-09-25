@@ -25,15 +25,6 @@ import com.jogamp.opengl.GL2ES1;
 public class GLG2DUtils {
   private static final Logger LOGGER = Logger.getLogger(GLG2DUtils.class.getName());
 
-  public static void setColor(GL2ES1 gl, Color c, float preMultiplyAlpha) {
-    int rgb = c.getRGB();
-    gl.glColor4ub((byte) (rgb >> 16 & 0xFF), (byte) (rgb >> 8 & 0xFF), (byte) (rgb & 0xFF), (byte) ((rgb >> 24 & 0xFF) * preMultiplyAlpha));
-  }
-
-  public static float[] getGLColor(Color c) {
-    return c.getComponents(null);
-  }
-
   public static int getViewportHeight(GL gl) {
     int[] viewportDimensions = new int[4];
     gl.glGetIntegerv(GL.GL_VIEWPORT, viewportDimensions, 0);
@@ -68,4 +59,19 @@ public class GLG2DUtils {
     gl.glGenBuffers(1, ids, 0);
     return ids[0];
   }
+
+    public static int ensureIsGLBuffer(com.github.opengrabeso.jaagl.GL2GL3 gl, int bufferId) {
+        if (gl.glIsBuffer(bufferId)) {
+            return bufferId;
+        } else {
+            return genBufferId(gl);
+        }
+    }
+
+    public static int genBufferId(com.github.opengrabeso.jaagl.GL2GL3 gl) {
+        int[] ids = new int[1];
+        gl.glGenBuffers(1, ids, 0);
+        return ids[0];
+    }
+
 }

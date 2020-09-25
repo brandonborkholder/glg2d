@@ -20,7 +20,7 @@ import java.awt.BasicStroke;
 import java.awt.Shape;
 import java.awt.Stroke;
 
-import com.jogamp.opengl.GL;
+import com.github.opengrabeso.jaagl.GL;
 
 import net.opengrabeso.glg2d.GLGraphics2D;
 import net.opengrabeso.glg2d.PathVisitor;
@@ -45,7 +45,7 @@ public class GL2ES2ShapeDrawer extends AbstractShapeHelper {
     super.setG2D(g2d);
 
     if (g2d instanceof GLShaderGraphics2D) {
-      GL gl = g2d.getGLContext().getGL();
+      GL gl = g2d.getGL();
       UniformBufferObject uniforms = ((GLShaderGraphics2D) g2d).getUniformsObject();
 
       lineVisitor.setGLContext(gl, uniforms);

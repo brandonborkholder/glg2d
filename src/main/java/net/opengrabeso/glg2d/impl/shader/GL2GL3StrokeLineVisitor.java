@@ -19,8 +19,8 @@ package net.opengrabeso.glg2d.impl.shader;
 import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2ES2;
+import com.github.opengrabeso.jaagl.GL;
+import com.github.opengrabeso.jaagl.GL2GL3;
 
 import net.opengrabeso.glg2d.VertexBuffer;
 import net.opengrabeso.glg2d.impl.SimplePathVisitor;
@@ -32,7 +32,7 @@ public class GL2GL3StrokeLineVisitor extends SimplePathVisitor implements Shader
 
   protected float[] lastV = new float[2];
 
-  protected GL2ES2 gl;
+  protected GL2GL3 gl;
   protected UniformBufferObject uniforms;
 
   protected GeometryShaderStrokePipeline pipeline;
@@ -47,7 +47,7 @@ public class GL2GL3StrokeLineVisitor extends SimplePathVisitor implements Shader
 
   @Override
   public void setGLContext(GL context) {
-    gl = context.getGL2ES2();
+    gl = context.getGL2GL3();
 
     if (!pipeline.isSetup()) {
       pipeline.setup(gl);

@@ -16,7 +16,7 @@
 package net.opengrabeso.glg2d.impl.shader;
 
 
-import com.jogamp.opengl.GL;
+import com.github.opengrabeso.jaagl.GL;
 
 import net.opengrabeso.glg2d.PathVisitor;
 

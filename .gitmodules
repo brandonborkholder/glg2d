@@ -1,0 +1,3 @@
+[submodule "src/main/java/com/github/opengrabeso/jaagl"]
+	path = src/main/java/com/github/opengrabeso/jaagl
+	url = https://github.com/OpenGrabeso/jaagl

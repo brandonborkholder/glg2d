@@ -19,9 +19,8 @@ package net.opengrabeso.glg2d.impl.shader;
 import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2ES2;
-import com.jogamp.opengl.GL3ES3;
+import com.github.opengrabeso.jaagl.GL;
+import com.github.opengrabeso.jaagl.GL2GL3;
 
 import net.opengrabeso.glg2d.GLG2DUtils;
 
@@ -56,7 +55,7 @@ public class GeometryShaderStrokePipeline extends AbstractShaderPipeline {
     super(vertexShaderFileName, geometryShaderFileName, fragmentShaderFileName);
   }
 
-  public void setStroke(GL2ES2 gl, BasicStroke stroke) {
+  public void setStroke(GL2GL3 gl, BasicStroke stroke) {
     if (lineWidthLocation >= 0) {
       gl.glUniform1f(lineWidthLocation, stroke.getLineWidth());
     }
@@ -74,33 +73,33 @@ public class GeometryShaderStrokePipeline extends AbstractShaderPipeline {
     }
   }
 
-  protected void setDrawEnd(GL2ES2 gl, int drawType) {
+  protected void setDrawEnd(GL2GL3 gl, int drawType) {
     if (drawEndLocation >= 0) {
       gl.glUniform1i(drawEndLocation, drawType);
     }
   }
 
-  protected void bindBuffer(GL2ES2 gl, FloatBuffer vertexBuffer) {
+  protected void bindBuffer(GL2GL3 gl, FloatBuffer vertexBuffer) {
     gl.glEnableVertexAttribArray(vertCoordLocation);
     gl.glEnableVertexAttribArray(vertBeforeLocation);
     gl.glEnableVertexAttribArray(vertAfterLocation);
 
     if (gl.glIsBuffer(vertCoordBuffer)) {
-      gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertCoordBuffer);
-      gl.glBufferSubData(GL.GL_ARRAY_BUFFER, 0, Buffers.SIZEOF_FLOAT * vertexBuffer.limit(), vertexBuffer);
+      gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), vertCoordBuffer);
+      gl.glBufferSubData(gl.GL_ARRAY_BUFFER(), 0, Buffers.SIZEOF_FLOAT * vertexBuffer.limit(), vertexBuffer);
     } else {
       vertCoordBuffer = GLG2DUtils.genBufferId(gl);
 
-      gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertCoordBuffer);
-      gl.glBufferData(GL.GL_ARRAY_BUFFER, Buffers.SIZEOF_FLOAT * vertexBuffer.capacity(), vertexBuffer, GL2ES2.GL_STREAM_DRAW);
+      gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), vertCoordBuffer);
+      gl.glBufferData(gl.GL_ARRAY_BUFFER(), Buffers.SIZEOF_FLOAT * vertexBuffer.capacity(), vertexBuffer, gl.GL_STREAM_DRAW());
     }
 
-    gl.glVertexAttribPointer(vertCoordLocation, 2, GL.GL_FLOAT, false, 0, 2 * Buffers.SIZEOF_FLOAT);
-    gl.glVertexAttribPointer(vertBeforeLocation, 2, GL.GL_FLOAT, false, 0, 0);
-    gl.glVertexAttribPointer(vertAfterLocation, 2, GL.GL_FLOAT, false, 0, 4 * Buffers.SIZEOF_FLOAT);
+    gl.glVertexAttribPointer(vertCoordLocation, 2, gl.GL_FLOAT(), false, 0, 2 * Buffers.SIZEOF_FLOAT);
+    gl.glVertexAttribPointer(vertBeforeLocation, 2, gl.GL_FLOAT(), false, 0, 0);
+    gl.glVertexAttribPointer(vertAfterLocation, 2, gl.GL_FLOAT(), false, 0, 4 * Buffers.SIZEOF_FLOAT);
   }
 
-  public void draw(GL2ES2 gl, FloatBuffer vertexBuffer, boolean close) {
+  public void draw(GL2GL3 gl, FloatBuffer vertexBuffer, boolean close) {
     int pos = vertexBuffer.position();
     int lim = vertexBuffer.limit();
     int numPts = (lim - pos) / 2;
@@ -133,32 +132,32 @@ public class GeometryShaderStrokePipeline extends AbstractShaderPipeline {
 
     if (close) {
       setDrawEnd(gl, DRAW_END_NONE);
-      gl.glDrawArrays(GL.GL_LINES, 0, numPts + 1);
-      gl.glDrawArrays(GL.GL_LINES, 1, numPts);
+      gl.glDrawArrays(gl.GL_LINES(), 0, numPts + 1);
+      gl.glDrawArrays(gl.GL_LINES(), 1, numPts);
     } else if (numPts == 2) {
       setDrawEnd(gl, DRAW_END_BOTH);
-      gl.glDrawArrays(GL.GL_LINES, 0, 2);
+      gl.glDrawArrays(gl.GL_LINES(), 0, 2);
     } else {
       setDrawEnd(gl, DRAW_END_NONE);
-      gl.glDrawArrays(GL.GL_LINES, 1, numPts - 2);
-      gl.glDrawArrays(GL.GL_LINES, 2, numPts - 3);
+      gl.glDrawArrays(gl.GL_LINES(), 1, numPts - 2);
+      gl.glDrawArrays(gl.GL_LINES(), 2, numPts - 3);
 
       setDrawEnd(gl, DRAW_END_FIRST);
-      gl.glDrawArrays(GL.GL_LINES, 0, 2);
+      gl.glDrawArrays(gl.GL_LINES(), 0, 2);
 
       setDrawEnd(gl, DRAW_END_LAST);
-      gl.glDrawArrays(GL.GL_LINES, numPts - 2, 2);
+      gl.glDrawArrays(gl.GL_LINES(), numPts - 2, 2);
     }
 
     gl.glDisableVertexAttribArray(vertCoordLocation);
     gl.glDisableVertexAttribArray(vertBeforeLocation);
     gl.glDisableVertexAttribArray(vertAfterLocation);
 
-    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+    gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), 0);
   }
 
   @Override
-  protected void setupUniformsAndAttributes(GL2ES2 gl) {
+  protected void setupUniformsAndAttributes(GL2GL3 gl) {
     super.setupUniformsAndAttributes(gl);
 
     transformLocation = gl.glGetUniformLocation(programId, "u_transform");
@@ -175,17 +174,16 @@ public class GeometryShaderStrokePipeline extends AbstractShaderPipeline {
   }
 
   @Override
-  protected void attachShaders(GL2ES2 gl) {
+  protected void attachShaders(GL2GL3 gl) {
     super.attachShaders(gl);
 
-    GL3ES3 gl3 = gl.getGL3ES3();
-    gl3.glProgramParameteri(programId, GL3ES3.GL_GEOMETRY_INPUT_TYPE, GL.GL_LINES);
-    gl3.glProgramParameteri(programId, GL3ES3.GL_GEOMETRY_OUTPUT_TYPE, GL.GL_TRIANGLE_STRIP);
-    gl3.glProgramParameteri(programId, GL3ES3.GL_GEOMETRY_VERTICES_OUT, maxVerticesOut);
+    gl.glProgramParameteri(programId, gl.GL_GEOMETRY_INPUT_TYPE(), gl.GL_LINES());
+    gl.glProgramParameteri(programId, gl.GL_GEOMETRY_OUTPUT_TYPE(), gl.GL_TRIANGLE_STRIP());
+    gl.glProgramParameteri(programId, gl.GL_GEOMETRY_VERTICES_OUT(), maxVerticesOut);
   }
 
   @Override
-  public void delete(GL2ES2 gl) {
+  public void delete(GL2GL3 gl) {
     super.delete(gl);
 
     gl.glDeleteBuffers(1, new int[] { vertCoordBuffer }, 0);

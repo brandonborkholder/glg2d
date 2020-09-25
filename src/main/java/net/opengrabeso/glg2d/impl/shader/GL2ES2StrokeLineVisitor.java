@@ -19,13 +19,13 @@ package net.opengrabeso.glg2d.impl.shader;
 import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2ES2;
+import com.github.opengrabeso.jaagl.GL;
+import com.github.opengrabeso.jaagl.GL2GL3;
 
 import net.opengrabeso.glg2d.impl.BasicStrokeLineVisitor;
 
 public class GL2ES2StrokeLineVisitor extends BasicStrokeLineVisitor implements ShaderPathVisitor {
-  protected GL2ES2 gl;
+  protected GL2GL3 gl;
   protected UniformBufferObject uniforms;
 
   protected AnyModePipeline pipeline;
@@ -47,7 +47,7 @@ public class GL2ES2StrokeLineVisitor extends BasicStrokeLineVisitor implements S
 
   @Override
   public void setGLContext(GL context) {
-    gl = context.getGL2ES2();
+    gl = context.getGL2GL3();
 
     if (!pipeline.isSetup()) {
       pipeline.setup(gl);
@@ -84,7 +84,7 @@ public class GL2ES2StrokeLineVisitor extends BasicStrokeLineVisitor implements S
 
     buf.flip();
 
-    pipeline.draw(gl, GL.GL_TRIANGLE_STRIP, buf);
+    pipeline.draw(gl, gl.GL_TRIANGLE_STRIP(), buf);
 
     vBuffer.clear();
   }

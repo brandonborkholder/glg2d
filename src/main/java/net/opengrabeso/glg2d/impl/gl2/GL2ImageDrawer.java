@@ -18,14 +18,15 @@ package net.opengrabeso.glg2d.impl.gl2;
 import java.awt.Color;
 import java.awt.geom.AffineTransform;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.GL2ES1;
+import com.github.opengrabeso.jaagl.GL;
+import com.github.opengrabeso.jaagl.GL2;
+import com.github.opengrabeso.jaagl.GL2GL3;
 
+import com.github.opengrabeso.jaagl.jogl.JoGL;
 import net.opengrabeso.glg2d.impl.AbstractImageHelper;
 import net.opengrabeso.glg2d.GLGraphics2D;
 
-import com.jogamp.opengl.util.texture.Texture;
+import net.opengrabeso.opengl.util.texture.Texture;
 
 public class GL2ImageDrawer extends AbstractImageHelper {
   protected GL2 gl;
@@ -35,13 +36,13 @@ public class GL2ImageDrawer extends AbstractImageHelper {
   @Override
   public void setG2D(GLGraphics2D g2d) {
     super.setG2D(g2d);
-    gl = g2d.getGLContext().getGL().getGL2();
+    gl = JoGL.wrap(g2d.getGLContext().getGL().getGL2());
   }
 
   @Override
   protected void begin(Texture texture, AffineTransform xform, Color bgcolor) {
-    gl.glTexEnvi(GL2ES1.GL_TEXTURE_ENV, GL2ES1.GL_TEXTURE_ENV_MODE, GL2ES1.GL_MODULATE);
-    gl.glTexParameterf(GL2ES1.GL_TEXTURE_ENV, GL2ES1.GL_TEXTURE_ENV_MODE, GL.GL_BLEND);
+    gl.glTexEnvi(gl.GL_TEXTURE_ENV(), gl.GL_TEXTURE_ENV_MODE(), gl.GL_MODULATE());
+    gl.glTexParameterf(gl.GL_TEXTURE_ENV(), gl.GL_TEXTURE_ENV_MODE(), gl.GL_BLEND());
 
     /*
      * FIXME This is unexpected since we never disable blending, but in some
@@ -74,7 +75,7 @@ public class GL2ImageDrawer extends AbstractImageHelper {
 
   @Override
   protected void applyTexture(Texture texture, int dx1, int dy1, int dx2, int dy2, float sx1, float sy1, float sx2, float sy2) {
-    gl.glBegin(GL2.GL_QUADS);
+    gl.glBegin(gl.GL_QUADS());
 
     // SW
     gl.glTexCoord2f(sx1, sy2);

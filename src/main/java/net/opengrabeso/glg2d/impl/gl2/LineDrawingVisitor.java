@@ -18,9 +18,8 @@ package net.opengrabeso.glg2d.impl.gl2;
 
 import java.awt.BasicStroke;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
+import com.github.opengrabeso.jaagl.GL;
+import com.github.opengrabeso.jaagl.GL2;
 
 import net.opengrabeso.glg2d.impl.BasicStrokeLineVisitor;
 
@@ -42,7 +41,7 @@ public class LineDrawingVisitor extends BasicStrokeLineVisitor {
     /*
      * pen hangs down and to the right. See java.awt.Graphics
      */
-    gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+    gl.glMatrixMode(gl.GL_MODELVIEW());
     gl.glPushMatrix();
     gl.glTranslatef(0.5f, 0.5f, 0);
 
@@ -53,12 +52,12 @@ public class LineDrawingVisitor extends BasicStrokeLineVisitor {
   public void endPoly() {
     super.endPoly();
 
-    gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+    gl.glMatrixMode(gl.GL_MODELVIEW());
     gl.glPopMatrix();
   }
 
   @Override
   protected void drawBuffer() {
-    vBuffer.drawBuffer(gl, GL.GL_TRIANGLE_STRIP);
+    vBuffer.drawBuffer(gl, gl.GL_TRIANGLE_STRIP());
   }
 }

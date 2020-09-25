@@ -15,12 +15,9 @@
  */
 package net.opengrabeso.glg2d.impl.shader;
 
-import static net.opengrabeso.glg2d.GLG2DUtils.ensureIsGLBuffer;
-
 import java.nio.FloatBuffer;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2ES2;
+import com.github.opengrabeso.jaagl.GL2GL3;
 
 import com.jogamp.common.nio.Buffers;
 
@@ -36,27 +33,31 @@ public class AnyModePipeline extends AbstractShaderPipeline {
     super(vertexShaderFileName, null, fragmentShaderFileName);
   }
 
-  public void bindBuffer(GL2ES2 gl) {
+  public void bindBuffer(GL2GL3 gl) {
     gl.glEnableVertexAttribArray(vertCoordLocation);
-    vertCoordBuffer = ensureIsGLBuffer(gl, vertCoordBuffer);
+    if (vertCoordBuffer < 0) {
+        int[] ids = new int[1];
+        gl.glGenBuffers(1, ids, 0);
+        vertCoordBuffer = ids[0];
+    }
 
-    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, vertCoordBuffer);
-    gl.glVertexAttribPointer(vertCoordLocation, 2, GL.GL_FLOAT, false, 0, 0);
+    gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), vertCoordBuffer);
+    gl.glVertexAttribPointer(vertCoordLocation, 2, gl.GL_FLOAT(), false, 0, 0);
   }
 
-  public void bindBufferData(GL2ES2 gl, FloatBuffer vertexBuffer) {
+  public void bindBufferData(GL2GL3 gl, FloatBuffer vertexBuffer) {
     bindBuffer(gl);
 
     int count = vertexBuffer.limit() - vertexBuffer.position();
-    gl.glBufferData(GL.GL_ARRAY_BUFFER, Buffers.SIZEOF_FLOAT * count, vertexBuffer, GL2ES2.GL_STREAM_DRAW);
+    gl.glBufferData(gl.GL_ARRAY_BUFFER(), Buffers.SIZEOF_FLOAT * count, vertexBuffer, gl.GL_STREAM_DRAW());
   }
 
-  public void unbindBuffer(GL2ES2 gl) {
+  public void unbindBuffer(GL2GL3 gl) {
     gl.glDisableVertexAttribArray(vertCoordLocation);
-    gl.glBindBuffer(GL.GL_ARRAY_BUFFER, 0);
+    gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), 0);
   }
 
-  public void draw(GL2ES2 gl, int mode, FloatBuffer vertexBuffer) {
+  public void draw(GL2GL3 gl, int mode, FloatBuffer vertexBuffer) {
     bindBufferData(gl, vertexBuffer);
 
     int numPts = (vertexBuffer.limit() - vertexBuffer.position()) / 2;
@@ -66,7 +67,7 @@ public class AnyModePipeline extends AbstractShaderPipeline {
   }
 
   @Override
-  protected void setupUniformsAndAttributes(GL2ES2 gl) {
+  protected void setupUniformsAndAttributes(GL2GL3 gl) {
     super.setupUniformsAndAttributes(gl);
 
     transformLocation = gl.glGetUniformLocation(programId, "u_transform");
@@ -76,7 +77,7 @@ public class AnyModePipeline extends AbstractShaderPipeline {
   }
 
   @Override
-  public void delete(GL2ES2 gl) {
+  public void delete(GL2GL3 gl) {
     super.delete(gl);
 
     if (gl.glIsBuffer(vertCoordBuffer)) {
