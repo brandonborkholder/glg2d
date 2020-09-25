@@ -5,6 +5,7 @@ import java.awt.RenderingHints.Key;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+import com.github.opengrabeso.jaagl.jogl.JoGL;
 import com.jogamp.opengl.GL2;
 import com.jogamp.opengl.GLAutoDrawable;
 import javax.swing.JComponent;
@@ -30,7 +31,7 @@ public class DepthSimExample {
         return new GLG2DSimpleEventListener(drawingComponent) {
           @Override
           protected GLGraphics2D createGraphics2D(GLAutoDrawable drawable) {
-            return new GLGraphics2D() {
+            return new GLGraphics2D(JoGL.wrap(drawable.getGL())) {
               @Override
               protected void createDrawingHelpers() {
                 super.createDrawingHelpers();

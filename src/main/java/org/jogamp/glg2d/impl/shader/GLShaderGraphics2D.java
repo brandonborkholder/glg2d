@@ -16,16 +16,22 @@
 package org.jogamp.glg2d.impl.shader;
 
 
+import com.github.opengrabeso.jaagl.GL3;
 import org.jogamp.glg2d.GLG2DColorHelper;
 import org.jogamp.glg2d.GLG2DImageHelper;
 import org.jogamp.glg2d.GLG2DShapeHelper;
 import org.jogamp.glg2d.GLG2DTextHelper;
 import org.jogamp.glg2d.GLG2DTransformHelper;
 import org.jogamp.glg2d.GLGraphics2D;
-import org.jogamp.glg2d.impl.shader.GL3StringDrawer;
 
 public class GLShaderGraphics2D extends GLGraphics2D {
   protected UniformBufferObject uniforms = new UniformBufferObject();
+
+  private GL3 getGL3() {return (GL3)gl;};
+
+  public GLShaderGraphics2D(GL3 gl) {
+      super(gl);
+  }
 
   public UniformBufferObject getUniformsObject() {
     return uniforms;
@@ -53,6 +59,6 @@ public class GLShaderGraphics2D extends GLGraphics2D {
 
   @Override
   protected GLG2DTextHelper createTextHelper() {
-    return new GL3StringDrawer();
+    return new GL3StringDrawer(getGL3());
   }
 }

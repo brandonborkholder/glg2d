@@ -22,9 +22,6 @@ import java.awt.Font;
 import java.text.AttributedCharacterIterator;
 import java.util.HashMap;
 
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
-
 import org.jogamp.glg2d.impl.AbstractTextDrawer;
 
 import com.github.opengrabeso.ogltext.util.awt.TextRenderer;
@@ -32,12 +29,10 @@ import com.github.opengrabeso.ogltext.util.awt.TextRenderer;
 /**
  * Draws text for the {@code GLGraphics2D} class.
  */
-public class GL2StringDrawer extends AbstractTextDrawer {
+public abstract class GL2StringDrawer extends AbstractTextDrawer {
   protected FontRenderCache cache = new FontRenderCache();
 
-  protected TextRenderer createTextRenderer(Font font, boolean antialias) {
-      return new TextRenderer(font, antialias, false, false);
-  }
+  protected abstract TextRenderer createTextRenderer(Font font, boolean antialias);
 
   @Override
   public void dispose() {
@@ -98,20 +93,11 @@ public class GL2StringDrawer extends AbstractTextDrawer {
     renderer.setColor(color);
   }
 
-  protected void setupMatrix(TextRenderer renderer) {
-      GL2 gl = g2d.getGLContext().getGL().getGL2();
-      gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
-      gl.glPushMatrix();
-      gl.glScalef(1, -1, 1);
-      gl.glTranslatef(0, -g2d.getCanvasHeight(), 0);
-  }
+  protected abstract void setupMatrix(TextRenderer renderer);
 
-  protected boolean useVerticalFlip() {return false;}
+  protected abstract boolean useVerticalFlip();
 
-  protected void cleanupMatrix(TextRenderer renderer) {
-      GL2 gl = g2d.getGLContext().getGL().getGL2();
-      gl.glPopMatrix();
-  }
+  protected abstract void cleanupMatrix(TextRenderer renderer);
 
   protected void begin(TextRenderer renderer) {
     setTextColorRespectComposite(renderer);

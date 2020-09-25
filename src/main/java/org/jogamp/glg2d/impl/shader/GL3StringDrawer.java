@@ -15,6 +15,7 @@
  */
 package org.jogamp.glg2d.impl.shader;
 
+import com.github.opengrabeso.jaagl.GL3;
 import com.github.opengrabeso.ogltext.util.awt.TextRenderer;
 import org.jogamp.glg2d.impl.gl2.GL2StringDrawer;
 
@@ -25,10 +26,15 @@ import java.awt.*;
  */
 public class GL3StringDrawer extends GL2StringDrawer {
 
+    private final GL3 gl;
+
+    public GL3StringDrawer(GL3 gl) {
+        this.gl = gl;
+    }
 
     @Override
     protected TextRenderer createTextRenderer(Font font, boolean antialias) {
-        return new TextRenderer(font, antialias, false, true);
+        return new TextRenderer(font, antialias, false, gl);
     }
 
     @Override
@@ -39,7 +45,7 @@ public class GL3StringDrawer extends GL2StringDrawer {
         setTextColorRespectComposite(renderer);
 
         float[] matrix = ((GLShaderGraphics2D) g2d).getUniformsObject().transformHook.getGLMatrixData();
-        renderer.setTransform(matrix);
+        renderer.setTransform(gl, matrix);
     }
 
     @Override

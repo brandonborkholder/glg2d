@@ -15,6 +15,7 @@
  */
 package org.jogamp.glg2d;
 
+import com.github.opengrabeso.jaagl.jogl.JoGL;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
 import org.jogamp.glg2d.impl.shader.GLShaderGraphics2D;
@@ -115,8 +116,8 @@ public class GLG2DSimpleEventListener implements GLEventListener {
    * calls.
    */
   protected GLGraphics2D createGraphics2D(GLAutoDrawable drawable) {
-    return new GLShaderGraphics2D();
-    //  return new GLGraphics2D();
+    return new GLShaderGraphics2D(JoGL.wrap(drawable.getContext().getGL().getGL3()));
+    //return new GLGraphics2D(JoGL.wrap(drawable.getContext().getGL().getGL2()));
   }
 
   @Override

@@ -54,18 +54,17 @@ import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.GLDrawable;
 
 import org.jogamp.glg2d.impl.GLGraphicsConfiguration;
-import org.jogamp.glg2d.impl.gl2.GL2ColorHelper;
-import org.jogamp.glg2d.impl.gl2.GL2ImageDrawer;
-import org.jogamp.glg2d.impl.gl2.GL2ShapeDrawer;
-import org.jogamp.glg2d.impl.gl2.GL2StringDrawer;
-import org.jogamp.glg2d.impl.gl2.GL2Transformhelper;
+import org.jogamp.glg2d.impl.gl2.*;
 
 /**
  * Implements the standard {@code Graphics2D} functionality, but instead draws
  * to an OpenGL canvas.
  */
 public class GLGraphics2D extends Graphics2D implements Cloneable {
-  /**
+  protected final com.github.opengrabeso.jaagl.GL gl;
+
+  private com.github.opengrabeso.jaagl.GL2 getGL2() {return (com.github.opengrabeso.jaagl.GL2)gl;}
+    /**
    * The parent graphics object, if we have one. This reference is used to pass
    * control back to the parent.
    */
@@ -118,9 +117,14 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
    */
   protected RenderingHints hints;
 
-  public GLGraphics2D() {
+  protected GLGraphics2D(com.github.opengrabeso.jaagl.GL gl) {
+    this.gl = gl;
     hints = new RenderingHints(Collections.<Key, Object> emptyMap());
     createDrawingHelpers();
+  }
+
+  public GLGraphics2D(com.github.opengrabeso.jaagl.GL2 gl) {
+    this((com.github.opengrabeso.jaagl.GL)gl);
   }
 
   protected void createDrawingHelpers() {
@@ -142,7 +146,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   protected GLG2DTextHelper createTextHelper() {
-    return new GL2StringDrawer();
+      return new GL2StringDrawerImpl(getGL2());
   }
 
   protected GLG2DImageHelper createImageHelper() {
