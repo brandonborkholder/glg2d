@@ -19,48 +19,34 @@ import java.awt.Color;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2ES1;
+import com.github.opengrabeso.jaagl.GL;
+import com.github.opengrabeso.jaagl.GL2GL3;
 
 public class GLG2DUtils {
   private static final Logger LOGGER = Logger.getLogger(GLG2DUtils.class.getName());
 
   public static int getViewportHeight(GL gl) {
     int[] viewportDimensions = new int[4];
-    gl.glGetIntegerv(GL.GL_VIEWPORT, viewportDimensions, 0);
+    gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions, 0);
     int canvasHeight = viewportDimensions[3];
     return canvasHeight;
   }
 
   public static int getViewportWidth(GL gl) {
     int[] viewportDimensions = new int[4];
-    gl.glGetIntegerv(GL.GL_VIEWPORT, viewportDimensions, 0);
+    gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions, 0);
     int canvasWidth = viewportDimensions[2];
     return canvasWidth;
   }
 
   public static void logGLError(GL gl) {
     int error = gl.glGetError();
-    if (error != GL.GL_NO_ERROR) {
+    if (error != gl.GL_NO_ERROR()) {
       LOGGER.log(Level.SEVERE, "GL Error: code " + error);
     }
   }
 
-  public static int ensureIsGLBuffer(GL gl, int bufferId) {
-    if (gl.glIsBuffer(bufferId)) {
-      return bufferId;
-    } else {
-      return genBufferId(gl);
-    }
-  }
-
-  public static int genBufferId(GL gl) {
-    int[] ids = new int[1];
-    gl.glGenBuffers(1, ids, 0);
-    return ids[0];
-  }
-
-    public static int ensureIsGLBuffer(com.github.opengrabeso.jaagl.GL2GL3 gl, int bufferId) {
+    public static int ensureIsGLBuffer(GL2GL3 gl, int bufferId) {
         if (gl.glIsBuffer(bufferId)) {
             return bufferId;
         } else {
@@ -68,7 +54,7 @@ public class GLG2DUtils {
         }
     }
 
-    public static int genBufferId(com.github.opengrabeso.jaagl.GL2GL3 gl) {
+    public static int genBufferId(GL2GL3 gl) {
         int[] ids = new int[1];
         gl.glGenBuffers(1, ids, 0);
         return ids[0];

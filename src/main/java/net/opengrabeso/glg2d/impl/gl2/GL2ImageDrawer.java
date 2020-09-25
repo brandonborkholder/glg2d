@@ -36,7 +36,7 @@ public class GL2ImageDrawer extends AbstractImageHelper {
   @Override
   public void setG2D(GLGraphics2D g2d) {
     super.setG2D(g2d);
-    gl = JoGL.wrap(g2d.getGLContext().getGL().getGL2());
+    gl = g2d.getGL().getGL2();
   }
 
   @Override

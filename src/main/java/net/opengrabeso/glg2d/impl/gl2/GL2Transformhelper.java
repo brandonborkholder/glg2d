@@ -17,9 +17,8 @@ package net.opengrabeso.glg2d.impl.gl2;
 
 import java.awt.geom.AffineTransform;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
+import com.github.opengrabeso.jaagl.GL;
+import com.github.opengrabeso.jaagl.GL2;
 
 import net.opengrabeso.glg2d.GLGraphics2D;
 import net.opengrabeso.glg2d.impl.AbstractMatrixHelper;
@@ -32,7 +31,7 @@ public class GL2Transformhelper extends AbstractMatrixHelper {
   @Override
   public void setG2D(GLGraphics2D g2d) {
     super.setG2D(g2d);
-    gl = g2d.getGLContext().getGL().getGL2();
+    gl = g2d.getGL().getGL2();
 
     setupGLView();
     flushTransformToOpenGL();
@@ -40,18 +39,18 @@ public class GL2Transformhelper extends AbstractMatrixHelper {
 
   protected void setupGLView() {
     int[] viewportDimensions = new int[4];
-    gl.glGetIntegerv(GL.GL_VIEWPORT, viewportDimensions, 0);
+    gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions, 0);
     int width = viewportDimensions[2];
     int height = viewportDimensions[3];
 
     // setup projection
-    gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
+    gl.glMatrixMode(gl.GL_PROJECTION());
     gl.glLoadIdentity();
     gl.glOrtho(0, width, 0, height, -1, 1);
 
     // the MODELVIEW matrix will get adjusted later
 
-    gl.glMatrixMode(GL.GL_TEXTURE);
+    gl.glMatrixMode(gl.GL_TEXTURE());
     gl.glLoadIdentity();
   }
 
@@ -62,7 +61,7 @@ public class GL2Transformhelper extends AbstractMatrixHelper {
   protected void flushTransformToOpenGL() {
     float[] matrix = getGLMatrix(stack.peek());
 
-    gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+    gl.glMatrixMode(gl.GL_MODELVIEW());
     gl.glLoadMatrixf(matrix, 0);
   }
 

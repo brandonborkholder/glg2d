@@ -49,9 +49,7 @@ import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GLContext;
-import com.jogamp.opengl.GLDrawable;
+import com.github.opengrabeso.jaagl.GL;
 
 import net.opengrabeso.glg2d.impl.GLGraphicsConfiguration;
 import net.opengrabeso.glg2d.impl.gl2.*;
@@ -71,12 +69,6 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
    * control back to the parent.
    */
   protected GLGraphics2D parent;
-
-  /**
-   * When we are painting, this is the drawable/context we're painting into.
-   */
-  protected GLDrawable glDrawable;
-  protected GLContext glContext;
 
   /**
    * Ensures we only dispose() once.
@@ -198,10 +190,8 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     return colorHelper;
   }
 
-  protected void setCanvas(GLContext context) {
-    glDrawable = context.getGLDrawable();
-    glContext = context;
-
+  protected void setCanvas(GL context) {
+    assert(context == gl);
     for (G2DDrawingHelper helper : helpers) {
       helper.setG2D(this);
     }
@@ -211,9 +201,10 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
    * Sets up the graphics object in preparation for drawing. Initialization such
    * as getting the viewport
    */
-  public void prePaint(GLContext context) {
-    canvasHeight = GLG2DUtils.getViewportHeight(context.getGL());
-    canvasWidth = GLG2DUtils.getViewportWidth(context.getGL());
+  public void prePaint(GL context) {
+    assert(context == gl);
+    canvasHeight = GLG2DUtils.getViewportHeight(gl);
+    canvasWidth = GLG2DUtils.getViewportWidth(gl);
     setCanvas(context);
     setDefaultState();
   }
@@ -226,15 +217,11 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
     setComposite(AlphaComposite.SrcOver);
     setClip(null);
     setRenderingHints(null);
-    graphicsConfig = new GLGraphicsConfiguration(glDrawable);
+    graphicsConfig = new GLGraphicsConfiguration(gl, canvasWidth, canvasHeight);
   }
 
   public void postPaint() {
     // could glFlush here, but not necessary
-  }
-
-  public GLContext getGLContext() {
-    return glContext;
   }
 
   public int getCanvasHeight() {
@@ -558,13 +545,13 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
   }
 
   protected void scissor(boolean enable) {
-    GL gl = getGLContext().getGL();
+    GL gl = getGL();
     if (enable) {
       gl.glScissor(clip.x, canvasHeight - clip.y - clip.height, Math.max(clip.width, 0), Math.max(clip.height, 0));
-      gl.glEnable(GL.GL_SCISSOR_TEST);
+      gl.glEnable(gl.GL_SCISSOR_TEST());
     } else {
       clip = null;
-      gl.glDisable(GL.GL_SCISSOR_TEST);
+      gl.glDisable(gl.GL_SCISSOR_TEST());
     }
   }
 

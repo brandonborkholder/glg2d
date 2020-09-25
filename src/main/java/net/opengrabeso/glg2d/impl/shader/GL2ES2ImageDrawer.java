@@ -58,7 +58,7 @@ public class GL2ES2ImageDrawer extends AbstractImageHelper {
           + GLShaderGraphics2D.class.getSimpleName());
     }
 
-    gl = JoGL.wrap(g2d.getGLContext().getGL().getGL3());
+    gl = g2d.getGL().getGL3();
     if (!shader.isSetup()) {
       shader.setup(gl);
     }

@@ -22,8 +22,8 @@ import java.awt.GradientPaint;
 import java.awt.MultipleGradientPaint;
 import java.awt.Paint;
 
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.GL2GL3;
+import com.github.opengrabeso.jaagl.GL2;
+import com.github.opengrabeso.jaagl.GL2GL3;
 
 import net.opengrabeso.glg2d.impl.GLG2DNotImplemented;
 import net.opengrabeso.glg2d.GLGraphics2D;
@@ -35,7 +35,7 @@ public class GL2ColorHelper extends AbstractColorHelper {
   @Override
   public void setG2D(GLGraphics2D g2d) {
     super.setG2D(g2d);
-    gl = g2d.getGLContext().getGL().getGL2();
+    gl = g2d.getGL().getGL2();
   }
 
   @Override
@@ -108,6 +108,6 @@ public class GL2ColorHelper extends AbstractColorHelper {
 
     int x1 = x;
     int y1 = g2d.getCanvasHeight() - (y + height);
-    gl.glCopyPixels(x1, y1, width, height, GL2GL3.GL_COLOR);
+    gl.glCopyPixels(x1, y1, width, height, gl.GL_COLOR());
   }
 }

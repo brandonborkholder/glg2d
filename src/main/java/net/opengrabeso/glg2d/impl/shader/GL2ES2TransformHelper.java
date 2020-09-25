@@ -17,7 +17,7 @@ package net.opengrabeso.glg2d.impl.shader;
 
 import java.awt.geom.AffineTransform;
 
-import com.jogamp.opengl.GL;
+import com.github.opengrabeso.jaagl.GL;
 
 import net.opengrabeso.glg2d.GLGraphics2D;
 import net.opengrabeso.glg2d.impl.AbstractMatrixHelper;
@@ -37,8 +37,8 @@ public class GL2ES2TransformHelper extends AbstractMatrixHelper implements Trans
     glMatrix = new float[16];
     viewportDimensions = new int[4];
 
-    GL gl = g2d.getGLContext().getGL();
-    gl.glGetIntegerv(GL.GL_VIEWPORT, viewportDimensions, 0);
+    GL gl = g2d.getGL();
+    gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions, 0);
 
     if (g2d instanceof GLShaderGraphics2D) {
       ((GLShaderGraphics2D) g2d).getUniformsObject().transformHook = this;

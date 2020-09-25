@@ -24,6 +24,7 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.DirectColorModel;
 
+import com.github.opengrabeso.jaagl.GL;
 import com.jogamp.opengl.GLDrawable;
 
 /**
@@ -36,13 +37,17 @@ import com.jogamp.opengl.GLDrawable;
  * </p>
  */
 public class GLGraphicsConfiguration extends GraphicsConfiguration {
-  private final GLDrawable target;
+  private final boolean onScreen;
 
   private final GLGraphicsDevice device;
+    private int width;
+    private int height;
 
-  public GLGraphicsConfiguration(GLDrawable drawable) {
-    target = drawable;
-    device = new GLGraphicsDevice(this);
+    public GLGraphicsConfiguration(GL gl, int width, int height) {
+        this.width = width;
+        this.height = height;
+        onScreen = true; // TODO: verify against JOGL
+        device = new GLGraphicsDevice(this);
   }
 
   @Override
@@ -90,10 +95,10 @@ public class GLGraphicsConfiguration extends GraphicsConfiguration {
 
   @Override
   public Rectangle getBounds() {
-    return new Rectangle(target.getSurfaceWidth(), target.getSurfaceHeight());
+    return new Rectangle(width, height);
   }
 
-  public GLDrawable getTarget() {
-    return target;
+  public boolean isOnScreen() {
+    return onScreen;
   }
 }

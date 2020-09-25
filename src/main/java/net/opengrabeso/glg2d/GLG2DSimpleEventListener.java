@@ -15,6 +15,7 @@
  */
 package net.opengrabeso.glg2d;
 
+import com.github.opengrabeso.jaagl.GL;
 import com.github.opengrabeso.jaagl.jogl.JoGL;
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
@@ -62,8 +63,8 @@ public class GLG2DSimpleEventListener implements GLEventListener {
    * the {@code GLGraphics2D} object to setup any client state.
    */
   protected void prePaint(GLAutoDrawable drawable) {
-    setupViewport(drawable);
-    g2d.prePaint(drawable.getContext());
+    setupViewport(g2d.getGL(), drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
+    g2d.prePaint(g2d.getGL());
 
     // clip to only the component we're painting
     g2d.translate(comp.getX(), comp.getY());
@@ -73,8 +74,8 @@ public class GLG2DSimpleEventListener implements GLEventListener {
   /**
    * Defines the viewport to paint into.
    */
-  protected void setupViewport(GLAutoDrawable drawable) {
-    drawable.getGL().glViewport(0, 0, drawable.getSurfaceWidth(), drawable.getSurfaceHeight());
+  protected void setupViewport(GL gl, int width, int height) {
+    gl.glViewport(0, 0, width, height);
   }
 
   /**

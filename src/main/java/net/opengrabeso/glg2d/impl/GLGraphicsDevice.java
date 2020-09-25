@@ -30,7 +30,7 @@ public class GLGraphicsDevice extends GraphicsDevice {
 
   @Override
   public int getType() {
-    if (config.getTarget().getChosenGLCapabilities().isOnscreen()) {
+    if (config.isOnScreen()) {
       return TYPE_RASTER_SCREEN;
     } else {
       return TYPE_IMAGE_BUFFER;
