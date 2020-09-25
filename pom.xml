@@ -3,12 +3,12 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.jogamp.glg2d</groupId>
   <artifactId>glg2d</artifactId>
-  <version>0.5.6-opengrabeso</version>
+  <version>0.6.0</version>
   <packaging>jar</packaging>
   <name>GLG2D</name>
   <description>Java2D to OpenGL bridge</description>
   <inceptionYear>2010</inceptionYear>
-  <url>http://brandonborkholder.github.com/glg2d/</url>
+  <url>http://opengrabeso.github.com/glg2d/</url>
   <licenses>
     <license>
       <name>Apache 2</name>
@@ -21,7 +21,7 @@
     <repository>
       <id>github</id>
       <name>GitHub OpenGrabeso Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/OpenGrabeso/packages</url>
+      <url>https://maven.pkg.github.com/OpenGrabeso/glg2d</url>
     </repository>
   </distributionManagement>
 
@@ -39,7 +39,7 @@
   </developers>
   <scm>
     <connection>scm:git:https://github.com/OpenGrabeso/glg2d.git</connection>
-    <developerConnection>scm:git:[fetch=]https://github.com/OpenGrabeso/glg2d.git[push=]git@github.com:brandonborkholder/glg2d.git</developerConnection>
+    <developerConnection>scm:git:[fetch=]https://github.com/OpenGrabeso/glg2d.git[push=]git@github.com:OpenGrabeso/glg2d.git</developerConnection>
     <tag>HEAD</tag>
     <url>https://github.com/OpenGrabeso/glg2d</url>
   </scm>
