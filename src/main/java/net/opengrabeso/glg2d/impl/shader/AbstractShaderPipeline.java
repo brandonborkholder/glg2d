@@ -131,21 +131,16 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
   }
 
   protected int compileShader(GL2GL3 gl, int type, Class<?> context, String name) throws ShaderException {
-    String[] source = readShader(context, name);
+    String source = readShader(context, name);
     int id = compileShader(gl, type, source);
     checkShaderThrowException(gl, id);
     return id;
   }
 
-  protected int compileShader(GL2GL3 gl, int type, String[] source) throws ShaderException {
+  protected int compileShader(GL2GL3 gl, int type, String source) throws ShaderException {
     int id = gl.glCreateShader(type);
 
-    int[] lineLengths = new int[source.length];
-    for (int i = 0; i < source.length; i++) {
-      lineLengths[i] = source[i].length();
-    }
-
-    gl.glShaderSource(id, source.length, source, IntBuffer.wrap(lineLengths));
+    gl.glShaderSource(id, source);
     int err = gl.glGetError();
     if (err != gl.GL_NO_ERROR()) {
       throw new ShaderException("Shader source failed, GL Error: 0x" + Integer.toHexString(err));
@@ -159,7 +154,7 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
     return id;
   }
 
-  protected String[] readShader(Class<?> context, String name) throws ShaderException {
+  protected String readShader(Class<?> context, String name) throws ShaderException {
     try {
       InputStream stream = null;
       if (context != null) {
@@ -180,13 +175,13 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
 
       BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
       String line = null;
-      List<String> lines = new ArrayList<String>();
+      StringBuilder sb = new StringBuilder();
       while ((line = reader.readLine()) != null) {
-        lines.add(line + "\n");
+        sb.append(line).append("\n");
       }
 
       stream.close();
-      return lines.toArray(new String[lines.size()]);
+      return sb.toString();
     } catch (IOException e) {
       throw new ShaderException("Error reading from stream", e);
     }
@@ -199,12 +194,8 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
       return;
     }
 
-    gl.glGetShaderiv(shaderId, gl.GL_INFO_LOG_LENGTH(), result, 0);
-    int size = result[0];
-    byte[] data = new byte[size];
-    gl.glGetShaderInfoLog(shaderId, size, result, 0, data, 0);
+    String error = gl.glGetShaderInfoLog(shaderId);
 
-    String error = new String(data, 0, result[0]);
     throw new ShaderException(error);
   }
 
@@ -215,12 +206,7 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
       return;
     }
 
-    gl.glGetProgramiv(programId, gl.GL_INFO_LOG_LENGTH(), result, 0);
-    int size = result[0];
-    byte[] data = new byte[size];
-    gl.glGetProgramInfoLog(programId, size, result, 0, data, 0);
-
-    String error = new String(data, 0, result[0]);
+    String error = gl.glGetProgramInfoLog(programId);
     throw new ShaderException(error);
   }
 }

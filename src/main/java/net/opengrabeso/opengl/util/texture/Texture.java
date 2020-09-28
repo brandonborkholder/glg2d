@@ -43,8 +43,6 @@ import com.github.opengrabeso.jaagl.*;
 
 import com.github.opengrabeso.ogltext.util.texture.TextureCoords;
 
-import com.jogamp.opengl.GLExtensions;
-
 /**
  * Represents an OpenGL texture object. Contains convenience routines
  * for enabling/disabling OpenGL texture state, binding this texture,
@@ -297,7 +295,7 @@ public class Texture {
      */
     public void destroy(final GL gl) {
         if(0!=texID) {
-            gl.glDeleteTextures(1, new int[] {texID}, 0);
+            gl.glDeleteTextures(new int[] {texID});
             texID = 0;
         }
     }
@@ -460,8 +458,8 @@ public class Texture {
         // See whether we have automatic mipmap generation support
 
         // Indicate to the TextureData what functionality is available
-        data.setHaveEXTABGR(gl.isExtensionAvailable(GLExtensions.EXT_abgr));
-        data.setHaveGL12(gl.isExtensionAvailable(GLExtensions.VERSION_1_2));
+        data.setHaveEXTABGR(gl.isExtensionAvailable("GL_EXT_abgr"));
+        data.setHaveGL12(gl.isExtensionAvailable("GL_VERSION_1_2"));
 
         // Note that automatic mipmap generation doesn't work for
         // GL_ARB_texture_rectangle
@@ -685,8 +683,8 @@ public class Texture {
     private void updateSubImageImpl(final GL gl, final TextureData data, final int newTarget, final int mipmapLevel,
                                     int dstx, int dsty,
                                     int srcx, int srcy, int width, int height) {
-        data.setHaveEXTABGR(gl.isExtensionAvailable(GLExtensions.EXT_abgr));
-        data.setHaveGL12(gl.isExtensionAvailable(GLExtensions.VERSION_1_2));
+        data.setHaveEXTABGR(gl.isExtensionAvailable("GL_EXT_abgr"));
+        data.setHaveGL12(gl.isExtensionAvailable("GL_VERSION_1_2"));
 
         ByteBuffer buffer = data.getBuffer();
         if (buffer == null && data.getMipmapData() == null) {
@@ -784,7 +782,7 @@ public class Texture {
         if( 0 == texID ) {
             if( null != gl ) {
                 final int[] tmp = new int[1];
-                gl.glGenTextures(1, tmp, 0);
+                gl.glGenTextures(tmp);
                 texID = tmp[0];
                 if ( 0 == texID && throwException ) {
                     throw gl.newGLException("Create texture ID invalid: texID "+texID+", glerr 0x"+Integer.toHexString(gl.glGetError()));
