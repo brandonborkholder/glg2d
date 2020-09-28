@@ -1,9 +1,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>org.jogamp.glg2d</groupId>
+  <groupId>net.opengrabeso</groupId>
   <artifactId>glg2d</artifactId>
-  <version>0.6.0</version>
+  <version>0.6.1-SNAPSHOT</version>
   <packaging>jar</packaging>
   <name>GLG2D</name>
   <description>Java2D to OpenGL bridge</description>
@@ -91,32 +91,6 @@
           <source>1.6</source>
           <target>1.6</target>
         </configuration>
-      </plugin>
-
-      <!--  check the licenses -->
-      <plugin>
-        <groupId>com.mycila.maven-license-plugin</groupId>
-        <artifactId>maven-license-plugin</artifactId>
-        <configuration>
-          <header>NOTICE.txt</header>
-          <quiet>false</quiet>
-          <failIfMissing>true</failIfMissing>
-          <strictCheck>true</strictCheck>
-          <includes>
-            <include>src/main/java/**/*.java</include>
-          </includes>
-          <mapping>
-            <java>SLASHSTAR_STYLE</java>
-          </mapping>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-               <goal>check</goal>
-            </goals>
-          </execution>
-        </executions>
       </plugin>
 
       <!-- for release -->
