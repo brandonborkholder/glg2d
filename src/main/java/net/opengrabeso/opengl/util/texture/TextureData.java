@@ -37,7 +37,7 @@
 
 package net.opengrabeso.opengl.util.texture;
 
-import java.nio.Buffer;
+import java.nio.ByteBuffer;
 
 /**
  * Represents the data for an OpenGL texture. This is separated from
@@ -68,8 +68,8 @@ public class TextureData {
     protected boolean mustFlipVertically; // Must flip texture coordinates
     // vertically to get OpenGL output
     // to look correct
-    protected Buffer buffer; // the actual data...
-    private Buffer[] mipmapData; // ...or a series of mipmaps
+    protected ByteBuffer buffer; // the actual data...
+    private ByteBuffer[] mipmapData; // ...or a series of mipmaps
     private Flusher flusher;
     protected int rowLength;
     protected int alignment; // 1, 2, or 4 bytes
@@ -126,7 +126,7 @@ public class TextureData {
                        final boolean mipmap,
                        final boolean dataIsCompressed,
                        final boolean mustFlipVertically,
-                       final Buffer buffer,
+                       final ByteBuffer buffer,
                        final Flusher flusher) throws IllegalArgumentException {
         if (mipmap && dataIsCompressed) {
             throw new IllegalArgumentException("Can not generate mipmaps for compressed textures");
@@ -192,7 +192,7 @@ public class TextureData {
                        final int pixelType,
                        final boolean dataIsCompressed,
                        final boolean mustFlipVertically,
-                       final Buffer[] mipmapData,
+                       final ByteBuffer[] mipmapData,
                        final Flusher flusher) throws IllegalArgumentException {
         this.width = width;
         this.height = height;
@@ -253,12 +253,12 @@ public class TextureData {
         return mustFlipVertically;
     }
     /** Returns the texture data, or null if it is specified as a set of mipmaps. */
-    public Buffer getBuffer() {
+    public ByteBuffer getBuffer() {
         return buffer;
     }
     /** Returns all mipmap levels for the texture data, or null if it is
         specified as a single image. */
-    public Buffer[] getMipmapData() {
+    public ByteBuffer[] getMipmapData() {
         return mipmapData;
     }
     /** Returns the required byte alignment for the texture data. */
@@ -288,7 +288,7 @@ public class TextureData {
         for proper display. */
     public void setMustFlipVertically(final boolean mustFlipVertically) { this.mustFlipVertically = mustFlipVertically; }
     /** Sets the texture data. */
-    public void setBuffer(final Buffer buffer) {
+    public void setBuffer(final ByteBuffer buffer) {
         this.buffer = buffer;
     }
     /** Sets the required byte alignment for the texture data. */

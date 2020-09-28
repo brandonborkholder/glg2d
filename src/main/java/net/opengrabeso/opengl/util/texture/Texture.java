@@ -688,7 +688,7 @@ public class Texture {
         data.setHaveEXTABGR(gl.isExtensionAvailable(GLExtensions.EXT_abgr));
         data.setHaveGL12(gl.isExtensionAvailable(GLExtensions.VERSION_1_2));
 
-        Buffer buffer = data.getBuffer();
+        ByteBuffer buffer = data.getBuffer();
         if (buffer == null && data.getMipmapData() == null) {
             // Assume user just wanted to get the Texture object allocated
             return;
