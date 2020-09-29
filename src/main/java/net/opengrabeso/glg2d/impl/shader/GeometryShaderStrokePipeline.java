@@ -19,7 +19,6 @@ package net.opengrabeso.glg2d.impl.shader;
 import java.awt.BasicStroke;
 import java.nio.FloatBuffer;
 
-import com.github.opengrabeso.jaagl.GL;
 import com.github.opengrabeso.jaagl.GL2GL3;
 
 import net.opengrabeso.glg2d.GLG2DUtils;
@@ -186,6 +185,6 @@ public class GeometryShaderStrokePipeline extends AbstractShaderPipeline {
   public void delete(GL2GL3 gl) {
     super.delete(gl);
 
-    gl.glDeleteBuffers(1, new int[] { vertCoordBuffer }, 0);
+    gl.glDeleteBuffers(new int[] { vertCoordBuffer });
   }
 }

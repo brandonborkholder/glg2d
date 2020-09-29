@@ -38,7 +38,7 @@ public class GL2ES2TransformHelper extends AbstractMatrixHelper implements Trans
     viewportDimensions = new int[4];
 
     GL gl = g2d.getGL();
-    gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions, 0);
+    gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions);
 
     if (g2d instanceof GLShaderGraphics2D) {
       ((GLShaderGraphics2D) g2d).getUniformsObject().transformHook = this;

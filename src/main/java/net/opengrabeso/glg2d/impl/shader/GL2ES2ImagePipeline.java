@@ -19,7 +19,6 @@ import static net.opengrabeso.glg2d.GLG2DUtils.ensureIsGLBuffer;
 
 import java.nio.FloatBuffer;
 
-import com.github.opengrabeso.jaagl.GL;
 import com.github.opengrabeso.jaagl.GL2GL3;
 
 import com.jogamp.common.nio.Buffers;
@@ -85,7 +84,7 @@ public class GL2ES2ImagePipeline extends AbstractShaderPipeline {
     super.delete(gl);
 
     if (gl.glIsBuffer(vertexBufferId)) {
-      gl.glDeleteBuffers(1, new int[] { vertexBufferId }, 0);
+      gl.glDeleteBuffers(new int[] { vertexBufferId });
     }
   }
 }

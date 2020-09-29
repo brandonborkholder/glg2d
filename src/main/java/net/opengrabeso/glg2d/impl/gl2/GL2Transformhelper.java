@@ -39,7 +39,7 @@ public class GL2Transformhelper extends AbstractMatrixHelper {
 
   protected void setupGLView() {
     int[] viewportDimensions = new int[4];
-    gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions, 0);
+    gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions);
     int width = viewportDimensions[2];
     int height = viewportDimensions[3];
 

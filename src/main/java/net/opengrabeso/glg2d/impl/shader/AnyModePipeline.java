@@ -37,7 +37,7 @@ public class AnyModePipeline extends AbstractShaderPipeline {
     gl.glEnableVertexAttribArray(vertCoordLocation);
     if (vertCoordBuffer < 0) {
         int[] ids = new int[1];
-        gl.glGenBuffers(1, ids, 0);
+        gl.glGenBuffers(ids);
         vertCoordBuffer = ids[0];
     }
 
@@ -81,7 +81,7 @@ public class AnyModePipeline extends AbstractShaderPipeline {
     super.delete(gl);
 
     if (gl.glIsBuffer(vertCoordBuffer)) {
-      gl.glDeleteBuffers(1, new int[] { vertCoordBuffer }, 0);
+      gl.glDeleteBuffers(new int[] { vertCoordBuffer });
     }
   }
 }

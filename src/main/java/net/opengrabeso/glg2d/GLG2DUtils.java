@@ -15,7 +15,6 @@
  */
 package net.opengrabeso.glg2d;
 
-import java.awt.Color;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -27,16 +26,14 @@ public class GLG2DUtils {
 
   public static int getViewportHeight(GL gl) {
     int[] viewportDimensions = new int[4];
-    gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions, 0);
-    int canvasHeight = viewportDimensions[3];
-    return canvasHeight;
+    gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions);
+      return viewportDimensions[3];
   }
 
   public static int getViewportWidth(GL gl) {
     int[] viewportDimensions = new int[4];
-    gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions, 0);
-    int canvasWidth = viewportDimensions[2];
-    return canvasWidth;
+    gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions);
+      return viewportDimensions[2];
   }
 
   public static void logGLError(GL gl) {
@@ -56,7 +53,7 @@ public class GLG2DUtils {
 
     public static int genBufferId(GL2GL3 gl) {
         int[] ids = new int[1];
-        gl.glGenBuffers(1, ids, 0);
+        gl.glGenBuffers(ids);
         return ids[0];
     }
 

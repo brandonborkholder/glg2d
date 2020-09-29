@@ -752,10 +752,10 @@ public class Texture {
             final int[] rowLength = { 0 };
             final int[] skipRows = { 0 };
             final int[] skipPixels = { 0 };
-            gl.glGetIntegerv(gl.GL_UNPACK_ALIGNMENT(),   align,      0); // save alignment
-            gl.glGetIntegerv(gl.GL_UNPACK_ROW_LENGTH(),  rowLength,  0); // save row length
-            gl.glGetIntegerv(gl.GL_UNPACK_SKIP_ROWS(),   skipRows,   0); // save skipped rows
-            gl.glGetIntegerv(gl.GL_UNPACK_SKIP_PIXELS(), skipPixels, 0); // save skipped pixels
+            gl.glGetIntegerv(gl.GL_UNPACK_ALIGNMENT(),   align); // save alignment
+            gl.glGetIntegerv(gl.GL_UNPACK_ROW_LENGTH(),  rowLength); // save row length
+            gl.glGetIntegerv(gl.GL_UNPACK_SKIP_ROWS(),   skipRows); // save skipped rows
+            gl.glGetIntegerv(gl.GL_UNPACK_SKIP_PIXELS(), skipPixels); // save skipped pixels
             gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT(), data.getAlignment());
             gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH(), rowlen);
             gl.glPixelStorei(gl.GL_UNPACK_SKIP_ROWS(), srcy);
