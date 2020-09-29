@@ -24,6 +24,7 @@ import com.jogamp.common.nio.Buffers;
 public class AnyModePipeline extends AbstractShaderPipeline {
   protected int vertCoordBuffer = -1;
   protected int vertCoordLocation = -1;
+  protected int vertexArrayId = -1;
 
   public AnyModePipeline() {
     this("FixedFuncShader.v", "FixedFuncShader.f");
@@ -34,6 +35,14 @@ public class AnyModePipeline extends AbstractShaderPipeline {
   }
 
   public void bindBuffer(GL2GL3 gl) {
+      if (vertexArrayId < 0) {
+          int[] vao = new int[]{0};
+          gl.glGenVertexArrays(vao);
+          vertexArrayId = vao[0];
+      }
+
+      gl.glBindVertexArray(vertexArrayId);
+
     gl.glEnableVertexAttribArray(vertCoordLocation);
     if (vertCoordBuffer < 0) {
         int[] ids = new int[1];
@@ -55,6 +64,7 @@ public class AnyModePipeline extends AbstractShaderPipeline {
   public void unbindBuffer(GL2GL3 gl) {
     gl.glDisableVertexAttribArray(vertCoordLocation);
     gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), 0);
+      gl.glBindVertexArray(0);
   }
 
   public void draw(GL2GL3 gl, int mode, FloatBuffer vertexBuffer) {
@@ -82,6 +92,10 @@ public class AnyModePipeline extends AbstractShaderPipeline {
 
     if (gl.glIsBuffer(vertCoordBuffer)) {
       gl.glDeleteBuffers(new int[] { vertCoordBuffer });
+    }
+
+    if (vertexArrayId >= 0) {
+        gl.glDeleteVertexArrays(new int[]{vertexArrayId});
     }
   }
 }

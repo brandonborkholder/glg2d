@@ -25,6 +25,7 @@ import com.jogamp.common.nio.Buffers;
 
 public class GL2ES2ImagePipeline extends AbstractShaderPipeline {
   protected int vertexBufferId = -1;
+  protected int vertexArrayId = -1;
 
   protected int textureLocation = -1;
   protected int vertCoordLocation = -1;
@@ -45,6 +46,15 @@ public class GL2ES2ImagePipeline extends AbstractShaderPipeline {
   }
 
   protected void bufferData(GL2GL3 gl, FloatBuffer buffer) {
+    if (vertexArrayId < 0) {
+        int[] vao = new int[]{0};
+        gl.glGenVertexArrays(vao);
+        vertexArrayId = vao[0];
+    }
+
+    gl.glBindVertexArray(vertexArrayId);
+
+    // TODO: no need to enable / disable, this is bound to VAO permanently
     vertexBufferId = ensureIsGLBuffer(gl, vertexBufferId);
 
     gl.glEnableVertexAttribArray(vertCoordLocation);
@@ -65,6 +75,7 @@ public class GL2ES2ImagePipeline extends AbstractShaderPipeline {
     gl.glDisableVertexAttribArray(vertCoordLocation);
     gl.glDisableVertexAttribArray(texCoordLocation);
     gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), 0);
+    gl.glBindVertexArray(0);
   }
 
   @Override
@@ -85,6 +96,9 @@ public class GL2ES2ImagePipeline extends AbstractShaderPipeline {
 
     if (gl.glIsBuffer(vertexBufferId)) {
       gl.glDeleteBuffers(new int[] { vertexBufferId });
+    }
+    if (vertexArrayId >= 0) {
+        gl.glDeleteVertexArrays(new int[]{vertexArrayId});
     }
   }
 }
