@@ -1,4 +1,4 @@
-#version 120
+#version 130
 #extension GL_EXT_geometry_shader4 : enable
 
 #define DRAW_END_NONE 0
