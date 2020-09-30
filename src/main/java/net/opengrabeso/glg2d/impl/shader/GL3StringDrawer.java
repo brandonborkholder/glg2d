@@ -15,7 +15,7 @@
  */
 package net.opengrabeso.glg2d.impl.shader;
 
-import com.github.opengrabeso.jaagl.GL3;
+import com.github.opengrabeso.jaagl.GL2GL3;
 import com.github.opengrabeso.ogltext.util.awt.TextRenderer;
 import net.opengrabeso.glg2d.impl.gl2.GL2StringDrawer;
 
@@ -26,9 +26,9 @@ import java.awt.*;
  */
 public class GL3StringDrawer extends GL2StringDrawer {
 
-    private final GL3 gl;
+    private final GL2GL3 gl;
 
-    public GL3StringDrawer(GL3 gl) {
+    public GL3StringDrawer(GL2GL3 gl) {
         this.gl = gl;
     }
 

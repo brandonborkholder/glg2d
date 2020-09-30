@@ -16,7 +16,7 @@
 package net.opengrabeso.glg2d.impl.shader;
 
 
-import com.github.opengrabeso.jaagl.GL3;
+import com.github.opengrabeso.jaagl.GL2GL3;
 import net.opengrabeso.glg2d.GLG2DColorHelper;
 import net.opengrabeso.glg2d.GLG2DImageHelper;
 import net.opengrabeso.glg2d.GLG2DShapeHelper;
@@ -27,9 +27,7 @@ import net.opengrabeso.glg2d.GLGraphics2D;
 public class GLShaderGraphics2D extends GLGraphics2D {
   protected UniformBufferObject uniforms = new UniformBufferObject();
 
-  private GL3 getGL3() {return (GL3)gl;};
-
-  public GLShaderGraphics2D(GL3 gl) {
+  public GLShaderGraphics2D(GL2GL3 gl) {
       super(gl);
   }
 
@@ -59,6 +57,6 @@ public class GLShaderGraphics2D extends GLGraphics2D {
 
   @Override
   protected GLG2DTextHelper createTextHelper() {
-    return new GL3StringDrawer(getGL3());
+    return new GL3StringDrawer(gl);
   }
 }

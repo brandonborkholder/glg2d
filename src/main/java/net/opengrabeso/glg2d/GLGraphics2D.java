@@ -59,9 +59,9 @@ import net.opengrabeso.glg2d.impl.gl2.*;
  * to an OpenGL canvas.
  */
 public class GLGraphics2D extends Graphics2D implements Cloneable {
-  protected final com.github.opengrabeso.jaagl.GL gl;
+  protected final com.github.opengrabeso.jaagl.GL2GL3 gl;
 
-  final public com.github.opengrabeso.jaagl.GL getGL() {return gl;}
+  final public com.github.opengrabeso.jaagl.GL2GL3 getGL() {return gl;}
 
   private com.github.opengrabeso.jaagl.GL2 getGL2() {return (com.github.opengrabeso.jaagl.GL2)gl;}
     /**
@@ -111,14 +111,14 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
    */
   protected RenderingHints hints;
 
-  protected GLGraphics2D(com.github.opengrabeso.jaagl.GL gl) {
+  protected GLGraphics2D(com.github.opengrabeso.jaagl.GL2GL3 gl) {
     this.gl = gl;
     hints = new RenderingHints(Collections.<Key, Object> emptyMap());
     createDrawingHelpers();
   }
 
   public GLGraphics2D(com.github.opengrabeso.jaagl.GL2 gl) {
-    this((com.github.opengrabeso.jaagl.GL)gl);
+    this((com.github.opengrabeso.jaagl.GL2GL3)gl);
   }
 
   protected void createDrawingHelpers() {
