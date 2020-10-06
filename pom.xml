@@ -68,9 +68,9 @@
       <version>${jogl.version}</version>
     </dependency>
     <dependency>
-      <groupId>com.github.opengrabeso</groupId>
+      <groupId>net.opengrabeso</groupId>
       <artifactId>text-renderer</artifactId>
-      <version>0.1.11</version>
+      <version>0.1.14-SNAPSHOT</version>
 
     </dependency>
     <dependency>

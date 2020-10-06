@@ -44,7 +44,7 @@ import net.opengrabeso.glg2d.GLG2DRenderingHints;
 import net.opengrabeso.glg2d.GLGraphics2D;
 
 import net.opengrabeso.opengl.util.texture.Texture;
-import com.github.opengrabeso.ogltext.util.texture.TextureCoords;
+import net.opengrabeso.opengl.util.texture.TextureCoords;
 import net.opengrabeso.opengl.util.texture.TextureData;
 
 public abstract class AbstractImageHelper implements GLG2DImageHelper {

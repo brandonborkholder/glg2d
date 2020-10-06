@@ -1,7 +1,7 @@
 package net.opengrabeso.glg2d.impl.gl2;
 
 import com.github.opengrabeso.jaagl.GL2;
-import com.github.opengrabeso.ogltext.util.awt.TextRenderer;
+import net.opengrabeso.opengl.util.awt.TextRenderer;
 import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 
 import java.awt.*;
@@ -16,7 +16,7 @@ public class GL2StringDrawerImpl extends GL2StringDrawer{
 
     @Override
     protected TextRenderer createTextRenderer(Font font, boolean antialias) {
-        return new TextRenderer(font, antialias, false, gl);
+        return new TextRenderer(gl, font, antialias, false);
     }
 
     @Override

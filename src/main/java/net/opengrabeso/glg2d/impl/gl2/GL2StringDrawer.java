@@ -24,7 +24,7 @@ import java.util.HashMap;
 
 import net.opengrabeso.glg2d.impl.AbstractTextDrawer;
 
-import com.github.opengrabeso.ogltext.util.awt.TextRenderer;
+import net.opengrabeso.opengl.util.awt.TextRenderer;
 
 /**
  * Draws text for the {@code GLGraphics2D} class.
@@ -65,9 +65,9 @@ public abstract class GL2StringDrawer extends AbstractTextDrawer {
 
     begin(renderer);
     if (useVerticalFlip()) {
-        renderer.draw3D(string, x, y, 0, 1, true);
+        renderer.draw3D(string, x, y, 0, 1);
     } else {
-        renderer.draw3D(string, x, g2d.getCanvasHeight() - y, 0, 1, false);
+        renderer.draw3D(string, x, g2d.getCanvasHeight() - y, 0, 1);
     }
     end(renderer);
   }
