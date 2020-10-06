@@ -116,7 +116,7 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
   }
 
   protected void deleteShaders(GL2GL3 gl) {
-    if (vertexShaderId >= 0) {
+    if (vertexShaderId > 0) {
       gl.glDeleteShader(vertexShaderId);
       vertexShaderId = 0;
     }
