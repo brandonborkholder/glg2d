@@ -53,15 +53,12 @@ public final class GlyphRendererGL2 extends AbstractGlyphRenderer {
 
     @Override
     protected void doBeginRendering(/*@Nonnull*/ final GL2GL3 gl,
-                                    final boolean ortho,
-                                    /*@Nonnegative*/ final int width,
-                                    /*@Nonnegative*/ final int height,
-                                    final boolean disableDepthTest) {
+                                                 final boolean disableDepthTest) {
 
         final GL2 gl2 = gl.getGL2();
 
         // Change general settings
-        gl2.glPushAttrib(getAttribMask(gl2, ortho));
+        gl2.glPushAttrib(getAttribMask(gl2));
         gl2.glDisable(gl2.GL_LIGHTING());
         gl2.glEnable(gl2.GL_BLEND());
         gl2.glDisable(gl2.GL_SCISSOR_TEST());
@@ -70,22 +67,6 @@ public final class GlyphRendererGL2 extends AbstractGlyphRenderer {
         gl2.glTexEnvi(gl2.GL_TEXTURE_ENV(), gl2.GL_TEXTURE_ENV_MODE(), gl2.GL_MODULATE());
 
         // Set up transformations
-        if (ortho) {
-            if (disableDepthTest) {
-                gl2.glDisable(gl2.GL_DEPTH_TEST());
-            }
-            gl2.glDisable(gl2.GL_CULL_FACE());
-            gl2.glMatrixMode(gl2.GL_PROJECTION());
-            gl2.glPushMatrix();
-            gl2.glLoadIdentity();
-            gl2.glOrtho(0, width, 0, height, -1, +1);
-            gl2.glMatrixMode(gl2.GL_MODELVIEW());
-            gl2.glPushMatrix();
-            gl2.glLoadIdentity();
-            gl2.glMatrixMode(gl2.GL_TEXTURE());
-            gl2.glPushMatrix();
-            gl2.glLoadIdentity();
-        }
     }
 
     /*@Nonnull*/
@@ -142,15 +123,13 @@ public final class GlyphRendererGL2 extends AbstractGlyphRenderer {
     /**
      * Returns attribute bits for {@code glPushAttrib} calls.
      *
-     * @param ortho True if using orthographic projection
      * @return Attribute bits for {@code glPushAttrib} calls
      */
-    private static int getAttribMask(final GL2 gl2, final boolean ortho) {
+    private static int getAttribMask(final GL2 gl2) {
         return gl2.GL_ENABLE_BIT() |
                gl2.GL_TEXTURE_BIT() |
                gl2.GL_COLOR_BUFFER_BIT() |
-               gl2.GL_SCISSOR_BIT() |
-               (ortho ? (gl2.GL_DEPTH_BUFFER_BIT() | gl2.GL_TRANSFORM_BIT()) : 0);
+               gl2.GL_SCISSOR_BIT();
     }
 
     @Override

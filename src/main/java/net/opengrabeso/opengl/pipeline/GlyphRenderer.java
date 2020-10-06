@@ -46,18 +46,10 @@ public interface GlyphRenderer {
 
     /**
      * Starts a render cycle with this {@link GlyphRenderer}.
-     *
-     * @param gl Current OpenGL context
-     * @param ortho True if using orthographic projection
-     * @param width Width of current OpenGL viewport
-     * @param height Height of current OpenGL viewport
+     *  @param gl Current OpenGL context
      * @param disableDepthTest True if should ignore depth values
      */
-    void beginRendering(/*@Nonnull*/ GL2GL3 gl,
-                                     boolean ortho,
-            /*@Nonnegative*/ int width,
-            /*@Nonnegative*/ int height,
-                                     boolean disableDepthTest, boolean gl3);
+    void beginRendering(/*@Nonnull*/ GL2GL3 gl, boolean disableDepthTest, boolean gl3);
 
     /**
      * Frees resources used by this {@link GlyphRenderer}.

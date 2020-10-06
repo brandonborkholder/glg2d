@@ -42,11 +42,11 @@ public final class GlyphRendererGL3 extends AbstractGlyphRenderer {
      */
     /*@Nonnull*/
     private static final String VERT_SOURCE =
-        "#version 140\n" +
+        "#version 110\n" +
         "uniform mat4 MVPMatrix;\n" +
-        "in vec4 MCVertex;\n" +
-        "in vec2 TexCoord0;\n" +
-        "out vec2 Coord0;\n" +
+        "attribute vec4 MCVertex;\n" +
+        "attribute vec2 TexCoord0;\n" +
+        "varying vec2 Coord0;\n" +
         "void main() {\n" +
         "   gl_Position = MVPMatrix * MCVertex;\n" +
         "   Coord0 = TexCoord0;\n" +
@@ -57,15 +57,14 @@ public final class GlyphRendererGL3 extends AbstractGlyphRenderer {
      */
     /*@Nonnull*/
     private static final String FRAG_SOURCE =
-        "#version 140\n" +
+        "#version 110\n" +
         "uniform sampler2D Texture;\n" +
         "uniform vec4 Color=vec4(1,1,1,1);\n" +
-        "in vec2 Coord0;\n" +
-        "out vec4 FragColor;\n" +
+        "varying vec2 Coord0;\n" +
         "void main() {\n" +
         "   float sample;\n" +
         "   sample = texture(Texture,Coord0).r;\n" +
-        "   FragColor = Color * sample;\n" +
+        "   gl_FragColor = Color * sample;\n" +
         "}\n";
 
     /**
@@ -126,10 +125,9 @@ public final class GlyphRendererGL3 extends AbstractGlyphRenderer {
 
     @Override
     protected void doBeginRendering(/*@Nonnull*/ final GL2GL3 gl,
-                                    final boolean ortho,
-                                    /*@Nonnegative*/ final int width,
-                                    /*@Nonnegative*/ final int height,
-                                    final boolean disableDepthTest) {
+            /*@Nonnegative*/
+            /*@Nonnegative*/
+                                                 final boolean disableDepthTest) {
 
         // Activate program
         gl.glUseProgram(program);
@@ -151,8 +149,6 @@ public final class GlyphRendererGL3 extends AbstractGlyphRenderer {
             gl.glDisable(gl.GL_SCISSOR_TEST());
             restoreScissor = true;
         }
-
-        assert !ortho;
     }
 
     @Override

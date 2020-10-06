@@ -76,7 +76,7 @@ abstract class AbstractGlyphRenderer implements GlyphRenderer, QuadPipeline.Even
     /**
      * True if orthographic.
      */
-    private boolean orthoMode = false;
+    final private boolean orthoMode = false;
 
     /**
      * Red component of color.
@@ -135,18 +135,13 @@ abstract class AbstractGlyphRenderer implements GlyphRenderer, QuadPipeline.Even
 
     @Override
     public final void beginRendering(/*@Nonnull*/ final GL2GL3 gl,
-                                     final boolean ortho,
-                                     /*@Nonnegative*/ final int width,
-                                     /*@Nonnegative*/ final int height,
-                                     final boolean disableDepthTest, final boolean gl3) {
+                                                  final boolean disableDepthTest, final boolean gl3) {
 
         // Perform hook
-        doBeginRendering(gl, ortho, width, height, disableDepthTest);
+        doBeginRendering(gl, disableDepthTest);
 
-        assert !ortho;
         // Store text renderer state
         inRenderCycle = true;
-        orthoMode = ortho;
 
         // Make sure the pipeline is made
         if (pipelineDirty) {
@@ -170,7 +165,7 @@ abstract class AbstractGlyphRenderer implements GlyphRenderer, QuadPipeline.Even
     }
 
     /**
-     * Requests that the pipeline be replaced on the next call to {@link #beginRendering}.
+     * Requests that the pipeline be replaced on the next call to beginRendering.
      */
     protected final void dirtyPipeline() {
         pipelineDirty = true;
@@ -186,17 +181,10 @@ abstract class AbstractGlyphRenderer implements GlyphRenderer, QuadPipeline.Even
 
     /**
      * Actually starts a render cycle.
-     *
-     * @param gl Current OpenGL context
-     * @param ortho True if using orthographic projection
-     * @param width Width of current OpenGL viewport
-     * @param height Height of current OpenGL viewport
+     *  @param gl Current OpenGL context
      * @param disableDepthTest True if should ignore depth values
      */
     protected abstract void doBeginRendering(/*@Nonnull*/ final GL2GL3 gl,
-                                             final boolean ortho,
-                                             /*@Nonnegative*/ final int width,
-                                             /*@Nonnegative*/ final int height,
                                              final boolean disableDepthTest);
 
     /**

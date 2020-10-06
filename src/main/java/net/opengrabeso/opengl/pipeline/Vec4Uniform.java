@@ -58,7 +58,6 @@ final class Vec4Uniform extends Uniform {
 
     @Override
     void update(/*@Nonnull*/ final GL2GL3 gl) {
-        Check.notNull(gl, "GL cannot be null");
         if (location >= 0) {
             gl.glUniform4fv(location, 1, value, 0);
         }
