@@ -74,11 +74,6 @@ abstract class AbstractGlyphRenderer implements GlyphRenderer, QuadPipeline.Even
     private boolean inRenderCycle = false;
 
     /**
-     * True if orthographic.
-     */
-    final private boolean orthoMode = false;
-
-    /**
      * Red component of color.
      */
     private float r = DEFAULT_RED;
@@ -306,16 +301,6 @@ abstract class AbstractGlyphRenderer implements GlyphRenderer, QuadPipeline.Even
      */
     final boolean hasColor(final float r, final float g, final float b, final float a) {
         return (this.r == r) && (this.g == g) && (this.b == b) && (this.a == a);
-    }
-
-    // TODO: Rename to `isOrthographic`?
-    /**
-     * Checks if this {@link GlyphRenderer} using an orthographic projection.
-     *
-     * @return True if this renderer is using an orthographic projection
-     */
-    final boolean isOrthoMode() {
-        return orthoMode;
     }
 
     @Override

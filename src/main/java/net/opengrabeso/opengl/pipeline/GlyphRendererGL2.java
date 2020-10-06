@@ -85,16 +85,6 @@ public final class GlyphRendererGL2 extends AbstractGlyphRenderer {
 
         final GL2 gl2 = gl.getGL2();
 
-        // Reset transformations
-        if (isOrthoMode()) {
-            gl2.glMatrixMode(gl2.GL_PROJECTION());
-            gl2.glPopMatrix();
-            gl2.glMatrixMode(gl2.GL_MODELVIEW());
-            gl2.glPopMatrix();
-            gl2.glMatrixMode(gl2.GL_TEXTURE());
-            gl2.glPopMatrix();
-        }
-
         // Reset general settings
         gl2.glPopAttrib();
     }
