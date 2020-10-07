@@ -1,13 +1,13 @@
 package net.opengrabeso.opengl.util.awt;
 
-import com.github.opengrabeso.jaagl.GL2;
+import com.github.opengrabeso.jaagl.GL2GL3;
 import com.jogamp.common.nio.Buffers;
 import net.opengrabeso.opengl.util.texture.TextureCoords;
 
 import java.nio.FloatBuffer;
 
 public abstract class Pipelined_QuadRenderer {
-    private final GL2 gl;
+    private final GL2GL3 gl;
     int mOutstandingGlyphsVerticesPipeline = 0;
     FloatBuffer mTexCoords;
     FloatBuffer mVertCoords;
@@ -16,7 +16,7 @@ public abstract class Pipelined_QuadRenderer {
 
     protected abstract void uploadTexture();
 
-    public Pipelined_QuadRenderer(GL2 gl) {
+    public Pipelined_QuadRenderer(GL2GL3 gl) {
         mVertCoords = Buffers.newDirectFloatBuffer(TextRenderer.kTotalBufferSizeCoordsVerts);
         mTexCoords = Buffers.newDirectFloatBuffer(TextRenderer.kTotalBufferSizeCoordsTex);
         this.gl = gl;
@@ -66,21 +66,22 @@ public abstract class Pipelined_QuadRenderer {
             mVertCoords.rewind();
             mTexCoords.rewind();
 
-            gl.glEnableClientState(gl.GL_VERTEX_ARRAY());
+
+            gl.glEnableVertexAttribArray(vertCoordAttrib);
+            gl.glEnableVertexAttribArray(texCoordAttrib);
+
+            gl.glVertexAttribPointer(vertCoordAttrib, 2, gl.GL_FLOAT(), false, 4 * Buffers.SIZEOF_FLOAT, 0);
+            gl.glVertexAttribPointer(texCoordAttrib, 2, gl.GL_FLOAT(), false, 4 * Buffers.SIZEOF_FLOAT, 2 * Buffers.SIZEOF_FLOAT);
 
             gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), mVBO_For_ResuableTileVertices);
             gl.glBufferSubData(gl.GL_ARRAY_BUFFER(), 0,
                     mOutstandingGlyphsVerticesPipeline * TextRenderer.kSizeInBytes_OneVertices_VertexData,
                     mVertCoords); // upload only the new stuff
-            gl.glVertexPointer(3, gl.GL_FLOAT(), 0, 0);
-
-            gl.glEnableClientState(gl.GL_TEXTURE_COORD_ARRAY());
 
             gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), mVBO_For_ResuableTileTexCoords);
             gl.glBufferSubData(gl.GL_ARRAY_BUFFER(), 0,
                     mOutstandingGlyphsVerticesPipeline * TextRenderer.kSizeInBytes_OneVertices_TexData,
                     mTexCoords); // upload only the new stuff
-            gl.glTexCoordPointer(2, gl.GL_FLOAT(), 0, 0);
 
             gl.glDrawArrays(gl.GL_TRIANGLES(), 0, mOutstandingGlyphsVerticesPipeline);
 

@@ -39,7 +39,7 @@
  */
 package net.opengrabeso.opengl.util.awt;
 
-import com.github.opengrabeso.jaagl.GL2;
+import com.github.opengrabeso.jaagl.GL2GL3;
 import net.opengrabeso.opengl.util.packrect.*;
 import net.opengrabeso.opengl.util.texture.*;
 
@@ -139,7 +139,7 @@ public class TextRenderer {
     private final Font font;
     private final boolean antialiased;
     private final boolean useFractionalMetrics;
-    private final GL2 gl;
+    private final GL2GL3 gl;
 
     // Whether we're attempting to use automatic mipmap generation support
     private boolean mipmap;
@@ -180,17 +180,6 @@ public class TextRenderer {
 
     /** Creates a new TextRenderer with the given font, using no
         antialiasing or fractional metrics, and the default
-        RenderDelegate. Equivalent to <code>TextRenderer(font, false,
-        false)</code>.
-
-        @param font the font to render with
-    */
-    public TextRenderer(final GL2 gl, final Font font) {
-        this(gl, font, false, false, null, false);
-    }
-
-    /** Creates a new TextRenderer with the given font, using no
-        antialiasing or fractional metrics, and the default
         RenderDelegate. If <CODE>mipmap</CODE> is true, attempts to use
         OpenGL's automatic mipmap generation for better smoothing when
         rendering the TextureRenderer's contents at a distance.
@@ -199,7 +188,7 @@ public class TextRenderer {
         @param font the font to render with
         @param mipmap whether to attempt use of automatic mipmap generation
     */
-    public TextRenderer(final GL2 gl, final Font font, final boolean mipmap) {
+    public TextRenderer(final GL2GL3 gl, final Font font, final boolean mipmap) {
         this(gl, font, false, false, null, mipmap);
     }
 
@@ -216,28 +205,9 @@ public class TextRenderer {
         @param useFractionalMetrics whether to use fractional font
         metrics at the Java 2D level
     */
-    public TextRenderer(final GL2 gl, final Font font, final boolean antialiased,
+    public TextRenderer(final GL2GL3 gl, final Font font, final boolean antialiased,
                         final boolean useFractionalMetrics) {
         this(gl, font, antialiased, useFractionalMetrics, null, false);
-    }
-
-    /** Creates a new TextRenderer with the given Font, specified font
-        properties, and given RenderDelegate. The
-        <code>antialiased</code> and <code>useFractionalMetrics</code>
-        flags provide control over the same properties at the Java 2D
-        level. The <code>renderDelegate</code> provides more control
-        over the text rendered. No mipmap support is requested.
-
-        @param font the font to render with
-        @param antialiased whether to use antialiased fonts
-        @param useFractionalMetrics whether to use fractional font
-        metrics at the Java 2D level
-        @param renderDelegate the render delegate to use to draw the
-        text's bitmap, or null to use the default one
-    */
-    public TextRenderer(final GL2 gl, final Font font, final boolean antialiased,
-                        final boolean useFractionalMetrics, final RenderDelegate renderDelegate) {
-        this(gl, font, antialiased, useFractionalMetrics, renderDelegate, false);
     }
 
     /** Creates a new TextRenderer with the given Font, specified font
@@ -257,7 +227,7 @@ public class TextRenderer {
         text's bitmap, or null to use the default one
         @param mipmap whether to attempt use of automatic mipmap generation
     */
-    public TextRenderer(final GL2 gl, final Font font, final boolean antialiased,
+    public TextRenderer(final GL2GL3 gl, final Font font, final boolean antialiased,
                         final boolean useFractionalMetrics, RenderDelegate renderDelegate,
                         final boolean mipmap) {
         this.gl = gl;
@@ -564,9 +534,6 @@ public class TextRenderer {
 
         getBackingStore().begin3DRendering();
 
-        // Push client attrib bits used by the pipelined quad renderer
-        gl.glPushClientAttrib((int) gl.GL_ALL_CLIENT_ATTRIB_BITS());
-
         if (!haveMaxSize) {
             // Query OpenGL for the maximum texture size and set it in the
             // RectanglePacker to keep it from expanding too large
@@ -606,9 +573,6 @@ public class TextRenderer {
         flushGlyphPipeline();
 
         inBeginEndPair = false;
-
-        // Pop client attrib bits used by the pipelined quad renderer
-        gl.glPopClientAttrib();
 
         // The OpenGL spec is unclear about whether this changes the
         // buffer bindings, so preemptively zero out the GL_ARRAY_BUFFER
@@ -1062,9 +1026,6 @@ public class TextRenderer {
                 // Draw any outstanding glyphs
                 flush();
 
-                // Pop client attrib bits used by the pipelined quad renderer
-                gl.glPopClientAttrib();
-
                 // The OpenGL spec is unclear about whether this changes the
                 // buffer bindings, so preemptively zero out the GL_ARRAY_BUFFER
                 // binding
@@ -1111,9 +1072,6 @@ public class TextRenderer {
             // Re-enter the begin / end pair if necessary
             if (inBeginEndPair) {
                 ((TextureRenderer) newBackingStore).begin3DRendering();
-
-                // Push client attrib bits used by the pipelined quad renderer
-                gl.glPushClientAttrib((int)gl.GL_ALL_CLIENT_ATTRIB_BITS());
 
                 if (haveCachedColor) {
                     if (cachedColor == null) {

@@ -117,6 +117,8 @@ public class TextureRenderer {
             "}\n";
     private int transformUniform;
     private int colorUniform;
+    private int vertCoordAttrib;
+    private int texCoordAttrib;
 
 
     /** Creates a new renderer with backing store of the specified width
@@ -151,18 +153,10 @@ public class TextureRenderer {
 
       transformUniform = gl.glGetUniformLocation(program, "MVPMatrix");
       colorUniform = gl.glGetUniformLocation(program, "Color");
-      // TODO: error handling
-      /*
-      if ((!isProgramLinked(gl, program)) || (!isProgramValidated(gl, program))) {
-          final String log = ShaderUtil.getProgramInfoLog(gl, program);
-          throw gl.newGLException(log);
-      }
-      */
 
-      int err = gl.glGetError();
-      if (err != 0) {
-          throw gl.newGLException("Cannot create a shader program, error $err");
-      }
+      vertCoordAttrib = gl.glGetAttribLocation(program, "MCVertex");
+      texCoordAttrib = gl.glGetAttribLocation(program, "TexCoord0");
+
 
   }
 
