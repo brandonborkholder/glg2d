@@ -160,6 +160,20 @@ public class TextureRenderer {
 
   }
 
+  public void setupVertexAttributes() {
+      // TODO: VBA
+      gl.glEnableVertexAttribArray(vertCoordAttrib);
+      gl.glEnableVertexAttribArray(texCoordAttrib);
+
+      gl.glVertexAttribPointer(vertCoordAttrib, 2, gl.GL_FLOAT(), false, 4 * Buffers.SIZEOF_FLOAT, 0);
+      gl.glVertexAttribPointer(texCoordAttrib, 2, gl.GL_FLOAT(), false, 4 * Buffers.SIZEOF_FLOAT, 2 * Buffers.SIZEOF_FLOAT);
+  }
+
+  public void cleanupVertexAttributes() {
+      gl.glDisableVertexAttribArray(vertCoordAttrib);
+      gl.glDisableVertexAttribArray(texCoordAttrib);
+  }
+
   private void cleanup() {
       gl.glDeleteProgram(program);
   }
@@ -447,9 +461,11 @@ public class TextureRenderer {
         texture.setTexParameteri(gl, gl.GL_TEXTURE_MAG_FILTER(), gl.GL_NEAREST());
       }
     }
+
   }
 
   private void endRendering() {
+
     final Texture texture = getTexture();
     texture.disable(gl);
   }

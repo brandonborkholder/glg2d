@@ -136,6 +136,10 @@ public class TextRenderer {
     static final int kTotalBufferSizeBytesTex = kTotalBufferSizeCoordsTex * 4;
     static final int kSizeInBytes_OneVertices_VertexData = kCoordsPerVertVerts * 4;
     static final int kSizeInBytes_OneVertices_TexData = kCoordsPerVertTex * 4;
+
+    static final int kTotalBufferSizeBytes = kTotalBufferSizeBytesTex + kTotalBufferSizeBytesVerts;
+    static final int kSizeInBytes_OneVertices_Data = kSizeInBytes_OneVertices_VertexData + kSizeInBytes_OneVertices_TexData;
+
     private final Font font;
     private final boolean antialiased;
     private final boolean useFractionalMetrics;
@@ -1327,6 +1331,16 @@ public class TextRenderer {
                 @Override
                 protected void uploadTexture() {
                     getBackingStore().getTexture(); // triggers texture uploads.  Maybe this should be more obvious?
+                }
+
+                @Override
+                protected void setupDraw() {
+                    getBackingStore().setupVertexAttributes();
+                }
+
+                @Override
+                protected void cleanupDraw() {
+                    getBackingStore().cleanupVertexAttributes();
                 }
             };
         }
