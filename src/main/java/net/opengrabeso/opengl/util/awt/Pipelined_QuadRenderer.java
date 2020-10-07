@@ -67,8 +67,7 @@ public abstract class Pipelined_QuadRenderer {
 
             gl.glEnableClientState(gl.GL_VERTEX_ARRAY());
 
-            gl.glBindBuffer(gl.GL_ARRAY_BUFFER(),
-                    mVBO_For_ResuableTileVertices);
+            gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), mVBO_For_ResuableTileVertices);
             gl.glBufferSubData(gl.GL_ARRAY_BUFFER(), 0,
                     mOutstandingGlyphsVerticesPipeline * TextRenderer.kSizeInBytes_OneVertices_VertexData,
                     mVertCoords); // upload only the new stuff
@@ -76,15 +75,13 @@ public abstract class Pipelined_QuadRenderer {
 
             gl.glEnableClientState(gl.GL_TEXTURE_COORD_ARRAY());
 
-            gl.glBindBuffer(gl.GL_ARRAY_BUFFER(),
-                    mVBO_For_ResuableTileTexCoords);
+            gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), mVBO_For_ResuableTileTexCoords);
             gl.glBufferSubData(gl.GL_ARRAY_BUFFER(), 0,
                     mOutstandingGlyphsVerticesPipeline * TextRenderer.kSizeInBytes_OneVertices_TexData,
                     mTexCoords); // upload only the new stuff
             gl.glTexCoordPointer(2, gl.GL_FLOAT(), 0, 0);
 
-            gl.glDrawArrays(gl.GL_QUADS(), 0,
-                    mOutstandingGlyphsVerticesPipeline);
+            gl.glDrawArrays(gl.GL_QUADS(), 0, mOutstandingGlyphsVerticesPipeline);
 
             mVertCoords.rewind();
             mTexCoords.rewind();

@@ -406,28 +406,6 @@ public class TextRenderer {
         cachedColor = null;
     }
 
-    /** Draws the supplied CharSequence at the desired location using
-        the renderer's current color. The baseline of the leftmost
-        character is at position (x, y) specified in OpenGL coordinates,
-        where the origin is at the lower-left of the drawable and the Y
-        coordinate increases in the upward direction.
-
-        @param str the string to draw
-        @param x the x coordinate at which to draw
-        @param y the y coordinate at which to draw
-
-    */
-    public void draw(final CharSequence str, final int x, final int y) {
-        draw3D(str, x, y, 0, 1);
-    }
-
-    /** Draws the supplied String at the desired location using the
-        renderer's current color. See {@link #draw(CharSequence, int,
-        int) draw(CharSequence, int, int)}. */
-    public void draw(final String str, final int x, final int y) {
-        draw3D(str, x, y, 0, 1);
-    }
-
     /** Draws the supplied CharSequence at the desired 3D location using
         the renderer's current color. The baseline of the leftmost
         character is placed at position (x, y, z) in the current
