@@ -755,14 +755,10 @@ public class TextRenderer {
                 texturex + width,
                 texturey + height);
 
-        piped.glTexCoord2f(coords.left(), coords.bottom());
-        piped.glVertex3f(xx, yy, z);
-        piped.glTexCoord2f(coords.right(), coords.bottom());
-        piped.glVertex3f(xx + width * scaleFactor, yy, z);
-        piped.glTexCoord2f(coords.right(), coords.top());
-        piped.glVertex3f(xx + width * scaleFactor, yy + height * scaleFactor, z);
-        piped.glTexCoord2f(coords.left(), coords.top());
-        piped.glVertex3f(xx, yy + height * scaleFactor, z);
+        piped.quad(
+                xx, yy, z, width * scaleFactor, height * scaleFactor,
+                coords
+        );
     }
 
     /** Class supporting more full control over the process of rendering
@@ -1301,17 +1297,8 @@ public class TextRenderer {
             final float ty2 = yScale * (1.0f -
                                   ((float) (texturey + height) / (float) renderer.getHeight()));
 
-            mPipelinedQuadRenderer.glTexCoord2f(tx1, ty1);
-            mPipelinedQuadRenderer.glVertex3f(x, y, z);
-            mPipelinedQuadRenderer.glTexCoord2f(tx2, ty1);
-            mPipelinedQuadRenderer.glVertex3f(x + (width * scaleFactor), y,
-                                              z);
-            mPipelinedQuadRenderer.glTexCoord2f(tx2, ty2);
-            mPipelinedQuadRenderer.glVertex3f(x + (width * scaleFactor),
-                                              y + (height * scaleFactor), z);
-            mPipelinedQuadRenderer.glTexCoord2f(tx1, ty2);
-            mPipelinedQuadRenderer.glVertex3f(x,
-                                              y + (height * scaleFactor), z);
+            TextureCoords coords = new TextureCoords(tx1, ty1, tx2, ty2);
+            mPipelinedQuadRenderer.quad(x, y, z, width * scaleFactor, height * scaleFactor, coords);
             return advance;
         }
 

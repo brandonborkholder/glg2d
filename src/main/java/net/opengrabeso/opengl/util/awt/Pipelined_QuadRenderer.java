@@ -2,6 +2,7 @@ package net.opengrabeso.opengl.util.awt;
 
 import com.github.opengrabeso.jaagl.GL2;
 import com.jogamp.common.nio.Buffers;
+import net.opengrabeso.opengl.util.texture.TextureCoords;
 
 import java.nio.FloatBuffer;
 
@@ -37,12 +38,12 @@ public abstract class Pipelined_QuadRenderer {
                 null, gl.GL_STREAM_DRAW()); // stream draw because this is a single quad use pipeline
     }
 
-    public void glTexCoord2f(final float v, final float v1) {
+    private void glTexCoord2f(final float v, final float v1) {
         mTexCoords.put(v);
         mTexCoords.put(v1);
     }
 
-    public void glVertex3f(final float inX, final float inY, final float inZ) {
+    private void glVertex3f(final float inX, final float inY, final float inZ) {
         mVertCoords.put(inX);
         mVertCoords.put(inY);
         mVertCoords.put(inZ);
@@ -94,5 +95,16 @@ public abstract class Pipelined_QuadRenderer {
         vbos[0] = mVBO_For_ResuableTileVertices;
         vbos[1] = mVBO_For_ResuableTileTexCoords;
         gl.glDeleteBuffers(vbos);
+    }
+
+    public void quad(float xx, float yy, float z, float width, float height, TextureCoords coords) {
+        glTexCoord2f(coords.left(), coords.bottom());
+        glVertex3f(xx, yy, z);
+        glTexCoord2f(coords.right(), coords.bottom());
+        glVertex3f(xx + width, yy, z);
+        glTexCoord2f(coords.right(), coords.top());
+        glVertex3f(xx + width, yy + height, z);
+        glTexCoord2f(coords.left(), coords.top());
+        glVertex3f(xx, yy + height, z);
     }
 }
