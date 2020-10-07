@@ -761,13 +761,9 @@ public class TextRenderer {
 
         // Align the leftmost point of the baseline to the (x, y, z) coordinate requested
 
-        Pipelined_QuadRenderer piped = new Pipelined_QuadRenderer(gl) {
-            @Override
-            protected void uploadTexture() {
-                // is this needed? It seems to be done in the draw3DRect anyway
-                renderer.getTexture(); // triggers texture uploads.  Maybe this should be more obvious?
-            }
-        };
+        createPipelinedRenderer();
+
+        Pipelined_QuadRenderer piped = mPipelinedQuadRenderer;
 
         float xx = x - (scaleFactor * data.origOriginX());
         float yy = y - (scaleFactor * ((float) origRect.getHeight() - data.origOriginY()));
@@ -789,9 +785,6 @@ public class TextRenderer {
         piped.glVertex3f(xx + width * scaleFactor, yy + height * scaleFactor, z);
         piped.glTexCoord2f(coords.left(), coords.top());
         piped.glVertex3f(xx, yy + height * scaleFactor, z);
-        // TODO: cache the renderer
-        piped.draw();
-        piped.dispose();
     }
 
     /** Class supporting more full control over the process of rendering
