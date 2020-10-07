@@ -82,7 +82,7 @@ public abstract class Pipelined_QuadRenderer {
                     mTexCoords); // upload only the new stuff
             gl.glTexCoordPointer(2, gl.GL_FLOAT(), 0, 0);
 
-            gl.glDrawArrays(gl.GL_QUADS(), 0, mOutstandingGlyphsVerticesPipeline);
+            gl.glDrawArrays(gl.GL_TRIANGLES(), 0, mOutstandingGlyphsVerticesPipeline);
 
             mVertCoords.rewind();
             mTexCoords.rewind();
@@ -102,6 +102,11 @@ public abstract class Pipelined_QuadRenderer {
         glVertex3f(xx, yy, z);
         glTexCoord2f(coords.right(), coords.bottom());
         glVertex3f(xx + width, yy, z);
+        glTexCoord2f(coords.right(), coords.top());
+        glVertex3f(xx + width, yy + height, z);
+
+        glTexCoord2f(coords.left(), coords.bottom());
+        glVertex3f(xx, yy, z);
         glTexCoord2f(coords.right(), coords.top());
         glVertex3f(xx + width, yy + height, z);
         glTexCoord2f(coords.left(), coords.top());

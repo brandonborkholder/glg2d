@@ -128,7 +128,7 @@ public class TextRenderer {
     static final int kQuadsPerBuffer = 100;
     static final int kCoordsPerVertVerts = 3;
     static final int kCoordsPerVertTex = 2;
-    static final int kVertsPerQuad = 4;
+    static final int kVertsPerQuad = 6;
     static final int kTotalBufferSizeVerts = kQuadsPerBuffer * kVertsPerQuad;
     static final int kTotalBufferSizeCoordsVerts = kQuadsPerBuffer * kVertsPerQuad * kCoordsPerVertVerts;
     static final int kTotalBufferSizeCoordsTex = kQuadsPerBuffer * kVertsPerQuad * kCoordsPerVertTex;
