@@ -42,7 +42,7 @@ public final class GlyphRendererGL3 extends AbstractGlyphRenderer {
      */
     /*@Nonnull*/
     private static final String VERT_SOURCE =
-        "#version 110\n" +
+        "#version 120\n" +
         "uniform mat4 MVPMatrix;\n" +
         "attribute vec4 MCVertex;\n" +
         "attribute vec2 TexCoord0;\n" +
@@ -57,7 +57,7 @@ public final class GlyphRendererGL3 extends AbstractGlyphRenderer {
      */
     /*@Nonnull*/
     private static final String FRAG_SOURCE =
-        "#version 110\n" +
+        "#version 120\n" +
         "uniform sampler2D Texture;\n" +
         "uniform vec4 Color=vec4(1,1,1,1);\n" +
         "varying vec2 Coord0;\n" +
