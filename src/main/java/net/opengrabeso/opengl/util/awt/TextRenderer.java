@@ -350,7 +350,7 @@ public class TextRenderer {
 
     */
     public void begin3DRendering() {
-        beginRendering(false, 0, 0, false);
+        beginRendering();
     }
 
     /** Changes the current color of this TextRenderer to the supplied
@@ -580,10 +580,7 @@ public class TextRenderer {
         return cachedGraphics;
     }
 
-    private void beginRendering(final boolean ortho, final int width, final int height,
-                                final boolean disableDepthTestForOrtho) {
-
-        assert !ortho;
+    private void beginRendering() {
 
         inBeginEndPair = true;
 
@@ -763,12 +760,38 @@ public class TextRenderer {
         final Rectangle2D origRect = data.origRect();
 
         // Align the leftmost point of the baseline to the (x, y, z) coordinate requested
-        renderer.draw3DRect(x - (scaleFactor * data.origOriginX()),
-                            y - (scaleFactor * ((float) origRect.getHeight() - data.origOriginY())), z,
-                            rect.x() + (data.origin().x - data.origOriginX()),
-                            renderer.getHeight() - rect.y() - (int) origRect.getHeight() -
-                              (data.origin().y - data.origOriginY()),
-                            (int) origRect.getWidth(), (int) origRect.getHeight(), scaleFactor);
+
+        Pipelined_QuadRenderer piped = new Pipelined_QuadRenderer(gl) {
+            @Override
+            protected void uploadTexture() {
+                // is this needed? It seems to be done in the draw3DRect anyway
+                renderer.getTexture(); // triggers texture uploads.  Maybe this should be more obvious?
+            }
+        };
+
+        float xx = x - (scaleFactor * data.origOriginX());
+        float yy = y - (scaleFactor * ((float) origRect.getHeight() - data.origOriginY()));
+        int texturex = rect.x() + (data.origin().x - data.origOriginX());
+        int texturey = renderer.getHeight() - rect.y() - (int) origRect.getHeight() - (data.origin().y - data.origOriginY());
+        int width = (int) origRect.getWidth();
+        int height = (int) origRect.getHeight();
+
+        final Texture texture = renderer.getTexture();
+        final TextureCoords coords = texture.getSubImageTexCoords(texturex, texturey,
+                texturex + width,
+                texturey + height);
+
+        piped.glTexCoord2f(coords.left(), coords.bottom());
+        piped.glVertex3f(xx, yy, z);
+        piped.glTexCoord2f(coords.right(), coords.bottom());
+        piped.glVertex3f(xx + width * scaleFactor, yy, z);
+        piped.glTexCoord2f(coords.right(), coords.top());
+        piped.glVertex3f(xx + width * scaleFactor, yy + height * scaleFactor, z);
+        piped.glTexCoord2f(coords.left(), coords.top());
+        piped.glVertex3f(xx, yy + height * scaleFactor, z);
+        // TODO: cache the renderer
+        piped.draw();
+        piped.dispose();
     }
 
     /** Class supporting more full control over the process of rendering
@@ -1277,14 +1300,7 @@ public class TextRenderer {
                 upload();
             }
 
-            if (mPipelinedQuadRenderer == null) {
-                mPipelinedQuadRenderer = new Pipelined_QuadRenderer(gl) {
-                    @Override
-                    protected void uploadTexture() {
-                        getBackingStore().getTexture(); // triggers texture uploads.  Maybe this should be more obvious?
-                    }
-                };
-            }
+            createPipelinedRenderer();
 
             final TextureRenderer renderer = getBackingStore();
             // Handles case where NPOT texture is used for backing store
@@ -1386,6 +1402,17 @@ public class TextRenderer {
             }
             singleUnicode[0] = (char) unicodeID;
             return font.createGlyphVector(getFontRenderContext(), singleUnicode);
+        }
+    }
+
+    private void createPipelinedRenderer() {
+        if (mPipelinedQuadRenderer == null) {
+            mPipelinedQuadRenderer = new Pipelined_QuadRenderer(gl) {
+                @Override
+                protected void uploadTexture() {
+                    getBackingStore().getTexture(); // triggers texture uploads.  Maybe this should be more obvious?
+                }
+            };
         }
     }
 

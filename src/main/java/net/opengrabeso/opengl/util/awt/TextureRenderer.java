@@ -373,62 +373,6 @@ public class TextureRenderer {
     setColor(compArray[0], compArray[1], compArray[2], compArray[3]);
   }
 
-  /** Draws a rectangle of the underlying texture to the specified 3D
-      location. In the current coordinate system, the lower left
-      corner of the rectangle is placed at (x, y, z), and the upper
-      right corner is placed at (x + width * scaleFactor, y + height *
-      scaleFactor, z). The lower left corner of the sub-rectangle of
-      the texture is (texturex, texturey) and the upper right corner
-      is (texturex + width, texturey + height). For back-face culling
-      purposes, the rectangle is drawn with counterclockwise
-      orientation of the vertices when viewed from the front.
-
-      @param x the x coordinate at which to draw the rectangle
-      @param y the y coordinate at which to draw the rectangle
-      @param z the z coordinate at which to draw the rectangle
-      @param texturex the x coordinate of the pixel in the texture of
-        the lower left portion of the rectangle to draw
-      @param texturey the y coordinate of the pixel in the texture
-        (relative to lower left) of the lower left portion of the
-        rectangle to draw
-      @param width the width in texels of the rectangle to draw
-      @param height the height in texels of the rectangle to draw
-      @param scaleFactor the scale factor to apply (multiplicatively)
-        to the size of the drawn rectangle
-
-
-  */
-  public void draw3DRect(final float x, final float y, final float z,
-                         final int texturex, final int texturey,
-                         final int width, final int height,
-                         final float scaleFactor) {
-
-    Pipelined_QuadRenderer renderer = new Pipelined_QuadRenderer(gl) {
-        @Override
-        protected void uploadTexture() {
-            // is this needed? It seems to be done in the draw3DRect anyway
-            getTexture(); // triggers texture uploads.  Maybe this should be more obvious?
-        }
-    };
-
-    final Texture texture = getTexture();
-    final TextureCoords coords = texture.getSubImageTexCoords(texturex, texturey,
-                                                        texturex + width,
-                                                        texturey + height);
-
-    renderer.glTexCoord2f(coords.left(), coords.bottom());
-    renderer.glVertex3f(x, y, z);
-    renderer.glTexCoord2f(coords.right(), coords.bottom());
-    renderer.glVertex3f(x + width * scaleFactor, y, z);
-    renderer.glTexCoord2f(coords.right(), coords.top());
-    renderer.glVertex3f(x + width * scaleFactor, y + height * scaleFactor, z);
-    renderer.glTexCoord2f(coords.left(), coords.top());
-    renderer.glVertex3f(x, y + height * scaleFactor, z);
-    // TODO: cache the renderer
-    renderer.draw();
-    renderer.dispose();
-  }
-
   /** Convenience method which assists in rendering portions of the
       OpenGL texture to the screen as 2D quads in 3D space. Must be
       used if {@link #begin3DRendering} is used to set up the
