@@ -46,7 +46,7 @@ import java.awt.image.SampleModel;
 import java.awt.image.SinglePixelPackedSampleModel;
 import java.nio.ByteBuffer;
 
-import com.github.opengrabeso.jaagl.GL2;
+import com.github.opengrabeso.jaagl.GL2GL3;
 import net.opengrabeso.opengl.util.GLPixelAttributes;
 import net.opengrabeso.opengl.util.texture.TextureData;
 
@@ -69,7 +69,7 @@ public class AWTTextureData extends TextureData {
      *                       texture
      * @param image          the image containing the texture data
      */
-    public AWTTextureData(final GL2 gl,
+    public AWTTextureData(final GL2GL3 gl,
                           int internalFormat,
                           final boolean mipmap,
                           final BufferedImage image) {
@@ -104,7 +104,7 @@ public class AWTTextureData extends TextureData {
         return buffer;
     }
 
-    private void createFromImage(GL2 gl, final BufferedImage image) {
+    private void createFromImage(GL2GL3 gl, final BufferedImage image) {
         pixelAttributes = GLPixelAttributes.UNDEF; // Determine from image
         mustFlipVertically = true;
 
@@ -130,14 +130,13 @@ public class AWTTextureData extends TextureData {
         width = image.getWidth();
         height = image.getHeight();
 
-        switch (image.getType()) {
-            case BufferedImage.TYPE_BYTE_GRAY:
-                pixelAttributes = new GLPixelAttributes(gl.GL_LUMINANCE(), gl.GL_UNSIGNED_BYTE());
-                rowLength = scanlineStride;
-                alignment = 1;
-                break;
-            default:
-                throw gl.newGLException("Unsupported image type");
+        if (image.getType() == BufferedImage.TYPE_BYTE_GRAY) {
+            int format = gl.isGL3() ? gl.getGL3().GL_RED() : gl.getGL2().GL_LUMINANCE();
+            pixelAttributes = new GLPixelAttributes(format, gl.GL_UNSIGNED_BYTE());
+            rowLength = scanlineStride;
+            alignment = 1;
+        } else {
+            throw gl.newGLException("Unsupported image type");
         }
 
         createNIOBufferFromImage(image);

@@ -47,7 +47,9 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.*;
 
-import com.github.opengrabeso.jaagl.GL2;
+import com.github.opengrabeso.jaagl.GL2GL3;
+import net.opengrabeso.opengl.pipeline.ShaderLoader;
+import net.opengrabeso.opengl.pipeline.ShaderUtil;
 import net.opengrabeso.opengl.util.texture.*;
 import net.opengrabeso.opengl.util.texture.awt.*;
 
@@ -68,7 +70,7 @@ public class TextureRenderer {
   // would need to be split up into multiple callbacks run from the
   // appropriate threads, which would be somewhat unfortunate.
 
-    private final GL2 gl;
+    private final GL2GL3 gl;
 
     // Whether we're attempting to use automatic mipmap generation support
   private boolean mipmap;
@@ -91,21 +93,35 @@ public class TextureRenderer {
   private float g = 1.0f;
   private float b = 1.0f;
   private float a = 1.0f;
+    private int program;
 
-  /** Creates a new renderer with backing store of the specified width
-      and height. If <CODE>alpha</CODE> is true, allocates an alpha
-      channel in the backing store image. No mipmap support is
-      requested.
 
-      @param width the width of the texture to render into
-      @param height the height of the texture to render into
-      @param alpha whether to allocate an alpha channel for the texture
-  */
-  public TextureRenderer(final GL2 gl, final int width, final int height, final boolean alpha) {
-    this(gl, width, height, alpha, false);
-  }
+    private static final String vsSource =
+            "#version 120\n" +
+            "uniform mat4 MVPMatrix;\n" +
+            "attribute vec4 MCVertex;\n" +
+            "attribute vec2 TexCoord0;\n" +
+            "varying vec2 Coord0;\n" +
+            "void main() {\n" +
+            "   gl_Position = MVPMatrix * MCVertex;\n" +
+            "   Coord0 = TexCoord0;\n" +
+            "}\n";
 
-  /** Creates a new renderer with backing store of the specified width
+    private static final String fsSource =
+            "#version 120\n" +
+            "uniform sampler2D Texture;\n" +
+            "uniform vec4 Color=vec4(1,1,1,1);\n" +
+            "varying vec2 Coord0;\n" +
+            "void main() {\n" +
+            "   float sample;\n" +
+            "   sample = texture2D(Texture,Coord0).r;\n" +
+            "   gl_FragColor = Color * sample;\n" +
+            "}\n";
+    private int transformUniform;
+    private int colorUniform;
+
+
+    /** Creates a new renderer with backing store of the specified width
       and height. If <CODE>alpha</CODE> is true, allocates an alpha channel in the
       backing store image. If <CODE>mipmap</CODE> is true, attempts to use OpenGL's
       automatic mipmap generation for better smoothing when rendering
@@ -116,23 +132,50 @@ public class TextureRenderer {
       @param alpha whether to allocate an alpha channel for the texture
       @param mipmap whether to attempt use of automatic mipmap generation
   */
-  public TextureRenderer(final GL2 gl, final int width, final int height, final boolean alpha, final boolean mipmap) {
+  public TextureRenderer(final GL2GL3 gl, final int width, final int height, final boolean alpha, final boolean mipmap) {
     this(gl, width, height, alpha, false, mipmap);
   }
 
   // Internal constructor to avoid confusion since alpha only makes
   // sense when intensity is not set
-  private TextureRenderer(final GL2 gl, final int width, final int height, final boolean alpha, final boolean intensity, final boolean mipmap) {
-      this.gl = gl;
-      this.mipmap = mipmap;
+  private TextureRenderer(final GL2GL3 gl, final int width, final int height, final boolean alpha, final boolean intensity, final boolean mipmap) {
+    this.gl = gl;
+    this.mipmap = mipmap;
     init(width, height);
+    setup();
   }
 
+  // create shaders and similar OpenGL objects
+  private void setup() {
+      gl.glGetError(); // flush any pending errors
+
+      program = ShaderLoader.loadProgram(gl, vsSource, fsSource);
+
+      transformUniform = gl.glGetUniformLocation(program, "MVPMatrix");
+      colorUniform = gl.glGetUniformLocation(program, "Color");
+      // TODO: error handling
+      /*
+      if ((!isProgramLinked(gl, program)) || (!isProgramValidated(gl, program))) {
+          final String log = ShaderUtil.getProgramInfoLog(gl, program);
+          throw gl.newGLException(log);
+      }
+      */
+
+      int err = gl.glGetError();
+      if (err != 0) {
+          throw gl.newGLException("Cannot create a shader program, error $err");
+      }
+
+  }
+
+  private void cleanup() {
+      gl.glDeleteProgram(program);
+  }
   /** Creates a new renderer with a special kind of backing store
       which acts only as an alpha channel. No mipmap support is
       requested. Internally, this associates a GL_INTENSITY OpenGL
       texture with the backing store. */
-  public static TextureRenderer createAlphaOnlyRenderer(final GL2 gl, final int width, final int height) {
+  public static TextureRenderer createAlphaOnlyRenderer(final GL2GL3 gl, final int width, final int height) {
     return createAlphaOnlyRenderer(gl, width, height, false);
   }
 
@@ -142,7 +185,7 @@ public class TextureRenderer {
       better smoothing when rendering the TextureRenderer's contents
       at a distance. Internally, this associates a GL_INTENSITY OpenGL
       texture with the backing store. */
-  public static TextureRenderer createAlphaOnlyRenderer(final GL2 gl, final int width, final int height, final boolean mipmap) {
+  public static TextureRenderer createAlphaOnlyRenderer(final GL2GL3 gl, final int width, final int height, final boolean mipmap) {
     return new TextureRenderer(gl, width, height, false, true, mipmap);
   }
 
@@ -309,14 +352,7 @@ public class TextureRenderer {
   }
 
   /** Convenience method which assists in rendering portions of the
-      OpenGL texture to the screen as 2D quads in 3D space. Pushes
-      OpenGL state (GL_ENABLE_BIT); disables lighting; and enables the
-      texture in this renderer. Does not modify the depth test, back-face
-      culling, lighting, or the modelview or projection matrices. The
-      user is responsible for setting up the view matrices for correct
-      results of {@link #draw3DRect draw3DRect}. {@link
-      #end3DRendering} must be used in conjunction with this method to
-      restore all OpenGL states.
+      OpenGL texture to the screen as 2D quads in 3D space.
 
 
   */
@@ -352,8 +388,7 @@ public class TextureRenderer {
     this.g = g * a;
     this.b = b * a;
     this.a = a;
-
-    gl.glColor4f(this.r, this.g, this.b, this.a);
+      // should not be called while the rendering is already in progress
   }
 
   private float[] compArray;
@@ -398,17 +433,14 @@ public class TextureRenderer {
   //
 
   private void beginRendering() {
-    final int attribBits = gl.GL_ENABLE_BIT() | gl.GL_TEXTURE_BIT() | gl.GL_COLOR_BUFFER_BIT();
-    gl.glPushAttrib(attribBits);
-    gl.glDisable(gl.GL_LIGHTING());
     gl.glEnable(gl.GL_BLEND());
     gl.glBlendFunc(gl.GL_ONE(), gl.GL_ONE_MINUS_SRC_ALPHA());
     final Texture texture = getTexture();
     texture.enable(gl);
     texture.bind(gl);
-    gl.glTexEnvi(gl.GL_TEXTURE_ENV(), gl.GL_TEXTURE_ENV_MODE(), gl.GL_MODULATE());
     // Change polygon color to last saved
-    gl.glColor4f(r, g, b, a);
+    float[] c = new float[]{r, g, b, a};
+    gl.glUniform4fv(colorUniform, c.length, c, 0);
     if (smoothingChanged) {
       smoothingChanged = false;
       if (smoothing) {
@@ -428,7 +460,6 @@ public class TextureRenderer {
   private void endRendering() {
     final Texture texture = getTexture();
     texture.disable(gl);
-      gl.glPopAttrib();
   }
 
   private void init(final int width, final int height) {
@@ -439,7 +470,7 @@ public class TextureRenderer {
     }
 
     // Infer the internal format if not an intensity texture
-    final int internalFormat = gl.GL_INTENSITY();
+    final int internalFormat = gl.isGL3() ? gl.getGL3().GL_RED() : gl.getGL2().GL_LUMINANCE();
     final int imageType = BufferedImage.TYPE_BYTE_GRAY;
     image = new BufferedImage(width, height, imageType);
     // Always realllocate the TextureData associated with this
