@@ -373,48 +373,6 @@ public class TextureRenderer {
     setColor(compArray[0], compArray[1], compArray[2], compArray[3]);
   }
 
-  /** Draws an orthographically projected rectangle containing all of
-      the underlying texture to the specified location on the
-      screen. All (x, y) coordinates are specified relative to the
-      lower left corner of either the texture image or the current
-      OpenGL drawable. This method is equivalent to
-      <code>drawOrthoRect(screenx, screeny, 0, 0, getWidth(),
-      getHeight());</code>.
-
-      @param screenx the on-screen x coordinate at which to draw the rectangle
-      @param screeny the on-screen y coordinate (relative to lower left) at
-        which to draw the rectangle
-
-
-  */
-  public void drawOrthoRect(final int screenx, final int screeny) {
-    drawOrthoRect(screenx, screeny, 0, 0, getWidth(), getHeight());
-  }
-
-  /** Draws an orthographically projected rectangle of the underlying
-      texture to the specified location on the screen. All (x, y)
-      coordinates are specified relative to the lower left corner of
-      either the texture image or the current OpenGL drawable.
-
-      @param screenx the on-screen x coordinate at which to draw the rectangle
-      @param screeny the on-screen y coordinate (relative to lower left) at
-        which to draw the rectangle
-      @param texturex the x coordinate of the pixel in the texture of
-        the lower left portion of the rectangle to draw
-      @param texturey the y coordinate of the pixel in the texture
-        (relative to lower left) of the lower left portion of the
-        rectangle to draw
-      @param width the width of the rectangle to draw
-      @param height the height of the rectangle to draw
-
-
-  */
-  public void drawOrthoRect(final int screenx, final int screeny,
-                            final int texturex, final int texturey,
-                            final int width, final int height) {
-    draw3DRect(screenx, screeny, 0, texturex, texturey, width, height, 1);
-  }
-
   /** Draws a rectangle of the underlying texture to the specified 3D
       location. In the current coordinate system, the lower left
       corner of the rectangle is placed at (x, y, z), and the upper
@@ -444,21 +402,31 @@ public class TextureRenderer {
                          final int texturex, final int texturey,
                          final int width, final int height,
                          final float scaleFactor) {
-    // TODO: use VBA instead
+
+    Pipelined_QuadRenderer renderer = new Pipelined_QuadRenderer(gl) {
+        @Override
+        protected void uploadTexture() {
+            // is this needed? It seems to be done in the draw3DRect anyway
+            getTexture(); // triggers texture uploads.  Maybe this should be more obvious?
+        }
+    };
+
     final Texture texture = getTexture();
     final TextureCoords coords = texture.getSubImageTexCoords(texturex, texturey,
                                                         texturex + width,
                                                         texturey + height);
-    gl.glBegin(gl.GL_QUADS());
-    gl.glTexCoord2f(coords.left(), coords.bottom());
-    gl.glVertex3f(x, y, z);
-    gl.glTexCoord2f(coords.right(), coords.bottom());
-    gl.glVertex3f(x + width * scaleFactor, y, z);
-    gl.glTexCoord2f(coords.right(), coords.top());
-    gl.glVertex3f(x + width * scaleFactor, y + height * scaleFactor, z);
-    gl.glTexCoord2f(coords.left(), coords.top());
-    gl.glVertex3f(x, y + height * scaleFactor, z);
-    gl.glEnd();
+
+    renderer.glTexCoord2f(coords.left(), coords.bottom());
+    renderer.glVertex3f(x, y, z);
+    renderer.glTexCoord2f(coords.right(), coords.bottom());
+    renderer.glVertex3f(x + width * scaleFactor, y, z);
+    renderer.glTexCoord2f(coords.right(), coords.top());
+    renderer.glVertex3f(x + width * scaleFactor, y + height * scaleFactor, z);
+    renderer.glTexCoord2f(coords.left(), coords.top());
+    renderer.glVertex3f(x, y + height * scaleFactor, z);
+    // TODO: cache the renderer
+    renderer.draw();
+    renderer.dispose();
   }
 
   /** Convenience method which assists in rendering portions of the
