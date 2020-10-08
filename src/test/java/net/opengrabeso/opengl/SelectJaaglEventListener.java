@@ -26,7 +26,7 @@ public class SelectJaaglEventListener {
         boolean jogl = Arrays.asList(args).contains("-jogl");
         boolean lwjgl = Arrays.asList(args).contains("-lwjgl");
         if (!jogl && !lwjgl) {
-            lwjgl = true; // default with no option
+            lwjgl = false; // default with no option
         }
 
         if (lwjgl) {

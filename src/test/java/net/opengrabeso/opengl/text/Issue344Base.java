@@ -59,7 +59,8 @@ public abstract class Issue344Base implements Jaagl2EventListener
         final Rectangle2D bounds = renderer.getBounds(getText());
         final float w = (float) bounds.getWidth();
         final float h = (float) bounds.getHeight();
-        renderer.begin3DRendering(projection.mul(translate).get(new float[16]));
+        final Matrix4f mvp = new Matrix4f().set(projection).mul(translate);
+        renderer.begin3DRendering(mvp.get(new float[16]));
         renderer.draw3D(getText(),
                         w / -2.0f * textScaleFactor,
                         h / -2.0f * textScaleFactor,

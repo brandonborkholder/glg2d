@@ -1270,19 +1270,6 @@ text's bitmap, or null to use the default one
             // Draw the string
             renderDelegate.drawGlyphVector(g, gv, strx, stry);
 
-            if (false) {
-                final TextData data = (TextData) rect.getUserData();
-                // Draw a bounding box on the backing store
-                g.drawRect(strx - data.origOriginX(),
-                           stry - data.origOriginY(),
-                           (int) data.origRect().getWidth(),
-                           (int) data.origRect().getHeight());
-                g.drawRect(strx - data.origin().x,
-                           stry - data.origin().y,
-                           rect.w(),
-                           rect.h());
-            }
-
             // Mark this region of the TextureRenderer as dirty
             getBackingStore().markDirty(rect.x(), rect.y(), rect.w(),
                                         rect.h());
