@@ -41,11 +41,11 @@ public class GL3StringDrawer extends GL2StringDrawer {
     protected boolean useVerticalFlip() {return true;}
 
     @Override
-    protected void setupMatrix(TextRenderer renderer) {
+    protected float[] getTransform(TextRenderer renderer) {
         setTextColorRespectComposite(renderer);
 
         float[] matrix = ((GLShaderGraphics2D) g2d).getUniformsObject().transformHook.getGLMatrixData();
-        //renderer.setTransform(gl, matrix);
+        return matrix;
     }
 
     @Override

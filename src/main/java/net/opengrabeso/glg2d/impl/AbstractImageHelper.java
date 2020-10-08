@@ -220,7 +220,7 @@ public abstract class AbstractImageHelper implements GLG2DImageHelper {
       GL gl = g2d.getGL();
       TextureData data = new TextureData(
               gl.GL_RGBA(), image.getWidth(), image.getHeight(), 0, gl.GL_RGBA(), gl.GL_UNSIGNED_BYTE(),
-              false, false, true, buffer, null
+              false, true, buffer, null
       );
       return new Texture(gl, data);
     // we'll assume the image is complete and can be rendered

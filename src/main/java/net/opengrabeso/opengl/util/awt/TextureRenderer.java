@@ -48,6 +48,7 @@ import java.awt.Rectangle;
 import java.awt.image.*;
 
 import com.github.opengrabeso.jaagl.GL2GL3;
+import com.jogamp.common.nio.Buffers;
 import net.opengrabeso.opengl.util.texture.*;
 import net.opengrabeso.opengl.util.texture.awt.*;
 
@@ -70,10 +71,7 @@ public class TextureRenderer {
 
     private final GL2GL3 gl;
 
-    // Whether we're attempting to use automatic mipmap generation support
-  private boolean mipmap;
-
-  // Whether smoothing is enabled for the OpenGL texture (switching
+    // Whether smoothing is enabled for the OpenGL texture (switching
   // between GL_LINEAR and GL_NEAREST filtering)
   private boolean smoothing = true;
   private boolean smoothingChanged;
@@ -115,10 +113,13 @@ public class TextureRenderer {
             "   sample = texture2D(Texture,Coord0).r;\n" +
             "   gl_FragColor = Color * sample;\n" +
             "}\n";
-    private int transformUniform;
-    private int colorUniform;
-    private int vertCoordAttrib;
-    private int texCoordAttrib;
+    private int transformUniform = -1;
+    private int colorUniform = -1;
+    private int vertCoordAttrib = -1;
+    private int texCoordAttrib = -1;
+
+    private boolean useVAO = true; // avoid using VAO on older OpenGL
+    private int vao = -1;
 
 
     /** Creates a new renderer with backing store of the specified width
@@ -140,8 +141,7 @@ public class TextureRenderer {
   // sense when intensity is not set
   private TextureRenderer(final GL2GL3 gl, final int width, final int height, final boolean alpha, final boolean intensity, final boolean mipmap) {
     this.gl = gl;
-    this.mipmap = mipmap;
-    init(width, height);
+      init(width, height);
     setup();
   }
 
@@ -157,21 +157,37 @@ public class TextureRenderer {
       vertCoordAttrib = gl.glGetAttribLocation(program, "MCVertex");
       texCoordAttrib = gl.glGetAttribLocation(program, "TexCoord0");
 
-
+      int[] vao = new int[]{0};
+      gl.glGenVertexArrays(vao);
+      this.vao = vao[0];
   }
 
-  public void setupVertexAttributes() {
+  public void setupVertexAttributes(float[] transform) {
       // TODO: VBA
+      if (useVAO) {
+          gl.glBindVertexArray(vao);
+      }
+
+      // TODO: optimize on VAO
       gl.glEnableVertexAttribArray(vertCoordAttrib);
       gl.glEnableVertexAttribArray(texCoordAttrib);
 
-      gl.glVertexAttribPointer(vertCoordAttrib, 2, gl.GL_FLOAT(), false, 4 * Buffers.SIZEOF_FLOAT, 0);
-      gl.glVertexAttribPointer(texCoordAttrib, 2, gl.GL_FLOAT(), false, 4 * Buffers.SIZEOF_FLOAT, 2 * Buffers.SIZEOF_FLOAT);
+      gl.glVertexAttribPointer(vertCoordAttrib, 3, gl.GL_FLOAT(), false, 5 * Buffers.SIZEOF_FLOAT, 0);
+      gl.glVertexAttribPointer(texCoordAttrib, 2, gl.GL_FLOAT(), false, 5 * Buffers.SIZEOF_FLOAT, 3 * Buffers.SIZEOF_FLOAT);
+
+      gl.glUseProgram(program);
+      gl.glUniformMatrix4fv(transformUniform, 1, false, transform, 0);
   }
 
   public void cleanupVertexAttributes() {
+      gl.glUseProgram(0);
+
       gl.glDisableVertexAttribArray(vertCoordAttrib);
       gl.glDisableVertexAttribArray(texCoordAttrib);
+
+      if (useVAO) {
+          gl.glBindVertexArray(0);
+      }
   }
 
   private void cleanup() {
@@ -431,7 +447,7 @@ public class TextureRenderer {
       TextureRenderer's backing store that automatic mipmap generation
       is not supported at the OpenGL level. */
   public boolean isUsingAutoMipmapGeneration() {
-    return mipmap;
+    return false;
   }
 
   //----------------------------------------------------------------------
@@ -446,16 +462,12 @@ public class TextureRenderer {
     texture.bind(gl);
     // Change polygon color to last saved
     float[] c = new float[]{r, g, b, a};
-    gl.glUniform4fv(colorUniform, c.length, c, 0);
+    //gl.glUniform4fv(colorUniform, c.length, c, 0);
     if (smoothingChanged) {
       smoothingChanged = false;
       if (smoothing) {
         texture.setTexParameteri(gl, gl.GL_TEXTURE_MAG_FILTER(), gl.GL_LINEAR());
-        if (mipmap) {
-          texture.setTexParameteri(gl, gl.GL_TEXTURE_MIN_FILTER(), gl.GL_LINEAR_MIPMAP_LINEAR());
-        } else {
-          texture.setTexParameteri(gl, gl.GL_TEXTURE_MIN_FILTER(), gl.GL_LINEAR());
-        }
+        texture.setTexParameteri(gl, gl.GL_TEXTURE_MIN_FILTER(), gl.GL_LINEAR());
       } else {
         texture.setTexParameteri(gl, gl.GL_TEXTURE_MIN_FILTER(), gl.GL_NEAREST());
         texture.setTexParameteri(gl, gl.GL_TEXTURE_MAG_FILTER(), gl.GL_NEAREST());
@@ -485,7 +497,7 @@ public class TextureRenderer {
     // BufferedImage; it's just a reference to the contents but we
     // need it in order to update sub-regions of the underlying
     // texture
-    textureData = new AWTTextureData(gl, internalFormat, mipmap, image);
+    textureData = new AWTTextureData(gl, internalFormat, image);
     // For now, always reallocate the underlying OpenGL texture when
     // the backing store size changes
     mustReallocateTexture = true;
@@ -532,13 +544,6 @@ public class TextureRenderer {
 
     if (texture == null) {
       texture = new Texture(gl, textureData);
-      if (mipmap && !texture.isUsingAutoMipmapGeneration()) {
-        // Only try this once
-        texture.destroy(gl);
-        mipmap = false;
-        textureData.setMipmap(false);
-        texture = new Texture(gl, textureData);
-      }
 
       if (!smoothing) {
         // The TextureIO classes default to GL_LINEAR filtering

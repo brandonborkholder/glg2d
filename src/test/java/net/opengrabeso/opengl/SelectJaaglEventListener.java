@@ -1,6 +1,6 @@
 package net.opengrabeso.opengl;
 
-import com.github.opengrabeso.jaagl.GL2;
+import com.github.opengrabeso.jaagl.GL3;
 import com.jogamp.common.util.InterruptSource;
 import com.jogamp.opengl.awt.GLCanvas;
 import org.lwjgl.glfw.GLFWErrorCallback;
@@ -43,6 +43,10 @@ public class SelectJaaglEventListener {
 
             glfwWindowHint(GLFW_STENCIL_BITS, 8);
             glfwWindowHint(GLFW_DEPTH_BITS, 24);
+            // TODO: try other profiles as well
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
             long window = glfwCreateWindow(512, 512, getClass().getName(), NULL, NULL);
 
@@ -53,7 +57,7 @@ public class SelectJaaglEventListener {
 
             org.lwjgl.opengl.GL.createCapabilities();
 
-            GL2 gl = com.github.opengrabeso.jaagl.lwjgl.LWGL2.createGL2();
+            GL3 gl = com.github.opengrabeso.jaagl.lwjgl.LWGL2.createGL3();
 
             jaaglListener.init(gl);
 

@@ -27,8 +27,7 @@ public abstract class Pipelined_QuadRenderer {
         mVBO = vbos[0];
 
         gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), mVBO);
-        gl.glBufferData(gl.GL_ARRAY_BUFFER(), TextRenderer.kTotalBufferSizeBytes,
-                null, gl.GL_STREAM_DRAW()); // stream draw because this is a single quad use pipeline
+        gl.glBufferData(gl.GL_ARRAY_BUFFER(), TextRenderer.kTotalBufferSizeBytes, null, gl.GL_STREAM_DRAW()); // stream draw because this is a single quad use pipeline
 
     }
 
@@ -44,7 +43,7 @@ public abstract class Pipelined_QuadRenderer {
 
         mOutstandingGlyphsVerticesPipeline++;
 
-        if (mOutstandingGlyphsVerticesPipeline >= TextRenderer.kTotalBufferSizeVerts) {
+        if (mOutstandingGlyphsVerticesPipeline >= TextRenderer.vertsPerBuffer) {
             this.draw();
         }
     }
@@ -63,7 +62,7 @@ public abstract class Pipelined_QuadRenderer {
 
             gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), mVBO);
             gl.glBufferSubData(gl.GL_ARRAY_BUFFER(), 0,
-                    mOutstandingGlyphsVerticesPipeline * TextRenderer.kSizeInBytes_OneVertices_VertexData,
+                    mOutstandingGlyphsVerticesPipeline * TextRenderer.oneVertexSizeInBytes,
                     mVert); // upload only the new stuff
 
             setupDraw();

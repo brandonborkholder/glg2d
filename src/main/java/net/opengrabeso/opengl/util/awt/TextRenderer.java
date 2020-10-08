@@ -125,20 +125,15 @@ public class TextRenderer {
     // The amount of vertical dead space on the backing store before we
     // force a compaction
     private static final float MAX_VERTICAL_FRAGMENTATION = 0.7f;
-    static final int kQuadsPerBuffer = 100;
-    static final int kCoordsPerVertVerts = 3;
-    static final int kCoordsPerVertTex = 2;
-    static final int kVertsPerQuad = 6;
-    static final int kTotalBufferSizeVerts = kQuadsPerBuffer * kVertsPerQuad;
-    static final int kTotalBufferSizeCoordsVerts = kQuadsPerBuffer * kVertsPerQuad * kCoordsPerVertVerts;
-    static final int kTotalBufferSizeCoordsTex = kQuadsPerBuffer * kVertsPerQuad * kCoordsPerVertTex;
-    static final int kTotalBufferSizeBytesVerts = kTotalBufferSizeCoordsVerts * 4;
-    static final int kTotalBufferSizeBytesTex = kTotalBufferSizeCoordsTex * 4;
-    static final int kSizeInBytes_OneVertices_VertexData = kCoordsPerVertVerts * 4;
-    static final int kSizeInBytes_OneVertices_TexData = kCoordsPerVertTex * 4;
+    static final int quadsPerBuffer = 100;
+    static final int posFloats = 3;
+    static final int uvFloats = 2;
+    static final int vertsPerQuad = 6;
+    static final int vertsPerBuffer = quadsPerBuffer * vertsPerQuad;
 
-    static final int kTotalBufferSizeBytes = kTotalBufferSizeBytesTex + kTotalBufferSizeBytesVerts;
-    static final int kSizeInBytes_OneVertices_Data = kSizeInBytes_OneVertices_VertexData + kSizeInBytes_OneVertices_TexData;
+    // 4 is sizeof(float)
+    static final int oneVertexSizeInBytes = (posFloats + uvFloats) * 4;
+    static final int kTotalBufferSizeBytes = oneVertexSizeInBytes * vertsPerQuad * quadsPerBuffer;
 
     private final Font font;
     private final boolean antialiased;
@@ -146,7 +141,7 @@ public class TextRenderer {
     private final GL2GL3 gl;
 
     // Whether we're attempting to use automatic mipmap generation support
-    private boolean mipmap;
+    final private boolean mipmap = false;
     private RectanglePacker packer;
     private boolean haveMaxSize;
     private final RenderDelegate renderDelegate;
@@ -181,6 +176,7 @@ public class TextRenderer {
 
     // Whether GL_LINEAR filtering is enabled for the backing store
     private boolean smoothing = true;
+    private float[] transform;
 
     /** Creates a new TextRenderer with the given font, using no
         antialiasing or fractional metrics, and the default
@@ -193,7 +189,7 @@ public class TextRenderer {
         @param mipmap whether to attempt use of automatic mipmap generation
     */
     public TextRenderer(final GL2GL3 gl, final Font font, final boolean mipmap) {
-        this(gl, font, false, false, null, mipmap);
+        this(gl, font, false, false, null);
     }
 
     /** Creates a new TextRenderer with the given Font, specified font
@@ -211,7 +207,7 @@ public class TextRenderer {
     */
     public TextRenderer(final GL2GL3 gl, final Font font, final boolean antialiased,
                         final boolean useFractionalMetrics) {
-        this(gl, font, antialiased, useFractionalMetrics, null, false);
+        this(gl, font, antialiased, useFractionalMetrics, null);
     }
 
     /** Creates a new TextRenderer with the given Font, specified font
@@ -222,23 +218,21 @@ public class TextRenderer {
         over the text rendered. If <CODE>mipmap</CODE> is true, attempts
         to use OpenGL's automatic mipmap generation for better smoothing
         when rendering the TextureRenderer's contents at a distance.
+     * @param font the font to render with
+     * @param antialiased whether to use antialiased fonts
+     * @param useFractionalMetrics whether to use fractional font
+metrics at the Java 2D level
+     * @param renderDelegate the render delegate to use to draw the
+text's bitmap, or null to use the default one
 
-        @param font the font to render with
-        @param antialiased whether to use antialiased fonts
-        @param useFractionalMetrics whether to use fractional font
-        metrics at the Java 2D level
-        @param renderDelegate the render delegate to use to draw the
-        text's bitmap, or null to use the default one
-        @param mipmap whether to attempt use of automatic mipmap generation
-    */
+     */
     public TextRenderer(final GL2GL3 gl, final Font font, final boolean antialiased,
-                        final boolean useFractionalMetrics, RenderDelegate renderDelegate,
-                        final boolean mipmap) {
+                        final boolean useFractionalMetrics, RenderDelegate renderDelegate
+                        ) {
         this.gl = gl;
         this.font = font;
         this.antialiased = antialiased;
         this.useFractionalMetrics = useFractionalMetrics;
-        this.mipmap = mipmap;
 
         // FIXME: consider adjusting the size based on font size
         // (it will already automatically resize if necessary)
@@ -323,8 +317,8 @@ public class TextRenderer {
 
 
     */
-    public void begin3DRendering() {
-        beginRendering();
+    public void begin3DRendering(float[] transform) {
+        beginRendering(transform);
     }
 
     /** Changes the current color of this TextRenderer to the supplied
@@ -419,16 +413,6 @@ public class TextRenderer {
         flushGlyphPipeline();
     }
 
-    /** Ends a render cycle with this {@link TextRenderer TextRenderer}.
-        Restores the projection and modelview matrices as well as
-        several OpenGL state bits. Should be paired with {@link
-        #beginRendering beginRendering}.
-
-
-    */
-    public void endRendering() {
-        endRendering(true);
-    }
 
     /** Ends a 3D render cycle with this {@link TextRenderer TextRenderer}.
         Restores several OpenGL state bits. Should be paired with {@link
@@ -437,7 +421,7 @@ public class TextRenderer {
 
     */
     public void end3DRendering() {
-        endRendering(false);
+        endRendering();
     }
 
     /** Disposes of all resources this TextRenderer is using. It is not
@@ -532,7 +516,8 @@ public class TextRenderer {
         return cachedGraphics;
     }
 
-    private void beginRendering() {
+    private void beginRendering(float[] transform) {
+        this.transform = transform;
 
         inBeginEndPair = true;
 
@@ -557,23 +542,14 @@ public class TextRenderer {
             needToResetColor = false;
         }
 
-        // Disable future attempts to use mipmapping if TextureRenderer
-        // doesn't support it
-        if (mipmap && !getBackingStore().isUsingAutoMipmapGeneration()) {
-            mipmap = false;
-        }
     }
 
     /**
      * emzic: here the call to glBindBuffer crashes on certain graphicscard/driver combinations
      * this is why the ugly try-catch block has been added, which falls back to the old textrenderer
-     *
-     * @param ortho
 
      */
-    private void endRendering(final boolean ortho) {
-        assert !ortho;
-
+    private void endRendering() {
         flushGlyphPipeline();
 
         inBeginEndPair = false;
@@ -1335,7 +1311,7 @@ public class TextRenderer {
 
                 @Override
                 protected void setupDraw() {
-                    getBackingStore().setupVertexAttributes();
+                    getBackingStore().setupVertexAttributes(transform);
                 }
 
                 @Override

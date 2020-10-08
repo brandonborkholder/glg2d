@@ -58,12 +58,10 @@ public class TextureData {
     private int border;
     protected GLPixelAttributes pixelAttributes;
     protected int internalFormat; // perhaps inferred from pixelFormat?
-    protected boolean mipmap; // indicates whether mipmaps should be generated
     protected boolean mustFlipVertically; // Must flip texture coordinates
     // vertically to get OpenGL output
     // to look correct
     protected ByteBuffer buffer; // the actual data...
-    private ByteBuffer[] mipmapData; // ...or a series of mipmaps
     private Flusher flusher;
     protected int rowLength;
     protected int alignment; // 1, 2, or 4 bytes
@@ -77,21 +75,16 @@ public class TextureData {
                        final int border,
                        final int dataFormat,
                        final int dataType,
-                       final boolean mipmap,
                        final boolean dataIsCompressed,
                        final boolean mustFlipVertically,
                        final ByteBuffer buffer,
                        final Flusher flusher) throws IllegalArgumentException {
-        if (mipmap && dataIsCompressed) {
-            throw new IllegalArgumentException("Can not generate mipmaps for compressed textures");
-        }
 
         this.width = width;
         this.height = height;
         this.border = border;
         this.pixelAttributes = new GLPixelAttributes(dataFormat, dataType);
         this.internalFormat = internalFormat;
-        this.mipmap = mipmap;
         this.mustFlipVertically = mustFlipVertically;
         this.buffer = buffer;
         this.flusher = flusher;
@@ -122,10 +115,6 @@ public class TextureData {
     public int getInternalFormat() {
         return internalFormat;
     }
-    /** Returns whether mipmaps should be generated for the texture data. */
-    public boolean getMipmap() {
-        return mipmap;
-    }
 
     /** Indicates whether the texture coordinates must be flipped
         vertically for proper display. */
@@ -135,11 +124,6 @@ public class TextureData {
     /** Returns the texture data, or null if it is specified as a set of mipmaps. */
     public ByteBuffer getBuffer() {
         return buffer;
-    }
-    /** Returns all mipmap levels for the texture data, or null if it is
-        specified as a single image. */
-    public ByteBuffer[] getMipmapData() {
-        return mipmapData;
     }
     /** Returns the required byte alignment for the texture data. */
     public int getAlignment() {
@@ -181,13 +165,6 @@ public class TextureData {
         if( pixelAttributes.type != pixelType) {
             pixelAttributes = new GLPixelAttributes(pixelAttributes.format, pixelType);
         }
-    }
-    /** Sets the intended OpenGL internal format of the texture data. */
-    public void setInternalFormat(final int internalFormat) { this.internalFormat = internalFormat; }
-    /** Sets whether mipmaps should be generated for the texture data. */
-    public void setMipmap(final boolean mipmap) { this.mipmap = mipmap; }
-    /** Sets whether the texture data is in compressed form. */
-    public void setIsDataCompressed(final boolean compressed) {
     }
     /** Sets whether the texture coordinates must be flipped vertically
         for proper display. */

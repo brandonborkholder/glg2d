@@ -20,11 +20,8 @@ public class GL2StringDrawerImpl extends GL2StringDrawer{
     }
 
     @Override
-    protected void setupMatrix(TextRenderer renderer) {
-        gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
-        gl.glPushMatrix();
-        gl.glScalef(1, -1, 1);
-        gl.glTranslatef(0, -g2d.getCanvasHeight(), 0);
+    protected float[] getTransform(TextRenderer renderer) {
+        throw new UnsupportedOperationException("GL2StringDrawerImpl.getTransform");
     }
 
     @Override

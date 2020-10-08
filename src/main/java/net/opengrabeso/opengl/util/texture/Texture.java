@@ -39,7 +39,6 @@ package net.opengrabeso.opengl.util.texture;
 
 import com.github.opengrabeso.jaagl.GL;
 
-import java.awt.image.DataBufferByte;
 import java.nio.*;
 
 /**
@@ -512,37 +511,13 @@ public class Texture {
         }
 
         checkCompressedTextureExtensions(gl, data);
-        final Buffer[] mipmapData = data.getMipmapData();
-        if (mipmapData != null) {
-            int width = texWidth;
-            int height = texHeight;
-            for (int i = 0; i < mipmapData.length; i++) {
-                // Allocate texture image at this level
-                gl.glTexImage2D(texTarget, i, data.getInternalFormat(),
-                                width, height, data.getBorder(),
-                                data.getPixelFormat(), data.getPixelType(), null);
-                updateSubImageImpl(gl, data, texTarget, i, 0, 0, 0, 0, data.getWidth(), data.getHeight());
 
-                width = Math.max(width / 2, 1);
-                height = Math.max(height / 2, 1);
-            }
-        } else {
-            if (data.getMipmap()) {
-                // For now, only use hardware mipmapping for uncompressed 2D
-                // textures where the user hasn't explicitly specified
-                // mipmap data; don't know about interactions between
-                // GL_GENERATE_MIPMAP and glCompressedTexImage2D
-                gl.glTexParameteri(texParamTarget, gl.GL_GENERATE_MIPMAP(), gl.GL_TRUE());
-                usingAutoMipmapGeneration = true;
-            }
+        gl.glTexImage2D(texTarget, 0, data.getInternalFormat(),
+                        texWidth, texHeight, data.getBorder(),
+                        data.getPixelFormat(), data.getPixelType(), null);
+        updateSubImageImpl(gl, data, texTarget, 0, 0, 0, 0, 0, data.getWidth(), data.getHeight());
 
-            gl.glTexImage2D(texTarget, 0, data.getInternalFormat(),
-                            texWidth, texHeight, data.getBorder(),
-                            data.getPixelFormat(), data.getPixelType(), null);
-            updateSubImageImpl(gl, data, texTarget, 0, 0, 0, 0, 0, data.getWidth(), data.getHeight());
-        }
-
-        final int minFilter = (data.getMipmap() ? gl.GL_LINEAR_MIPMAP_LINEAR() : gl.GL_LINEAR());
+        final int minFilter = gl.GL_LINEAR();
         final int magFilter = gl.GL_LINEAR();
         final int wrapMode = gl.GL_CLAMP_TO_EDGE();
 
@@ -738,7 +713,7 @@ public class Texture {
                                     int dstx, int dsty,
                                     int srcx, int srcy, int width, int height) {
         ByteBuffer buffer = data.getBuffer();
-        if (buffer == null && data.getMipmapData() == null) {
+        if (buffer == null) {
             // Assume user just wanted to get the Texture object allocated
             return;
         }
@@ -746,20 +721,6 @@ public class Texture {
         int rowlen = data.getRowLength();
         int dataWidth = data.getWidth();
         int dataHeight = data.getHeight();
-        if (data.getMipmapData() != null) {
-            // Compute the width, height and row length at the specified mipmap level
-            // Note we do not support specification of the row length for
-            // mipmapped textures at this point
-            for (int i = 0; i < mipmapLevel; i++) {
-                width = Math.max(width / 2, 1);
-                height = Math.max(height / 2, 1);
-
-                dataWidth = Math.max(dataWidth / 2, 1);
-                dataHeight = Math.max(dataHeight / 2, 1);
-            }
-            rowlen = 0;
-            buffer = data.getMipmapData()[mipmapLevel];
-        }
 
         // Clip incoming rectangles to what is available both on this
         // texture and in the incoming TextureData

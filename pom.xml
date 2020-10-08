@@ -164,6 +164,12 @@
     </dependency>
 
     <dependency>
+      <groupId>org.joml</groupId>
+      <artifactId>joml</artifactId>
+      <version>1.9.25</version>
+    </dependency>
+
+    <dependency>
       <groupId>org.lwjglx</groupId>
       <artifactId>lwjgl3-awt</artifactId>
       <version>0.1.7</version>
