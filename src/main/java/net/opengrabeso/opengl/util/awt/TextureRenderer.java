@@ -48,8 +48,6 @@ import java.awt.Rectangle;
 import java.awt.image.*;
 
 import com.github.opengrabeso.jaagl.GL2GL3;
-import net.opengrabeso.opengl.pipeline.ShaderLoader;
-import net.opengrabeso.opengl.pipeline.ShaderUtil;
 import net.opengrabeso.opengl.util.texture.*;
 import net.opengrabeso.opengl.util.texture.awt.*;
 

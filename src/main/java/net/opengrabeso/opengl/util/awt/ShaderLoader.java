@@ -25,7 +25,7 @@
  * authors and should not be interpreted as representing official policies, either expressed
  * or implied, of JogAmp Community.
  */
-package net.opengrabeso.opengl.pipeline;
+package net.opengrabeso.opengl.util.awt;
 
 import com.github.opengrabeso.jaagl.GL2GL3;
 

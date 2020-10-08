@@ -31,7 +31,7 @@
  *
  */
 
-package net.opengrabeso.opengl.pipeline;
+package net.opengrabeso.opengl.util.awt;
 
 import com.github.opengrabeso.jaagl.GL2GL3;
 

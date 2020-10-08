@@ -2,8 +2,6 @@ package net.opengrabeso.opengl.text;
 
 import java.awt.Font;
 import java.awt.geom.*;
-import com.jogamp.opengl.*;
-import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import net.opengrabeso.opengl.Jaagl2EventListener;
 import net.opengrabeso.opengl.SelectJaaglEventListener;
 import net.opengrabeso.opengl.util.awt.TextRenderer;
@@ -37,7 +35,7 @@ public abstract class Issue344Base implements Jaagl2EventListener
 
     @Override
     public void init(final com.github.opengrabeso.jaagl.GL2 gl) {
-        gl.glEnable(GL.GL_DEPTH_TEST);
+        gl.glEnable(gl.GL_DEPTH_TEST());
 
         renderer = new TextRenderer(gl, font, useMipMaps);
 
@@ -53,7 +51,7 @@ public abstract class Issue344Base implements Jaagl2EventListener
         gl.glClearColor(0.8f, 0.5f, 0.5f, 1);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT() | gl.GL_DEPTH_BUFFER_BIT());
 
-        gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+        gl.glMatrixMode(gl.GL_MODELVIEW());
 
         gl.glLoadIdentity();
         gl.glTranslatef(0, 0, -10);
@@ -73,7 +71,7 @@ public abstract class Issue344Base implements Jaagl2EventListener
 
     @Override
     public void reshape(final com.github.opengrabeso.jaagl.GL2 gl, final int x, final int y, final int width, final int height) {
-        gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
+        gl.glMatrixMode(gl.GL_PROJECTION());
 
         //void gluPerspective(	GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
         // glu.gluPerspective(15, (float) width / (float) height, 5, 15);
