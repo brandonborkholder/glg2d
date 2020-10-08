@@ -45,9 +45,9 @@ public class SelectJaaglEventListener {
             glfwWindowHint(GLFW_STENCIL_BITS, 8);
             glfwWindowHint(GLFW_DEPTH_BITS, 24);
             // TODO: try other profiles as well
-            //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-            //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-            //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+            glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+            glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
             glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 
             long window = glfwCreateWindow(512, 512, getClass().getName(), NULL, NULL);
@@ -59,7 +59,7 @@ public class SelectJaaglEventListener {
 
             org.lwjgl.opengl.GL.createCapabilities();
 
-            GL2GL3 gl = com.github.opengrabeso.jaagl.lwjgl.LWGL2.createGL2();
+            GL2GL3 gl = com.github.opengrabeso.jaagl.lwjgl.LWGL2.createGL3();
 
             jaaglListener.init(gl);
 
