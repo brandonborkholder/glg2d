@@ -5,17 +5,26 @@ import java.awt.Font;
 import java.awt.Frame;
 import java.awt.event.*;
 import java.awt.geom.*;
+import java.util.Arrays;
 
 import com.github.opengrabeso.jaagl.jogl.JoGL;
 import com.jogamp.common.util.InterruptSource;
-import com.jogamp.opengl.GL;
-import com.jogamp.opengl.GL2;
-import com.jogamp.opengl.GLAutoDrawable;
-import com.jogamp.opengl.GLEventListener;
+import com.jogamp.opengl.*;
 import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 import com.jogamp.opengl.glu.*;
+import net.opengrabeso.opengl.Jaagl2EventListener;
+import net.opengrabeso.opengl.SelectJaaglEventListener;
 import net.opengrabeso.opengl.util.awt.TextRenderer;
+import org.lwjgl.glfw.*;
+
+import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.system.MemoryUtil.*;
+import static org.lwjgl.glfw.GLFW.*;
+
+
+import java.util.EventListener;
+
 
 /** Test Code adapted from TextCube.java (in JOGL demos)
  *
@@ -23,7 +32,7 @@ import net.opengrabeso.opengl.util.awt.TextRenderer;
  * @author kbr
  */
 
-public abstract class Issue344Base implements GLEventListener
+public abstract class Issue344Base implements Jaagl2EventListener
 {
     GLU glu = new GLU();
     TextRenderer renderer;
@@ -40,39 +49,12 @@ public abstract class Issue344Base implements GLEventListener
     protected abstract String getText();
 
     protected void run(final String[] args) {
-        final Frame frame = new Frame(getClass().getName());
-        frame.setLayout(new BorderLayout());
-
-        final GLCanvas canvas = new GLCanvas();
-        canvas.addGLEventListener(this);
-        frame.add(canvas, BorderLayout.CENTER);
-
-        frame.setSize(512, 512);
-        frame.addWindowListener(new WindowAdapter() {
-                public void windowClosing(final WindowEvent e) {
-                    new InterruptSource.Thread(null, new Runnable() {
-                            public void run() {
-                                System.exit(0);
-                            }
-                        }).start();
-                }
-            });
-        try {
-            javax.swing.SwingUtilities.invokeAndWait(new Runnable() {
-                public void run() {
-                    frame.setVisible(true);
-                } } );
-        } catch(final Exception ex) {
-            throw new RuntimeException(ex);
-        }
+        SelectJaaglEventListener jaaglEventListener = new SelectJaaglEventListener(this);
+        jaaglEventListener.run(args);
     }
 
-    public void init(final GLAutoDrawable drawable)
-    {
-        final GL2 jgl = drawable.getGL().getGL2();
-
-        final com.github.opengrabeso.jaagl.GL2 gl = JoGL.wrap(jgl);
-
+    @Override
+    public void init(final com.github.opengrabeso.jaagl.GL2 gl) {
         gl.glEnable(GL.GL_DEPTH_TEST);
 
         renderer = new TextRenderer(gl, font, useMipMaps);
@@ -84,11 +66,8 @@ public abstract class Issue344Base implements GLEventListener
         //gl.setSwapInterval(0);
     }
 
-    public void display(final GLAutoDrawable drawable)
-    {
-        final GL2 jgl = drawable.getGL().getGL2();
-
-        final com.github.opengrabeso.jaagl.GL2 gl = JoGL.wrap(jgl);
+    @Override
+    public void display(final com.github.opengrabeso.jaagl.GL2 gl) {
         gl.glClear(gl.GL_COLOR_BUFFER_BIT() | gl.GL_DEPTH_BUFFER_BIT());
 
         gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
@@ -110,13 +89,13 @@ public abstract class Issue344Base implements GLEventListener
         renderer.end3DRendering();
     }
 
-    public void reshape(final GLAutoDrawable drawable, final int x, final int y, final int width, final int height)
-    {
-        final GL2 gl = drawable.getGL().getGL2();
+    @Override
+    public void reshape(final com.github.opengrabeso.jaagl.GL2 gl, final int x, final int y, final int width, final int height) {
         gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
         gl.glLoadIdentity();
         glu.gluPerspective(15, (float) width / (float) height, 5, 15);
     }
 
-    public void dispose(final GLAutoDrawable drawable) {}
+    @Override
+    public void dispose(final com.github.opengrabeso.jaagl.GL2 drawable) {}
 }
