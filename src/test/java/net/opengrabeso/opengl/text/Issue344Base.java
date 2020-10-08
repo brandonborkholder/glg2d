@@ -1,29 +1,12 @@
 package net.opengrabeso.opengl.text;
 
-import java.awt.BorderLayout;
 import java.awt.Font;
-import java.awt.Frame;
-import java.awt.event.*;
 import java.awt.geom.*;
-import java.util.Arrays;
-
-import com.github.opengrabeso.jaagl.jogl.JoGL;
-import com.jogamp.common.util.InterruptSource;
 import com.jogamp.opengl.*;
-import com.jogamp.opengl.awt.GLCanvas;
 import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
-import com.jogamp.opengl.glu.*;
 import net.opengrabeso.opengl.Jaagl2EventListener;
 import net.opengrabeso.opengl.SelectJaaglEventListener;
 import net.opengrabeso.opengl.util.awt.TextRenderer;
-import org.lwjgl.glfw.*;
-
-import static org.lwjgl.opengl.GL11.*;
-import static org.lwjgl.system.MemoryUtil.*;
-import static org.lwjgl.glfw.GLFW.*;
-
-
-import java.util.EventListener;
 
 
 /** Test Code adapted from TextCube.java (in JOGL demos)
@@ -34,7 +17,6 @@ import java.util.EventListener;
 
 public abstract class Issue344Base implements Jaagl2EventListener
 {
-    GLU glu = new GLU();
     TextRenderer renderer;
 
     float textScaleFactor;
@@ -68,13 +50,13 @@ public abstract class Issue344Base implements Jaagl2EventListener
 
     @Override
     public void display(final com.github.opengrabeso.jaagl.GL2 gl) {
+        gl.glClearColor(0.8f, 0.5f, 0.5f, 1);
         gl.glClear(gl.GL_COLOR_BUFFER_BIT() | gl.GL_DEPTH_BUFFER_BIT());
 
         gl.glMatrixMode(GLMatrixFunc.GL_MODELVIEW);
+
         gl.glLoadIdentity();
-        glu.gluLookAt(0, 0, 10,
-                      0, 0, 0,
-                      0, 1, 0);
+        gl.glTranslatef(0, 0, -10);
 
         renderer.begin3DRendering();
         final Rectangle2D bounds = renderer.getBounds(getText());
@@ -92,8 +74,40 @@ public abstract class Issue344Base implements Jaagl2EventListener
     @Override
     public void reshape(final com.github.opengrabeso.jaagl.GL2 gl, final int x, final int y, final int width, final int height) {
         gl.glMatrixMode(GLMatrixFunc.GL_PROJECTION);
-        gl.glLoadIdentity();
-        glu.gluPerspective(15, (float) width / (float) height, 5, 15);
+
+        //void gluPerspective(	GLdouble fovy, GLdouble aspect, GLdouble zNear, GLdouble zFar);
+        // glu.gluPerspective(15, (float) width / (float) height, 5, 15);
+
+
+        float fov = 15;
+        float aspect = (float) width / (float) height;
+        float znear = 5;
+        float zfar = 15;
+
+        float[] m = new float[16];
+        float f = 1 / (float) Math.tan(fov * Math.PI / 360);
+
+        m[0] = f / aspect;
+        m[1] = 0;
+        m[2] = 0;
+        m[3] = 0;
+
+        m[4] = 0;
+        m[5] = f;
+        m[6] = 0;
+        m[7] = 0;
+
+        m[8] = 0;
+        m[9] = 0;
+        m[10] = (zfar + znear) / (znear - zfar);
+        m[11] = -1;
+
+        m[12] = 0;
+        m[13] = 0;
+        m[14] = 2 * zfar * znear / (znear - zfar);
+        m[15] = 0;
+
+        gl.glLoadMatrixf(m, 0);
     }
 
     @Override

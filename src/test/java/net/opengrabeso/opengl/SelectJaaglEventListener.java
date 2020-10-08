@@ -11,7 +11,6 @@ import java.awt.event.WindowEvent;
 import java.util.Arrays;
 
 import static org.lwjgl.glfw.GLFW.*;
-import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 
 public class SelectJaaglEventListener {
@@ -27,7 +26,7 @@ public class SelectJaaglEventListener {
         boolean jogl = Arrays.asList(args).contains("-jogl");
         boolean lwjgl = Arrays.asList(args).contains("-lwjgl");
         if (!jogl && !lwjgl) {
-            lwjgl = false; // default with no option
+            lwjgl = true; // default with no option
         }
 
         if (lwjgl) {
@@ -45,24 +44,31 @@ public class SelectJaaglEventListener {
             glfwWindowHint(GLFW_STENCIL_BITS, 8);
             glfwWindowHint(GLFW_DEPTH_BITS, 24);
 
-            glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-
             long window = glfwCreateWindow(512, 512, getClass().getName(), NULL, NULL);
 
             glfwMakeContextCurrent(window);
+
             glfwSwapInterval(1);
             glfwShowWindow(window);
 
             org.lwjgl.opengl.GL.createCapabilities();
 
-            GL2 gl = null;
+            GL2 gl = com.github.opengrabeso.jaagl.lwjgl.LWGL2.createGL2();
 
             jaaglListener.init(gl);
+
+            jaaglListener.reshape(gl, 0, 0, 512, 512);
 
             // Run the rendering loop until the user has attempted to close
             // the window or has pressed the ESCAPE key.
             while ( !glfwWindowShouldClose(window) ) {
-                glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clear the framebuffer
+
+                jaaglListener.display(gl);
+                try {
+                    Thread.sleep(50);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
                 glfwSwapBuffers(window); // swap the color buffers
 
