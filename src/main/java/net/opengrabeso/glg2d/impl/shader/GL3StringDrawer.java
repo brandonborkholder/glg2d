@@ -34,7 +34,7 @@ public class GL3StringDrawer extends GL2StringDrawer {
 
     @Override
     protected TextRenderer createTextRenderer(Font font, boolean antialias) {
-        return new TextRenderer(null, font, antialias, false);
+        return new TextRenderer(gl, font, antialias, false);
     }
 
     @Override
