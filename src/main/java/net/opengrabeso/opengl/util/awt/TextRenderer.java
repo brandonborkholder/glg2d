@@ -178,20 +178,6 @@ public class TextRenderer {
     private boolean smoothing = true;
     private float[] transform;
 
-    /** Creates a new TextRenderer with the given font, using no
-        antialiasing or fractional metrics, and the default
-        RenderDelegate. If <CODE>mipmap</CODE> is true, attempts to use
-        OpenGL's automatic mipmap generation for better smoothing when
-        rendering the TextureRenderer's contents at a distance.
-        Equivalent to <code>TextRenderer(font, false, false)</code>.
-
-        @param font the font to render with
-        @param mipmap whether to attempt use of automatic mipmap generation
-    */
-    public TextRenderer(final GL2GL3 gl, final Font font, final boolean mipmap) {
-        this(gl, font, false, false, null);
-    }
-
     /** Creates a new TextRenderer with the given Font, specified font
         properties, and default RenderDelegate. The
         <code>antialiased</code> and <code>useFractionalMetrics</code>

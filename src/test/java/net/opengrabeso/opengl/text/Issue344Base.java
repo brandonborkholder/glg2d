@@ -20,12 +20,11 @@ public abstract class Issue344Base implements Jaagl2EventListener
 
     float textScaleFactor;
     Font font;
-    boolean useMipMaps;
+    boolean antialias = true;
     Matrix4f projection;
 
     protected Issue344Base() {
         font = new Font("default", Font.PLAIN, 200);
-        useMipMaps = false; //false
     }
 
     protected abstract String getText();
@@ -39,7 +38,7 @@ public abstract class Issue344Base implements Jaagl2EventListener
     public void init(final com.github.opengrabeso.jaagl.GL2GL3 gl) {
         gl.glEnable(gl.GL_DEPTH_TEST());
 
-        renderer = new TextRenderer(gl, font, useMipMaps);
+        renderer = new TextRenderer(gl, font, antialias, false);
 
         final Rectangle2D bounds = renderer.getBounds(getText());
         final float w = (float) bounds.getWidth();
