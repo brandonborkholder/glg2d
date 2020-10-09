@@ -99,7 +99,7 @@ public class TextureRenderer {
             "attribute vec2 TexCoord0;\n" +
             "varying vec2 Coord0;\n" +
             "void main() {\n" +
-            "   gl_Position = MVPMatrix * (MCVertex * vec4(32.0, 32.0, -1.0, 1.0));\n" +
+            "   gl_Position = MVPMatrix * MCVertex;\n" +
             "   Coord0 = TexCoord0;\n" +
             "}\n";
 
