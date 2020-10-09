@@ -84,11 +84,6 @@ public class TextureRenderer {
   private boolean mustReallocateTexture;
   private Rectangle dirtyRegion;
 
-  // Current color
-  private float r = 1.0f;
-  private float g = 1.0f;
-  private float b = 1.0f;
-  private float a = 1.0f;
     private int program;
 
 
@@ -162,7 +157,7 @@ public class TextureRenderer {
       this.vao = vao[0];
   }
 
-  public void setupVertexAttributes(float[] transform) {
+  public void setupVertexAttributes(float[] transform, float[] color) {
       // TODO: VBA
       if (useVAO) {
           gl.glBindVertexArray(vao);
@@ -177,6 +172,7 @@ public class TextureRenderer {
 
       gl.glUseProgram(program);
       gl.glUniformMatrix4fv(transformUniform, 1, false, transform, 0);
+      gl.glUniform4fv(colorUniform, 1, color, 0);
   }
 
   public void cleanupVertexAttributes() {
@@ -382,54 +378,6 @@ public class TextureRenderer {
     beginRendering();
   }
 
-  /** Changes the color of the polygons, and therefore the drawn
-      images, this TextureRenderer produces. Use of this method is
-      optional. The TextureRenderer uses the GL_MODULATE texture
-      environment mode, which causes the portions of the rendered
-      texture to be multiplied by the color of the rendered
-      polygons. The polygon color can be varied to achieve effects
-      like tinting of the overall output or fading in and out by
-      changing the alpha of the color. <P>
-
-      Each component ranges from 0.0f - 1.0f. The alpha component, if
-      used, does not need to be premultiplied into the color channels
-      as described in the documentation for {@link
-      com.jogamp.opengl.util.texture.Texture Texture}, although
-      premultiplied colors are used internally. The default color is
-      opaque white.
-
-      @param r the red component of the new color
-      @param g the green component of the new color
-      @param b the blue component of the new color
-      @param a the alpha component of the new color, 0.0f = completely
-        transparent, 1.0f = completely opaque
-
-  */
-  public void setColor(final float r, final float g, final float b, final float a) {
-    this.r = r * a;
-    this.g = g * a;
-    this.b = b * a;
-    this.a = a;
-      // should not be called while the rendering is already in progress
-  }
-
-  private float[] compArray;
-  /** Changes the current color of this TextureRenderer to the
-      supplied one. The default color is opaque white. See {@link
-      #setColor(float,float,float,float) setColor} for more details.
-
-      @param color the new color to use for rendering
-
-  */
-  public void setColor(final Color color) {
-    // Get color's RGBA components as floats in the range [0,1].
-    if (compArray == null) {
-      compArray = new float[4];
-    }
-    color.getRGBComponents(compArray);
-    setColor(compArray[0], compArray[1], compArray[2], compArray[3]);
-  }
-
   /** Convenience method which assists in rendering portions of the
       OpenGL texture to the screen as 2D quads in 3D space. Must be
       used if {@link #begin3DRendering} is used to set up the
@@ -461,8 +409,6 @@ public class TextureRenderer {
     texture.enable(gl);
     texture.bind(gl);
     // Change polygon color to last saved
-    float[] c = new float[]{r, g, b, a};
-    //gl.glUniform4fv(colorUniform, c.length, c, 0);
     if (smoothingChanged) {
       smoothingChanged = false;
       if (smoothing) {

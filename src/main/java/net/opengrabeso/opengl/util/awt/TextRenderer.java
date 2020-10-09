@@ -159,13 +159,7 @@ public class TextRenderer {
     private boolean inBeginEndPair;
 
     // For resetting the color after disposal of the old backing store
-    private boolean haveCachedColor;
-    private float cachedR;
-    private float cachedG;
-    private float cachedB;
-    private float cachedA;
-    private Color cachedColor;
-    private boolean needToResetColor;
+    private float[] cachedRGBA = new float[]{1,0,0,1}; // Red as a default: force to set it
 
     // For debugging only
     private Frame dbgFrame;
@@ -314,16 +308,7 @@ text's bitmap, or null to use the default one
 
     */
     public void setColor(final Color color) {
-        final boolean noNeedForFlush = (haveCachedColor && (cachedColor != null) &&
-                                  color.equals(cachedColor));
-
-        if (!noNeedForFlush) {
-            flushGlyphPipeline();
-        }
-
-        getBackingStore().setColor(color);
-        haveCachedColor = true;
-        cachedColor = color;
+        setColor(color.getRed() / 255f, color.getGreen() / 255f, color.getBlue() / 255f, color.getAlpha() / 255f);
     }
 
     /** Changes the current color of this TextRenderer to the supplied
@@ -343,21 +328,14 @@ text's bitmap, or null to use the default one
     */
     public void setColor(final float r, final float g, final float b, final float a)
         {
-        final boolean noNeedForFlush = (haveCachedColor && (cachedColor == null) &&
-                                  (r == cachedR) && (g == cachedG) && (b == cachedB) &&
-                                  (a == cachedA));
+        final boolean noNeedForFlush = (r == cachedRGBA[0]) && (g == cachedRGBA[1]) && (b == cachedRGBA[2]) &&
+                                  (a == cachedRGBA[3]);
 
         if (!noNeedForFlush) {
             flushGlyphPipeline();
         }
 
-        getBackingStore().setColor(r, g, b, a);
-        haveCachedColor = true;
-        cachedR = r;
-        cachedG = g;
-        cachedB = b;
-        cachedA = a;
-        cachedColor = null;
+        cachedRGBA = new float[]{r, g, b, a};
     }
 
     /** Draws the supplied CharSequence at the desired 3D location using
@@ -516,16 +494,6 @@ text's bitmap, or null to use the default one
             gl.glGetIntegerv(gl.GL_MAX_TEXTURE_SIZE(), sz);
             packer.setMaxSize(sz[0], sz[0]);
             haveMaxSize = true;
-        }
-
-        if (needToResetColor && haveCachedColor) {
-            if (cachedColor == null) {
-                getBackingStore().setColor(cachedR, cachedG, cachedB, cachedA);
-            } else {
-                getBackingStore().setColor(cachedColor);
-            }
-
-            needToResetColor = false;
         }
 
     }
@@ -1038,17 +1006,6 @@ text's bitmap, or null to use the default one
             // Re-enter the begin / end pair if necessary
             if (inBeginEndPair) {
                 ((TextureRenderer) newBackingStore).begin3DRendering();
-
-                if (haveCachedColor) {
-                    if (cachedColor == null) {
-                        ((TextureRenderer) newBackingStore).setColor(cachedR,
-                                                                     cachedG, cachedB, cachedA);
-                    } else {
-                        ((TextureRenderer) newBackingStore).setColor(cachedColor);
-                    }
-                }
-            } else {
-                needToResetColor = true;
             }
         }
     }
@@ -1284,7 +1241,7 @@ text's bitmap, or null to use the default one
 
                 @Override
                 protected void setupDraw() {
-                    getBackingStore().setupVertexAttributes(transform);
+                    getBackingStore().setupVertexAttributes(transform, cachedRGBA);
                 }
 
                 @Override
