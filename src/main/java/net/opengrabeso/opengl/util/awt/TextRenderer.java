@@ -351,16 +351,14 @@ text's bitmap, or null to use the default one
 
     */
     public void draw3D(final CharSequence str, final float x, final float y, final float z,
-                       final float scaleFactor) {
-        internal_draw3D(str, x, y, z, scaleFactor);
+                       final float scaleFactor, final boolean verticalFlip) {
+        internal_draw3D(str, x, y, z, scaleFactor, verticalFlip);
     }
 
     /** Draws the supplied String at the desired 3D location using the
-        renderer's current color. See {@link #draw3D(CharSequence,
-        float, float, float, float) draw3D(CharSequence, float, float,
-        float, float)}. */
-    public void draw3D(final String str, final float x, final float y, final float z, final float scaleFactor) {
-        internal_draw3D(str, x, y, z, scaleFactor);
+        renderer's current color. */
+    public void draw3D(final String str, final float x, final float y, final float z, final float scaleFactor, final boolean verticalFlip) {
+        internal_draw3D(str, x, y, z, scaleFactor, verticalFlip);
     }
 
     /** Returns the pixel width of the given character. */
@@ -563,9 +561,9 @@ text's bitmap, or null to use the default one
     }
 
     private void internal_draw3D(final CharSequence str, float x, final float y, final float z,
-                                 final float scaleFactor) {
+                                 final float scaleFactor, final boolean verticalFlip) {
         for (final Glyph glyph : mGlyphProducer.getGlyphs(str)) {
-            final float advance = glyph.draw3D(x, y, z, scaleFactor);
+            final float advance = glyph.draw3D(x, y, z, scaleFactor, verticalFlip);
             x += advance * scaleFactor;
         }
     }
@@ -577,7 +575,7 @@ text's bitmap, or null to use the default one
     }
 
     private void draw3D_ROBUST(final CharSequence str, final float x, final float y, final float z,
-                               final float scaleFactor) {
+                               final float scaleFactor, final boolean verticalFlip) {
         String curStr;
         if (str instanceof String) {
             curStr = (String) str;
@@ -641,8 +639,10 @@ text's bitmap, or null to use the default one
 
         Pipelined_QuadRenderer piped = mPipelinedQuadRenderer;
 
+        final float verticalScale = verticalFlip ? -scaleFactor : scaleFactor;
+
         float xx = x - (scaleFactor * data.origOriginX());
-        float yy = y - (scaleFactor * ((float) origRect.getHeight() - data.origOriginY()));
+        float yy = y - (verticalScale * ((float) origRect.getHeight() - data.origOriginY()));
         int texturex = rect.x() + (data.origin().x - data.origOriginX());
         int texturey = renderer.getHeight() - rect.y() - (int) origRect.getHeight() - (data.origin().y - data.origOriginY());
         int width = (int) origRect.getWidth();
@@ -654,7 +654,7 @@ text's bitmap, or null to use the default one
                 texturey + height);
 
         piped.quad(
-                xx, yy, z, width * scaleFactor, height * scaleFactor,
+                xx, yy, z, width * scaleFactor, height * verticalScale,
                 coords
         );
     }
@@ -1128,9 +1128,9 @@ text's bitmap, or null to use the default one
         }
 
         /** Draws this glyph and returns the (x) advance for this glyph */
-        public float draw3D(final float inX, final float inY, final float z, final float scaleFactor) {
+        public float draw3D(final float inX, final float inY, final float z, final float scaleFactor, final boolean verticalFlip) {
             if (str != null) {
-                draw3D_ROBUST(str, inX, inY, z, scaleFactor);
+                draw3D_ROBUST(str, inX, inY, z, scaleFactor, verticalFlip);
                 if (!needAdvance) {
                     return 0;
                 }
@@ -1162,24 +1162,22 @@ text's bitmap, or null to use the default one
 
             final Rectangle2D origRect = data.origRect();
 
+            final float verticalScale = verticalFlip ? -scaleFactor : scaleFactor;
             final float x = inX - (scaleFactor * data.origOriginX());
-            final float y = inY - (scaleFactor * ((float) origRect.getHeight() - data.origOriginY()));
+            final float y = inY - (verticalScale * ((float) origRect.getHeight() - data.origOriginY()));
 
             final int texturex = rect.x() + (data.origin().x - data.origOriginX());
-            final int texturey = renderer.getHeight() - rect.y() - (int) origRect.getHeight() -
-                (data.origin().y - data.origOriginY());
+            final int texturey = renderer.getHeight() - rect.y() - (int) origRect.getHeight() - (data.origin().y - data.origOriginY());
             final int width = (int) origRect.getWidth();
             final int height = (int) origRect.getHeight();
 
             final float tx1 = xScale * texturex / renderer.getWidth();
-            final float ty1 = yScale * (1.0f -
-                                  ((float) texturey / (float) renderer.getHeight()));
+            final float ty1 = yScale * (1.0f - ((float) texturey / (float) renderer.getHeight()));
             final float tx2 = xScale * (texturex + width) / renderer.getWidth();
-            final float ty2 = yScale * (1.0f -
-                                  ((float) (texturey + height) / (float) renderer.getHeight()));
+            final float ty2 = yScale * (1.0f - ((float) (texturey + height) / (float) renderer.getHeight()));
 
             TextureCoords coords = new TextureCoords(tx1, ty1, tx2, ty2);
-            mPipelinedQuadRenderer.quad(x, y, z, width * scaleFactor, height * scaleFactor, coords);
+            mPipelinedQuadRenderer.quad(x, y, z, width * scaleFactor, height * verticalScale, coords);
             return advance;
         }
 

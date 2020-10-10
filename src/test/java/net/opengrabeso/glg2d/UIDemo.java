@@ -136,7 +136,7 @@ public class UIDemo extends JPanel {
     panel.add(spinner);
 
     JTextField field = new JTextField();
-    field.setText("lorem ipsum...");
+    field.setText("lorem ipsum... \u201C...\u201D");
     field.setColumns(10);
     panel.add(field);
 
@@ -302,10 +302,10 @@ public class UIDemo extends JPanel {
     model.addRow(new Object[] { 1, "a", "b" });
     model.addRow(new Object[] { 3, "A", "t" });
     model.addRow(new Object[] { 2, "D", "c" });
-    model.addRow(new Object[] { 4, "a", "b" });
+    model.addRow(new Object[] { 4, "a", "b \u201CB\u201D" });
     model.addRow(new Object[] { 3, "D", "t" });
     model.addRow(new Object[] { 9, "3", "l" });
-    model.addRow(new Object[] { 8, "a", "r" });
+    model.addRow(new Object[] { 8, "a", "r \u201CR\u201D" });
     model.addRow(new Object[] { 2, "G", "k" });
     model.addRow(new Object[] { 3, "f", "g" });
 

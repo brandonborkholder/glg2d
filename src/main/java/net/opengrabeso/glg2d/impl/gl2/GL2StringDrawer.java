@@ -65,9 +65,9 @@ public abstract class GL2StringDrawer extends AbstractTextDrawer {
 
     begin(renderer);
     if (useVerticalFlip()) {
-        renderer.draw3D(string, x, y, 0, 1);
+        renderer.draw3D(string, x, y, 0, 1, true);
     } else {
-        renderer.draw3D(string, x, g2d.getCanvasHeight() - y, 0, 1);
+        renderer.draw3D(string, x, g2d.getCanvasHeight() - y, 0, 1, false);
     }
     end(renderer);
   }

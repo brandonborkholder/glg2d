@@ -65,7 +65,7 @@ public abstract class Issue344Base implements Jaagl2EventListener
                         w / -2.0f * textScaleFactor,
                         h / -2.0f * textScaleFactor,
                         3f,
-                        textScaleFactor);
+                        textScaleFactor, false);
 
         renderer.end3DRendering();
     }
