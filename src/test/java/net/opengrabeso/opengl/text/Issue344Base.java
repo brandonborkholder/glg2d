@@ -59,7 +59,7 @@ public abstract class Issue344Base implements Jaagl2EventListener
         final Rectangle2D bounds = renderer.getBounds(getText());
         final float w = (float) bounds.getWidth();
         final float h = (float) bounds.getHeight();
-        final Matrix4f mvp = new Matrix4f().set(projection).mul(translate).scale(1, 1, -1);
+        final Matrix4f mvp = new Matrix4f().set(projection).mul(translate);
         renderer.begin3DRendering(mvp.get(new float[16]));
         renderer.draw3D(getText(),
                         w / -2.0f * textScaleFactor,
@@ -72,7 +72,7 @@ public abstract class Issue344Base implements Jaagl2EventListener
 
     @Override
     public void reshape(final com.github.opengrabeso.jaagl.GL2GL3 gl, final int x, final int y, final int width, final int height) {
-        float fov = 8.8f;
+        float fov = 15;
 
         float aspect = (float) width / (float) height;
         float znear = 5;
@@ -80,6 +80,7 @@ public abstract class Issue344Base implements Jaagl2EventListener
 
         float fovRad = (float)(fov * java.lang.Math.PI / 180);
         projection = new Matrix4f().perspective(fovRad, aspect, znear, zfar);
+        gl.glViewport(0, 0, width, height);
     }
 
     @Override

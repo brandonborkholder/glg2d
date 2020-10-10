@@ -57,13 +57,21 @@ public class SelectJaaglEventListener {
             glfwSwapInterval(1);
             glfwShowWindow(window);
 
+            int[] width = new int[1];
+            int[] height = new int[1];
+            glfwGetWindowSize(window, width, height);
+
             org.lwjgl.opengl.GL.createCapabilities();
 
             GL2GL3 gl = com.github.opengrabeso.jaagl.lwjgl.LWGL2.createGL3();
 
             jaaglListener.init(gl);
 
-            jaaglListener.reshape(gl, 0, 0, 512, 512);
+            jaaglListener.reshape(gl, 0, 0, width[0], height[0]);
+
+            glfwSetWindowSizeCallback(window, (windowHandle, w, h) ->
+                        jaaglListener.reshape(gl, 0, 0, w, h)
+                    );
 
             // Run the rendering loop until the user has attempted to close
             // the window or has pressed the ESCAPE key.

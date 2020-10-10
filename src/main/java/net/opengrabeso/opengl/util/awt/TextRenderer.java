@@ -159,7 +159,7 @@ public class TextRenderer {
     private boolean inBeginEndPair;
 
     // For resetting the color after disposal of the old backing store
-    private float[] cachedRGBA = new float[]{1,0,0,1}; // Red as a default: force to set it
+    private float[] cachedRGBA = new float[]{1,1,1,1};
 
     // For debugging only
     private Frame dbgFrame;
