@@ -37,11 +37,9 @@
 
 package net.opengrabeso.opengl.util.texture;
 
+import com.github.opengrabeso.jaagl.GL;
+
 import java.nio.*;
-
-import com.github.opengrabeso.jaagl.*;
-
-import com.github.opengrabeso.ogltext.util.texture.TextureCoords;
 
 /**
  * Represents an OpenGL texture object. Contains convenience routines
@@ -63,14 +61,9 @@ import com.github.opengrabeso.ogltext.util.texture.TextureCoords;
  * </ul>
  * </p>
  *
- * <p>One caveat in this approach is that certain texture wrap modes
- * (e.g.  <code>GL_REPEAT</code>) are not legal when the GL_ARB_texture_rectangle
- * extension is in use.  Another issue to be aware of is that in the
- * default pow2 scenario, if the original image does not have pow2
- * dimensions, then wrapping may not work as one might expect since
- * the image does not extend to the edges of the pow2 texture.  If
- * texture wrapping is important, it is recommended to use only
- * pow2-sized images with the Texture class.
+ * <p><a name="nonpow2"><b>Non-power-of-two restrictions</b></a>
+ * <br> When creating an OpenGL texture object, the Texture class will
+ * attempt to use <i>non-power-of-two textures</i>.
  *
  * <p><a name="perftips"><b>Performance Tips</b></a>
  * <br> For best performance, try to avoid calling {@link #enable} /
@@ -163,9 +156,6 @@ public class Texture {
     /** Indicates whether the TextureData requires a vertical flip of
         the texture coords. */
     private boolean mustFlipVertically;
-    /** Indicates whether we're using automatic mipmap generation
-        support (GL_GENERATE_MIPMAP). */
-    private boolean usingAutoMipmapGeneration;
 
     /** The texture coordinates corresponding to the entire image. */
     private TextureCoords coords;
@@ -174,7 +164,8 @@ public class Texture {
     public String toString() {
         final String targetS = target == imageTarget ? Integer.toHexString(target) : Integer.toHexString(target) + " - image "+Integer.toHexString(imageTarget);
         return "Texture[target "+targetS+", name "+texID+", "+
-                imgWidth+"/"+texWidth+" x "+imgHeight+"/"+texHeight+", y-flip "+mustFlipVertically+ "]";
+                imgWidth+"/"+texWidth+" x "+imgHeight+"/"+texHeight+", y-flip "+mustFlipVertically+
+                "]";
     }
 
     public Texture(final GL gl, final TextureData data) {
@@ -243,13 +234,20 @@ public class Texture {
      *   gl.glEnable(texture.getTarget());
      * </pre>
      * <p>
+     * Call is ignored if the {@link GL} object's context
+     * is using a core profile,
+     * </p>
+     * <p>
      * See the <a href="#perftips">performance tips</a> above for hints
      * on how to maximize performance when using many Texture objects.
      * </p>
      * @param gl the current GL object
+     *
+
+     * OpenGL-related errors occurred
      */
     public void enable(final GL gl) {
-        if (!gl.isGL3()) {
+        if( !gl.isGL3()) {
             gl.glEnable(target);
         }
     }
@@ -262,13 +260,20 @@ public class Texture {
      *   gl.glDisable(texture.getTarget());
      * </pre>
      * <p>
+     * Call is ignored if the {@link GL} object's context
+     * is using a core profile
+     * </p>
+     * <p>
      * See the <a href="#perftips">performance tips</a> above for hints
      * on how to maximize performance when using many Texture objects.
      * </p>
      * @param gl the current GL object
+     *
+
+     * OpenGL-related errors occurred
      */
     public void disable(final GL gl) {
-        if (!gl.isGL3()) {
+        if( !gl.isGL3()) {
             gl.glDisable(target);
         }
     }
@@ -284,6 +289,8 @@ public class Texture {
      * on how to maximize performance when using many Texture objects.
      *
      * @param gl the current GL context
+
+     * OpenGL-related errors occurred
      */
     public void bind(final GL gl) {
         validateTexID(gl, true);
@@ -292,6 +299,8 @@ public class Texture {
 
     /**
      * Destroys the native resources used by this texture object.
+     *
+
      */
     public void destroy(final GL gl) {
         if(0!=texID) {
@@ -302,10 +311,20 @@ public class Texture {
 
     /**
      * Returns the OpenGL "target" of this texture.
-     * @see GL#GL_TEXTURE_2D
+     * @see com.jogamp.opengl.GL#GL_TEXTURE_2D
+     * @see com.jogamp.opengl.GL2#GL_TEXTURE_RECTANGLE_ARB
      */
     public int getTarget() {
         return target;
+    }
+
+    /**
+     * Returns the image OpenGL "target" of this texture, or its sub-components if cubemap.
+     * @see com.jogamp.opengl.GL#GL_TEXTURE_2D
+     * @see com.jogamp.opengl.GL2#GL_TEXTURE_RECTANGLE_ARB
+     */
+    public int getImageTarget() {
+        return imageTarget;
     }
 
     /**
@@ -405,13 +424,6 @@ public class Texture {
         }
     }
 
-    /**
-     * Updates the entire content area incl. {@link TextureCoords}
-     * of this texture using the data in the given image.
-     */
-    public void updateImage(final GL gl, final TextureData data) {
-        updateImage(gl, data, 0);
-    }
 
     /**
      * Indicates whether this texture's texture coordinates must be
@@ -443,8 +455,10 @@ public class Texture {
      * Updates the content area incl. {@link TextureCoords} of the specified target of this texture
      * using the data in the given image. In general this is intended
      * for construction of cube maps.
+     *
+
      */
-    public void updateImage(final GL gl, final TextureData data, final int targetOverride) {
+    public void updateImage(final GL gl, final TextureData data) {
         validateTexID(gl, true);
 
         imgWidth = data.getWidth();
@@ -452,109 +466,42 @@ public class Texture {
         aspectRatio = (float) imgWidth / (float) imgHeight;
         mustFlipVertically = data.getMustFlipVertically();
 
-        int texTarget = 0;
-        int texParamTarget = this.target;
-
-        // See whether we have automatic mipmap generation support
-
-        // Indicate to the TextureData what functionality is available
-        data.setHaveEXTABGR(gl.isExtensionAvailable("GL_EXT_abgr"));
-        data.setHaveGL12(gl.isExtensionAvailable("GL_VERSION_1_2"));
-
-        // Note that automatic mipmap generation doesn't work for
-        // GL_ARB_texture_rectangle
-
         texWidth = imgWidth;
         texHeight = imgHeight;
-        texTarget = gl.GL_TEXTURE_2D();
-
-        texParamTarget = texTarget;
-        imageTarget = texTarget;
+        imageTarget = gl.GL_TEXTURE_2D();
         updateTexCoords();
 
-        if (targetOverride != 0) {
-            // Allow user to override auto detection and skip bind step (for
-            // cubemap construction)
-            if (this.target == 0) {
-                throw gl.newGLException("Override of target failed; no target specified yet");
-            }
-            texTarget = targetOverride;
-            texParamTarget = this.target;
-            gl.glBindTexture(texParamTarget, texID);
-        } else {
-            gl.glBindTexture(texTarget, texID);
-        }
+        gl.glBindTexture(gl.GL_TEXTURE_2D(), texID);
 
-        checkCompressedTextureExtensions(gl, data);
-        final Buffer[] mipmapData = data.getMipmapData();
-        if (mipmapData != null) {
-            int width = texWidth;
-            int height = texHeight;
-            for (int i = 0; i < mipmapData.length; i++) {
-                if (data.isDataCompressed()) {
-                    throw new UnsupportedOperationException("Compressed textures not supported");
-                } else {
-                    // Allocate texture image at this level
-                    gl.glTexImage2D(texTarget, i, data.getInternalFormat(),
-                                    width, height, data.getBorder(),
-                                    data.getPixelFormat(), data.getPixelType(), null);
-                    updateSubImageImpl(gl, data, texTarget, i, 0, 0, 0, 0, data.getWidth(), data.getHeight());
-                }
+        gl.glTexImage2D(gl.GL_TEXTURE_2D(), 0, data.getInternalFormat(),
+                        texWidth, texHeight, data.getBorder(),
+                        data.getPixelFormat(), data.getPixelType(), null);
+        updateSubImageImpl(gl, data, gl.GL_TEXTURE_2D(), 0, 0, 0, 0, 0, data.getWidth(), data.getHeight());
 
-                width = Math.max(width / 2, 1);
-                height = Math.max(height / 2, 1);
-            }
-        } else {
-            if (data.isDataCompressed()) {
-                // Need to use glCompressedTexImage2D directly to allocate and fill this image
-                // Avoid spurious memory allocation when possible
-                throw new UnsupportedOperationException("Compressed textures not supported");
-            } else {
-                if (data.getMipmap()) {
-                    // For now, only use hardware mipmapping for uncompressed 2D
-                    // textures where the user hasn't explicitly specified
-                    // mipmap data; don't know about interactions between
-                    // GL_GENERATE_MIPMAP and glCompressedTexImage2D
-                    gl.glTexParameteri(texParamTarget, gl.GL_GENERATE_MIPMAP(), gl.GL_TRUE());
-                    usingAutoMipmapGeneration = true;
-                }
-
-                gl.glTexImage2D(texTarget, 0, data.getInternalFormat(),
-                                texWidth, texHeight, data.getBorder(),
-                                data.getPixelFormat(), data.getPixelType(), null);
-                updateSubImageImpl(gl, data, texTarget, 0, 0, 0, 0, 0, data.getWidth(), data.getHeight());
-            }
-        }
-
-        final int minFilter = (data.getMipmap() ? gl.GL_LINEAR_MIPMAP_LINEAR() : gl.GL_LINEAR());
+        final int minFilter = gl.GL_LINEAR();
         final int magFilter = gl.GL_LINEAR();
         final int wrapMode = gl.GL_CLAMP_TO_EDGE();
 
-        gl.glTexParameteri(texParamTarget, gl.GL_TEXTURE_MIN_FILTER(), minFilter);
-        gl.glTexParameteri(texParamTarget, gl.GL_TEXTURE_MAG_FILTER(), magFilter);
-        gl.glTexParameteri(texParamTarget, gl.GL_TEXTURE_WRAP_S(), wrapMode);
-        gl.glTexParameteri(texParamTarget, gl.GL_TEXTURE_WRAP_T(), wrapMode);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D(), gl.GL_TEXTURE_MIN_FILTER(), minFilter);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D(), gl.GL_TEXTURE_MAG_FILTER(), magFilter);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D(), gl.GL_TEXTURE_WRAP_S(), wrapMode);
+        gl.glTexParameteri(gl.GL_TEXTURE_2D(), gl.GL_TEXTURE_WRAP_T(), wrapMode);
         if (this.target == gl.GL_TEXTURE_CUBE_MAP()) {
-            gl.glTexParameteri(texParamTarget, gl.GL_TEXTURE_WRAP_R(), wrapMode);
+            gl.glTexParameteri(gl.GL_TEXTURE_2D(), gl.GL_TEXTURE_WRAP_R(), wrapMode);
         }
 
         // Don't overwrite target if we're loading e.g. faces of a cube
         // map
         if ((this.target == 0) ||
             (this.target == gl.GL_TEXTURE_2D())) {
-            this.target = texTarget;
+            this.target = gl.GL_TEXTURE_2D();
         }
+
     }
 
     /**
      * Updates a subregion of the content area of this texture using the
-     * given data. If automatic mipmap generation is in use (see {@link
-     * #isUsingAutoMipmapGeneration isUsingAutoMipmapGeneration}),
-     * updates to the base (level 0) mipmap will cause the lower-level
-     * mipmaps to be regenerated, and updates to other mipmap levels
-     * will be ignored. Otherwise, if automatic mipmap generation is not
-     * in use, only updates the specified mipmap level and does not
-     * re-generate mipmaps if they were originally produced or loaded.
+     * given data.
      *
      * @param data the image data to be uploaded to this texture
      * @param mipmapLevel the mipmap level of the texture to set. If
@@ -564,28 +511,17 @@ public class Texture {
      * of this texture
      * @param y the y offset (in pixels) relative to the lower-left corner
      * of this texture
+     *
+
      */
     public void updateSubImage(final GL gl, final TextureData data, final int mipmapLevel, final int x, final int y) {
-        if (usingAutoMipmapGeneration && mipmapLevel != 0) {
-            // When we're using mipmap generation via GL_GENERATE_MIPMAP, we
-            // don't need to update other mipmap levels
-            return;
-        }
         bind(gl);
         updateSubImageImpl(gl, data, target, mipmapLevel, x, y, 0, 0, data.getWidth(), data.getHeight());
     }
 
     /**
      * Updates a subregion of the content area of this texture using the
-     * specified sub-region of the given data.  If automatic mipmap
-     * generation is in use (see {@link #isUsingAutoMipmapGeneration
-     * isUsingAutoMipmapGeneration}), updates to the base (level 0)
-     * mipmap will cause the lower-level mipmaps to be regenerated, and
-     * updates to other mipmap levels will be ignored. Otherwise, if
-     * automatic mipmap generation is not in use, only updates the
-     * specified mipmap level and does not re-generate mipmaps if they
-     * were originally produced or loaded. This method is only supported
-     * for uncompressed TextureData sources.
+     * specified sub-region of the given data.
      *
      * @param data the image data to be uploaded to this texture
      * @param mipmapLevel the mipmap level of the texture to set. If
@@ -601,22 +537,49 @@ public class Texture {
      * of the supplied TextureData from which to fetch the update rectangle
      * @param width the width (in pixels) of the rectangle to be updated
      * @param height the height (in pixels) of the rectangle to be updated
+     *
+
+     * OpenGL-related errors occurred
      */
     public void updateSubImage(final GL gl, final TextureData data, final int mipmapLevel,
                                final int dstx, final int dsty,
                                final int srcx, final int srcy,
                                final int width, final int height) {
-        if (data.isDataCompressed()) {
-            throw gl.newGLException("updateSubImage specifying a sub-rectangle is not supported for compressed TextureData");
-        }
-        if (usingAutoMipmapGeneration && mipmapLevel != 0) {
-            // When we're using mipmap generation via GL_GENERATE_MIPMAP, we
-            // don't need to update other mipmap levels
-            return;
-        }
         bind(gl);
         updateSubImageImpl(gl, data, target, mipmapLevel, dstx, dsty, srcx, srcy, width, height);
     }
+
+    /**
+     * Sets the OpenGL floating-point texture parameter for the
+     * texture's target. This gives control over parameters such as
+     * GL_TEXTURE_MAX_ANISOTROPY_EXT. Causes this texture to be bound to
+     * the current texture state.
+     *
+
+     * OpenGL-related errors occurred
+     */
+    public void setTexParameterf(final GL gl, final int parameterName,
+                                 final float value) {
+        bind(gl);
+        gl.glTexParameterf(target, parameterName, value);
+    }
+
+    /**
+     * Sets the OpenGL integer texture parameter for the texture's
+     * target. This gives control over parameters such as
+     * GL_TEXTURE_WRAP_S and GL_TEXTURE_WRAP_T, which by default are set
+     * to GL_CLAMP_TO_EDGE if OpenGL 1.2 is supported on the current
+     * platform and GL_CLAMP if not. Causes this texture to be bound to
+     * the current texture state.
+     *
+
+     */
+    public void setTexParameteri(final GL gl, final int parameterName,
+                                 final int value) {
+        bind(gl);
+        gl.glTexParameteri(target, parameterName, value);
+    }
+
 
     /**
      * Returns the underlying OpenGL texture object for this texture
@@ -647,19 +610,6 @@ public class Texture {
         return texID;
     }
 
-    /** Indicates whether this Texture is using automatic mipmap
-        generation (via the OpenGL texture parameter
-        GL_GENERATE_MIPMAP). This will automatically be used when
-        mipmapping is requested via the TextureData and either OpenGL
-        1.4 or the GL_SGIS_generate_mipmap extension is available. If
-        so, updates to the base image (mipmap level 0) will
-        automatically propagate down to the lower mipmap levels. Manual
-        updates of the mipmap data at these lower levels will be
-        ignored. */
-    public boolean isUsingAutoMipmapGeneration() {
-        return usingAutoMipmapGeneration;
-    }
-
     //----------------------------------------------------------------------
     // Internals only below this point
     //
@@ -683,11 +633,8 @@ public class Texture {
     private void updateSubImageImpl(final GL gl, final TextureData data, final int newTarget, final int mipmapLevel,
                                     int dstx, int dsty,
                                     int srcx, int srcy, int width, int height) {
-        data.setHaveEXTABGR(gl.isExtensionAvailable("GL_EXT_abgr"));
-        data.setHaveGL12(gl.isExtensionAvailable("GL_VERSION_1_2"));
-
         ByteBuffer buffer = data.getBuffer();
-        if (buffer == null && data.getMipmapData() == null) {
+        if (buffer == null) {
             // Assume user just wanted to get the Texture object allocated
             return;
         }
@@ -695,20 +642,6 @@ public class Texture {
         int rowlen = data.getRowLength();
         int dataWidth = data.getWidth();
         int dataHeight = data.getHeight();
-        if (data.getMipmapData() != null) {
-            // Compute the width, height and row length at the specified mipmap level
-            // Note we do not support specification of the row length for
-            // mipmapped textures at this point
-            for (int i = 0; i < mipmapLevel; i++) {
-                width = Math.max(width / 2, 1);
-                height = Math.max(height / 2, 1);
-
-                dataWidth = Math.max(dataWidth / 2, 1);
-                dataHeight = Math.max(dataHeight / 2, 1);
-            }
-            rowlen = 0;
-            buffer = data.getMipmapData()[mipmapLevel];
-        }
 
         // Clip incoming rectangles to what is available both on this
         // texture and in the incoming TextureData
@@ -743,39 +676,27 @@ public class Texture {
             height = texHeight - dsty;
         }
 
-        checkCompressedTextureExtensions(gl, data);
+        final int[] align = { 0 };
+        final int[] rowLength = { 0 };
+        final int[] skipRows = { 0 };
+        final int[] skipPixels = { 0 };
+        gl.glGetIntegerv(gl.GL_UNPACK_ALIGNMENT(),   align); // save alignment
+        gl.glGetIntegerv(gl.GL_UNPACK_ROW_LENGTH(),  rowLength); // save row length
+        gl.glGetIntegerv(gl.GL_UNPACK_SKIP_ROWS(),   skipRows); // save skipped rows
+        gl.glGetIntegerv(gl.GL_UNPACK_SKIP_PIXELS(), skipPixels); // save skipped pixels
+        gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT(), data.getAlignment());
+        gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH(), rowlen);
+        gl.glPixelStorei(gl.GL_UNPACK_SKIP_ROWS(), srcy);
+        gl.glPixelStorei(gl.GL_UNPACK_SKIP_PIXELS(), srcx);
 
-        if (data.isDataCompressed()) {
-            throw new UnsupportedOperationException("Compressed textures not supported");
-        } else {
-            final int[] align = { 0 };
-            final int[] rowLength = { 0 };
-            final int[] skipRows = { 0 };
-            final int[] skipPixels = { 0 };
-            gl.glGetIntegerv(gl.GL_UNPACK_ALIGNMENT(),   align); // save alignment
-            gl.glGetIntegerv(gl.GL_UNPACK_ROW_LENGTH(),  rowLength); // save row length
-            gl.glGetIntegerv(gl.GL_UNPACK_SKIP_ROWS(),   skipRows); // save skipped rows
-            gl.glGetIntegerv(gl.GL_UNPACK_SKIP_PIXELS(), skipPixels); // save skipped pixels
-            gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT(), data.getAlignment());
-            gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH(), rowlen);
-            gl.glPixelStorei(gl.GL_UNPACK_SKIP_ROWS(), srcy);
-            gl.glPixelStorei(gl.GL_UNPACK_SKIP_PIXELS(), srcx);
-
-            gl.glTexSubImage2D(newTarget, mipmapLevel,
-                               dstx, dsty, width, height,
-                               data.getPixelFormat(), data.getPixelType(),
-                               buffer);
-            gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT(),   align[0]);      // restore alignment
-            gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH(),  rowLength[0]);  // restore row length
-            gl.glPixelStorei(gl.GL_UNPACK_SKIP_ROWS(),   skipRows[0]);   // restore skipped rows
-            gl.glPixelStorei(gl.GL_UNPACK_SKIP_PIXELS(), skipPixels[0]); // restore skipped pixels
-        }
-    }
-
-    private void checkCompressedTextureExtensions(final GL gl, final TextureData data) {
-        if (data.isDataCompressed()) {
-            throw new UnsupportedOperationException("Compressed textures not supported");
-        }
+        gl.glTexSubImage2D(newTarget, mipmapLevel,
+                           dstx, dsty, width, height,
+                           data.getPixelFormat(), data.getPixelType(),
+                           buffer);
+        gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT(),   align[0]);      // restore alignment
+        gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH(),  rowLength[0]);  // restore row length
+        gl.glPixelStorei(gl.GL_UNPACK_SKIP_ROWS(),   skipRows[0]);   // restore skipped rows
+        gl.glPixelStorei(gl.GL_UNPACK_SKIP_PIXELS(), skipPixels[0]); // restore skipped pixels
     }
 
     private boolean validateTexID(final GL gl, final boolean throwException) {
@@ -788,10 +709,12 @@ public class Texture {
                     throw gl.newGLException("Create texture ID invalid: texID "+texID+", glerr 0x"+Integer.toHexString(gl.glGetError()));
                 }
             } else if ( throwException ) {
-                throw new UnsupportedOperationException("No GL context given, can't create texture ID");
+                throw gl.newGLException("No GL context given, can't create texture ID");
             }
         }
         return 0 != texID;
     }
+
+    // Helper routines for disabling certain codepaths
 
 }

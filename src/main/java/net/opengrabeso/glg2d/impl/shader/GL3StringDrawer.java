@@ -16,7 +16,7 @@
 package net.opengrabeso.glg2d.impl.shader;
 
 import com.github.opengrabeso.jaagl.GL2GL3;
-import com.github.opengrabeso.ogltext.util.awt.TextRenderer;
+import net.opengrabeso.opengl.util.awt.TextRenderer;
 import net.opengrabeso.glg2d.impl.gl2.GL2StringDrawer;
 
 import java.awt.*;
@@ -34,18 +34,18 @@ public class GL3StringDrawer extends GL2StringDrawer {
 
     @Override
     protected TextRenderer createTextRenderer(Font font, boolean antialias) {
-        return new TextRenderer(font, antialias, false, gl);
+        return new TextRenderer(gl, font, antialias, false);
     }
 
     @Override
     protected boolean useVerticalFlip() {return true;}
 
     @Override
-    protected void setupMatrix(TextRenderer renderer) {
+    protected float[] getTransform(TextRenderer renderer) {
         setTextColorRespectComposite(renderer);
 
         float[] matrix = ((GLShaderGraphics2D) g2d).getUniformsObject().transformHook.getGLMatrixData();
-        renderer.setTransform(gl, matrix);
+        return matrix;
     }
 
     @Override
