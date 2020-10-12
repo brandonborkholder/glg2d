@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.opengrabeso</groupId>
   <artifactId>glg2d</artifactId>
-  <version>0.7.1-SNAPSHOT</version>
+  <version>0.7.1</version>
   <packaging>jar</packaging>
   <name>GLG2D</name>
   <description>OpenGL Text Renderer for JOGL and LWJGL</description>
@@ -25,18 +25,6 @@
     </repository>
   </distributionManagement>
 
-  <developers>
-    <developer>
-      <id>borkholder</id>
-      <name>Brandon Borkholder</name>
-      <email>borkhobs@gmail.com</email>
-      <roles>
-        <role>architect</role>
-        <role>developer</role>
-      </roles>
-      <timezone>-5</timezone>
-    </developer>
-  </developers>
   <scm>
     <connection>scm:git:https://github.com/OpenGrabeso/glg2d.git</connection>
     <developerConnection>scm:git:[fetch=]https://github.com/OpenGrabeso/glg2d.git[push=]git@github.com:OpenGrabeso/glg2d.git</developerConnection>
