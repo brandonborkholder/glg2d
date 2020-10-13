@@ -5,8 +5,9 @@
   <parent>
     <artifactId>glg2d-parent</artifactId>
     <groupId>net.opengrabeso</groupId>
-    <version>${projversion}</version>
+    <version>flatten-central-version</version>
   </parent>
+  <version>${projversion}</version>
   <modelVersion>4.0.0</modelVersion>
 
   <artifactId>examples-jogl</artifactId>
@@ -20,10 +21,16 @@
       <artifactId>glg2d</artifactId>
       <version>${projversion}</version>
     </dependency>
+
     <dependency>
-      <groupId>net.opengrabeso</groupId>
-      <artifactId>jogl</artifactId>
-      <version>${projversion}</version>
+      <groupId>org.jogamp.gluegen</groupId>
+      <artifactId>gluegen-rt-main</artifactId>
+      <version>${jogl.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jogamp.jogl</groupId>
+      <artifactId>jogl-all-main</artifactId>
+      <version>${jogl.version}</version>
     </dependency>
   </dependencies>
 </project>

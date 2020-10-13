@@ -3,23 +3,21 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.opengrabeso</groupId>
   <artifactId>glg2d-parent</artifactId>
-  <version>${projversion}</version>
+  <version>flatten-central-version</version>
 
   <properties>
-    <projversion>0.7.3</projversion>
-    <jogl.version>2.3.2</jogl.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <projversion>0.7.5</projversion>
 
+    <jogl.version>2.3.2</jogl.version>
     <lwjgl.version>3.2.3</lwjgl.version>
 
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
 
   <modules>
-    <module>examples-jogl</module>
     <module>lib</module>
-    <module>jogl</module>
-    <module>lwjgl</module>
+    <module>examples-jogl</module>
     <module>examples-lwjgl</module>
   </modules>
   <packaging>pom</packaging>
@@ -106,9 +104,6 @@
             <manifestEntries>
               <Implementation-Title>${project.name}</Implementation-Title>
               <Implementation-Version>${project.version}</Implementation-Version>
-              <Implementation-Branch>${mvngit.branch}</Implementation-Branch>
-              <Implementation-Commit>${mvngit.commit.id}</Implementation-Commit>
-              <Implementation-Vendor>JogAmp Community</Implementation-Vendor>
               <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
               <Implementation-URL>${project.url}</Implementation-URL>
             </manifestEntries>
@@ -133,8 +128,6 @@
             <manifestEntries>
               <Implementation-Title>${project.name}</Implementation-Title>
               <Implementation-Version>${project.version}</Implementation-Version>
-              <Implementation-Vendor>JogAmp Community</Implementation-Vendor>
-              <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
               <Implementation-URL>${project.url}</Implementation-URL>
             </manifestEntries>
           </archive>
@@ -156,14 +149,37 @@
             <manifestEntries>
               <Implementation-Title>${project.name}</Implementation-Title>
               <Implementation-Version>${project.version}</Implementation-Version>
-              <Implementation-Branch>${mvngit.branch}</Implementation-Branch>
-              <Implementation-Commit>${mvngit.commit.id}</Implementation-Commit>
-              <Implementation-Vendor>JogAmp Community</Implementation-Vendor>
-              <Implementation-Vendor-Id>${project.groupId}</Implementation-Vendor-Id>
               <Implementation-URL>${project.url}</Implementation-URL>
             </manifestEntries>
           </archive>
         </configuration>
+      </plugin>
+
+
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>flatten-maven-plugin</artifactId>
+        <version>1.2.5</version>
+        <configuration>
+        </configuration>
+        <executions>
+          <!-- enable flattening -->
+          <execution>
+            <id>flatten</id>
+            <phase>process-resources</phase>
+            <goals>
+              <goal>flatten</goal>
+            </goals>
+          </execution>
+          <!-- ensure proper cleanup -->
+          <execution>
+            <id>flatten.clean</id>
+            <phase>clean</phase>
+            <goals>
+              <goal>clean</goal>
+            </goals>
+          </execution>
+        </executions>
       </plugin>
     </plugins>
   </build>

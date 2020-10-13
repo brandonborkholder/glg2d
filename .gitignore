@@ -7,3 +7,4 @@ bin
 *.log
 /.idea/
 /*.iml
+.flattened-pom.xml
