@@ -126,7 +126,7 @@ public class UIDemo extends JPanel {
   JComponent createInputComponent() {
     JPanel panel = new JPanel();
 
-    JComboBox box = new JComboBox(new String[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel" });
+    JComboBox<String> box = new JComboBox<String>(new String[] { "alpha", "bravo", "charlie", "delta", "echo", "foxtrot", "golf", "hotel" });
     panel.add(box);
 
     JSpinner spinner = new JSpinner(new SpinnerNumberModel());
@@ -240,7 +240,7 @@ public class UIDemo extends JPanel {
   }
 
   JComponent createListComponent() {
-    DefaultListModel model = new DefaultListModel();
+    DefaultListModel<String> model = new DefaultListModel<String>();
     model.addElement("alpha");
     model.addElement("bravo");
     model.addElement("charlie");
@@ -255,7 +255,7 @@ public class UIDemo extends JPanel {
     model.addElement("limo");
     model.addElement("mike");
     model.addElement("november");
-    return new JList(model);
+    return new JList<>(model);
   }
 
   JComponent createTreeComponent() {
