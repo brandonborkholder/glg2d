@@ -54,7 +54,7 @@ The project is published at GitHub packages, add following to your pom.xml:
 
 <dependency>
  <groupId>net.opengrabeso.glg2d</groupId>
- <artifactId>glg2d</artifactId>
+ <artifactId>glg2d-parent</artifactId>
  <version>${glg2d.version}</version>
 </dependency>
 ```

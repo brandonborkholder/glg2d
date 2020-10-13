@@ -1,20 +1,9 @@
 package net.opengrabeso.glg2d.examples;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JRadioButton;
-import javax.swing.JSlider;
-import javax.swing.SwingConstants;
-
 import net.opengrabeso.glg2d.GLGraphics2D;
+
+import javax.swing.*;
+import java.awt.*;
 
 class Example {
   public static JComponent createComponent() {

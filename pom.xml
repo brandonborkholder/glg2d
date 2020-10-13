@@ -2,9 +2,27 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>net.opengrabeso</groupId>
-  <artifactId>glg2d</artifactId>
-  <version>0.7.2</version>
-  <packaging>jar</packaging>
+  <artifactId>glg2d-parent</artifactId>
+  <version>${projversion}</version>
+
+  <properties>
+    <projversion>0.7.3</projversion>
+    <jogl.version>2.3.2</jogl.version>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+    <lwjgl.version>3.2.3</lwjgl.version>
+
+    <maven.deploy.skip>true</maven.deploy.skip>
+  </properties>
+
+  <modules>
+    <module>examples-jogl</module>
+    <module>lib</module>
+    <module>jogl</module>
+    <module>lwjgl</module>
+    <module>examples-lwjgl</module>
+  </modules>
+  <packaging>pom</packaging>
   <name>GLG2D</name>
   <description>OpenGL Text Renderer for JOGL and LWJGL</description>
   <inceptionYear>2010</inceptionYear>
@@ -40,140 +58,6 @@
     </repository>
   </repositories>
 
-  <properties>
-    <jogl.version>2.3.2</jogl.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-
-    <lwjgl.version>3.2.3</lwjgl.version>
-
-  </properties>
-
-
-  <profiles>
-    <profile>
-      <id>lwjgl-natives-linux-amd64</id>
-      <activation>
-        <os>
-          <family>unix</family>
-          <arch>amd64</arch>
-        </os>
-      </activation>
-      <properties>
-        <lwjgl.natives>natives-linux</lwjgl.natives>
-      </properties>
-    </profile>
-    <profile>
-      <id>lwjgl-natives-macos-amd64</id>
-      <activation>
-        <os>
-          <family>mac</family>
-          <arch>amd64</arch>
-        </os>
-      </activation>
-      <properties>
-        <lwjgl.natives>natives-macos</lwjgl.natives>
-      </properties>
-    </profile>
-    <profile>
-      <id>lwjgl-natives-windows-amd64</id>
-      <activation>
-        <os>
-          <family>windows</family>
-          <arch>amd64</arch>
-        </os>
-      </activation>
-      <properties>
-        <lwjgl.natives>natives-windows</lwjgl.natives>
-      </properties>
-    </profile>
-  </profiles>
-
-  <dependencyManagement>
-    <dependencies>
-      <dependency>
-        <groupId>org.lwjgl</groupId>
-        <artifactId>lwjgl-bom</artifactId>
-        <version>${lwjgl.version}</version>
-        <scope>import</scope>
-        <type>pom</type>
-      </dependency>
-    </dependencies>
-  </dependencyManagement>
-
-  <dependencies>
-    <dependency>
-      <groupId>org.jogamp.gluegen</groupId>
-      <artifactId>gluegen-rt-main</artifactId>
-      <version>${jogl.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.jogamp.jogl</groupId>
-      <artifactId>jogl-all-main</artifactId>
-      <version>${jogl.version}</version>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.11</version>
-      <scope>test</scope>
-    </dependency>
-
-
-    <dependency>
-      <groupId>org.lwjgl</groupId>
-      <artifactId>lwjgl</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.lwjgl</groupId>
-      <artifactId>lwjgl-glfw</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.lwjgl</groupId>
-      <artifactId>lwjgl-jawt</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.lwjgl</groupId>
-      <artifactId>lwjgl-opengl</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.lwjgl</groupId>
-      <artifactId>lwjgl</artifactId>
-      <classifier>${lwjgl.natives}</classifier>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.lwjgl</groupId>
-      <artifactId>lwjgl-glfw</artifactId>
-      <classifier>${lwjgl.natives}</classifier>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.lwjgl</groupId>
-      <artifactId>lwjgl-opengl</artifactId>
-      <classifier>${lwjgl.natives}</classifier>
-      <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.joml</groupId>
-      <artifactId>joml</artifactId>
-      <version>1.9.25</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.lwjglx</groupId>
-      <artifactId>lwjgl3-awt</artifactId>
-      <version>0.1.7</version>
-      <scope>provided</scope>
-    </dependency>
-
-  </dependencies>
   <build>
     <plugins>
 

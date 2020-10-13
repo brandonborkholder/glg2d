@@ -1,11 +1,9 @@
 package net.opengrabeso.glg2d.examples;
 
-import java.awt.Dimension;
-
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-
 import net.opengrabeso.glg2d.GLG2DPanel;
+
+import javax.swing.*;
+import java.awt.*;
 
 public class AWTExample {
   public static void main(String[] args) {

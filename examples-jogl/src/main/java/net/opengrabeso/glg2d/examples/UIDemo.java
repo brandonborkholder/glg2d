@@ -1,4 +1,6 @@
-package net.opengrabeso.glg2d;
+package net.opengrabeso.glg2d.examples;
+
+import net.opengrabeso.glg2d.GLG2DPanel;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -314,7 +316,7 @@ public class UIDemo extends JPanel {
 
   Icon getIcon(String name) {
     try {
-      InputStream str = UIDemo.class.getClassLoader().getResourceAsStream(name + ".png");
+      InputStream str = getClass().getClassLoader().getResourceAsStream(name + ".png");
       return new ImageIcon(ImageIO.read(str));
     } catch (IOException e) {
       throw new RuntimeException(e);
