@@ -2,7 +2,6 @@ package net.opengrabeso.glg2d.impl.gl2;
 
 import com.github.opengrabeso.jaagl.GL2;
 import net.opengrabeso.opengl.util.awt.TextRenderer;
-import com.jogamp.opengl.fixedfunc.GLMatrixFunc;
 
 import java.awt.*;
 
