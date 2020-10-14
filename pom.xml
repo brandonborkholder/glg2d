@@ -6,7 +6,7 @@
   <version>flatten-central-version</version>
 
   <properties>
-    <projversion>0.7.5</projversion>
+    <projversion>0.7.6</projversion>
 
     <jogl.version>2.3.2</jogl.version>
     <lwjgl.version>3.2.3</lwjgl.version>
