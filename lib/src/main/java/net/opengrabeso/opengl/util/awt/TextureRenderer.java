@@ -115,7 +115,7 @@ public class TextureRenderer {
     private int vertCoordAttrib = -1;
     private int texCoordAttrib = -1;
 
-    private boolean useVAO = true; // avoid using VAO on older OpenGL
+    private boolean useVAO = false; // avoid using VAO on older OpenGL
     private int vao = -1;
 
 
@@ -155,23 +155,43 @@ public class TextureRenderer {
         vertCoordAttrib = gl.glGetAttribLocation(program, "MCVertex");
         texCoordAttrib = gl.glGetAttribLocation(program, "TexCoord0");
 
-        int[] vao = new int[]{0};
-        gl.glGenVertexArrays(vao);
-        this.vao = vao[0];
+        // try VAO support
+        // it seems when there is no VAO glGenVertexArrays fails gracefully by returning -1,
+        // but as it is hard to test this one older implementations, using an additional try should do no harm
+        try {
+            int[] vao = new int[]{0};
+            gl.glGenVertexArrays(vao);
+            this.vao = vao[0];
+            this.useVAO = this.vao > 0;
+
+            setupVertexAttributesImpl();
+        } catch (Exception ex) {
+            this.useVAO = false;
+        }
+
+
+    }
+
+    private void setupVertexAttributesImpl() {
+        gl.glEnableVertexAttribArray(vertCoordAttrib);
+        gl.glEnableVertexAttribArray(texCoordAttrib);
+
+        gl.glVertexAttribPointer(vertCoordAttrib, 3, gl.GL_FLOAT(), false, 5 * Buffers.SIZEOF_FLOAT, 0);
+        gl.glVertexAttribPointer(texCoordAttrib, 2, gl.GL_FLOAT(), false, 5 * Buffers.SIZEOF_FLOAT, 3 * Buffers.SIZEOF_FLOAT);
+    }
+
+    private void cleanupVertexAttributesImpl() {
+        gl.glDisableVertexAttribArray(vertCoordAttrib);
+        gl.glDisableVertexAttribArray(texCoordAttrib);
     }
 
     public void setupVertexAttributes(float[] transform, float[] color) {
         // TODO: VBA
         if (useVAO) {
             gl.glBindVertexArray(vao);
+        } else {
+            setupVertexAttributesImpl();
         }
-
-        // TODO: optimize on VAO
-        gl.glEnableVertexAttribArray(vertCoordAttrib);
-        gl.glEnableVertexAttribArray(texCoordAttrib);
-
-        gl.glVertexAttribPointer(vertCoordAttrib, 3, gl.GL_FLOAT(), false, 5 * Buffers.SIZEOF_FLOAT, 0);
-        gl.glVertexAttribPointer(texCoordAttrib, 2, gl.GL_FLOAT(), false, 5 * Buffers.SIZEOF_FLOAT, 3 * Buffers.SIZEOF_FLOAT);
 
         gl.glUseProgram(program);
         gl.glUniformMatrix4fv(transformUniform, 1, false, transform, 0);
@@ -181,13 +201,13 @@ public class TextureRenderer {
     public void cleanupVertexAttributes() {
         gl.glUseProgram(0);
 
-        gl.glDisableVertexAttribArray(vertCoordAttrib);
-        gl.glDisableVertexAttribArray(texCoordAttrib);
-
         if (useVAO) {
             gl.glBindVertexArray(0);
+        } else {
+            cleanupVertexAttributesImpl();
         }
     }
+
 
     private void cleanup() {
         gl.glDeleteProgram(program);
@@ -374,6 +394,7 @@ public class TextureRenderer {
      * valid to use this renderer after calling this method.
      */
     public void dispose() {
+        cleanup();
         if (texture != null) {
             texture.destroy(gl);
             texture = null;
