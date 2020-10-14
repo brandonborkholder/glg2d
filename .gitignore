@@ -6,5 +6,5 @@ target
 bin
 *.log
 /.idea/
-/*.iml
+*.iml
 .flattened-pom.xml
