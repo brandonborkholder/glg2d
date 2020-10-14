@@ -13,7 +13,7 @@ public class Jaagl2EventListenerJogl implements GLEventListener {
     }
 
     private static GL2GL3 getGL(GLAutoDrawable glAutoDrawable) {
-        return JoGL.wrap(glAutoDrawable.getGL().getGL3());
+        return JoGL.wrap(glAutoDrawable.getGL());
     }
 
     @Override

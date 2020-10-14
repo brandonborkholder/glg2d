@@ -12,7 +12,9 @@ public abstract class JoGL implements GL {
     }
 
     public static GL2GL3 wrap(com.jogamp.opengl.GL gl) {
-        if (gl instanceof com.jogamp.opengl.GL3) {
+        // JOGL always uses GL4bcImpl to implement the interface
+        // we need to check the profile to learn the real capabilities
+        if (gl.getGLProfile().isGL3()) {
             return new JoGL3((com.jogamp.opengl.GL3)gl);
         } else if (gl instanceof com.jogamp.opengl.GL2) {
             return new JoGL2((com.jogamp.opengl.GL2)gl);

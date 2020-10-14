@@ -117,7 +117,8 @@ public class GLG2DSimpleEventListener implements GLEventListener {
    * calls.
    */
   protected GLGraphics2D createGraphics2D(GLAutoDrawable drawable) {
-    return new GLShaderGraphics2D(JoGL.wrap(drawable.getContext().getGL().getGL3()));
+    // choose GL2/GL3 automatically
+    return new GLShaderGraphics2D(JoGL.wrap(drawable.getContext().getGL()));
     //return new GLGraphics2D(JoGL.wrap(drawable.getContext().getGL().getGL2()));
   }
 
