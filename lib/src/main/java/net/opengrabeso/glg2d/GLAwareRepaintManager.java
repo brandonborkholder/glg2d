@@ -18,32 +18,33 @@ package net.opengrabeso.glg2d;
 import java.awt.Container;
 
 import com.jogamp.opengl.GLAutoDrawable;
+
 import javax.swing.JComponent;
 import javax.swing.RepaintManager;
 
 public class GLAwareRepaintManager extends RepaintManager {
-  public static RepaintManager INSTANCE = new GLAwareRepaintManager();
+    public static RepaintManager INSTANCE = new GLAwareRepaintManager();
 
-  @Override
-  public void addDirtyRegion(JComponent c, int x, int y, int w, int h) {
-    GLG2DCanvas canvas = getGLParent(c);
-    if (canvas == null || c instanceof GLAutoDrawable) {
-      super.addDirtyRegion(c, x, y, w, h);
-    } else {
-      canvas.repaint();
+    @Override
+    public void addDirtyRegion(JComponent c, int x, int y, int w, int h) {
+        GLG2DCanvas canvas = getGLParent(c);
+        if (canvas == null || c instanceof GLAutoDrawable) {
+            super.addDirtyRegion(c, x, y, w, h);
+        } else {
+            canvas.repaint();
+        }
     }
-  }
 
-  protected GLG2DCanvas getGLParent(JComponent component) {
-    Container c = component.getParent();
-    while (true) {
-      if (c == null) {
-        return null;
-      } else if (c instanceof GLG2DCanvas) {
-        return (GLG2DCanvas) c;
-      } else {
-        c = c.getParent();
-      }
+    protected GLG2DCanvas getGLParent(JComponent component) {
+        Container c = component.getParent();
+        while (true) {
+            if (c == null) {
+                return null;
+            } else if (c instanceof GLG2DCanvas) {
+                return (GLG2DCanvas) c;
+            } else {
+                c = c.getParent();
+            }
+        }
     }
-  }
 }

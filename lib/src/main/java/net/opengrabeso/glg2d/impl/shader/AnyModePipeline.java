@@ -22,80 +22,80 @@ import com.github.opengrabeso.jaagl.GL2GL3;
 import com.jogamp.common.nio.Buffers;
 
 public class AnyModePipeline extends AbstractShaderPipeline {
-  protected int vertCoordBuffer = -1;
-  protected int vertCoordLocation = -1;
-  protected int vertexArrayId = -1;
+    protected int vertCoordBuffer = -1;
+    protected int vertCoordLocation = -1;
+    protected int vertexArrayId = -1;
 
-  public AnyModePipeline() {
-    this("FixedFuncShader.v", "FixedFuncShader.f");
-  }
-
-  public AnyModePipeline(String vertexShaderFileName, String fragmentShaderFileName) {
-    super(vertexShaderFileName, null, fragmentShaderFileName);
-  }
-
-  public void bindBuffer(GL2GL3 gl) {
-      if (vertexArrayId < 0) {
-          int[] vao = new int[]{0};
-          gl.glGenVertexArrays(vao);
-          vertexArrayId = vao[0];
-      }
-
-      gl.glBindVertexArray(vertexArrayId);
-
-    gl.glEnableVertexAttribArray(vertCoordLocation);
-    if (vertCoordBuffer < 0) {
-        int[] ids = new int[1];
-        gl.glGenBuffers(ids);
-        vertCoordBuffer = ids[0];
+    public AnyModePipeline() {
+        this("FixedFuncShader.v", "FixedFuncShader.f");
     }
 
-    gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), vertCoordBuffer);
-    gl.glVertexAttribPointer(vertCoordLocation, 2, gl.GL_FLOAT(), false, 0, 0);
-  }
-
-  public void bindBufferData(GL2GL3 gl, FloatBuffer vertexBuffer) {
-    bindBuffer(gl);
-
-    int count = vertexBuffer.limit() - vertexBuffer.position();
-    gl.glBufferData(gl.GL_ARRAY_BUFFER(), Buffers.SIZEOF_FLOAT * count, vertexBuffer, gl.GL_STREAM_DRAW());
-  }
-
-  public void unbindBuffer(GL2GL3 gl) {
-    gl.glDisableVertexAttribArray(vertCoordLocation);
-    gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), 0);
-      gl.glBindVertexArray(0);
-  }
-
-  public void draw(GL2GL3 gl, int mode, FloatBuffer vertexBuffer) {
-    bindBufferData(gl, vertexBuffer);
-
-    int numPts = (vertexBuffer.limit() - vertexBuffer.position()) / 2;
-    gl.glDrawArrays(mode, 0, numPts);
-
-    unbindBuffer(gl);
-  }
-
-  @Override
-  protected void setupUniformsAndAttributes(GL2GL3 gl) {
-    super.setupUniformsAndAttributes(gl);
-
-    transformLocation = gl.glGetUniformLocation(programId, "u_transform");
-    colorLocation = gl.glGetUniformLocation(programId, "u_color");
-
-    vertCoordLocation = gl.glGetAttribLocation(programId, "a_vertCoord");
-  }
-
-  @Override
-  public void delete(GL2GL3 gl) {
-    super.delete(gl);
-
-    if (gl.glIsBuffer(vertCoordBuffer)) {
-      gl.glDeleteBuffers(new int[] { vertCoordBuffer });
+    public AnyModePipeline(String vertexShaderFileName, String fragmentShaderFileName) {
+        super(vertexShaderFileName, null, fragmentShaderFileName);
     }
 
-    if (vertexArrayId >= 0) {
-        gl.glDeleteVertexArrays(new int[]{vertexArrayId});
+    public void bindBuffer(GL2GL3 gl) {
+        if (vertexArrayId < 0) {
+            int[] vao = new int[]{0};
+            gl.glGenVertexArrays(vao);
+            vertexArrayId = vao[0];
+        }
+
+        gl.glBindVertexArray(vertexArrayId);
+
+        gl.glEnableVertexAttribArray(vertCoordLocation);
+        if (vertCoordBuffer < 0) {
+            int[] ids = new int[1];
+            gl.glGenBuffers(ids);
+            vertCoordBuffer = ids[0];
+        }
+
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), vertCoordBuffer);
+        gl.glVertexAttribPointer(vertCoordLocation, 2, gl.GL_FLOAT(), false, 0, 0);
     }
-  }
+
+    public void bindBufferData(GL2GL3 gl, FloatBuffer vertexBuffer) {
+        bindBuffer(gl);
+
+        int count = vertexBuffer.limit() - vertexBuffer.position();
+        gl.glBufferData(gl.GL_ARRAY_BUFFER(), Buffers.SIZEOF_FLOAT * count, vertexBuffer, gl.GL_STREAM_DRAW());
+    }
+
+    public void unbindBuffer(GL2GL3 gl) {
+        gl.glDisableVertexAttribArray(vertCoordLocation);
+        gl.glBindBuffer(gl.GL_ARRAY_BUFFER(), 0);
+        gl.glBindVertexArray(0);
+    }
+
+    public void draw(GL2GL3 gl, int mode, FloatBuffer vertexBuffer) {
+        bindBufferData(gl, vertexBuffer);
+
+        int numPts = (vertexBuffer.limit() - vertexBuffer.position()) / 2;
+        gl.glDrawArrays(mode, 0, numPts);
+
+        unbindBuffer(gl);
+    }
+
+    @Override
+    protected void setupUniformsAndAttributes(GL2GL3 gl) {
+        super.setupUniformsAndAttributes(gl);
+
+        transformLocation = gl.glGetUniformLocation(programId, "u_transform");
+        colorLocation = gl.glGetUniformLocation(programId, "u_color");
+
+        vertCoordLocation = gl.glGetAttribLocation(programId, "a_vertCoord");
+    }
+
+    @Override
+    public void delete(GL2GL3 gl) {
+        super.delete(gl);
+
+        if (gl.glIsBuffer(vertCoordBuffer)) {
+            gl.glDeleteBuffers(new int[]{vertCoordBuffer});
+        }
+
+        if (vertexArrayId >= 0) {
+            gl.glDeleteVertexArrays(new int[]{vertexArrayId});
+        }
+    }
 }

@@ -25,67 +25,67 @@ import com.github.opengrabeso.jaagl.GL2GL3;
 import net.opengrabeso.glg2d.impl.BasicStrokeLineVisitor;
 
 public class GL2ES2StrokeLineVisitor extends BasicStrokeLineVisitor implements ShaderPathVisitor {
-  protected GL2GL3 gl;
-  protected UniformBufferObject uniforms;
+    protected GL2GL3 gl;
+    protected UniformBufferObject uniforms;
 
-  protected AnyModePipeline pipeline;
+    protected AnyModePipeline pipeline;
 
-  public GL2ES2StrokeLineVisitor() {
-    this(new AnyModePipeline());
-  }
-
-  public GL2ES2StrokeLineVisitor(AnyModePipeline pipeline) {
-    this.pipeline = pipeline;
-  }
-
-  @Override
-  public void setGLContext(GL context, UniformBufferObject uniforms) {
-    setGLContext(context);
-
-    this.uniforms = uniforms;
-  }
-
-  @Override
-  public void setGLContext(GL context) {
-    gl = context.getGL2GL3();
-
-    if (!pipeline.isSetup()) {
-      pipeline.setup(gl);
-    }
-  }
-
-  @Override
-  public void setStroke(BasicStroke stroke) {
-    super.setStroke(stroke);
-  }
-
-  @Override
-  public void beginPoly(int windingRule) {
-    pipeline.use(gl, true);
-    pipeline.setTransform(gl, uniforms.transformHook.getGLMatrixData());
-    pipeline.setColor(gl, uniforms.colorHook.getRGBA());
-
-    super.beginPoly(windingRule);
-  }
-
-  @Override
-  public void endPoly() {
-    super.endPoly();
-
-    pipeline.use(gl, false);
-  }
-
-  @Override
-  protected void drawBuffer() {
-    FloatBuffer buf = vBuffer.getBuffer();
-    if (buf.position() == 0) {
-      return;
+    public GL2ES2StrokeLineVisitor() {
+        this(new AnyModePipeline());
     }
 
-    buf.flip();
+    public GL2ES2StrokeLineVisitor(AnyModePipeline pipeline) {
+        this.pipeline = pipeline;
+    }
 
-    pipeline.draw(gl, gl.GL_TRIANGLE_STRIP(), buf);
+    @Override
+    public void setGLContext(GL context, UniformBufferObject uniforms) {
+        setGLContext(context);
 
-    vBuffer.clear();
-  }
+        this.uniforms = uniforms;
+    }
+
+    @Override
+    public void setGLContext(GL context) {
+        gl = context.getGL2GL3();
+
+        if (!pipeline.isSetup()) {
+            pipeline.setup(gl);
+        }
+    }
+
+    @Override
+    public void setStroke(BasicStroke stroke) {
+        super.setStroke(stroke);
+    }
+
+    @Override
+    public void beginPoly(int windingRule) {
+        pipeline.use(gl, true);
+        pipeline.setTransform(gl, uniforms.transformHook.getGLMatrixData());
+        pipeline.setColor(gl, uniforms.colorHook.getRGBA());
+
+        super.beginPoly(windingRule);
+    }
+
+    @Override
+    public void endPoly() {
+        super.endPoly();
+
+        pipeline.use(gl, false);
+    }
+
+    @Override
+    protected void drawBuffer() {
+        FloatBuffer buf = vBuffer.getBuffer();
+        if (buf.position() == 0) {
+            return;
+        }
+
+        buf.flip();
+
+        pipeline.draw(gl, gl.GL_TRIANGLE_STRIP(), buf);
+
+        vBuffer.clear();
+    }
 }

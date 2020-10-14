@@ -5,7 +5,7 @@ import net.opengrabeso.opengl.util.awt.TextRenderer;
 
 import java.awt.*;
 
-public class GL2StringDrawerImpl extends GL2StringDrawer{
+public class GL2StringDrawerImpl extends GL2StringDrawer {
 
     private final GL2 gl;
 
@@ -24,7 +24,9 @@ public class GL2StringDrawerImpl extends GL2StringDrawer{
     }
 
     @Override
-    protected boolean useVerticalFlip() {return false;}
+    protected boolean useVerticalFlip() {
+        return false;
+    }
 
     @Override
     protected void cleanupMatrix(TextRenderer renderer) {

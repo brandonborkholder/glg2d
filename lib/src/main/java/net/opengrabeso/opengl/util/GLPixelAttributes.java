@@ -44,7 +44,6 @@ public class GLPixelAttributes {
      *
      * @param dataFormat GL data format
      * @param dataType   GL data type
-
      */
     public GLPixelAttributes(final int dataFormat, final int dataType) {
         this.format = dataFormat;

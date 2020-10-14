@@ -50,9 +50,9 @@ public class ShaderUtil {
         final int[] ires = new int[1];
         gl.glGetShaderiv(shaderObj, name, ires, 0);
 
-        final boolean res = ires[0]==1;
-        if(!res && null!=verboseOut) {
-            verboseOut.println("Shader status invalid: "+ getShaderInfoLog(gl, shaderObj));
+        final boolean res = ires[0] == 1;
+        if (!res && null != verboseOut) {
+            verboseOut.println("Shader status invalid: " + getShaderInfoLog(gl, shaderObj));
         }
         return res;
     }
@@ -61,7 +61,7 @@ public class ShaderUtil {
         final int[] ires = new int[1];
         gl.glGetProgramiv(programObj, name, ires, 0);
 
-        return ires[0]==1;
+        return ires[0] == 1;
     }
 
 

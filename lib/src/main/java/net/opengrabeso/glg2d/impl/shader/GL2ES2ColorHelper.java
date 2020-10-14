@@ -25,59 +25,59 @@ import net.opengrabeso.glg2d.impl.AbstractColorHelper;
 import net.opengrabeso.glg2d.impl.shader.UniformBufferObject.ColorHook;
 
 public class GL2ES2ColorHelper extends AbstractColorHelper implements ColorHook {
-  protected float[] foregroundRGBA = new float[4];
+    protected float[] foregroundRGBA = new float[4];
 
-  protected GL2ES2ImagePipeline pipeline;
+    protected GL2ES2ImagePipeline pipeline;
 
-  public GL2ES2ColorHelper() {
-    this(new GL2ES2ImagePipeline());
-  }
-
-  public GL2ES2ColorHelper(GL2ES2ImagePipeline pipeline) {
-    this.pipeline = pipeline;
-  }
-
-  @Override
-  public void setG2D(GLGraphics2D g2d) {
-    if (g2d instanceof GLShaderGraphics2D) {
-      ((GLShaderGraphics2D) g2d).getUniformsObject().colorHook = this;
-    } else {
-      throw new IllegalArgumentException(GLGraphics2D.class.getName() + " implementation must be instance of "
-          + GLShaderGraphics2D.class.getSimpleName());
+    public GL2ES2ColorHelper() {
+        this(new GL2ES2ImagePipeline());
     }
 
-    super.setG2D(g2d);
-  }
+    public GL2ES2ColorHelper(GL2ES2ImagePipeline pipeline) {
+        this.pipeline = pipeline;
+    }
 
-  @Override
-  public void setColorNoRespectComposite(Color c) {
-    foregroundRGBA[0] = c.getRed() / 255f;
-    foregroundRGBA[1] = c.getGreen() / 255f;
-    foregroundRGBA[2] = c.getBlue() / 255f;
-    foregroundRGBA[3] = c.getAlpha() / 255f;
-  }
+    @Override
+    public void setG2D(GLGraphics2D g2d) {
+        if (g2d instanceof GLShaderGraphics2D) {
+            ((GLShaderGraphics2D) g2d).getUniformsObject().colorHook = this;
+        } else {
+            throw new IllegalArgumentException(GLGraphics2D.class.getName() + " implementation must be instance of "
+                    + GLShaderGraphics2D.class.getSimpleName());
+        }
 
-  @Override
-  public void setColorRespectComposite(Color c) {
-    float alpha = getAlpha();
-    foregroundRGBA[0] = c.getRed() / 255f;
-    foregroundRGBA[1] = c.getGreen() / 255f;
-    foregroundRGBA[2] = c.getBlue() / 255f;
-    foregroundRGBA[3] = (c.getAlpha() / 255f) * alpha;
-  }
+        super.setG2D(g2d);
+    }
 
-  @Override
-  public void setPaintMode() {
-    // not implemented yet
-  }
+    @Override
+    public void setColorNoRespectComposite(Color c) {
+        foregroundRGBA[0] = c.getRed() / 255f;
+        foregroundRGBA[1] = c.getGreen() / 255f;
+        foregroundRGBA[2] = c.getBlue() / 255f;
+        foregroundRGBA[3] = c.getAlpha() / 255f;
+    }
 
-  @Override
-  public void setXORMode(Color c) {
-    // not implemented yet
-  }
+    @Override
+    public void setColorRespectComposite(Color c) {
+        float alpha = getAlpha();
+        foregroundRGBA[0] = c.getRed() / 255f;
+        foregroundRGBA[1] = c.getGreen() / 255f;
+        foregroundRGBA[2] = c.getBlue() / 255f;
+        foregroundRGBA[3] = (c.getAlpha() / 255f) * alpha;
+    }
 
-  @Override
-  public void copyArea(int x, int y, int width, int height, int dx, int dy) {
+    @Override
+    public void setPaintMode() {
+        // not implemented yet
+    }
+
+    @Override
+    public void setXORMode(Color c) {
+        // not implemented yet
+    }
+
+    @Override
+    public void copyArea(int x, int y, int width, int height, int dx, int dy) {
 //    GL2ES2 gl = g2d.getGLContext().getGL().getGL2ES2();
 //
 //    if (!pipeline.isSetup()) {
@@ -171,21 +171,21 @@ public class GL2ES2ColorHelper extends AbstractColorHelper implements ColorHook 
 //    gl.glDisable(GL.GL_TEXTURE_2D);
 //
 //    pipeline.use(gl, false);
-  }
-
-  @Override
-  public float getAlpha() {
-    Composite composite = getComposite();
-    float alpha = 1;
-    if (composite instanceof AlphaComposite) {
-      alpha = ((AlphaComposite) composite).getAlpha();
     }
 
-    return alpha;
-  }
+    @Override
+    public float getAlpha() {
+        Composite composite = getComposite();
+        float alpha = 1;
+        if (composite instanceof AlphaComposite) {
+            alpha = ((AlphaComposite) composite).getAlpha();
+        }
 
-  @Override
-  public float[] getRGBA() {
-    return foregroundRGBA;
-  }
+        return alpha;
+    }
+
+    @Override
+    public float[] getRGBA() {
+        return foregroundRGBA;
+    }
 }

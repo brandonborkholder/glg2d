@@ -39,8 +39,8 @@ public abstract class LWGL2GL3 extends LWGL implements GL2GL3 {
     }
 
     public void glUniformMatrix4fv(int location, int count, boolean transpose, float[] value, int i1) {
-        assert(count * 16 == value.length);
-        assert(i1 == 0);
+        assert (count * 16 == value.length);
+        assert (i1 == 0);
         org.lwjgl.opengl.GL20.glUniformMatrix4fv(location, transpose, value);
     }
 

@@ -22,15 +22,15 @@ import com.github.opengrabeso.jaagl.GL2;
 import net.opengrabeso.glg2d.impl.AbstractTesselatorVisitor;
 
 public class GL2TesselatorVisitor extends AbstractTesselatorVisitor {
-  protected GL2 gl;
+    protected GL2 gl;
 
-  @Override
-  public void setGLContext(GL context) {
-    gl = context.getGL2();
-  }
+    @Override
+    public void setGLContext(GL context) {
+        gl = context.getGL2();
+    }
 
-  @Override
-  protected void endTess() {
-    vBuffer.drawBuffer(gl, drawMode);
-  }
+    @Override
+    protected void endTess() {
+        vBuffer.drawBuffer(gl, drawMode);
+    }
 }

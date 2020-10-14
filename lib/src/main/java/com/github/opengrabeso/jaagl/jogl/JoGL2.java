@@ -1,11 +1,12 @@
 package com.github.opengrabeso.jaagl.jogl;
+
 import com.github.opengrabeso.jaagl.*;
 
 import java.nio.Buffer;
 
 public class JoGL2 extends JoGL2GL3 implements GL2 {
     private com.jogamp.opengl.GL2 ggl() {
-        return (com.jogamp.opengl.GL2)this.gl;
+        return (com.jogamp.opengl.GL2) this.gl;
     }
 
     public JoGL2(com.jogamp.opengl.GL2 gl) {
@@ -110,7 +111,7 @@ public class JoGL2 extends JoGL2GL3 implements GL2 {
         ggl().glScalef(x, y, z);
     }
 
-    public void glTranslatef(float x, float y, float z){
+    public void glTranslatef(float x, float y, float z) {
         ggl().glTranslatef(x, y, z);
     }
 

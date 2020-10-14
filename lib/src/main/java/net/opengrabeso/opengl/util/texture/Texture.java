@@ -97,74 +97,95 @@ import java.nio.*;
  * the alpha value.  If using <i>premultiplied color components</i>
  * it is important to use the correct blending function; for
  * example, the SrcOver rule is expressed as:
-<pre>
-    gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
-</pre>
+ * <pre>
+ * gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE_MINUS_SRC_ALPHA);
+ * </pre>
  * Also, when using a texture function like <code>GL_MODULATE</code> where
  * the current color plays a role, it is important to remember to make
  * sure that the color is specified in a premultiplied form, for
  * example:
-<pre>
-    float a = ...;
-    float r = r * a;
-    float g = g * a;
-    float b = b * a;
-    gl.glColor4f(r, g, b, a);
-</pre>
- *
+ * <pre>
+ * float a = ...;
+ * float r = r * a;
+ * float g = g * a;
+ * float b = b * a;
+ * gl.glColor4f(r, g, b, a);
+ * </pre>
+ * <p>
  * For reference, here is a list of the Porter-Duff compositing rules
  * and the associated OpenGL blend functions (source and destination
  * factors) to use in the face of premultiplied alpha:
  *
-<CENTER>
-<TABLE WIDTH="75%">
-<TR> <TD> Rule     <TD> Source                  <TD> Dest
-<TR> <TD> Clear    <TD> GL_ZERO                 <TD> GL_ZERO
-<TR> <TD> Src      <TD> GL_ONE                  <TD> GL_ZERO
-<TR> <TD> SrcOver  <TD> GL_ONE                  <TD> GL_ONE_MINUS_SRC_ALPHA
-<TR> <TD> DstOver  <TD> GL_ONE_MINUS_DST_ALPHA  <TD> GL_ONE
-<TR> <TD> SrcIn    <TD> GL_DST_ALPHA            <TD> GL_ZERO
-<TR> <TD> DstIn    <TD> GL_ZERO                 <TD> GL_SRC_ALPHA
-<TR> <TD> SrcOut   <TD> GL_ONE_MINUS_DST_ALPHA  <TD> GL_ZERO
-<TR> <TD> DstOut   <TD> GL_ZERO                 <TD> GL_ONE_MINUS_SRC_ALPHA
-<TR> <TD> Dst      <TD> GL_ZERO                 <TD> GL_ONE
-<TR> <TD> SrcAtop  <TD> GL_DST_ALPHA            <TD> GL_ONE_MINUS_SRC_ALPHA
-<TR> <TD> DstAtop  <TD> GL_ONE_MINUS_DST_ALPHA  <TD> GL_SRC_ALPHA
-<TR> <TD> AlphaXor <TD> GL_ONE_MINUS_DST_ALPHA  <TD> GL_ONE_MINUS_SRC_ALPHA
-</TABLE>
-</CENTER>
+ * <CENTER>
+ * <TABLE WIDTH="75%">
+ * <TR> <TD> Rule     <TD> Source                  <TD> Dest
+ * <TR> <TD> Clear    <TD> GL_ZERO                 <TD> GL_ZERO
+ * <TR> <TD> Src      <TD> GL_ONE                  <TD> GL_ZERO
+ * <TR> <TD> SrcOver  <TD> GL_ONE                  <TD> GL_ONE_MINUS_SRC_ALPHA
+ * <TR> <TD> DstOver  <TD> GL_ONE_MINUS_DST_ALPHA  <TD> GL_ONE
+ * <TR> <TD> SrcIn    <TD> GL_DST_ALPHA            <TD> GL_ZERO
+ * <TR> <TD> DstIn    <TD> GL_ZERO                 <TD> GL_SRC_ALPHA
+ * <TR> <TD> SrcOut   <TD> GL_ONE_MINUS_DST_ALPHA  <TD> GL_ZERO
+ * <TR> <TD> DstOut   <TD> GL_ZERO                 <TD> GL_ONE_MINUS_SRC_ALPHA
+ * <TR> <TD> Dst      <TD> GL_ZERO                 <TD> GL_ONE
+ * <TR> <TD> SrcAtop  <TD> GL_DST_ALPHA            <TD> GL_ONE_MINUS_SRC_ALPHA
+ * <TR> <TD> DstAtop  <TD> GL_ONE_MINUS_DST_ALPHA  <TD> GL_SRC_ALPHA
+ * <TR> <TD> AlphaXor <TD> GL_ONE_MINUS_DST_ALPHA  <TD> GL_ONE_MINUS_SRC_ALPHA
+ * </TABLE>
+ * </CENTER>
+ *
  * @author Chris Campbell, Kenneth Russell, et.al.
  */
 public class Texture {
-    /** The GL target type for this texture. */
+    /**
+     * The GL target type for this texture.
+     */
     private int target;
-    /** The image GL target type for this texture, or its sub-components if cubemap. */
+    /**
+     * The image GL target type for this texture, or its sub-components if cubemap.
+     */
     private int imageTarget;
-    /** The GL texture ID. */
+    /**
+     * The GL texture ID.
+     */
     private int texID;
-    /** The width of the texture. */
+    /**
+     * The width of the texture.
+     */
     private int texWidth;
-    /** The height of the texture. */
+    /**
+     * The height of the texture.
+     */
     private int texHeight;
-    /** The width of the image. */
+    /**
+     * The width of the image.
+     */
     private int imgWidth;
-    /** The height of the image. */
+    /**
+     * The height of the image.
+     */
     private int imgHeight;
-    /** The original aspect ratio of the image, before any rescaling
-        that might have occurred due to using the GLU mipmap routines. */
+    /**
+     * The original aspect ratio of the image, before any rescaling
+     * that might have occurred due to using the GLU mipmap routines.
+     */
     private float aspectRatio;
-    /** Indicates whether the TextureData requires a vertical flip of
-        the texture coords. */
+    /**
+     * Indicates whether the TextureData requires a vertical flip of
+     * the texture coords.
+     */
     private boolean mustFlipVertically;
 
-    /** The texture coordinates corresponding to the entire image. */
+    /**
+     * The texture coordinates corresponding to the entire image.
+     */
     private TextureCoords coords;
 
     @Override
     public String toString() {
-        final String targetS = target == imageTarget ? Integer.toHexString(target) : Integer.toHexString(target) + " - image "+Integer.toHexString(imageTarget);
-        return "Texture[target "+targetS+", name "+texID+", "+
-                imgWidth+"/"+texWidth+" x "+imgHeight+"/"+texHeight+", y-flip "+mustFlipVertically+
+        final String targetS = target == imageTarget ? Integer.toHexString(target) : Integer.toHexString(target) + " - image " + Integer.toHexString(imageTarget);
+        return "Texture[target " + targetS + ", name " + texID + ", " +
+                imgWidth + "/" + texWidth + " x " + imgHeight + "/" + texHeight + ", y-flip " + mustFlipVertically +
                 "]";
     }
 
@@ -178,6 +199,7 @@ public class Texture {
     /**
      * Constructor for use when creating e.g. cube maps, where there is
      * no initial texture data
+     *
      * @param target the OpenGL texture target, eg GL.GL_TEXTURE_2D,
      *               GL2.GL_TEXTURE_RECTANGLE
      */
@@ -194,17 +216,17 @@ public class Texture {
      * it. Attempts to update such textures' contents will yield
      * undefined results.
      *
-     * @param textureID the OpenGL texture object to wrap
-     * @param target the OpenGL texture target, eg GL.GL_TEXTURE_2D,
-     *               GL2.GL_TEXTURE_RECTANGLE
-     * @param texWidth the width of the texture in pixels
-     * @param texHeight the height of the texture in pixels
-     * @param imgWidth the width of the image within the texture in
-     *          pixels (if the content is a sub-rectangle in the upper
-     *          left corner); otherwise, pass in texWidth
-     * @param imgHeight the height of the image within the texture in
-     *          pixels (if the content is a sub-rectangle in the upper
-     *          left corner); otherwise, pass in texHeight
+     * @param textureID          the OpenGL texture object to wrap
+     * @param target             the OpenGL texture target, eg GL.GL_TEXTURE_2D,
+     *                           GL2.GL_TEXTURE_RECTANGLE
+     * @param texWidth           the width of the texture in pixels
+     * @param texHeight          the height of the texture in pixels
+     * @param imgWidth           the width of the image within the texture in
+     *                           pixels (if the content is a sub-rectangle in the upper
+     *                           left corner); otherwise, pass in texWidth
+     * @param imgHeight          the height of the image within the texture in
+     *                           pixels (if the content is a sub-rectangle in the upper
+     *                           left corner); otherwise, pass in texHeight
      * @param mustFlipVertically indicates whether the texture
      *                           coordinates must be flipped vertically
      *                           in order to properly display the
@@ -241,13 +263,14 @@ public class Texture {
      * See the <a href="#perftips">performance tips</a> above for hints
      * on how to maximize performance when using many Texture objects.
      * </p>
-     * @param gl the current GL object
      *
-
-     * OpenGL-related errors occurred
+     * @param gl the current GL object
+     *           <p>
+     *           <p>
+     *           OpenGL-related errors occurred
      */
     public void enable(final GL gl) {
-        if( !gl.isGL3()) {
+        if (!gl.isGL3()) {
             gl.glEnable(target);
         }
     }
@@ -267,13 +290,14 @@ public class Texture {
      * See the <a href="#perftips">performance tips</a> above for hints
      * on how to maximize performance when using many Texture objects.
      * </p>
-     * @param gl the current GL object
      *
-
-     * OpenGL-related errors occurred
+     * @param gl the current GL object
+     *           <p>
+     *           <p>
+     *           OpenGL-related errors occurred
      */
     public void disable(final GL gl) {
-        if( !gl.isGL3()) {
+        if (!gl.isGL3()) {
             gl.glDisable(target);
         }
     }
@@ -281,16 +305,16 @@ public class Texture {
     /**
      * Binds this texture to the given GL context. This method is a
      * shorthand equivalent of the following OpenGL code:
-     <pre>
-     gl.glBindTexture(texture.getTarget(), texture.getTextureObject());
-     </pre>
-     *
+     * <pre>
+     * gl.glBindTexture(texture.getTarget(), texture.getTextureObject());
+     * </pre>
+     * <p>
      * See the <a href="#perftips">performance tips</a> above for hints
      * on how to maximize performance when using many Texture objects.
      *
      * @param gl the current GL context
-
-     * OpenGL-related errors occurred
+     *           <p>
+     *           OpenGL-related errors occurred
      */
     public void bind(final GL gl) {
         validateTexID(gl, true);
@@ -299,18 +323,17 @@ public class Texture {
 
     /**
      * Destroys the native resources used by this texture object.
-     *
-
      */
     public void destroy(final GL gl) {
-        if(0!=texID) {
-            gl.glDeleteTextures(new int[] {texID});
+        if (0 != texID) {
+            gl.glDeleteTextures(new int[]{texID});
             texID = 0;
         }
     }
 
     /**
      * Returns the OpenGL "target" of this texture.
+     *
      * @see com.jogamp.opengl.GL#GL_TEXTURE_2D
      * @see com.jogamp.opengl.GL2#GL_TEXTURE_RECTANGLE_ARB
      */
@@ -320,6 +343,7 @@ public class Texture {
 
     /**
      * Returns the image OpenGL "target" of this texture, or its sub-components if cubemap.
+     *
      * @see com.jogamp.opengl.GL#GL_TEXTURE_2D
      * @see com.jogamp.opengl.GL2#GL_TEXTURE_RECTANGLE_ARB
      */
@@ -412,10 +436,10 @@ public class Texture {
      * @return the texture coordinates corresponding to the specified sub-image
      */
     public TextureCoords getSubImageTexCoords(final int x1, final int y1, final int x2, final int y2) {
-        final float tx1 = (float)x1 / (float)texWidth;
-        final float ty1 = (float)y1 / (float)texHeight;
-        final float tx2 = (float)x2 / (float)texWidth;
-        final float ty2 = (float)y2 / (float)texHeight;
+        final float tx1 = (float) x1 / (float) texWidth;
+        final float ty1 = (float) y1 / (float) texHeight;
+        final float tx2 = (float) x2 / (float) texWidth;
+        final float ty2 = (float) y2 / (float) texHeight;
         if (mustFlipVertically) {
             final float yMax = (float) imgHeight / (float) texHeight;
             return new TextureCoords(tx1, yMax - ty1, tx2, yMax - ty2);
@@ -445,7 +469,7 @@ public class Texture {
      * </p>
      */
     public void setMustFlipVertically(final boolean v) {
-        if( v != mustFlipVertically ) {
+        if (v != mustFlipVertically) {
             mustFlipVertically = v;
             updateTexCoords();
         }
@@ -455,8 +479,6 @@ public class Texture {
      * Updates the content area incl. {@link TextureCoords} of the specified target of this texture
      * using the data in the given image. In general this is intended
      * for construction of cube maps.
-     *
-
      */
     public void updateImage(final GL gl, final TextureData data) {
         validateTexID(gl, true);
@@ -474,8 +496,8 @@ public class Texture {
         gl.glBindTexture(gl.GL_TEXTURE_2D(), texID);
 
         gl.glTexImage2D(gl.GL_TEXTURE_2D(), 0, data.getInternalFormat(),
-                        texWidth, texHeight, data.getBorder(),
-                        data.getPixelFormat(), data.getPixelType(), null);
+                texWidth, texHeight, data.getBorder(),
+                data.getPixelFormat(), data.getPixelType(), null);
         updateSubImageImpl(gl, data, gl.GL_TEXTURE_2D(), 0, 0, 0, 0, 0, data.getWidth(), data.getHeight());
 
         final int minFilter = gl.GL_LINEAR();
@@ -493,7 +515,7 @@ public class Texture {
         // Don't overwrite target if we're loading e.g. faces of a cube
         // map
         if ((this.target == 0) ||
-            (this.target == gl.GL_TEXTURE_2D())) {
+                (this.target == gl.GL_TEXTURE_2D())) {
             this.target = gl.GL_TEXTURE_2D();
         }
 
@@ -503,16 +525,14 @@ public class Texture {
      * Updates a subregion of the content area of this texture using the
      * given data.
      *
-     * @param data the image data to be uploaded to this texture
+     * @param data        the image data to be uploaded to this texture
      * @param mipmapLevel the mipmap level of the texture to set. If
-     * this is non-zero and the TextureData contains mipmap data, the
-     * appropriate mipmap level will be selected.
-     * @param x the x offset (in pixels) relative to the lower-left corner
-     * of this texture
-     * @param y the y offset (in pixels) relative to the lower-left corner
-     * of this texture
-     *
-
+     *                    this is non-zero and the TextureData contains mipmap data, the
+     *                    appropriate mipmap level will be selected.
+     * @param x           the x offset (in pixels) relative to the lower-left corner
+     *                    of this texture
+     * @param y           the y offset (in pixels) relative to the lower-left corner
+     *                    of this texture
      */
     public void updateSubImage(final GL gl, final TextureData data, final int mipmapLevel, final int x, final int y) {
         bind(gl);
@@ -523,23 +543,23 @@ public class Texture {
      * Updates a subregion of the content area of this texture using the
      * specified sub-region of the given data.
      *
-     * @param data the image data to be uploaded to this texture
+     * @param data        the image data to be uploaded to this texture
      * @param mipmapLevel the mipmap level of the texture to set. If
-     * this is non-zero and the TextureData contains mipmap data, the
-     * appropriate mipmap level will be selected.
-     * @param dstx the x offset (in pixels) relative to the lower-left corner
-     * of this texture where the update will be applied
-     * @param dsty the y offset (in pixels) relative to the lower-left corner
-     * of this texture where the update will be applied
-     * @param srcx the x offset (in pixels) relative to the lower-left corner
-     * of the supplied TextureData from which to fetch the update rectangle
-     * @param srcy the y offset (in pixels) relative to the lower-left corner
-     * of the supplied TextureData from which to fetch the update rectangle
-     * @param width the width (in pixels) of the rectangle to be updated
-     * @param height the height (in pixels) of the rectangle to be updated
-     *
-
-     * OpenGL-related errors occurred
+     *                    this is non-zero and the TextureData contains mipmap data, the
+     *                    appropriate mipmap level will be selected.
+     * @param dstx        the x offset (in pixels) relative to the lower-left corner
+     *                    of this texture where the update will be applied
+     * @param dsty        the y offset (in pixels) relative to the lower-left corner
+     *                    of this texture where the update will be applied
+     * @param srcx        the x offset (in pixels) relative to the lower-left corner
+     *                    of the supplied TextureData from which to fetch the update rectangle
+     * @param srcy        the y offset (in pixels) relative to the lower-left corner
+     *                    of the supplied TextureData from which to fetch the update rectangle
+     * @param width       the width (in pixels) of the rectangle to be updated
+     * @param height      the height (in pixels) of the rectangle to be updated
+     *                    <p>
+     *                    <p>
+     *                    OpenGL-related errors occurred
      */
     public void updateSubImage(final GL gl, final TextureData data, final int mipmapLevel,
                                final int dstx, final int dsty,
@@ -554,8 +574,8 @@ public class Texture {
      * texture's target. This gives control over parameters such as
      * GL_TEXTURE_MAX_ANISOTROPY_EXT. Causes this texture to be bound to
      * the current texture state.
-     *
-
+     * <p>
+     * <p>
      * OpenGL-related errors occurred
      */
     public void setTexParameterf(final GL gl, final int parameterName,
@@ -571,8 +591,6 @@ public class Texture {
      * to GL_CLAMP_TO_EDGE if OpenGL 1.2 is supported on the current
      * platform and GL_CLAMP if not. Causes this texture to be bound to
      * the current texture state.
-     *
-
      */
     public void setTexParameteri(final GL gl, final int parameterName,
                                  final int value) {
@@ -588,6 +606,7 @@ public class Texture {
      * Most applications will not need to access this, since it is
      * handled automatically by the bind(GL) and destroy(GL) APIs.
      * </p>
+     *
      * @param gl required to be valid and current in case the texture object has not been generated yet,
      *           otherwise it may be <code>null</code>.
      * @see #getTextureObject()
@@ -604,6 +623,7 @@ public class Texture {
      * Most applications will not need to access this, since it is
      * handled automatically by the bind(GL) and destroy(GL) APIs.
      * </p>
+     *
      * @see #getTextureObject(GL)
      */
     public int getTextureObject() {
@@ -617,16 +637,16 @@ public class Texture {
     private void updateTexCoords() {
         if (mustFlipVertically) {
             coords = new TextureCoords(0,                                      // l
-                                       (float) imgHeight / (float) texHeight,  // b
-                                       (float) imgWidth / (float) texWidth,    // r
-                                       0                                       // t
-                                      );
+                    (float) imgHeight / (float) texHeight,  // b
+                    (float) imgWidth / (float) texWidth,    // r
+                    0                                       // t
+            );
         } else {
             coords = new TextureCoords(0,                                      // l
-                                       0,                                      // b
-                                       (float) imgWidth / (float) texWidth,    // r
-                                       (float) imgHeight / (float) texHeight   // t
-                                      );
+                    0,                                      // b
+                    (float) imgWidth / (float) texWidth,    // r
+                    (float) imgHeight / (float) texHeight   // t
+            );
         }
     }
 
@@ -676,13 +696,13 @@ public class Texture {
             height = texHeight - dsty;
         }
 
-        final int[] align = { 0 };
-        final int[] rowLength = { 0 };
-        final int[] skipRows = { 0 };
-        final int[] skipPixels = { 0 };
-        gl.glGetIntegerv(gl.GL_UNPACK_ALIGNMENT(),   align); // save alignment
-        gl.glGetIntegerv(gl.GL_UNPACK_ROW_LENGTH(),  rowLength); // save row length
-        gl.glGetIntegerv(gl.GL_UNPACK_SKIP_ROWS(),   skipRows); // save skipped rows
+        final int[] align = {0};
+        final int[] rowLength = {0};
+        final int[] skipRows = {0};
+        final int[] skipPixels = {0};
+        gl.glGetIntegerv(gl.GL_UNPACK_ALIGNMENT(), align); // save alignment
+        gl.glGetIntegerv(gl.GL_UNPACK_ROW_LENGTH(), rowLength); // save row length
+        gl.glGetIntegerv(gl.GL_UNPACK_SKIP_ROWS(), skipRows); // save skipped rows
         gl.glGetIntegerv(gl.GL_UNPACK_SKIP_PIXELS(), skipPixels); // save skipped pixels
         gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT(), data.getAlignment());
         gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH(), rowlen);
@@ -690,25 +710,25 @@ public class Texture {
         gl.glPixelStorei(gl.GL_UNPACK_SKIP_PIXELS(), srcx);
 
         gl.glTexSubImage2D(newTarget, mipmapLevel,
-                           dstx, dsty, width, height,
-                           data.getPixelFormat(), data.getPixelType(),
-                           buffer);
-        gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT(),   align[0]);      // restore alignment
-        gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH(),  rowLength[0]);  // restore row length
-        gl.glPixelStorei(gl.GL_UNPACK_SKIP_ROWS(),   skipRows[0]);   // restore skipped rows
+                dstx, dsty, width, height,
+                data.getPixelFormat(), data.getPixelType(),
+                buffer);
+        gl.glPixelStorei(gl.GL_UNPACK_ALIGNMENT(), align[0]);      // restore alignment
+        gl.glPixelStorei(gl.GL_UNPACK_ROW_LENGTH(), rowLength[0]);  // restore row length
+        gl.glPixelStorei(gl.GL_UNPACK_SKIP_ROWS(), skipRows[0]);   // restore skipped rows
         gl.glPixelStorei(gl.GL_UNPACK_SKIP_PIXELS(), skipPixels[0]); // restore skipped pixels
     }
 
     private boolean validateTexID(final GL gl, final boolean throwException) {
-        if( 0 == texID ) {
-            if( null != gl ) {
+        if (0 == texID) {
+            if (null != gl) {
                 final int[] tmp = new int[1];
                 gl.glGenTextures(tmp);
                 texID = tmp[0];
-                if ( 0 == texID && throwException ) {
-                    throw gl.newGLException("Create texture ID invalid: texID "+texID+", glerr 0x"+Integer.toHexString(gl.glGetError()));
+                if (0 == texID && throwException) {
+                    throw gl.newGLException("Create texture ID invalid: texID " + texID + ", glerr 0x" + Integer.toHexString(gl.glGetError()));
                 }
-            } else if ( throwException ) {
+            } else if (throwException) {
                 throw gl.newGLException("No GL context given, can't create texture ID");
             }
         }

@@ -29,130 +29,121 @@ import com.jogamp.common.nio.Buffers;
  * multi-threaded.
  */
 public class VertexBuffer {
-  protected static VertexBuffer shared = new VertexBuffer(1024);
+    protected static VertexBuffer shared = new VertexBuffer(1024);
 
-  protected FloatBuffer buffer;
+    protected FloatBuffer buffer;
 
-  protected int deviceBufferId;
+    protected int deviceBufferId;
 
-  /**
-   * Creates a buffer that uses the shared global buffer. This is faster than
-   * allocating multiple float buffers. Since OpenGL is single-threaded, we can
-   * assume this won't be accessed outside the OpenGL thread and typically one
-   * object is drawn completely before another one. If this is not true, one of
-   * the objects being drawn simultaneously must use a private buffer. See
-   * {@code #VertexBuffer(int)}.
-   */
-  public static VertexBuffer getSharedBuffer() {
-    shared.clear();
-    return shared;
-  }
-
-  protected VertexBuffer(FloatBuffer buffer) {
-    this.buffer = buffer;
-  }
-
-  /**
-   * Creates a private buffer. This can be used without fear of clobbering the
-   * global buffer. This should only be used if you have a need to create two
-   * parallel shapes at the same time.
-   * 
-   * @param capacity
-   *          The size of the buffer in number of vertices
-   */
-  public VertexBuffer(int capacity) {
-    this(Buffers.newDirectFloatBuffer(capacity * 2));
-  }
-
-  /**
-   * Adds multiple vertices to the buffer.
-   * 
-   * @param array
-   *          The array containing vertices in the form (x,y),(x,y)
-   * @param offset
-   *          The starting index
-   * @param numVertices
-   *          The number of vertices, pairs of floats
-   */
-  public void addVertex(float[] array, int offset, int numVertices) {
-    int numFloats = numVertices * 2;
-    ensureCapacity(numFloats);
-    buffer.put(array, offset, numFloats);
-  }
-
-  /**
-   * Adds a vertex to the buffer.
-   * 
-   * @param x
-   *          The x coordinate
-   * @param y
-   *          The y coordinate
-   */
-  public void addVertex(float x, float y) {
-    ensureCapacity(2);
-    buffer.put(x);
-    buffer.put(y);
-  }
-
-  /**
-   * Adds multiple vertices to the buffer.
-   * 
-   * @param vertices
-   *          The buffer of new vertices to add.
-   */
-  public void addVertices(FloatBuffer vertices) {
-    int size = vertices.limit() - vertices.position();
-    ensureCapacity(size);
-
-    buffer.put(vertices);
-  }
-
-  protected void ensureCapacity(int numNewFloats) {
-    if (buffer.capacity() <= buffer.position() + numNewFloats) {
-      FloatBuffer larger = Buffers.newDirectFloatBuffer(Math.max(buffer.position() * 2, buffer.position() + numNewFloats));
-      deviceBufferId = -deviceBufferId;
-      int position = buffer.position();
-      buffer.rewind();
-      larger.put(buffer);
-      buffer = larger;
-      buffer.position(position);
-    }
-  }
-
-  /**
-   * Discard all existing points. This method is not necessary unless the points
-   * already added are not needed anymore and the buffer will be reused.
-   */
-  public void clear() {
-    buffer.clear();
-  }
-
-  public FloatBuffer getBuffer() {
-    return buffer;
-  }
-
-  /**
-   * Draws the vertices and rewinds the buffer to be ready to draw next time.
-   * 
-   * @param gl
-   *          The graphics context to use to draw
-   * @param mode
-   *          The mode, e.g. {@code GL#GL_LINE_STRIP}
-   */
-  public void drawBuffer(GL2 gl, int mode) {
-    if (buffer.position() == 0) {
-      return;
+    /**
+     * Creates a buffer that uses the shared global buffer. This is faster than
+     * allocating multiple float buffers. Since OpenGL is single-threaded, we can
+     * assume this won't be accessed outside the OpenGL thread and typically one
+     * object is drawn completely before another one. If this is not true, one of
+     * the objects being drawn simultaneously must use a private buffer. See
+     * {@code #VertexBuffer(int)}.
+     */
+    public static VertexBuffer getSharedBuffer() {
+        shared.clear();
+        return shared;
     }
 
-    int count = buffer.position();
-    buffer.rewind();
+    protected VertexBuffer(FloatBuffer buffer) {
+        this.buffer = buffer;
+    }
 
-    gl.glVertexPointer(2, gl.GL_FLOAT(), 0, buffer);
+    /**
+     * Creates a private buffer. This can be used without fear of clobbering the
+     * global buffer. This should only be used if you have a need to create two
+     * parallel shapes at the same time.
+     *
+     * @param capacity The size of the buffer in number of vertices
+     */
+    public VertexBuffer(int capacity) {
+        this(Buffers.newDirectFloatBuffer(capacity * 2));
+    }
 
-    gl.glEnableClientState(gl.GL_VERTEX_ARRAY());
-    gl.glDrawArrays(mode, 0, count / 2);
-    gl.glDisableClientState(gl.GL_VERTEX_ARRAY());
+    /**
+     * Adds multiple vertices to the buffer.
+     *
+     * @param array       The array containing vertices in the form (x,y),(x,y)
+     * @param offset      The starting index
+     * @param numVertices The number of vertices, pairs of floats
+     */
+    public void addVertex(float[] array, int offset, int numVertices) {
+        int numFloats = numVertices * 2;
+        ensureCapacity(numFloats);
+        buffer.put(array, offset, numFloats);
+    }
 
-    buffer.position(count);
-  }
+    /**
+     * Adds a vertex to the buffer.
+     *
+     * @param x The x coordinate
+     * @param y The y coordinate
+     */
+    public void addVertex(float x, float y) {
+        ensureCapacity(2);
+        buffer.put(x);
+        buffer.put(y);
+    }
+
+    /**
+     * Adds multiple vertices to the buffer.
+     *
+     * @param vertices The buffer of new vertices to add.
+     */
+    public void addVertices(FloatBuffer vertices) {
+        int size = vertices.limit() - vertices.position();
+        ensureCapacity(size);
+
+        buffer.put(vertices);
+    }
+
+    protected void ensureCapacity(int numNewFloats) {
+        if (buffer.capacity() <= buffer.position() + numNewFloats) {
+            FloatBuffer larger = Buffers.newDirectFloatBuffer(Math.max(buffer.position() * 2, buffer.position() + numNewFloats));
+            deviceBufferId = -deviceBufferId;
+            int position = buffer.position();
+            buffer.rewind();
+            larger.put(buffer);
+            buffer = larger;
+            buffer.position(position);
+        }
+    }
+
+    /**
+     * Discard all existing points. This method is not necessary unless the points
+     * already added are not needed anymore and the buffer will be reused.
+     */
+    public void clear() {
+        buffer.clear();
+    }
+
+    public FloatBuffer getBuffer() {
+        return buffer;
+    }
+
+    /**
+     * Draws the vertices and rewinds the buffer to be ready to draw next time.
+     *
+     * @param gl   The graphics context to use to draw
+     * @param mode The mode, e.g. {@code GL#GL_LINE_STRIP}
+     */
+    public void drawBuffer(GL2 gl, int mode) {
+        if (buffer.position() == 0) {
+            return;
+        }
+
+        int count = buffer.position();
+        buffer.rewind();
+
+        gl.glVertexPointer(2, gl.GL_FLOAT(), 0, buffer);
+
+        gl.glEnableClientState(gl.GL_VERTEX_ARRAY());
+        gl.glDrawArrays(mode, 0, count / 2);
+        gl.glDisableClientState(gl.GL_VERTEX_ARRAY());
+
+        buffer.position(count);
+    }
 }

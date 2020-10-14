@@ -38,7 +38,9 @@ public class GL3StringDrawer extends GL2StringDrawer {
     }
 
     @Override
-    protected boolean useVerticalFlip() {return true;}
+    protected boolean useVerticalFlip() {
+        return true;
+    }
 
     @Override
     protected float[] getTransform(TextRenderer renderer) {

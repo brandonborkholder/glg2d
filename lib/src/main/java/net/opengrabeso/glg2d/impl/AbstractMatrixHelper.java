@@ -24,108 +24,108 @@ import net.opengrabeso.glg2d.GLG2DTransformHelper;
 import net.opengrabeso.glg2d.GLGraphics2D;
 
 public abstract class AbstractMatrixHelper implements GLG2DTransformHelper {
-  protected GLGraphics2D g2d;
+    protected GLGraphics2D g2d;
 
-  protected Deque<AffineTransform> stack = new ArrayDeque<AffineTransform>();
+    protected Deque<AffineTransform> stack = new ArrayDeque<AffineTransform>();
 
-  @Override
-  public void setG2D(GLGraphics2D g2d) {
-    this.g2d = g2d;
+    @Override
+    public void setG2D(GLGraphics2D g2d) {
+        this.g2d = g2d;
 
-    stack.clear();
-    stack.push(new AffineTransform());
-  }
+        stack.clear();
+        stack.push(new AffineTransform());
+    }
 
-  @Override
-  public void push(GLGraphics2D newG2d) {
-    stack.push(getTransform());
-  }
+    @Override
+    public void push(GLGraphics2D newG2d) {
+        stack.push(getTransform());
+    }
 
-  @Override
-  public void pop(GLGraphics2D parentG2d) {
-    stack.pop();
-    flushTransformToOpenGL();
-  }
+    @Override
+    public void pop(GLGraphics2D parentG2d) {
+        stack.pop();
+        flushTransformToOpenGL();
+    }
 
-  @Override
-  public void setHint(Key key, Object value) {
-    // nop
-  }
+    @Override
+    public void setHint(Key key, Object value) {
+        // nop
+    }
 
-  @Override
-  public void resetHints() {
-    // nop
-  }
+    @Override
+    public void resetHints() {
+        // nop
+    }
 
-  @Override
-  public void dispose() {
-    // nop
-  }
+    @Override
+    public void dispose() {
+        // nop
+    }
 
-  @Override
-  public void translate(int x, int y) {
-    translate((double) x, (double) y);
-    flushTransformToOpenGL();
-  }
+    @Override
+    public void translate(int x, int y) {
+        translate((double) x, (double) y);
+        flushTransformToOpenGL();
+    }
 
-  @Override
-  public void translate(double tx, double ty) {
-    getTransform0().translate(tx, ty);
-    flushTransformToOpenGL();
-  }
+    @Override
+    public void translate(double tx, double ty) {
+        getTransform0().translate(tx, ty);
+        flushTransformToOpenGL();
+    }
 
-  @Override
-  public void rotate(double theta) {
-    getTransform0().rotate(theta);
-    flushTransformToOpenGL();
-  }
+    @Override
+    public void rotate(double theta) {
+        getTransform0().rotate(theta);
+        flushTransformToOpenGL();
+    }
 
-  @Override
-  public void rotate(double theta, double x, double y) {
-    getTransform0().rotate(theta, x, y);
-    flushTransformToOpenGL();
-  }
+    @Override
+    public void rotate(double theta, double x, double y) {
+        getTransform0().rotate(theta, x, y);
+        flushTransformToOpenGL();
+    }
 
-  @Override
-  public void scale(double sx, double sy) {
-    getTransform0().scale(sx, sy);
-    flushTransformToOpenGL();
-  }
+    @Override
+    public void scale(double sx, double sy) {
+        getTransform0().scale(sx, sy);
+        flushTransformToOpenGL();
+    }
 
-  @Override
-  public void shear(double shx, double shy) {
-    getTransform0().shear(shx, shy);
-    flushTransformToOpenGL();
-  }
+    @Override
+    public void shear(double shx, double shy) {
+        getTransform0().shear(shx, shy);
+        flushTransformToOpenGL();
+    }
 
-  @Override
-  public void transform(AffineTransform Tx) {
-    getTransform0().concatenate(Tx);
-    flushTransformToOpenGL();
-  }
+    @Override
+    public void transform(AffineTransform Tx) {
+        getTransform0().concatenate(Tx);
+        flushTransformToOpenGL();
+    }
 
-  @Override
-  public void setTransform(AffineTransform transform) {
-    getTransform0().setTransform(transform);
-    flushTransformToOpenGL();
-  }
+    @Override
+    public void setTransform(AffineTransform transform) {
+        getTransform0().setTransform(transform);
+        flushTransformToOpenGL();
+    }
 
-  @Override
-  public AffineTransform getTransform() {
-    return (AffineTransform) getTransform0().clone();
-  }
+    @Override
+    public AffineTransform getTransform() {
+        return (AffineTransform) getTransform0().clone();
+    }
 
-  /**
-   * Returns the {@code AffineTransform} at the top of the stack, <em>not</em> a
-   * copy.
-   */
-  protected AffineTransform getTransform0() {
-    return stack.peek();
-  }
+    /**
+     * Returns the {@code AffineTransform} at the top of the stack, <em>not</em> a
+     * copy.
+     */
+    protected AffineTransform getTransform0() {
+        return stack.peek();
+    }
 
-  /**
-   * Sends the {@code AffineTransform} that's on top of the stack to the video
-   * card.
-   */
-  protected abstract void flushTransformToOpenGL();
+    /**
+     * Sends the {@code AffineTransform} that's on top of the stack to the video
+     * card.
+     */
+    protected abstract void flushTransformToOpenGL();
 }

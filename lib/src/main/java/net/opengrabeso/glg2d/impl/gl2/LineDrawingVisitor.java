@@ -29,35 +29,35 @@ import net.opengrabeso.glg2d.impl.BasicStrokeLineVisitor;
  * of quads for each line segment, joins corners and endpoints as appropriate.
  */
 public class LineDrawingVisitor extends BasicStrokeLineVisitor {
-  protected GL2 gl;
+    protected GL2 gl;
 
-  @Override
-  public void setGLContext(GL context) {
-    gl = context.getGL2();
-  }
+    @Override
+    public void setGLContext(GL context) {
+        gl = context.getGL2();
+    }
 
-  @Override
-  public void beginPoly(int windingRule) {
-    /*
-     * pen hangs down and to the right. See java.awt.Graphics
-     */
-    gl.glMatrixMode(gl.GL_MODELVIEW());
-    gl.glPushMatrix();
-    gl.glTranslatef(0.5f, 0.5f, 0);
+    @Override
+    public void beginPoly(int windingRule) {
+        /*
+         * pen hangs down and to the right. See java.awt.Graphics
+         */
+        gl.glMatrixMode(gl.GL_MODELVIEW());
+        gl.glPushMatrix();
+        gl.glTranslatef(0.5f, 0.5f, 0);
 
-    super.beginPoly(windingRule);
-  }
+        super.beginPoly(windingRule);
+    }
 
-  @Override
-  public void endPoly() {
-    super.endPoly();
+    @Override
+    public void endPoly() {
+        super.endPoly();
 
-    gl.glMatrixMode(gl.GL_MODELVIEW());
-    gl.glPopMatrix();
-  }
+        gl.glMatrixMode(gl.GL_MODELVIEW());
+        gl.glPopMatrix();
+    }
 
-  @Override
-  protected void drawBuffer() {
-    vBuffer.drawBuffer(gl, gl.GL_TRIANGLE_STRIP());
-  }
+    @Override
+    protected void drawBuffer() {
+        vBuffer.drawBuffer(gl, gl.GL_TRIANGLE_STRIP());
+    }
 }

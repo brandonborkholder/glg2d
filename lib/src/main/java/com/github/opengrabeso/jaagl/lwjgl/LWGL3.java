@@ -15,7 +15,7 @@ public class LWGL3 extends LWGL2GL3 implements GL3 {
 
         int numExtensions = org.lwjgl.opengl.GL11.glGetInteger(org.lwjgl.opengl.GL31.GL_NUM_EXTENSIONS);
         for (int i = 0; i < numExtensions; i++) {
-            String ext =  org.lwjgl.opengl.GL31.glGetStringi( org.lwjgl.opengl.GL11.GL_EXTENSIONS, i);
+            String ext = org.lwjgl.opengl.GL31.glGetStringi(org.lwjgl.opengl.GL11.GL_EXTENSIONS, i);
             extensions.add(ext);
         }
     }

@@ -39,118 +39,146 @@
 
 package net.opengrabeso.opengl.util.packrect;
 
-/** Represents a rectangular region on the backing store. The edges of
-    the rectangle are the infinitely thin region between adjacent
-    pixels on the screen. The origin of the rectangle is its
-    upper-left corner. It is inclusive of the pixels on the top and
-    left edges and exclusive of the pixels on the bottom and right
-    edges. For example, a rect at position (0, 0) and of size (1, 1)
-    would include only the pixel at (0, 0). <P>
-
-    Negative coordinates and sizes are not supported, since they make
-    no sense in the context of the packer, which deals only with
-    positively sized regions. <P>
-
-    This class contains a user data field for efficient hookup to
-    external data structures as well as enough other hooks to
-    efficiently plug into the rectangle packer. */
+/**
+ * Represents a rectangular region on the backing store. The edges of
+ * the rectangle are the infinitely thin region between adjacent
+ * pixels on the screen. The origin of the rectangle is its
+ * upper-left corner. It is inclusive of the pixels on the top and
+ * left edges and exclusive of the pixels on the bottom and right
+ * edges. For example, a rect at position (0, 0) and of size (1, 1)
+ * would include only the pixel at (0, 0). <P>
+ * <p>
+ * Negative coordinates and sizes are not supported, since they make
+ * no sense in the context of the packer, which deals only with
+ * positively sized regions. <P>
+ * <p>
+ * This class contains a user data field for efficient hookup to
+ * external data structures as well as enough other hooks to
+ * efficiently plug into the rectangle packer.
+ */
 
 public class Rect {
-  private int x;
-  private int y;
-  private int w;
-  private int h;
+    private int x;
+    private int y;
+    private int w;
+    private int h;
 
-  // The level we're currently installed in in the parent
-  // RectanglePacker, or null if not hooked in to the table yet
-  private Level level;
+    // The level we're currently installed in in the parent
+    // RectanglePacker, or null if not hooked in to the table yet
+    private Level level;
 
-  // The user's object this rectangle represents.
-  private Object userData;
+    // The user's object this rectangle represents.
+    private Object userData;
 
-  // Used transiently during re-layout of the backing store (when
-  // there is no room left due either to fragmentation or just being
-  // out of space)
-  private Rect nextLocation;
+    // Used transiently during re-layout of the backing store (when
+    // there is no room left due either to fragmentation or just being
+    // out of space)
+    private Rect nextLocation;
 
-  public Rect() {
-    this(null);
-  }
+    public Rect() {
+        this(null);
+    }
 
-  public Rect(final Object userData) {
-    this(0, 0, 0, 0, userData);
-  }
+    public Rect(final Object userData) {
+        this(0, 0, 0, 0, userData);
+    }
 
-  public Rect(final int x, final int y, final int w, final int h, final Object userData) {
-    setPosition(x, y);
-    setSize(w, h);
-    setUserData(userData);
-  }
+    public Rect(final int x, final int y, final int w, final int h, final Object userData) {
+        setPosition(x, y);
+        setSize(w, h);
+        setUserData(userData);
+    }
 
-  public int x() { return x; }
-  public int y() { return y; }
-  public int w() { return w; }
-  public int h() { return h; }
-  public Object getUserData() { return userData; }
-  public Rect getNextLocation() { return nextLocation; }
+    public int x() {
+        return x;
+    }
 
-  public void setPosition(final int x, final int y) {
-    if (x < 0)
-      throw new IllegalArgumentException("Negative x");
-    if (y < 0)
-      throw new IllegalArgumentException("Negative y");
-    this.x = x;
-    this.y = y;
-  }
+    public int y() {
+        return y;
+    }
 
-  public void setSize(final int w, final int h) throws IllegalArgumentException {
-    if (w < 0)
-      throw new IllegalArgumentException("Negative width");
-    if (h < 0)
-      throw new IllegalArgumentException("Negative height");
-    this.w = w;
-    this.h = h;
-  }
+    public int w() {
+        return w;
+    }
 
-  public void setUserData(final Object obj) { userData = obj; }
-  public void setNextLocation(final Rect nextLocation) { this.nextLocation = nextLocation; }
+    public int h() {
+        return h;
+    }
 
-  // Helpers for computations.
+    public Object getUserData() {
+        return userData;
+    }
 
-  /** Returns the maximum x-coordinate contained within this
-      rectangle. Note that this returns a different result than Java
-      2D's rectangles; for a rectangle of position (0, 0) and size (1,
-      1) this will return 0, not 1. Returns -1 if the width of this
-      rectangle is 0. */
-  public int maxX() {
-    if (w() < 1)
-      return -1;
-    return x() + w() - 1;
-  }
+    public Rect getNextLocation() {
+        return nextLocation;
+    }
 
-  /** Returns the maximum y-coordinate contained within this
-      rectangle. Note that this returns a different result than Java
-      2D's rectangles; for a rectangle of position (0, 0) and size (1,
-      1) this will return 0, not 1. Returns -1 if the height of this
-      rectangle is 0. */
-  public int maxY() {
-    if (h() < 1)
-      return -1;
-    return y() + h() - 1;
-  }
+    public void setPosition(final int x, final int y) {
+        if (x < 0)
+            throw new IllegalArgumentException("Negative x");
+        if (y < 0)
+            throw new IllegalArgumentException("Negative y");
+        this.x = x;
+        this.y = y;
+    }
 
-  public boolean canContain(final Rect other) {
-    return (w() >= other.w() &&
-            h() >= other.h());
-  }
+    public void setSize(final int w, final int h) throws IllegalArgumentException {
+        if (w < 0)
+            throw new IllegalArgumentException("Negative width");
+        if (h < 0)
+            throw new IllegalArgumentException("Negative height");
+        this.w = w;
+        this.h = h;
+    }
 
-  @Override
-  public String toString() {
-    return "[Rect x: " + x() + " y: " + y() + " w: " + w() + " h: " + h() + "]";
-  }
+    public void setUserData(final Object obj) {
+        userData = obj;
+    }
 
-  // Unclear whether it's a good idea to override hashCode and equals
-  // for these objects
+    public void setNextLocation(final Rect nextLocation) {
+        this.nextLocation = nextLocation;
+    }
+
+    // Helpers for computations.
+
+    /**
+     * Returns the maximum x-coordinate contained within this
+     * rectangle. Note that this returns a different result than Java
+     * 2D's rectangles; for a rectangle of position (0, 0) and size (1,
+     * 1) this will return 0, not 1. Returns -1 if the width of this
+     * rectangle is 0.
+     */
+    public int maxX() {
+        if (w() < 1)
+            return -1;
+        return x() + w() - 1;
+    }
+
+    /**
+     * Returns the maximum y-coordinate contained within this
+     * rectangle. Note that this returns a different result than Java
+     * 2D's rectangles; for a rectangle of position (0, 0) and size (1,
+     * 1) this will return 0, not 1. Returns -1 if the height of this
+     * rectangle is 0.
+     */
+    public int maxY() {
+        if (h() < 1)
+            return -1;
+        return y() + h() - 1;
+    }
+
+    public boolean canContain(final Rect other) {
+        return (w() >= other.w() &&
+                h() >= other.h());
+    }
+
+    @Override
+    public String toString() {
+        return "[Rect x: " + x() + " y: " + y() + " w: " + w() + " h: " + h() + "]";
+    }
+
+    // Unclear whether it's a good idea to override hashCode and equals
+    // for these objects
   /*
   public boolean equals(Object other) {
     if (other == null || (!(other instanceof Rect))) {

@@ -13,7 +13,9 @@ public abstract class Pipelined_QuadRenderer {
     int mVBO;
 
     protected abstract void uploadTexture();
+
     protected abstract void setupDraw();
+
     protected abstract void cleanupDraw();
 
     public Pipelined_QuadRenderer(GL2GL3 gl) {

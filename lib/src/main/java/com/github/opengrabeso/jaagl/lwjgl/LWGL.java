@@ -204,17 +204,17 @@ public abstract class LWGL implements GL {
 
     @Override
     public int GL_UNPACK_SKIP_ROWS() {
-        return  org.lwjgl.opengl.GL11.GL_UNPACK_SKIP_ROWS;
+        return org.lwjgl.opengl.GL11.GL_UNPACK_SKIP_ROWS;
     }
 
     @Override
     public int GL_UNPACK_SKIP_PIXELS() {
-        return  org.lwjgl.opengl.GL11.GL_UNPACK_SKIP_PIXELS;
+        return org.lwjgl.opengl.GL11.GL_UNPACK_SKIP_PIXELS;
     }
 
     @Override
     public int GL_UNPACK_ROW_LENGTH() {
-        return  org.lwjgl.opengl.GL11.GL_UNPACK_ROW_LENGTH;
+        return org.lwjgl.opengl.GL11.GL_UNPACK_ROW_LENGTH;
     }
 
     @Override

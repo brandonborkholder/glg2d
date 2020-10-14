@@ -23,6 +23,7 @@ import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLCapabilitiesImmutable;
 import com.jogamp.opengl.GLContext;
 import com.jogamp.opengl.awt.GLCanvas;
+
 import javax.swing.JComponent;
 
 import net.opengrabeso.glg2d.event.AWTMouseEventTranslator;

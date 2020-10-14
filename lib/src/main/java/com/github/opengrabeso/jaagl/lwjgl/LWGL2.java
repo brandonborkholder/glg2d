@@ -133,7 +133,7 @@ public class LWGL2 extends LWGL2GL3 implements GL2 {
         GL11.glScalef(x, y, z);
     }
 
-    public void glTranslatef(float x, float y, float z){
+    public void glTranslatef(float x, float y, float z) {
         GL11.glTranslatef(x, y, z);
     }
 
@@ -252,7 +252,7 @@ public class LWGL2 extends LWGL2GL3 implements GL2 {
 
     @Override
     public void glLoadMatrixf(float[] matrix, int i) {
-        assert(i == 0);
+        assert (i == 0);
         GL11.glLoadMatrixf(matrix);
     }
 }

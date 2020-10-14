@@ -29,47 +29,47 @@ import net.opengrabeso.glg2d.impl.SimplePathVisitor;
  * polygon is actually simple and convex.
  */
 public class FillSimpleConvexPolygonVisitor extends SimplePathVisitor {
-  protected GL2 gl;
+    protected GL2 gl;
 
-  protected VertexBuffer vBuffer = VertexBuffer.getSharedBuffer();
+    protected VertexBuffer vBuffer = VertexBuffer.getSharedBuffer();
 
-  @Override
-  public void setGLContext(GL context) {
-    gl = context.getGL2();
-  }
+    @Override
+    public void setGLContext(GL context) {
+        gl = context.getGL2();
+    }
 
-  @Override
-  public void setStroke(BasicStroke stroke) {
-    // nop
-  }
+    @Override
+    public void setStroke(BasicStroke stroke) {
+        // nop
+    }
 
-  @Override
-  public void beginPoly(int windingRule) {
-    vBuffer.clear();
+    @Override
+    public void beginPoly(int windingRule) {
+        vBuffer.clear();
 
-    /*
-     * We don't care what the winding rule is, we disable face culling.
-     */
-    gl.glDisable(gl.GL_CULL_FACE());
-  }
+        /*
+         * We don't care what the winding rule is, we disable face culling.
+         */
+        gl.glDisable(gl.GL_CULL_FACE());
+    }
 
-  @Override
-  public void closeLine() {
-    vBuffer.drawBuffer(gl, gl.GL_POLYGON());
-  }
+    @Override
+    public void closeLine() {
+        vBuffer.drawBuffer(gl, gl.GL_POLYGON());
+    }
 
-  @Override
-  public void endPoly() {
-  }
+    @Override
+    public void endPoly() {
+    }
 
-  @Override
-  public void lineTo(float[] vertex) {
-    vBuffer.addVertex(vertex, 0, 1);
-  }
+    @Override
+    public void lineTo(float[] vertex) {
+        vBuffer.addVertex(vertex, 0, 1);
+    }
 
-  @Override
-  public void moveTo(float[] vertex) {
-    vBuffer.clear();
-    vBuffer.addVertex(vertex, 0, 1);
-  }
+    @Override
+    public void moveTo(float[] vertex) {
+        vBuffer.clear();
+        vBuffer.addVertex(vertex, 0, 1);
+    }
 }

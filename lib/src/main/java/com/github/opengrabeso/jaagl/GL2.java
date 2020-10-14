@@ -70,7 +70,7 @@ public interface GL2 extends GL, GL2GL3 {
     void glBegin(int gl_quads);
 
     void glTexCoord2f(float sx1, float sy2);
-    
+
     void glVertex3f(float x, float y, float z);
 
     void glVertex2i(int dx1, int dy2);

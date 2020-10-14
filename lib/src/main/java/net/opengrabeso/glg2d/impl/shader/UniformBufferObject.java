@@ -22,18 +22,18 @@ import java.awt.geom.AffineTransform;
  * hardware.
  */
 public class UniformBufferObject {
-  public ColorHook colorHook;
-  public TransformHook transformHook;
+    public ColorHook colorHook;
+    public TransformHook transformHook;
 
-  public interface ColorHook {
-    float[] getRGBA();
+    public interface ColorHook {
+        float[] getRGBA();
 
-    float getAlpha();
-  }
+        float getAlpha();
+    }
 
-  public interface TransformHook {
-    float[] getGLMatrixData();
+    public interface TransformHook {
+        float[] getGLMatrixData();
 
-    float[] getGLMatrixData(AffineTransform concat);
-  }
+        float[] getGLMatrixData(AffineTransform concat);
+    }
 }

@@ -37,9 +37,9 @@ import com.jogamp.opengl.GLDrawable;
  * </p>
  */
 public class GLGraphicsConfiguration extends GraphicsConfiguration {
-  private final boolean onScreen;
+    private final boolean onScreen;
 
-  private final GLGraphicsDevice device;
+    private final GLGraphicsDevice device;
     private int width;
     private int height;
 
@@ -48,57 +48,57 @@ public class GLGraphicsConfiguration extends GraphicsConfiguration {
         this.height = height;
         onScreen = true; // TODO: verify against JOGL
         device = new GLGraphicsDevice(this);
-  }
-
-  @Override
-  public GraphicsDevice getDevice() {
-    return device;
-  }
-
-  @Override
-  public BufferedImage createCompatibleImage(int width, int height) {
-    return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
-  }
-
-  /*
-   * Any reasonable {@code ColorModel} can be transformed into a texture we can
-   * render in OpenGL. I'm not worried about creating an exactly correct one
-   * right now.
-   */
-  @Override
-  public ColorModel getColorModel() {
-    return ColorModel.getRGBdefault();
-  }
-
-  @Override
-  public ColorModel getColorModel(int transparency) {
-    switch (transparency) {
-    case Transparency.OPAQUE:
-    case Transparency.TRANSLUCENT:
-      return getColorModel();
-    case Transparency.BITMASK:
-      return new DirectColorModel(25, 0xff0000, 0xff00, 0xff, 0x1000000);
-    default:
-      return null;
     }
-  }
 
-  @Override
-  public AffineTransform getDefaultTransform() {
-    return new AffineTransform();
-  }
+    @Override
+    public GraphicsDevice getDevice() {
+        return device;
+    }
 
-  @Override
-  public AffineTransform getNormalizingTransform() {
-    return new AffineTransform();
-  }
+    @Override
+    public BufferedImage createCompatibleImage(int width, int height) {
+        return new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+    }
 
-  @Override
-  public Rectangle getBounds() {
-    return new Rectangle(width, height);
-  }
+    /*
+     * Any reasonable {@code ColorModel} can be transformed into a texture we can
+     * render in OpenGL. I'm not worried about creating an exactly correct one
+     * right now.
+     */
+    @Override
+    public ColorModel getColorModel() {
+        return ColorModel.getRGBdefault();
+    }
 
-  public boolean isOnScreen() {
-    return onScreen;
-  }
+    @Override
+    public ColorModel getColorModel(int transparency) {
+        switch (transparency) {
+            case Transparency.OPAQUE:
+            case Transparency.TRANSLUCENT:
+                return getColorModel();
+            case Transparency.BITMASK:
+                return new DirectColorModel(25, 0xff0000, 0xff00, 0xff, 0x1000000);
+            default:
+                return null;
+        }
+    }
+
+    @Override
+    public AffineTransform getDefaultTransform() {
+        return new AffineTransform();
+    }
+
+    @Override
+    public AffineTransform getNormalizingTransform() {
+        return new AffineTransform();
+    }
+
+    @Override
+    public Rectangle getBounds() {
+        return new Rectangle(width, height);
+    }
+
+    public boolean isOnScreen() {
+        return onScreen;
+    }
 }

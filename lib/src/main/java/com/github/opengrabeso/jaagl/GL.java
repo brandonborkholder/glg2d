@@ -4,10 +4,13 @@ import java.nio.ByteBuffer;
 
 public interface GL {
     GL2 getGL2();
+
     GL3 getGL3();
+
     GL2GL3 getGL2GL3();
 
     GL3 gl3();
+
     GL2 gl2();
 
     boolean isGL3();

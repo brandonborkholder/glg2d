@@ -39,9 +39,11 @@
 
 package net.opengrabeso.opengl.util.packrect;
 
-/** Iteration construct without exposing the internals of the
-    RectanglePacker and without implementing a complex Iterator. */
+/**
+ * Iteration construct without exposing the internals of the
+ * RectanglePacker and without implementing a complex Iterator.
+ */
 
 public interface RectVisitor {
-  public void visit(Rect rect);
+    public void visit(Rect rect);
 }

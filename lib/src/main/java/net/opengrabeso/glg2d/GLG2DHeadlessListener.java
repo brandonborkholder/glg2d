@@ -17,6 +17,7 @@ package net.opengrabeso.glg2d;
 
 import com.jogamp.opengl.GLAutoDrawable;
 import com.jogamp.opengl.GLEventListener;
+
 import javax.swing.JComponent;
 
 /**
@@ -24,7 +25,7 @@ import javax.swing.JComponent;
  * and therefore not receiving standard AWT events, the UI will not function as
  * expected. Reshape events will not be propagated and many features of Swing
  * components will not be available (e.g. indeterminate progress bars).
- * 
+ *
  * <p>
  * This will initialize the component as if it was part of a Swing hierarchy on
  * the first call to {@code init(GLDrawable)}. This will listen for reshape
@@ -34,32 +35,32 @@ import javax.swing.JComponent;
  * </p>
  */
 public class GLG2DHeadlessListener implements GLEventListener {
-  protected JComponent comp;
+    protected JComponent comp;
 
-  public GLG2DHeadlessListener(JComponent component) {
-    if (component == null) {
-      throw new NullPointerException("component is null");
+    public GLG2DHeadlessListener(JComponent component) {
+        if (component == null) {
+            throw new NullPointerException("component is null");
+        }
+
+        comp = component;
     }
 
-    comp = component;
-  }
+    @Override
+    public void init(GLAutoDrawable drawable) {
+        comp.addNotify();
+    }
 
-  @Override
-  public void init(GLAutoDrawable drawable) {
-    comp.addNotify();
-  }
+    @Override
+    public void dispose(GLAutoDrawable drawable) {
+    }
 
-  @Override
-  public void dispose(GLAutoDrawable drawable) {
-  }
+    @Override
+    public void display(GLAutoDrawable drawable) {
+    }
 
-  @Override
-  public void display(GLAutoDrawable drawable) {
-  }
-
-  @Override
-  public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
-    comp.setSize(width, height);
-    comp.validate();
-  }
+    @Override
+    public void reshape(GLAutoDrawable drawable, int x, int y, int width, int height) {
+        comp.setSize(width, height);
+        comp.validate();
+    }
 }

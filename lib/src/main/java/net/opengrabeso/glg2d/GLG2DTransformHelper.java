@@ -18,21 +18,21 @@ package net.opengrabeso.glg2d;
 import java.awt.geom.AffineTransform;
 
 public interface GLG2DTransformHelper extends G2DDrawingHelper {
-  void translate(int x, int y);
+    void translate(int x, int y);
 
-  void translate(double tx, double ty);
+    void translate(double tx, double ty);
 
-  void rotate(double theta);
+    void rotate(double theta);
 
-  void rotate(double theta, double x, double y);
+    void rotate(double theta, double x, double y);
 
-  void scale(double sx, double sy);
+    void scale(double sx, double sy);
 
-  void shear(double shx, double shy);
+    void shear(double shx, double shy);
 
-  void transform(AffineTransform Tx);
+    void transform(AffineTransform Tx);
 
-  void setTransform(AffineTransform transform);
+    void setTransform(AffineTransform transform);
 
-  AffineTransform getTransform();
+    AffineTransform getTransform();
 }

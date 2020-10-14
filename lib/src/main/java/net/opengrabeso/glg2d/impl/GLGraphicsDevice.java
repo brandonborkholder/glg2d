@@ -22,33 +22,33 @@ import java.awt.GraphicsDevice;
  * Fulfills the contract of a {@code GraphicsDevice}.
  */
 public class GLGraphicsDevice extends GraphicsDevice {
-  protected final GLGraphicsConfiguration config;
+    protected final GLGraphicsConfiguration config;
 
-  public GLGraphicsDevice(GLGraphicsConfiguration config) {
-    this.config = config;
-  }
-
-  @Override
-  public int getType() {
-    if (config.isOnScreen()) {
-      return TYPE_RASTER_SCREEN;
-    } else {
-      return TYPE_IMAGE_BUFFER;
+    public GLGraphicsDevice(GLGraphicsConfiguration config) {
+        this.config = config;
     }
-  }
 
-  @Override
-  public String getIDstring() {
-    return "glg2d";
-  }
+    @Override
+    public int getType() {
+        if (config.isOnScreen()) {
+            return TYPE_RASTER_SCREEN;
+        } else {
+            return TYPE_IMAGE_BUFFER;
+        }
+    }
 
-  @Override
-  public GraphicsConfiguration[] getConfigurations() {
-    return new GraphicsConfiguration[] { getDefaultConfiguration() };
-  }
+    @Override
+    public String getIDstring() {
+        return "glg2d";
+    }
 
-  @Override
-  public GraphicsConfiguration getDefaultConfiguration() {
-    return config;
-  }
+    @Override
+    public GraphicsConfiguration[] getConfigurations() {
+        return new GraphicsConfiguration[]{getDefaultConfiguration()};
+    }
+
+    @Override
+    public GraphicsConfiguration getDefaultConfiguration() {
+        return config;
+    }
 }

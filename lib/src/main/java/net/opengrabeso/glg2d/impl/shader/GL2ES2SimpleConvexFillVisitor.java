@@ -26,113 +26,113 @@ import net.opengrabeso.glg2d.VertexBuffer;
 import net.opengrabeso.glg2d.impl.SimplePathVisitor;
 
 public class GL2ES2SimpleConvexFillVisitor extends SimplePathVisitor implements ShaderPathVisitor {
-  protected GL2GL3 gl;
-  protected UniformBufferObject uniforms;
+    protected GL2GL3 gl;
+    protected UniformBufferObject uniforms;
 
-  protected VertexBuffer vBuffer = new VertexBuffer(1024);
+    protected VertexBuffer vBuffer = new VertexBuffer(1024);
 
-  protected AnyModePipeline pipeline;
+    protected AnyModePipeline pipeline;
 
-  public GL2ES2SimpleConvexFillVisitor() {
-    this(new AnyModePipeline());
-  }
-
-  public GL2ES2SimpleConvexFillVisitor(AnyModePipeline pipeline) {
-    this.pipeline = pipeline;
-  }
-
-  @Override
-  public void setGLContext(GL glContext, UniformBufferObject uniforms) {
-    setGLContext(glContext);
-
-    this.uniforms = uniforms;
-  }
-
-  @Override
-  public void setGLContext(GL context) {
-    gl = context.getGL2GL3();
-
-    if (!pipeline.isSetup()) {
-      pipeline.setup(gl);
-    }
-  }
-
-  @Override
-  public void setStroke(BasicStroke stroke) {
-    // nop
-  }
-
-  @Override
-  public void beginPoly(int windingRule) {
-    // do we need to care about winding rule?
-    pipeline.use(gl, true);
-
-    pipeline.setColor(gl, uniforms.colorHook.getRGBA());
-    pipeline.setTransform(gl, uniforms.transformHook.getGLMatrixData());
-
-    vBuffer.clear();
-    vBuffer.addVertex(0, 0);
-  }
-
-  @Override
-  public void moveTo(float[] vertex) {
-    draw();
-
-    vBuffer.addVertex(vertex[0], vertex[1]);
-  }
-
-  @Override
-  public void lineTo(float[] vertex) {
-    vBuffer.addVertex(vertex[0], vertex[1]);
-  }
-
-  @Override
-  public void closeLine() {
-    FloatBuffer buf = vBuffer.getBuffer();
-    float x = buf.get(2);
-    float y = buf.get(3);
-    vBuffer.addVertex(x, y);
-  }
-
-  @Override
-  public void endPoly() {
-    draw();
-    pipeline.use(gl, false);
-  }
-
-  protected void draw() {
-    FloatBuffer buf = vBuffer.getBuffer();
-    if (buf.position() <= 2) {
-      buf.position(2);
-      return;
+    public GL2ES2SimpleConvexFillVisitor() {
+        this(new AnyModePipeline());
     }
 
-    buf.flip();
-
-    setupCentroid(buf);
-
-    pipeline.draw(gl, gl.GL_TRIANGLE_FAN(), buf);
-
-    vBuffer.clear();
-    vBuffer.addVertex(0, 0);
-  }
-
-  protected void setupCentroid(FloatBuffer vertexBuffer) {
-    float x = 0;
-    float y = 0;
-
-    vertexBuffer.position(2);
-    int numPts = 0;
-    while (vertexBuffer.position() < vertexBuffer.limit()) {
-      x += vertexBuffer.get();
-      y += vertexBuffer.get();
-      numPts++;
+    public GL2ES2SimpleConvexFillVisitor(AnyModePipeline pipeline) {
+        this.pipeline = pipeline;
     }
 
-    vertexBuffer.rewind();
-    vertexBuffer.put(x / numPts);
-    vertexBuffer.put(y / numPts);
+    @Override
+    public void setGLContext(GL glContext, UniformBufferObject uniforms) {
+        setGLContext(glContext);
 
-    vertexBuffer.rewind();
-  }
+        this.uniforms = uniforms;
+    }
+
+    @Override
+    public void setGLContext(GL context) {
+        gl = context.getGL2GL3();
+
+        if (!pipeline.isSetup()) {
+            pipeline.setup(gl);
+        }
+    }
+
+    @Override
+    public void setStroke(BasicStroke stroke) {
+        // nop
+    }
+
+    @Override
+    public void beginPoly(int windingRule) {
+        // do we need to care about winding rule?
+        pipeline.use(gl, true);
+
+        pipeline.setColor(gl, uniforms.colorHook.getRGBA());
+        pipeline.setTransform(gl, uniforms.transformHook.getGLMatrixData());
+
+        vBuffer.clear();
+        vBuffer.addVertex(0, 0);
+    }
+
+    @Override
+    public void moveTo(float[] vertex) {
+        draw();
+
+        vBuffer.addVertex(vertex[0], vertex[1]);
+    }
+
+    @Override
+    public void lineTo(float[] vertex) {
+        vBuffer.addVertex(vertex[0], vertex[1]);
+    }
+
+    @Override
+    public void closeLine() {
+        FloatBuffer buf = vBuffer.getBuffer();
+        float x = buf.get(2);
+        float y = buf.get(3);
+        vBuffer.addVertex(x, y);
+    }
+
+    @Override
+    public void endPoly() {
+        draw();
+        pipeline.use(gl, false);
+    }
+
+    protected void draw() {
+        FloatBuffer buf = vBuffer.getBuffer();
+        if (buf.position() <= 2) {
+            buf.position(2);
+            return;
+        }
+
+        buf.flip();
+
+        setupCentroid(buf);
+
+        pipeline.draw(gl, gl.GL_TRIANGLE_FAN(), buf);
+
+        vBuffer.clear();
+        vBuffer.addVertex(0, 0);
+    }
+
+    protected void setupCentroid(FloatBuffer vertexBuffer) {
+        float x = 0;
+        float y = 0;
+
+        vertexBuffer.position(2);
+        int numPts = 0;
+        while (vertexBuffer.position() < vertexBuffer.limit()) {
+            x += vertexBuffer.get();
+            y += vertexBuffer.get();
+            numPts++;
+        }
+
+        vertexBuffer.rewind();
+        vertexBuffer.put(x / numPts);
+        vertexBuffer.put(y / numPts);
+
+        vertexBuffer.rewind();
+    }
 }

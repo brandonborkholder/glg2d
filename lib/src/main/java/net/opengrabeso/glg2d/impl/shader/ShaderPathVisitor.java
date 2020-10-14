@@ -21,5 +21,5 @@ import com.github.opengrabeso.jaagl.GL;
 import net.opengrabeso.glg2d.PathVisitor;
 
 public interface ShaderPathVisitor extends PathVisitor {
-  void setGLContext(GL glContext, UniformBufferObject uniforms);
+    void setGLContext(GL glContext, UniformBufferObject uniforms);
 }

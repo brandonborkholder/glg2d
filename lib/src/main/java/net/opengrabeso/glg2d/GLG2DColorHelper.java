@@ -20,29 +20,29 @@ import java.awt.Composite;
 import java.awt.Paint;
 
 public interface GLG2DColorHelper extends G2DDrawingHelper {
-  void setComposite(Composite comp);
+    void setComposite(Composite comp);
 
-  Composite getComposite();
+    Composite getComposite();
 
-  void setPaint(Paint paint);
+    void setPaint(Paint paint);
 
-  Paint getPaint();
+    Paint getPaint();
 
-  void setColor(Color c);
+    void setColor(Color c);
 
-  Color getColor();
+    Color getColor();
 
-  void setColorNoRespectComposite(Color c);
+    void setColorNoRespectComposite(Color c);
 
-  void setColorRespectComposite(Color c);
+    void setColorRespectComposite(Color c);
 
-  void setBackground(Color color);
+    void setBackground(Color color);
 
-  Color getBackground();
+    Color getBackground();
 
-  void setPaintMode();
+    void setPaintMode();
 
-  void setXORMode(Color c);
+    void setXORMode(Color c);
 
-  void copyArea(int x, int y, int width, int height, int dx, int dy);
+    void copyArea(int x, int y, int width, int height, int dx, int dy);
 }

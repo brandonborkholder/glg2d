@@ -25,38 +25,38 @@ import net.opengrabeso.glg2d.GLG2DTransformHelper;
 import net.opengrabeso.glg2d.GLGraphics2D;
 
 public class GLShaderGraphics2D extends GLGraphics2D {
-  protected UniformBufferObject uniforms = new UniformBufferObject();
+    protected UniformBufferObject uniforms = new UniformBufferObject();
 
-  public GLShaderGraphics2D(GL2GL3 gl) {
-      super(gl);
-  }
+    public GLShaderGraphics2D(GL2GL3 gl) {
+        super(gl);
+    }
 
-  public UniformBufferObject getUniformsObject() {
-    return uniforms;
-  }
+    public UniformBufferObject getUniformsObject() {
+        return uniforms;
+    }
 
-  @Override
-  protected GLG2DImageHelper createImageHelper() {
-    return new GL2ES2ImageDrawer();
-  }
+    @Override
+    protected GLG2DImageHelper createImageHelper() {
+        return new GL2ES2ImageDrawer();
+    }
 
-  @Override
-  protected GLG2DColorHelper createColorHelper() {
-    return new GL2ES2ColorHelper();
-  }
+    @Override
+    protected GLG2DColorHelper createColorHelper() {
+        return new GL2ES2ColorHelper();
+    }
 
-  @Override
-  protected GLG2DTransformHelper createTransformHelper() {
-    return new GL2ES2TransformHelper();
-  }
+    @Override
+    protected GLG2DTransformHelper createTransformHelper() {
+        return new GL2ES2TransformHelper();
+    }
 
-  @Override
-  protected GLG2DShapeHelper createShapeHelper() {
-    return new GL2ES2ShapeDrawer();
-  }
+    @Override
+    protected GLG2DShapeHelper createShapeHelper() {
+        return new GL2ES2ShapeDrawer();
+    }
 
-  @Override
-  protected GLG2DTextHelper createTextHelper() {
-    return new GL3StringDrawer(gl);
-  }
+    @Override
+    protected GLG2DTextHelper createTextHelper() {
+        return new GL3StringDrawer(gl);
+    }
 }

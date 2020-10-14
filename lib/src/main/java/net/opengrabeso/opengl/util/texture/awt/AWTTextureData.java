@@ -88,6 +88,7 @@ public class AWTTextureData extends TextureData {
         validatePixelAttributes();
         return super.getPixelFormat();
     }
+
     @Override
     public int getPixelType() {
         validatePixelAttributes();
@@ -111,13 +112,13 @@ public class AWTTextureData extends TextureData {
         final SampleModel sm = image.getRaster().getSampleModel();
         if (sm instanceof SinglePixelPackedSampleModel) {
             scanlineStride =
-                ((SinglePixelPackedSampleModel)sm).getScanlineStride();
+                    ((SinglePixelPackedSampleModel) sm).getScanlineStride();
         } else if (sm instanceof MultiPixelPackedSampleModel) {
             scanlineStride =
-                ((MultiPixelPackedSampleModel)sm).getScanlineStride();
+                    ((MultiPixelPackedSampleModel) sm).getScanlineStride();
         } else if (sm instanceof ComponentSampleModel) {
             scanlineStride =
-                ((ComponentSampleModel)sm).getScanlineStride();
+                    ((ComponentSampleModel) sm).getScanlineStride();
         } else {
             throw gl.newGLException("Unexpected sample model");
         }

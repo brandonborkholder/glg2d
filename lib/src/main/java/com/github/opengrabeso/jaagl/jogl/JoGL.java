@@ -1,4 +1,5 @@
 package com.github.opengrabeso.jaagl.jogl;
+
 import com.github.opengrabeso.jaagl.*;
 import com.jogamp.opengl.GLException;
 
@@ -15,9 +16,9 @@ public abstract class JoGL implements GL {
         // JOGL always uses GL4bcImpl to implement the interface
         // we need to check the profile to learn the real capabilities
         if (gl.getGLProfile().isGL3()) {
-            return new JoGL3((com.jogamp.opengl.GL3)gl);
+            return new JoGL3((com.jogamp.opengl.GL3) gl);
         } else if (gl instanceof com.jogamp.opengl.GL2) {
-            return new JoGL2((com.jogamp.opengl.GL2)gl);
+            return new JoGL2((com.jogamp.opengl.GL2) gl);
         } else {
             throw new UnsupportedOperationException("GL2 or GL3 expected");
         }
@@ -32,7 +33,7 @@ public abstract class JoGL implements GL {
     }
 
     public GL2ES2 jogl() {
-        return (GL2ES2)gl;
+        return (GL2ES2) gl;
     }
 
     @Override
@@ -225,17 +226,17 @@ public abstract class JoGL implements GL {
 
     @Override
     public int GL_UNPACK_SKIP_ROWS() {
-        return  com.jogamp.opengl.GL2ES2.GL_UNPACK_SKIP_ROWS;
+        return com.jogamp.opengl.GL2ES2.GL_UNPACK_SKIP_ROWS;
     }
 
     @Override
     public int GL_UNPACK_SKIP_PIXELS() {
-        return  com.jogamp.opengl.GL2ES2.GL_UNPACK_SKIP_PIXELS;
+        return com.jogamp.opengl.GL2ES2.GL_UNPACK_SKIP_PIXELS;
     }
 
     @Override
     public int GL_UNPACK_ROW_LENGTH() {
-        return  com.jogamp.opengl.GL2ES2.GL_UNPACK_ROW_LENGTH;
+        return com.jogamp.opengl.GL2ES2.GL_UNPACK_ROW_LENGTH;
     }
 
     @Override

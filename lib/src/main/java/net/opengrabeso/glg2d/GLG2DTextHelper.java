@@ -21,19 +21,19 @@ import java.awt.font.FontRenderContext;
 import java.text.AttributedCharacterIterator;
 
 public interface GLG2DTextHelper extends G2DDrawingHelper {
-  void setFont(Font font);
+    void setFont(Font font);
 
-  Font getFont();
+    Font getFont();
 
-  FontMetrics getFontMetrics(Font font);
+    FontMetrics getFontMetrics(Font font);
 
-  FontRenderContext getFontRenderContext();
+    FontRenderContext getFontRenderContext();
 
-  void drawString(AttributedCharacterIterator iterator, int x, int y);
+    void drawString(AttributedCharacterIterator iterator, int x, int y);
 
-  void drawString(AttributedCharacterIterator iterator, float x, float y);
+    void drawString(AttributedCharacterIterator iterator, float x, float y);
 
-  void drawString(String string, float x, float y);
+    void drawString(String string, float x, float y);
 
-  void drawString(String string, int x, int y);
+    void drawString(String string, int x, int y);
 }

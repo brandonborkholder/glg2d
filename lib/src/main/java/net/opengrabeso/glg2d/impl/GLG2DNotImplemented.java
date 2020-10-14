@@ -21,13 +21,13 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class GLG2DNotImplemented {
-  private static final Logger LOGGER = Logger.getLogger(GLG2DNotImplemented.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GLG2DNotImplemented.class.getName());
 
-  private static final Set<String> tags = new TreeSet<String>();
+    private static final Set<String> tags = new TreeSet<String>();
 
-  public static void notImplemented(String tag) {
-    if (tags.add(tag)) {
-      LOGGER.log(Level.WARNING, tag + " has not been implemented yet ...");
+    public static void notImplemented(String tag) {
+        if (tags.add(tag)) {
+            LOGGER.log(Level.WARNING, tag + " has not been implemented yet ...");
+        }
     }
-  }
 }

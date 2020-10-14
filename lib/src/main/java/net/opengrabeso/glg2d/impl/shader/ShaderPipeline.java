@@ -18,11 +18,11 @@ package net.opengrabeso.glg2d.impl.shader;
 import com.github.opengrabeso.jaagl.GL2GL3;
 
 public interface ShaderPipeline {
-  void setup(GL2GL3 gl);
+    void setup(GL2GL3 gl);
 
-  boolean isSetup();
+    boolean isSetup();
 
-  void use(GL2GL3 gl, boolean use);
+    void use(GL2GL3 gl, boolean use);
 
-  void delete(GL2GL3 gl);
+    void delete(GL2GL3 gl);
 }

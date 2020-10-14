@@ -23,62 +23,57 @@ import java.awt.RenderingHints;
  * or shape drawing.
  */
 public interface G2DDrawingHelper {
-  /**
-   * Sets the current {@code GLGraphics2D} parent. The current {@code GL} and
-   * {@code GLContext} objects can be accessed from this. This should clear all
-   * internal stacks in the helper object because previous painting iterations
-   * may not have called dispose() for each time they called create().
-   * 
-   * @param g2d
-   *          The parent context for subsequent drawing operations.
-   */
-  void setG2D(GLGraphics2D g2d);
+    /**
+     * Sets the current {@code GLGraphics2D} parent. The current {@code GL} and
+     * {@code GLContext} objects can be accessed from this. This should clear all
+     * internal stacks in the helper object because previous painting iterations
+     * may not have called dispose() for each time they called create().
+     *
+     * @param g2d The parent context for subsequent drawing operations.
+     */
+    void setG2D(GLGraphics2D g2d);
 
-  /**
-   * Sets the new {@code GLGraphics2D} context in a stack. This is called when
-   * {@code Graphics2D.create()} is called and each helper is given notice to
-   * push any necessary information onto the stack. This is used in conjunction
-   * with {@link #pop(GLGraphics2D)}.
-   * 
-   * @param newG2d
-   *          The new context, top of the stack.
-   */
-  void push(GLGraphics2D newG2d);
+    /**
+     * Sets the new {@code GLGraphics2D} context in a stack. This is called when
+     * {@code Graphics2D.create()} is called and each helper is given notice to
+     * push any necessary information onto the stack. This is used in conjunction
+     * with {@link #pop(GLGraphics2D)}.
+     *
+     * @param newG2d The new context, top of the stack.
+     */
+    void push(GLGraphics2D newG2d);
 
-  /**
-   * Sets the new {@code GLGraphics2D} context in a stack after a pop. This is
-   * called when {@code Graphics2D.dispose()} is called and each helper is given
-   * notice to pop any necessary information off the stack. This is used in
-   * conjunction with {@link #push(GLGraphics2D)}.
-   * 
-   * @param parentG2d
-   *          The new context, top of the stack - which is actually the parent
-   *          of what was popped.
-   */
-  void pop(GLGraphics2D parentG2d);
+    /**
+     * Sets the new {@code GLGraphics2D} context in a stack after a pop. This is
+     * called when {@code Graphics2D.dispose()} is called and each helper is given
+     * notice to pop any necessary information off the stack. This is used in
+     * conjunction with {@link #push(GLGraphics2D)}.
+     *
+     * @param parentG2d The new context, top of the stack - which is actually the parent
+     *                  of what was popped.
+     */
+    void pop(GLGraphics2D parentG2d);
 
-  /**
-   * Sets a new rendering hint. The state of all rendering hints is kept by the
-   * {@code GLGraphics2D} object, but all new state changes are propagated to
-   * all listeners.
-   * 
-   * @param key
-   *          The rendering hint key.
-   * @param value
-   *          The new hint value.
-   */
-  void setHint(RenderingHints.Key key, Object value);
+    /**
+     * Sets a new rendering hint. The state of all rendering hints is kept by the
+     * {@code GLGraphics2D} object, but all new state changes are propagated to
+     * all listeners.
+     *
+     * @param key   The rendering hint key.
+     * @param value The new hint value.
+     */
+    void setHint(RenderingHints.Key key, Object value);
 
-  /**
-   * Clears all hints back to their default states.
-   */
-  void resetHints();
+    /**
+     * Clears all hints back to their default states.
+     */
+    void resetHints();
 
-  /**
-   * Disposes the helper object. This is not called during the dispose operation
-   * of the {@code Graphics2D} object. This should dispose all GL resources when
-   * all drawing is finished and no more calls will be executing on this OpenGL
-   * context and these resources.
-   */
-  void dispose();
+    /**
+     * Disposes the helper object. This is not called during the dispose operation
+     * of the {@code Graphics2D} object. This should dispose all GL resources when
+     * all drawing is finished and no more calls will be executing on this OpenGL
+     * context and these resources.
+     */
+    void dispose();
 }

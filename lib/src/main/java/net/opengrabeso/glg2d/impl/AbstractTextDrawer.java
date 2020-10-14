@@ -31,100 +31,100 @@ import net.opengrabeso.glg2d.GLG2DTextHelper;
 import net.opengrabeso.glg2d.GLGraphics2D;
 
 public abstract class AbstractTextDrawer implements GLG2DTextHelper {
-  protected GLGraphics2D g2d;
+    protected GLGraphics2D g2d;
 
-  protected Deque<FontState> stack = new ArrayDeque<FontState>();
+    protected Deque<FontState> stack = new ArrayDeque<FontState>();
 
-  @Override
-  public void setG2D(GLGraphics2D g2d) {
-    this.g2d = g2d;
+    @Override
+    public void setG2D(GLGraphics2D g2d) {
+        this.g2d = g2d;
 
-    stack.clear();
-    stack.push(new FontState());
-  }
-
-  @Override
-  public void push(GLGraphics2D newG2d) {
-    stack.push(stack.peek().clone());
-  }
-
-  @Override
-  public void pop(GLGraphics2D parentG2d) {
-    stack.pop();
-  }
-
-  @Override
-  public void setHint(Key key, Object value) {
-    if (key == RenderingHints.KEY_TEXT_ANTIALIASING) {
-      stack.peek().antiAlias = value != null && value != RenderingHints.VALUE_TEXT_ANTIALIAS_OFF && value != RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT;
+        stack.clear();
+        stack.push(new FontState());
     }
-  }
 
-  @Override
-  public void resetHints() {
-    setHint(RenderingHints.KEY_TEXT_ANTIALIASING, null);
-  }
+    @Override
+    public void push(GLGraphics2D newG2d) {
+        stack.push(stack.peek().clone());
+    }
 
-  @Override
-  public void setFont(Font font) {
-    stack.peek().font = font;
-  }
+    @Override
+    public void pop(GLGraphics2D parentG2d) {
+        stack.pop();
+    }
 
-  @Override
-  public Font getFont() {
-    return stack.peek().font;
-  }
+    @Override
+    public void setHint(Key key, Object value) {
+        if (key == RenderingHints.KEY_TEXT_ANTIALIASING) {
+            stack.peek().antiAlias = value != null && value != RenderingHints.VALUE_TEXT_ANTIALIAS_OFF && value != RenderingHints.VALUE_TEXT_ANTIALIAS_DEFAULT;
+        }
+    }
 
-  @Override
-  public FontMetrics getFontMetrics(Font font) {
-    return new GLFontMetrics(font, getFontRenderContext());
-  }
+    @Override
+    public void resetHints() {
+        setHint(RenderingHints.KEY_TEXT_ANTIALIASING, null);
+    }
 
-  @Override
-  public FontRenderContext getFontRenderContext() {
-    return new FontRenderContext(g2d.getTransform(), stack.peek().antiAlias, false);
-  }
+    @Override
+    public void setFont(Font font) {
+        stack.peek().font = font;
+    }
 
-  /**
-   * The default implementation is good enough for now.
-   */
-  public static class GLFontMetrics extends FontMetrics {
-    private static final long serialVersionUID = 3676850359220061793L;
+    @Override
+    public Font getFont() {
+        return stack.peek().font;
+    }
 
-    protected FontRenderContext fontRenderContext;
-
-    public GLFontMetrics(Font font, FontRenderContext frc) {
-      super(font);
-      fontRenderContext = frc;
+    @Override
+    public FontMetrics getFontMetrics(Font font) {
+        return new GLFontMetrics(font, getFontRenderContext());
     }
 
     @Override
     public FontRenderContext getFontRenderContext() {
-      return fontRenderContext;
+        return new FontRenderContext(g2d.getTransform(), stack.peek().antiAlias, false);
     }
 
-    @Override
-    public int charsWidth(char[] data, int off, int len) {
-      if (len <= 0) {
-        return 0;
-      }
+    /**
+     * The default implementation is good enough for now.
+     */
+    public static class GLFontMetrics extends FontMetrics {
+        private static final long serialVersionUID = 3676850359220061793L;
 
-      Rectangle2D bounds = font.getStringBounds(data, off, len, getFontRenderContext());
-      return (int) ceil(bounds.getWidth());
+        protected FontRenderContext fontRenderContext;
+
+        public GLFontMetrics(Font font, FontRenderContext frc) {
+            super(font);
+            fontRenderContext = frc;
+        }
+
+        @Override
+        public FontRenderContext getFontRenderContext() {
+            return fontRenderContext;
+        }
+
+        @Override
+        public int charsWidth(char[] data, int off, int len) {
+            if (len <= 0) {
+                return 0;
+            }
+
+            Rectangle2D bounds = font.getStringBounds(data, off, len, getFontRenderContext());
+            return (int) ceil(bounds.getWidth());
+        }
     }
-  }
 
-  protected static class FontState implements Cloneable {
-    public Font font;
-    public boolean antiAlias;
+    protected static class FontState implements Cloneable {
+        public Font font;
+        public boolean antiAlias;
 
-    @Override
-    public FontState clone() {
-      try {
-        return (FontState) super.clone();
-      } catch (CloneNotSupportedException e) {
-        throw new AssertionError(e);
-      }
+        @Override
+        public FontState clone() {
+            try {
+                return (FontState) super.clone();
+            } catch (CloneNotSupportedException e) {
+                throw new AssertionError(e);
+            }
+        }
     }
-  }
 }

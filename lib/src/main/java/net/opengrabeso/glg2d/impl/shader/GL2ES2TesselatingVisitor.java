@@ -24,56 +24,56 @@ import com.github.opengrabeso.jaagl.GL2GL3;
 import net.opengrabeso.glg2d.impl.AbstractTesselatorVisitor;
 
 public class GL2ES2TesselatingVisitor extends AbstractTesselatorVisitor implements ShaderPathVisitor {
-  protected GL2GL3 gl;
-  protected UniformBufferObject uniforms;
+    protected GL2GL3 gl;
+    protected UniformBufferObject uniforms;
 
-  protected AnyModePipeline pipeline;
+    protected AnyModePipeline pipeline;
 
-  public GL2ES2TesselatingVisitor() {
-    this(new AnyModePipeline());
-  }
-
-  public GL2ES2TesselatingVisitor(AnyModePipeline pipeline) {
-    this.pipeline = pipeline;
-  }
-
-  @Override
-  public void setGLContext(GL context) {
-    gl = context.getGL2GL3();
-
-    if (!pipeline.isSetup()) {
-      pipeline.setup(gl);
+    public GL2ES2TesselatingVisitor() {
+        this(new AnyModePipeline());
     }
-  }
 
-  @Override
-  public void setGLContext(GL glContext, UniformBufferObject uniforms) {
-    setGLContext(glContext);
-    this.uniforms = uniforms;
-  }
+    public GL2ES2TesselatingVisitor(AnyModePipeline pipeline) {
+        this.pipeline = pipeline;
+    }
 
-  @Override
-  public void beginPoly(int windingRule) {
-    pipeline.use(gl, true);
+    @Override
+    public void setGLContext(GL context) {
+        gl = context.getGL2GL3();
 
-    super.beginPoly(windingRule);
+        if (!pipeline.isSetup()) {
+            pipeline.setup(gl);
+        }
+    }
 
-    pipeline.setColor(gl, uniforms.colorHook.getRGBA());
-    pipeline.setTransform(gl, uniforms.transformHook.getGLMatrixData());
-  }
+    @Override
+    public void setGLContext(GL glContext, UniformBufferObject uniforms) {
+        setGLContext(glContext);
+        this.uniforms = uniforms;
+    }
 
-  @Override
-  public void endPoly() {
-    super.endPoly();
+    @Override
+    public void beginPoly(int windingRule) {
+        pipeline.use(gl, true);
 
-    pipeline.use(gl, false);
-  }
+        super.beginPoly(windingRule);
 
-  @Override
-  protected void endTess() {
-    FloatBuffer buf = vBuffer.getBuffer();
-    buf.flip();
+        pipeline.setColor(gl, uniforms.colorHook.getRGBA());
+        pipeline.setTransform(gl, uniforms.transformHook.getGLMatrixData());
+    }
 
-    pipeline.draw(gl, drawMode, buf);
-  }
+    @Override
+    public void endPoly() {
+        super.endPoly();
+
+        pipeline.use(gl, false);
+    }
+
+    @Override
+    protected void endTess() {
+        FloatBuffer buf = vBuffer.getBuffer();
+        buf.flip();
+
+        pipeline.draw(gl, drawMode, buf);
+    }
 }

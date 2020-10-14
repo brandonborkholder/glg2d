@@ -66,8 +66,12 @@ public class TextureData {
     protected int rowLength;
     protected int alignment; // 1, 2, or 4 bytes
 
-    /** Used only by subclasses */
-    protected TextureData() { this.pixelAttributes = GLPixelAttributes.UNDEF; }
+    /**
+     * Used only by subclasses
+     */
+    protected TextureData() {
+        this.pixelAttributes = GLPixelAttributes.UNDEF;
+    }
 
     public TextureData(final int internalFormat,
                        final int width,
@@ -91,59 +95,114 @@ public class TextureData {
         alignment = 1;  // FIXME: is this correct enough in all situations?
     }
 
-    /** Returns the width in pixels of the texture data. */
-    public int getWidth() { return width; }
-    /** Returns the height in pixels of the texture data. */
-    public int getHeight() { return height; }
-    /** Returns the border in pixels of the texture data. */
+    /**
+     * Returns the width in pixels of the texture data.
+     */
+    public int getWidth() {
+        return width;
+    }
+
+    /**
+     * Returns the height in pixels of the texture data.
+     */
+    public int getHeight() {
+        return height;
+    }
+
+    /**
+     * Returns the border in pixels of the texture data.
+     */
     public int getBorder() {
         return border;
     }
-    /** Returns the intended OpenGL {@link GLPixelAttributes} of the texture data, i.e. format and type. */
+
+    /**
+     * Returns the intended OpenGL {@link GLPixelAttributes} of the texture data, i.e. format and type.
+     */
     public GLPixelAttributes getPixelAttributes() {
         return pixelAttributes;
     }
-    /** Returns the intended OpenGL pixel format of the texture data using {@link #getPixelAttributes()}. */
+
+    /**
+     * Returns the intended OpenGL pixel format of the texture data using {@link #getPixelAttributes()}.
+     */
     public int getPixelFormat() {
         return pixelAttributes.format;
     }
-    /** Returns the intended OpenGL pixel type of the texture data using {@link #getPixelAttributes()}. */
+
+    /**
+     * Returns the intended OpenGL pixel type of the texture data using {@link #getPixelAttributes()}.
+     */
     public int getPixelType() {
         return pixelAttributes.type;
     }
-    /** Returns the intended OpenGL internal format of the texture data. */
+
+    /**
+     * Returns the intended OpenGL internal format of the texture data.
+     */
     public int getInternalFormat() {
         return internalFormat;
     }
 
-    /** Indicates whether the texture coordinates must be flipped
-        vertically for proper display. */
+    /**
+     * Indicates whether the texture coordinates must be flipped
+     * vertically for proper display.
+     */
     public boolean getMustFlipVertically() {
         return mustFlipVertically;
     }
-    /** Returns the texture data, or null if it is specified as a set of mipmaps. */
+
+    /**
+     * Returns the texture data, or null if it is specified as a set of mipmaps.
+     */
     public ByteBuffer getBuffer() {
         return buffer;
     }
-    /** Returns the required byte alignment for the texture data. */
+
+    /**
+     * Returns the required byte alignment for the texture data.
+     */
     public int getAlignment() {
         return alignment;
     }
-    /** Returns the row length needed for correct GL_UNPACK_ROW_LENGTH
-        specification. This is currently only supported for
-        non-mipmapped, non-compressed textures. */
+
+    /**
+     * Returns the row length needed for correct GL_UNPACK_ROW_LENGTH
+     * specification. This is currently only supported for
+     * non-mipmapped, non-compressed textures.
+     */
     public int getRowLength() {
         return rowLength;
     }
 
-    /** Sets the width in pixels of the texture data. */
-    public void setWidth(final int width) { this.width = width; }
-    /** Sets the height in pixels of the texture data. */
-    public void setHeight(final int height) { this.height = height; }
-    /** Sets the border in pixels of the texture data. */
-    public void setBorder(final int border) { this.border = border; }
-    /** Sets the intended OpenGL pixel format of the texture data. */
-    public void setPixelAttributes(final GLPixelAttributes pixelAttributes) { this.pixelAttributes = pixelAttributes; }
+    /**
+     * Sets the width in pixels of the texture data.
+     */
+    public void setWidth(final int width) {
+        this.width = width;
+    }
+
+    /**
+     * Sets the height in pixels of the texture data.
+     */
+    public void setHeight(final int height) {
+        this.height = height;
+    }
+
+    /**
+     * Sets the border in pixels of the texture data.
+     */
+    public void setBorder(final int border) {
+        this.border = border;
+    }
+
+    /**
+     * Sets the intended OpenGL pixel format of the texture data.
+     */
+    public void setPixelAttributes(final GLPixelAttributes pixelAttributes) {
+        this.pixelAttributes = pixelAttributes;
+    }
+
     /**
      * Sets the intended OpenGL pixel format component of {@link GLPixelAttributes} of the texture data.
      * <p>
@@ -151,10 +210,11 @@ public class TextureData {
      * </p>
      */
     public void setPixelFormat(final int pixelFormat) {
-        if( pixelAttributes.format != pixelFormat ) {
+        if (pixelAttributes.format != pixelFormat) {
             pixelAttributes = new GLPixelAttributes(pixelFormat, pixelAttributes.type);
         }
     }
+
     /**
      * Sets the intended OpenGL pixel type component of {@link GLPixelAttributes} of the texture data.
      * <p>
@@ -162,26 +222,46 @@ public class TextureData {
      * </p>
      */
     public void setPixelType(final int pixelType) {
-        if( pixelAttributes.type != pixelType) {
+        if (pixelAttributes.type != pixelType) {
             pixelAttributes = new GLPixelAttributes(pixelAttributes.format, pixelType);
         }
     }
-    /** Sets whether the texture coordinates must be flipped vertically
-        for proper display. */
-    public void setMustFlipVertically(final boolean mustFlipVertically) { this.mustFlipVertically = mustFlipVertically; }
-    /** Sets the texture data. */
+
+    /**
+     * Sets whether the texture coordinates must be flipped vertically
+     * for proper display.
+     */
+    public void setMustFlipVertically(final boolean mustFlipVertically) {
+        this.mustFlipVertically = mustFlipVertically;
+    }
+
+    /**
+     * Sets the texture data.
+     */
     public void setBuffer(final ByteBuffer buffer) {
         this.buffer = buffer;
     }
-    /** Sets the required byte alignment for the texture data. */
-    public void setAlignment(final int alignment) { this.alignment = alignment; }
-    /** Sets the row length needed for correct GL_UNPACK_ROW_LENGTH
-        specification. This is currently only supported for
-        non-mipmapped, non-compressed textures. */
-    public void setRowLength(final int rowLength) { this.rowLength = rowLength; }
 
-    /** Flushes resources associated with this TextureData by calling
-        Flusher.flush(). */
+    /**
+     * Sets the required byte alignment for the texture data.
+     */
+    public void setAlignment(final int alignment) {
+        this.alignment = alignment;
+    }
+
+    /**
+     * Sets the row length needed for correct GL_UNPACK_ROW_LENGTH
+     * specification. This is currently only supported for
+     * non-mipmapped, non-compressed textures.
+     */
+    public void setRowLength(final int rowLength) {
+        this.rowLength = rowLength;
+    }
+
+    /**
+     * Flushes resources associated with this TextureData by calling
+     * Flusher.flush().
+     */
     public void flush() {
         if (flusher != null) {
             flusher.flush();
@@ -189,26 +269,32 @@ public class TextureData {
         }
     }
 
-    /** Calls flush()
+    /**
+     * Calls flush()
+     *
      * @see #flush()
      */
     public void destroy() {
         flush();
     }
 
-    /** Defines a callback mechanism to allow the user to explicitly
-        deallocate native resources (memory-mapped files, etc.)
-        associated with a particular TextureData. */
+    /**
+     * Defines a callback mechanism to allow the user to explicitly
+     * deallocate native resources (memory-mapped files, etc.)
+     * associated with a particular TextureData.
+     */
     public static interface Flusher {
-        /** Flushes any native resources associated with this
-            TextureData. */
+        /**
+         * Flushes any native resources associated with this
+         * TextureData.
+         */
         public void flush();
     }
 
     @Override
     public String toString() {
-        return "TextureData["+width+"x"+height+", y-flip "+mustFlipVertically+", internFormat 0x"+Integer.toHexString(internalFormat)+", "+
-                pixelAttributes+", border "+border+", alignment "+alignment+", rowlen "+rowLength+ "";
+        return "TextureData[" + width + "x" + height + ", y-flip " + mustFlipVertically + ", internFormat 0x" + Integer.toHexString(internalFormat) + ", " +
+                pixelAttributes + ", border " + border + ", alignment " + alignment + ", rowlen " + rowLength + "";
     }
 
 }

@@ -58,7 +58,7 @@ public final class ShaderLoader {
     /**
      * Checks that a shader was compiled correctly.
      *
-     * @param gl OpenGL context, assumed not null
+     * @param gl     OpenGL context, assumed not null
      * @param shader OpenGL handle to a shader
      * @return True if shader was compiled without errors
      */
@@ -69,7 +69,7 @@ public final class ShaderLoader {
     /**
      * Checks that a shader program was linked successfully.
      *
-     * @param gl OpenGL context, assumed not null
+     * @param gl      OpenGL context, assumed not null
      * @param program OpenGL handle to a shader program
      * @return True if program was linked successfully
      */
@@ -80,7 +80,7 @@ public final class ShaderLoader {
     /**
      * Checks that a shader program was validated successfully.
      *
-     * @param gl OpenGL context, assumed not null
+     * @param gl      OpenGL context, assumed not null
      * @param program OpenGL handle to a shader program
      * @return True if program was validated successfully
      */
@@ -91,17 +91,17 @@ public final class ShaderLoader {
     /**
      * Loads a shader program from a pair of strings.
      *
-     * @param gl Current OpenGL context
+     * @param gl  Current OpenGL context
      * @param vss Vertex shader source
      * @param fss Fragment shader source
      * @return OpenGL handle to the shader program, not negative
-     * @throws NullPointerException if context or either source is null
+     * @throws NullPointerException     if context or either source is null
      * @throws IllegalArgumentException if either source is empty
      */
     /*@Nonnegative*/
     public static int loadProgram(/*@Nonnull*/ final GL2GL3 gl,
-                                  /*@Nonnull*/ final String vss,
-                                  /*@Nonnull*/ final String fss) {
+            /*@Nonnull*/ final String vss,
+            /*@Nonnull*/ final String fss) {
 
         // Create the shaders
         final int vs = loadShader(gl, vss, gl.GL_VERTEX_SHADER());
@@ -130,15 +130,15 @@ public final class ShaderLoader {
     /**
      * Loads a shader from a string.
      *
-     * @param gl Current OpenGL context, assumed not null
+     * @param gl     Current OpenGL context, assumed not null
      * @param source Source code of the shader as one long string, assumed not null or empty
-     * @param type Type of shader, assumed valid
+     * @param type   Type of shader, assumed valid
      * @return OpenGL handle to the shader, not negative
      */
     /*@Nonnegative*/
     private static int loadShader(/*@Nonnull*/ final GL2GL3 gl,
-                                  /*@Nonnull*/ final String source,
-                                  final int type) {
+            /*@Nonnull*/ final String source,
+                                               final int type) {
 
         // Create and read source
         final int shader = gl.glCreateShader(type);

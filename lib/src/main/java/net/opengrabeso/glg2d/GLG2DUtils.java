@@ -22,26 +22,26 @@ import com.github.opengrabeso.jaagl.GL;
 import com.github.opengrabeso.jaagl.GL2GL3;
 
 public class GLG2DUtils {
-  private static final Logger LOGGER = Logger.getLogger(GLG2DUtils.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(GLG2DUtils.class.getName());
 
-  public static int getViewportHeight(GL gl) {
-    int[] viewportDimensions = new int[4];
-    gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions);
-      return viewportDimensions[3];
-  }
-
-  public static int getViewportWidth(GL gl) {
-    int[] viewportDimensions = new int[4];
-    gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions);
-      return viewportDimensions[2];
-  }
-
-  public static void logGLError(GL gl) {
-    int error = gl.glGetError();
-    if (error != gl.GL_NO_ERROR()) {
-      LOGGER.log(Level.SEVERE, "GL Error: code " + error);
+    public static int getViewportHeight(GL gl) {
+        int[] viewportDimensions = new int[4];
+        gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions);
+        return viewportDimensions[3];
     }
-  }
+
+    public static int getViewportWidth(GL gl) {
+        int[] viewportDimensions = new int[4];
+        gl.glGetIntegerv(gl.GL_VIEWPORT(), viewportDimensions);
+        return viewportDimensions[2];
+    }
+
+    public static void logGLError(GL gl) {
+        int error = gl.glGetError();
+        if (error != gl.GL_NO_ERROR()) {
+            LOGGER.log(Level.SEVERE, "GL Error: code " + error);
+        }
+    }
 
     public static int ensureIsGLBuffer(GL2GL3 gl, int bufferId) {
         if (gl.glIsBuffer(bufferId)) {
