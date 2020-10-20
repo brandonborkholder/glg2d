@@ -101,6 +101,7 @@ public class TextureRenderer {
 
     private boolean useVAO = false; // avoid using VAO on older OpenGL
     private int vao = -1;
+    private boolean vaoSetupDone = false;
 
 
     /**
@@ -181,7 +182,6 @@ public class TextureRenderer {
             this.vao = vao[0];
             this.useVAO = this.vao > 0;
 
-            setupVertexAttributesImpl();
         } catch (Exception ex) {
             this.useVAO = false;
         }
@@ -206,6 +206,10 @@ public class TextureRenderer {
         // TODO: VBA
         if (useVAO) {
             gl.glBindVertexArray(vao);
+            if (!vaoSetupDone) {
+                setupVertexAttributesImpl();
+                vaoSetupDone = true;
+            }
         } else {
             setupVertexAttributesImpl();
         }
