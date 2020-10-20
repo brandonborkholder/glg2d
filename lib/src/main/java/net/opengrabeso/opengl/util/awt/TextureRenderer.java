@@ -46,9 +46,15 @@ import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.image.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import com.github.opengrabeso.jaagl.GL2GL3;
 import com.jogamp.common.nio.Buffers;
+import net.opengrabeso.glg2d.impl.shader.AbstractShaderPipeline;
+import net.opengrabeso.glg2d.impl.shader.AnyModePipeline;
 import net.opengrabeso.opengl.util.texture.*;
 import net.opengrabeso.opengl.util.texture.awt.*;
 
@@ -88,28 +94,6 @@ public class TextureRenderer {
 
     private int program;
 
-
-    private static final String vsSource =
-            "#version 120\n" +
-                    "uniform mat4 MVPMatrix;\n" +
-                    "attribute vec4 MCVertex;\n" +
-                    "attribute vec2 TexCoord0;\n" +
-                    "varying vec2 Coord0;\n" +
-                    "void main() {\n" +
-                    "   gl_Position = MVPMatrix * MCVertex;\n" +
-                    "   Coord0 = TexCoord0;\n" +
-                    "}\n";
-
-    private static final String fsSource =
-            "#version 120\n" +
-                    "uniform sampler2D Texture;\n" +
-                    "uniform vec4 Color=vec4(1,1,1,1);\n" +
-                    "varying vec2 Coord0;\n" +
-                    "void main() {\n" +
-                    "   float sample;\n" +
-                    "   sample = texture2D(Texture,Coord0).r;\n" +
-                    "   gl_FragColor = Color * sample;\n" +
-                    "}\n";
     private int transformUniform = -1;
     private int colorUniform = -1;
     private int vertCoordAttrib = -1;
@@ -143,9 +127,42 @@ public class TextureRenderer {
         setup();
     }
 
+    static private String readResource(Class<?> context, String path) {
+        InputStream stream = null;
+        if (context != null) {
+            stream = context.getResourceAsStream(path);
+        }
+
+        if (stream == null) {
+            stream = TextureRenderer.class.getResourceAsStream(path);
+        }
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
+        StringBuilder sb = new StringBuilder();
+        try {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
+            }
+        } catch(IOException ignored) {
+        } finally {
+            try {
+                stream.close();
+            } catch (IOException ignored) {
+            }
+        }
+
+        return sb.toString();
+    }
+
     // create shaders and similar OpenGL objects
     private void setup() {
         gl.glGetError(); // flush any pending errors
+
+        String directory = gl.isGL3() ? "gl3/" : "gl2/";
+
+        String vsSource = readResource(AnyModePipeline.class, directory + "textShader.v");
+        String fsSource = readResource(AnyModePipeline.class, directory + "textShader.f");
 
         program = ShaderLoader.loadProgram(gl, vsSource, fsSource);
 
