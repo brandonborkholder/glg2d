@@ -1,4 +1,4 @@
-#version 100
+#version 130
 precision mediump float;
 uniform vec4 u_color;
 

@@ -1,4 +1,4 @@
-#version 100
+#version 110
 precision mediump float;
 uniform sampler2D u_tex;
 uniform vec4 u_color;

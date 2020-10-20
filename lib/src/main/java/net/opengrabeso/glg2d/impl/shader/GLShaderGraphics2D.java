@@ -35,14 +35,18 @@ public class GLShaderGraphics2D extends GLGraphics2D {
         return uniforms;
     }
 
+    private String shaderDirectory() {
+        return gl.isGL3() ? "gl3/" : "gl2/";
+    }
+
     @Override
     protected GLG2DImageHelper createImageHelper() {
-        return new GL2ES2ImageDrawer();
+        return new GL2ES2ImageDrawer(shaderDirectory());
     }
 
     @Override
     protected GLG2DColorHelper createColorHelper() {
-        return new GL2ES2ColorHelper();
+        return new GL2ES2ColorHelper(shaderDirectory());
     }
 
     @Override
@@ -52,7 +56,7 @@ public class GLShaderGraphics2D extends GLGraphics2D {
 
     @Override
     protected GLG2DShapeHelper createShapeHelper() {
-        return new GL2ES2ShapeDrawer();
+        return new GL2ES2ShapeDrawer(shaderDirectory());
     }
 
     @Override

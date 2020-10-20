@@ -33,8 +33,8 @@ public class GL2ES2SimpleConvexFillVisitor extends SimplePathVisitor implements 
 
     protected AnyModePipeline pipeline;
 
-    public GL2ES2SimpleConvexFillVisitor() {
-        this(new AnyModePipeline());
+    public GL2ES2SimpleConvexFillVisitor(String shaderDirectory) {
+        this(new AnyModePipeline(shaderDirectory));
     }
 
     public GL2ES2SimpleConvexFillVisitor(AnyModePipeline pipeline) {

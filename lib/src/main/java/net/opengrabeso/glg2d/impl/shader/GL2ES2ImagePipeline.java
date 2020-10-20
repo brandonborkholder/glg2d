@@ -31,12 +31,12 @@ public class GL2ES2ImagePipeline extends AbstractShaderPipeline {
     protected int vertCoordLocation = -1;
     protected int texCoordLocation = -1;
 
-    public GL2ES2ImagePipeline() {
-        this("TextureShader.v", "TextureShader.f");
+    public GL2ES2ImagePipeline(String shaderDirectory) {
+        this(shaderDirectory, "TextureShader.v", "TextureShader.f");
     }
 
-    public GL2ES2ImagePipeline(String vertexShaderFileName, String fragmentShaderFileName) {
-        super(vertexShaderFileName, null, fragmentShaderFileName);
+    public GL2ES2ImagePipeline(String shaderDirectory, String vertexShaderFileName, String fragmentShaderFileName) {
+        super(shaderDirectory, vertexShaderFileName, null, fragmentShaderFileName);
     }
 
     public void setTextureUnit(GL2GL3 gl, int unit) {

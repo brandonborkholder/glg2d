@@ -46,12 +46,12 @@ public class GeometryShaderStrokePipeline extends AbstractShaderPipeline {
     protected int capTypeLocation;
     protected int drawEndLocation;
 
-    public GeometryShaderStrokePipeline() {
-        this("StrokeShader.v", "StrokeShader.g", "StrokeShader.f");
+    public GeometryShaderStrokePipeline(String shaderDirectory) {
+        this(shaderDirectory, "StrokeShader.v", "StrokeShader.g", "StrokeShader.f");
     }
 
-    public GeometryShaderStrokePipeline(String vertexShaderFileName, String geometryShaderFileName, String fragmentShaderFileName) {
-        super(vertexShaderFileName, geometryShaderFileName, fragmentShaderFileName);
+    public GeometryShaderStrokePipeline(String shaderDirectory, String vertexShaderFileName, String geometryShaderFileName, String fragmentShaderFileName) {
+        super(shaderDirectory, vertexShaderFileName, geometryShaderFileName, fragmentShaderFileName);
     }
 
     public void setStroke(GL2GL3 gl, BasicStroke stroke) {

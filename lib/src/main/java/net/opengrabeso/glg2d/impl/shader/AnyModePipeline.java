@@ -26,12 +26,12 @@ public class AnyModePipeline extends AbstractShaderPipeline {
     protected int vertCoordLocation = -1;
     protected int vertexArrayId = -1;
 
-    public AnyModePipeline() {
-        this("FixedFuncShader.v", "FixedFuncShader.f");
+    public AnyModePipeline(String shaderDirectory) {
+        this(shaderDirectory, "FixedFuncShader.v", "FixedFuncShader.f");
     }
 
-    public AnyModePipeline(String vertexShaderFileName, String fragmentShaderFileName) {
-        super(vertexShaderFileName, null, fragmentShaderFileName);
+    public AnyModePipeline(String directory, String vertexShaderFileName, String fragmentShaderFileName) {
+        super(directory, vertexShaderFileName, null, fragmentShaderFileName);
     }
 
     public void bindBuffer(GL2GL3 gl) {
