@@ -161,8 +161,8 @@ public class TextureRenderer {
 
         String directory = gl.isGL3() ? "gl3/" : "gl2/";
 
-        String vsSource = readResource(AnyModePipeline.class, directory + "textShader.v");
-        String fsSource = readResource(AnyModePipeline.class, directory + "textShader.f");
+        String vsSource = readResource(AnyModePipeline.class, directory + "TextShader.v");
+        String fsSource = readResource(AnyModePipeline.class, directory + "TextShader.f");
 
         program = ShaderLoader.loadProgram(gl, vsSource, fsSource);
 
