@@ -29,8 +29,8 @@ public class GL2ES2ColorHelper extends AbstractColorHelper implements ColorHook 
 
     protected GL2ES2ImagePipeline pipeline;
 
-    public GL2ES2ColorHelper() {
-        this(new GL2ES2ImagePipeline());
+    public GL2ES2ColorHelper(String shaderDirectory) {
+        this(new GL2ES2ImagePipeline(shaderDirectory));
     }
 
     public GL2ES2ColorHelper(GL2ES2ImagePipeline pipeline) {

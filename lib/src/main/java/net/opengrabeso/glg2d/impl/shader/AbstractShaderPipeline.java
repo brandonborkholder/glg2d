@@ -39,10 +39,10 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
     protected int transformLocation = -1;
     protected int colorLocation = -1;
 
-    public AbstractShaderPipeline(String vertexShaderFileName, String geometryShaderFileName, String fragmentShaderFileName) {
-        this.vertexShaderFileName = vertexShaderFileName;
-        this.geometryShaderFileName = geometryShaderFileName;
-        this.fragmentShaderFileName = fragmentShaderFileName;
+    public AbstractShaderPipeline(String directory, String vertexShaderFileName, String geometryShaderFileName, String fragmentShaderFileName) {
+        this.vertexShaderFileName = directory + vertexShaderFileName;
+        this.geometryShaderFileName = geometryShaderFileName != null ? directory + geometryShaderFileName : geometryShaderFileName;
+        this.fragmentShaderFileName = directory + fragmentShaderFileName;
     }
 
     @Override

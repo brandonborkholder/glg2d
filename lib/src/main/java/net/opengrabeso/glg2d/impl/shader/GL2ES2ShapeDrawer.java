@@ -33,10 +33,10 @@ public class GL2ES2ShapeDrawer extends AbstractShapeHelper {
     protected ShaderPathVisitor tesselatingVisitor;
     protected PathVisitor complexFillVisitor;
 
-    public GL2ES2ShapeDrawer() {
-        lineVisitor = new GL2ES2StrokeLineVisitor();
-        simpleFillVisitor = new GL2ES2SimpleConvexFillVisitor();
-        tesselatingVisitor = new GL2ES2TesselatingVisitor();
+    public GL2ES2ShapeDrawer(String shaderDirectory) {
+        lineVisitor = new GL2ES2StrokeLineVisitor(shaderDirectory);
+        simpleFillVisitor = new GL2ES2SimpleConvexFillVisitor(shaderDirectory);
+        tesselatingVisitor = new GL2ES2TesselatingVisitor(shaderDirectory);
         complexFillVisitor = new SimpleOrTesselatingVisitor(simpleFillVisitor, tesselatingVisitor);
     }
 

@@ -37,10 +37,10 @@ public class GL2ES2ImageDrawer extends AbstractImageHelper {
     protected FloatBuffer vertTexCoords = Buffers.newDirectFloatBuffer(16);
     protected GL2ES2ImagePipeline shader;
 
-    private float[] white = new float[]{1, 1, 1, 1};
+    private final float[] white = new float[]{1, 1, 1, 1};
 
-    public GL2ES2ImageDrawer() {
-        this(new GL2ES2ImagePipeline());
+    public GL2ES2ImageDrawer(String shaderDirectory) {
+        this(new GL2ES2ImagePipeline(shaderDirectory));
     }
 
     public GL2ES2ImageDrawer(GL2ES2ImagePipeline shader) {

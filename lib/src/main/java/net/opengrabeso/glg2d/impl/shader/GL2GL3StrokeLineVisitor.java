@@ -37,8 +37,8 @@ public class GL2GL3StrokeLineVisitor extends SimplePathVisitor implements Shader
 
     protected GeometryShaderStrokePipeline pipeline;
 
-    public GL2GL3StrokeLineVisitor() {
-        this(new GeometryShaderStrokePipeline());
+    public GL2GL3StrokeLineVisitor(String shaderDirectory) {
+        this(new GeometryShaderStrokePipeline(shaderDirectory));
     }
 
     public GL2GL3StrokeLineVisitor(GeometryShaderStrokePipeline pipeline) {

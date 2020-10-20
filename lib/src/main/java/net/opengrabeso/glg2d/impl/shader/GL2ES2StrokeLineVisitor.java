@@ -30,8 +30,8 @@ public class GL2ES2StrokeLineVisitor extends BasicStrokeLineVisitor implements S
 
     protected AnyModePipeline pipeline;
 
-    public GL2ES2StrokeLineVisitor() {
-        this(new AnyModePipeline());
+    public GL2ES2StrokeLineVisitor(String shaderDirectory) {
+        this(new AnyModePipeline(shaderDirectory));
     }
 
     public GL2ES2StrokeLineVisitor(AnyModePipeline pipeline) {

@@ -29,8 +29,8 @@ public class GL2ES2TesselatingVisitor extends AbstractTesselatorVisitor implemen
 
     protected AnyModePipeline pipeline;
 
-    public GL2ES2TesselatingVisitor() {
-        this(new AnyModePipeline());
+    public GL2ES2TesselatingVisitor(String shaderDirectory) {
+        this(new AnyModePipeline(shaderDirectory));
     }
 
     public GL2ES2TesselatingVisitor(AnyModePipeline pipeline) {

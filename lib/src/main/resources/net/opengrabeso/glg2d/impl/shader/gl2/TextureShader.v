@@ -1,4 +1,4 @@
-#version 100
+#version 110
 uniform mat4 u_transform;
 
 attribute vec2 a_vertCoord;
