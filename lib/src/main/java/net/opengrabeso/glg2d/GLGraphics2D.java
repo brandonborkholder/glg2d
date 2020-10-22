@@ -531,7 +531,7 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
         } else if (clipShape == null) {
             setClip(null, false);
         } else {
-            setClip(clipShape.getBounds2D());
+            setClip(clipShape.getBounds2D(), false);
         }
     }
 
