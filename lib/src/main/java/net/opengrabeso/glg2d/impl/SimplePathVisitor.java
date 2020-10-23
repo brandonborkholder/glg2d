@@ -17,6 +17,8 @@ package net.opengrabeso.glg2d.impl;
 
 import net.opengrabeso.glg2d.PathVisitor;
 
+import java.awt.geom.Point2D;
+
 /**
  * This is a fast B&eacute;zier curve implementation. I can't use OpenGL's
  * built-in evaluators because subclasses need to do something with the points,
@@ -27,30 +29,39 @@ import net.opengrabeso.glg2d.PathVisitor;
  * the implementation for the quadratic on my own, but it's simple.
  */
 public abstract class SimplePathVisitor implements PathVisitor {
-    /**
-     * Just a guess. Would be nice to make a better guess based on what's visually
-     * acceptable.
-     */
-    public static final int CURVE_STEPS = 30;
 
-    protected int steps = CURVE_STEPS;
-
-    /**
-     * Sets the number of steps to take in a quadratic or cubic curve spline.
-     */
-    public void setNumCurveSteps(int steps) {
-        this.steps = steps;
+    private float distance(float pointX, float pointY, float x, float y) {
+        float dx = x - pointX;
+        float dy = y - pointY;
+        return (float) Math.sqrt(dx * dx + dy * dy);
     }
 
-    /**
-     * Gets the number of steps to take in a quadratic or cubic curve spline.
-     */
-    public int getNumCurveSteps() {
-        return steps;
+    private Point2D.Float tPoint(float begX, float begY, float endX, float endY, float t) {
+        return new Point2D.Float(
+                begX + (endX - begX) * t,
+                begY + (endY - begY) * t
+        );
+    }
+
+    private float distance(float pointX, float pointY, float begX, float begY, float endX, float endY) {
+        float px = endX - begX;
+        float py = endY - begY;
+        float u = ((pointX - begX) * px + (pointY - begY) * py) / ((px * px) + (py * py));
+        float x = begX + u * px;
+        float y = begY + u * py;
+
+        return distance(pointX, pointY, x, y);
     }
 
     @Override
     public void quadTo(float[] previousVertex, float[] control) {
+
+        // error estimation: distance of control points from the center point
+        Point2D.Float midPoint = tPoint(previousVertex[0], previousVertex[1], control[2], control[3], 0.5f);
+        float err = distance(control[0], control[1], midPoint.x, midPoint.y);
+
+        int steps = Math.round(err);
+
         float[] p = new float[2];
 
         float xd, xdd, xdd_per_2;
@@ -89,6 +100,18 @@ public abstract class SimplePathVisitor implements PathVisitor {
     @Override
     public void cubicTo(float[] previousVertex, float[] control) {
         float[] p = new float[2];
+
+        // error estimation: distance of control points from the point on the straight line
+        Point2D.Float midPoint1 = tPoint(previousVertex[0], previousVertex[1], control[4], control[5], 1.0f/3);
+        Point2D.Float midPoint2 = tPoint(previousVertex[0], previousVertex[1], control[4], control[5], 2.0f/3);
+
+        // error estimation: distance of control points from the straight line
+        float err1 = distance(control[0], control[1], midPoint1.x, midPoint1.y);
+        float err2 = distance(control[2], control[3], midPoint2.x, midPoint2.y);
+
+        float err = Math.max(err1, err2);
+
+        int steps = Math.round(err);
 
         float xd, xdd, xddd, xdd_per_2, xddd_per_2, xddd_per_6;
         float yd, ydd, yddd, ydd_per_2, yddd_per_2, yddd_per_6;
