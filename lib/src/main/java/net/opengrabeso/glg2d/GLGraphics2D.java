@@ -535,17 +535,26 @@ public class GLGraphics2D extends Graphics2D implements Cloneable {
         }
     }
 
+    private boolean wholeCanvasClip(Rectangle2D clipShape) {
+        return clipShape.contains(0, 0, canvasWidth, canvasHeight);
+    }
+
     protected void setClip(Rectangle2D clipShape, boolean intersect) {
         if (clipShape == null) {
             clip = null;
             scissor(false);
         } else if (intersect && clip != null) {
             Rectangle rect = getTransform().createTransformedShape(clipShape).getBounds();
-            clip = rect.intersection(clip);
-            scissor(true);
+            if (!wholeCanvasClip(rect)) {
+                clip = rect.intersection(clip);
+                scissor(true);
+            }
         } else {
-            clip = getTransform().createTransformedShape(clipShape).getBounds();
-            scissor(true);
+            Rectangle rect = getTransform().createTransformedShape(clipShape).getBounds();
+            if (!wholeCanvasClip(rect)) {
+                clip = rect;
+                scissor(true);
+            }
         }
     }
 
