@@ -2,9 +2,7 @@ package net.opengrabeso.glg2d.examples;
 
 import net.opengrabeso.glg2d.GLG2DPanel;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics;
+import java.awt.*;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
@@ -36,6 +34,8 @@ class CustomComponent extends JComponent {
 
     private static final long serialVersionUID = 1L;
 
+    private final int margin = 10;
+
     @Override
     public Dimension getMinimumSize() {
         return new Dimension(100, 100);
@@ -46,6 +46,20 @@ class CustomComponent extends JComponent {
         return new Dimension(400, 300);
     }
 
+    private Rectangle placeRect(Rectangle rect) {
+        Dimension dim = getSize();
+
+        int wMax = dim.width - margin - rect.x;
+        int hMax = dim.height - margin - rect.y;
+
+        return new Rectangle(
+                rect.x,
+                rect.y,
+                Math.min(rect.width, wMax),
+                Math.min(rect.height, hMax)
+        );
+    }
+
     @Override
     public void paintComponent(Graphics g) {
         int margin = 10;
@@ -54,16 +68,23 @@ class CustomComponent extends JComponent {
         g.setColor(Color.red);
         g.fillRect(margin, margin, dim.width - margin * 2, dim.height - margin * 2);
 
-        g.setColor(Color.green);
+        {
+            Rectangle rect = placeRect(new Rectangle(20, 20, 300, 300));
+            g.setColor(Color.yellow);
+            g.fillRoundRect(rect.x, rect.y, rect.width, rect.height, 100, 100);
+        }
 
-        int x = 100;
-        int y = 100;
-        int wMax = dim.width - margin - x;
-        int hMax = dim.height - margin - y;
+        {
+            Rectangle rect = placeRect(new Rectangle(100, 100, 100, 100));
+            g.setColor(Color.green);
+            g.fillRoundRect(rect.x, rect.y, rect.width, rect.height, 20, 20);
+        }
 
-        int w = Math.min(100, wMax);
-        int h = Math.min(100, hMax);
+        {
+            Rectangle rect = placeRect(new Rectangle(300, 100, 200, 200));
+            g.setColor(Color.blue);
+            g.fillOval(rect.x, rect.y, rect.width, rect.height);
 
-        g.fillRoundRect(100, 100, w, h, 20 , 20);
+        }
     }
 }

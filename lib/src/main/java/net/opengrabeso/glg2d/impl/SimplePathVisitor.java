@@ -27,30 +27,36 @@ import net.opengrabeso.glg2d.PathVisitor;
  * the implementation for the quadratic on my own, but it's simple.
  */
 public abstract class SimplePathVisitor implements PathVisitor {
-    /**
-     * Just a guess. Would be nice to make a better guess based on what's visually
-     * acceptable.
-     */
-    public static final int CURVE_STEPS = 30;
 
-    protected int steps = CURVE_STEPS;
+    private float distance(float pointX, float pointY, float begX, float begY, float endX, float endY) {
+        float px = endX - begX;
+        float py = endY - begY;
+        float u = ((pointX - begX) * px + (pointY - begY) * py) / ((px * px) + (py * py));
+        /*
+        if(u>1){
+            u=1;
+        }
+        else if(u<0){
+            u=0;
+        }
+         */
+        float x = begX + u * px;
+        float y = begY + u * py;
 
-    /**
-     * Sets the number of steps to take in a quadratic or cubic curve spline.
-     */
-    public void setNumCurveSteps(int steps) {
-        this.steps = steps;
-    }
-
-    /**
-     * Gets the number of steps to take in a quadratic or cubic curve spline.
-     */
-    public int getNumCurveSteps() {
-        return steps;
+        float dx = x - pointX;
+        float dy = y - pointY;
+        return (float) Math.sqrt(dx * dx + dy * dy);
     }
 
     @Override
     public void quadTo(float[] previousVertex, float[] control) {
+
+        // error estimation: distance of control points from the straight line
+        float err = distance(control[0], control[1], previousVertex[0], previousVertex[1], control[2], control[3]);
+
+        int steps = Math.round(err);
+
+
         float[] p = new float[2];
 
         float xd, xdd, xdd_per_2;
@@ -89,6 +95,14 @@ public abstract class SimplePathVisitor implements PathVisitor {
     @Override
     public void cubicTo(float[] previousVertex, float[] control) {
         float[] p = new float[2];
+
+        // error estimation: distance of control points from the straight line
+        float err1 = distance(control[0], control[1], previousVertex[0], previousVertex[1], control[4], control[5]);
+        float err2 = distance(control[2], control[3], previousVertex[0], previousVertex[1], control[4], control[5]);
+
+        float err = Math.max(err1, err2);
+
+        int steps = Math.round(err);
 
         float xd, xdd, xddd, xdd_per_2, xddd_per_2, xddd_per_6;
         float yd, ydd, yddd, ydd_per_2, yddd_per_2, yddd_per_6;
