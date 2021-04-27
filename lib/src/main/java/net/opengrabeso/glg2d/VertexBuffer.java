@@ -33,8 +33,6 @@ public class VertexBuffer {
 
     protected FloatBuffer buffer;
 
-    protected int deviceBufferId;
-
     /**
      * Creates a buffer that uses the shared global buffer. This is faster than
      * allocating multiple float buffers. Since OpenGL is single-threaded, we can
@@ -88,22 +86,9 @@ public class VertexBuffer {
         buffer.put(y);
     }
 
-    /**
-     * Adds multiple vertices to the buffer.
-     *
-     * @param vertices The buffer of new vertices to add.
-     */
-    public void addVertices(FloatBuffer vertices) {
-        int size = vertices.limit() - vertices.position();
-        ensureCapacity(size);
-
-        buffer.put(vertices);
-    }
-
     protected void ensureCapacity(int numNewFloats) {
         if (buffer.capacity() <= buffer.position() + numNewFloats) {
             FloatBuffer larger = Buffers.newDirectFloatBuffer(Math.max(buffer.position() * 2, buffer.position() + numNewFloats));
-            deviceBufferId = -deviceBufferId;
             int position = buffer.position();
             buffer.rewind();
             larger.put(buffer);

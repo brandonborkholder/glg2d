@@ -141,14 +141,17 @@ public class SimpleOrTesselatingVisitor extends SimplePathVisitor {
 
     @Override
     public void lineTo(float[] vertex) {
-        if (isConvexSoFar) {
-            buffer.addVertex(vertex[0], vertex[1]);
+        // do nothing when the same vertex submitted twice
+        if (previousVertices[0] != vertex[0] || previousVertices[1] != vertex[1]) {
+            if (isConvexSoFar) {
+                buffer.addVertex(vertex[0], vertex[1]);
 
-            if (!isValidCorner(vertex)) {
-                setUseTesselator(false);
+                if (!isValidCorner(vertex)) {
+                    setUseTesselator(false);
+                }
+            } else {
+                tesselatorFallback.lineTo(vertex);
             }
-        } else {
-            tesselatorFallback.lineTo(vertex);
         }
     }
 
@@ -181,11 +184,15 @@ public class SimpleOrTesselatingVisitor extends SimplePathVisitor {
             /*
              * Check that the total curvature along the path is less than 2π.
              */
+            double dot = diff1 * diff3 + diff2 * diff4;
+            double theta = 0;
+            // when we are submitted two identical points, handle them as a straight line - no change in totalCurvature
             double norm1sq = diff1 * diff1 + diff2 * diff2;
             double norm2sq = diff3 * diff3 + diff4 * diff4;
-            double dot = diff1 * diff3 + diff2 * diff4;
-            double cosThetasq = dot * dot / (norm1sq * norm2sq);
-            double theta = acos(sqrt(cosThetasq));
+            if (norm1sq * norm2sq != 0) {
+                double cosThetasq = dot != 0 ? dot * dot / (norm1sq * norm2sq) : 0;
+                theta = acos(sqrt(cosThetasq));
+            }
 
             totalCurvature += theta;
             if (totalCurvature > 2 * Math.PI + 1e-3) {

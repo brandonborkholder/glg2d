@@ -71,7 +71,7 @@ public class GL2ES2SimpleConvexFillVisitor extends SimplePathVisitor implements 
         pipeline.setTransform(gl, uniforms.transformHook.getGLMatrixData());
 
         vBuffer.clear();
-        vBuffer.addVertex(0, 0);
+        vBuffer.addVertex(0, 0);  // reserve space for a future centroid
     }
 
     @Override
@@ -114,7 +114,7 @@ public class GL2ES2SimpleConvexFillVisitor extends SimplePathVisitor implements 
         pipeline.draw(gl, gl.GL_TRIANGLE_FAN(), buf);
 
         vBuffer.clear();
-        vBuffer.addVertex(0, 0);
+        vBuffer.addVertex(0, 0); // reserve space for a future centroid
     }
 
     protected void setupCentroid(FloatBuffer vertexBuffer) {
