@@ -33,7 +33,6 @@
       <activation>
         <os>
           <family>mac</family>
-          <arch>amd64</arch>
         </os>
       </activation>
       <properties>
