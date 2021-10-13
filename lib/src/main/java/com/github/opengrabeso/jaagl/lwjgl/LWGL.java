@@ -1,6 +1,5 @@
 package com.github.opengrabeso.jaagl.lwjgl;
 
-import com.github.opengrabeso.jaagl.GL;
 import com.github.opengrabeso.jaagl.GL2;
 import com.github.opengrabeso.jaagl.GL3;
 import com.github.opengrabeso.jaagl.GLBase;
@@ -10,10 +9,6 @@ import org.lwjgl.system.MemoryUtil;
 import java.nio.ByteBuffer;
 
 public abstract class LWGL extends GLBase {
-
-    int versionMajor;
-    int versionMinor;
-
 
     LWGL() {
         super(GL11.glGetString(GL11.GL_VERSION));
@@ -25,11 +20,6 @@ public abstract class LWGL extends GLBase {
 
     public static GL3 createGL3() {
         return new LWGL3();
-    }
-
-    @Override
-    public boolean versionAtLeast(int major, int minor) {
-        return versionMajor > major || versionMajor == major && versionMinor >= minor;
     }
 
     @Override
