@@ -3,30 +3,20 @@ package com.github.opengrabeso.jaagl.lwjgl;
 import com.github.opengrabeso.jaagl.GL;
 import com.github.opengrabeso.jaagl.GL2;
 import com.github.opengrabeso.jaagl.GL3;
+import com.github.opengrabeso.jaagl.GLBase;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.system.MemoryUtil;
 
 import java.nio.ByteBuffer;
 
-public abstract class LWGL implements GL {
+public abstract class LWGL extends GLBase {
 
     int versionMajor;
     int versionMinor;
 
 
     LWGL() {
-        String strVersion = GL11.glGetString(GL11.GL_VERSION);
-        // if anything else fails, assume 2.0 - we do not support anything below this anyway
-        versionMajor = 2;
-        versionMinor = 0;
-
-        if (strVersion != null) {
-            String[] versions = strVersion.split("\\.");
-            if (versions.length >= 2) {
-                versionMajor = Integer.parseInt(versions[0]);
-                versionMinor = Integer.parseInt(versions[1]);
-            }
-        }
+        super(GL11.glGetString(GL11.GL_VERSION));
     }
 
     public static GL2 createGL2() {
