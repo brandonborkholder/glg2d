@@ -21,8 +21,8 @@ public abstract class LWGL implements GL {
         versionMinor = 0;
 
         if (strVersion != null) {
-            String[] versions = strVersion.split("\\.", 2);
-            if (versions.length == 2) {
+            String[] versions = strVersion.split("\\.");
+            if (versions.length >= 2) {
                 versionMajor = Integer.parseInt(versions[0]);
                 versionMinor = Integer.parseInt(versions[1]);
             }
