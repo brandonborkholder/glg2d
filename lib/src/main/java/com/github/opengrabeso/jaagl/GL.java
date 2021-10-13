@@ -17,6 +17,7 @@ public interface GL {
 
     boolean isExtensionAvailable(String name);
 
+    boolean versionAtLeast(int major, int minor);
 
     int GL_TEXTURE0();
 

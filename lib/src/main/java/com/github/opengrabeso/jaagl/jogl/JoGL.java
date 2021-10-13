@@ -8,8 +8,23 @@ import java.nio.ByteBuffer;
 public abstract class JoGL implements GL {
     com.jogamp.opengl.GL gl;
 
+    int versionMajor;
+    int versionMinor;
+
     JoGL(com.jogamp.opengl.GL gl) {
         this.gl = gl;
+        String strVersion = gl.glGetString(gl.GL_VERSION);
+        // if anything else fails, assume 2.0 - we do not support anything below this anyway
+        versionMajor = 2;
+        versionMinor = 0;
+
+        if (strVersion != null) {
+            String[] versions = strVersion.split("\\.");
+            if (versions.length >= 2) {
+                versionMajor = Integer.parseInt(versions[0]);
+                versionMinor = Integer.parseInt(versions[1]);
+            }
+        }
     }
 
     public static GL2GL3 wrap(com.jogamp.opengl.GL gl) {
@@ -84,6 +99,11 @@ public abstract class JoGL implements GL {
     @Override
     public boolean isExtensionAvailable(String name) {
         return gl.isExtensionAvailable(name);
+    }
+
+    @Override
+    public boolean versionAtLeast(int major, int minor) {
+        return versionMajor > major || versionMajor == major && versionMinor >= minor;
     }
 
     @Override

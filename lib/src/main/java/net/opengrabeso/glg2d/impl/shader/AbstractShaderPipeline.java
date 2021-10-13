@@ -132,7 +132,46 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
 
     protected int compileShader(GL2GL3 gl, int type, Class<?> context, String name) throws ShaderException {
         String source = readShader(context, name);
-        int id = compileShader(gl, type, source);
+
+        String[] prefixVertex = new String[]{
+                "#version 330",
+                "#define attribute in",
+                "#define varying out",
+                "#define texture2D texture"
+        };
+
+        String[] prefixFragment = new String[]{
+                "#version 330",
+                "#define varying in",
+                "#define gl_FragDepthEXT gl_FragDepth",
+                "#define texture2D texture",
+                "#define textureCube texture",
+                "#define texture2DProj textureProj",
+                "#define texture2DLodEXT textureLod",
+                "#define texture2DProjLodEXT textureProjLod",
+                "#define textureCubeLodEXT textureLod",
+                "#define texture2DGradEXT textureGrad",
+                "#define texture2DProjGradEXT textureProjGrad",
+                "#define textureCubeGradEXT textureGrad"
+        };
+        String[] prefixVertex3 = new String[]{
+                "out highp vec4 pc_fragColor;",
+                "#define gl_FragColor pc_fragColor"
+        };
+
+        String prefixedSource = source;
+        // OpenGL 3.3 has GLSL version 330 (see https://en.wikipedia.org/wiki/OpenGL_Shading_Language)
+        if (gl.versionAtLeast(3, 3) && source.startsWith("#version 1")) {
+            String strippedSource = source.replaceAll("#version 1..", "");
+            if (type == gl.GL_FRAGMENT_SHADER()) {
+                prefixedSource = String.join("\n", prefixFragment) + strippedSource;
+            }
+            if (type == gl.GL_VERTEX_SHADER()) {
+                prefixedSource = String.join("\n", prefixVertex) + String.join("\n", prefixVertex3) + strippedSource;
+            }
+        }
+
+        int id = compileShader(gl, type, prefixedSource);
         checkShaderThrowException(gl, id);
         return id;
     }
