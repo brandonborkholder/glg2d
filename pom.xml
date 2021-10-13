@@ -48,14 +48,6 @@
     <url>https://github.com/OpenGrabeso/glg2d</url>
   </scm>
 
-  <repositories>
-    <repository>
-      <id>github</id>
-      <name>GitHub OpenGrabeso Apache Maven Packages</name>
-      <url>https://maven.pkg.github.com/OpenGrabeso/_</url>
-    </repository>
-  </repositories>
-
   <build>
     <plugins>
 
