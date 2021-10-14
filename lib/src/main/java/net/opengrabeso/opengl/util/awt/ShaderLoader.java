@@ -55,6 +55,44 @@ public final class ShaderLoader {
         // empty
     }
 
+    static private final String[] prefixVertex = new String[]{
+            "#version 330",
+            "#define attribute in",
+            "#define varying out",
+            "#define texture2D texture"
+    };
+
+    static private final String[] prefixFragment = new String[]{
+            "#version 330",
+            "#define varying in",
+            "#define gl_FragDepthEXT gl_FragDepth",
+            "#define texture2D texture",
+            "#define textureCube texture",
+            "#define texture2DProj textureProj",
+            "#define texture2DLodEXT textureLod",
+            "#define texture2DProjLodEXT textureProjLod",
+            "#define textureCubeLodEXT textureLod",
+            "#define texture2DGradEXT textureGrad",
+            "#define texture2DProjGradEXT textureProjGrad",
+            "#define textureCubeGradEXT textureGrad",
+            "out highp vec4 pc_fragColor;",
+            "#define gl_FragColor pc_fragColor"
+    };
+
+    /** adjust shader source to avoid deprecated versions */
+    static public String adjustShader(final GL2GL3 gl, int type, String source) {
+        String prefixedSource = source;
+        // OpenGL 3.3 has GLSL version 330 (see https://en.wikipedia.org/wiki/OpenGL_Shading_Language)
+        if (gl.versionAtLeast(3, 3) && source.startsWith("#version 1")) {
+            String strippedSource = source.replaceAll("#version 1..", "");
+            if (type == gl.GL_FRAGMENT_SHADER()) {
+                prefixedSource = String.join("\n", prefixFragment) + strippedSource;
+            } else if (type == gl.GL_VERTEX_SHADER()) {
+                prefixedSource = String.join("\n", prefixVertex) + strippedSource;
+            }
+        }
+        return prefixedSource;
+    }
     /**
      * Checks that a shader was compiled correctly.
      *
@@ -114,8 +152,7 @@ public final class ShaderLoader {
 
         // Link and validate the program
         gl.glLinkProgram(program);
-        gl.glValidateProgram(program);
-        if ((!isProgramLinked(gl, program)) || (!isProgramValidated(gl, program))) {
+        if (!isProgramLinked(gl, program)) {
             final String log = ShaderUtil.getProgramInfoLog(gl, program);
             throw gl.newGLException(log);
         }
@@ -125,6 +162,15 @@ public final class ShaderLoader {
         gl.glDeleteShader(fs);
 
         return program;
+    }
+
+    public static void validateProgram(GL2GL3 gl, int program) {
+        gl.glValidateProgram(program);
+        if (!isProgramValidated(gl, program)) {
+            final String log = ShaderUtil.getProgramInfoLog(gl, program);
+            throw gl.newGLException(log);
+        }
+
     }
 
     /**
@@ -142,7 +188,7 @@ public final class ShaderLoader {
 
         // Create and read source
         final int shader = gl.glCreateShader(type);
-        gl.glShaderSource(shader, source);
+        gl.glShaderSource(shader, adjustShader(gl, type, source));
 
         // Compile
         gl.glCompileShader(shader);

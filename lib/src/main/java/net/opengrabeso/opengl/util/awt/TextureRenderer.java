@@ -175,7 +175,7 @@ public class TextureRenderer {
 
         // try VAO support
         // it seems when there is no VAO glGenVertexArrays fails gracefully by returning -1,
-        // but as it is hard to test this one older implementations, using an additional try should do no harm
+        // but as it is hard to test this on older implementations, using an additional try should do no harm
         try {
             int[] vao = new int[]{0};
             gl.glGenVertexArrays(vao);
@@ -186,7 +186,11 @@ public class TextureRenderer {
             this.useVAO = false;
         }
 
-
+        if (false) {
+            // crashes on MacOS - VAO not provided
+            // validating has no sense - we have no fallback anyway
+            ShaderLoader.validateProgram(gl, program);
+        }
     }
 
     private void setupVertexAttributesImpl() {

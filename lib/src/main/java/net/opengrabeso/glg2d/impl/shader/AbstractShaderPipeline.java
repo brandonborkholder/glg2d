@@ -25,6 +25,7 @@ import java.util.List;
 
 import com.github.opengrabeso.jaagl.GL;
 import com.github.opengrabeso.jaagl.GL2GL3;
+import net.opengrabeso.opengl.util.awt.ShaderLoader;
 
 public abstract class AbstractShaderPipeline implements ShaderPipeline {
     protected int vertexShaderId = 0;
@@ -130,46 +131,11 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
         }
     }
 
+
     protected int compileShader(GL2GL3 gl, int type, Class<?> context, String name) throws ShaderException {
         String source = readShader(context, name);
 
-        String[] prefixVertex = new String[]{
-                "#version 330",
-                "#define attribute in",
-                "#define varying out",
-                "#define texture2D texture"
-        };
-
-        String[] prefixFragment = new String[]{
-                "#version 330",
-                "#define varying in",
-                "#define gl_FragDepthEXT gl_FragDepth",
-                "#define texture2D texture",
-                "#define textureCube texture",
-                "#define texture2DProj textureProj",
-                "#define texture2DLodEXT textureLod",
-                "#define texture2DProjLodEXT textureProjLod",
-                "#define textureCubeLodEXT textureLod",
-                "#define texture2DGradEXT textureGrad",
-                "#define texture2DProjGradEXT textureProjGrad",
-                "#define textureCubeGradEXT textureGrad"
-        };
-        String[] prefixVertex3 = new String[]{
-                "out highp vec4 pc_fragColor;",
-                "#define gl_FragColor pc_fragColor"
-        };
-
-        String prefixedSource = source;
-        // OpenGL 3.3 has GLSL version 330 (see https://en.wikipedia.org/wiki/OpenGL_Shading_Language)
-        if (gl.versionAtLeast(3, 3) && source.startsWith("#version 1")) {
-            String strippedSource = source.replaceAll("#version 1..", "");
-            if (type == gl.GL_FRAGMENT_SHADER()) {
-                prefixedSource = String.join("\n", prefixFragment) + strippedSource;
-            }
-            if (type == gl.GL_VERTEX_SHADER()) {
-                prefixedSource = String.join("\n", prefixVertex) + String.join("\n", prefixVertex3) + strippedSource;
-            }
-        }
+        String prefixedSource = ShaderLoader.adjustShader(gl, type, source);
 
         int id = compileShader(gl, type, prefixedSource);
         checkShaderThrowException(gl, id);
@@ -178,14 +144,19 @@ public abstract class AbstractShaderPipeline implements ShaderPipeline {
 
     protected int compileShader(GL2GL3 gl, int type, String source) throws ShaderException {
         int id = gl.glCreateShader(type);
+        int err = gl.glGetError();
+        if (err != gl.GL_NO_ERROR()) {
+            throw new ShaderException("Create shader failed, GL Error: 0x" + Integer.toHexString(err));
+        }
 
         gl.glShaderSource(id, source);
-        int err = gl.glGetError();
+        err = gl.glGetError();
         if (err != gl.GL_NO_ERROR()) {
             throw new ShaderException("Shader source failed, GL Error: 0x" + Integer.toHexString(err));
         }
 
         gl.glCompileShader(id);
+        err = gl.glGetError();
         if (err != gl.GL_NO_ERROR()) {
             throw new ShaderException("Compile failed, GL Error: 0x" + Integer.toHexString(err));
         }
