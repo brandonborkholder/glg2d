@@ -99,6 +99,23 @@
       <version>${lwjgl.version}</version>
       <classifier>${lwjgl.natives}</classifier>
     </dependency>
+
+
+    <!--  TODO: remove JOGL dependencies from LWJGL implementation -->
+    <dependency>
+      <groupId>org.jogamp.gluegen</groupId>
+      <artifactId>gluegen-rt-main</artifactId>
+      <version>${jogl.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.jogamp.jogl</groupId>
+      <artifactId>jogl-all-main</artifactId>
+      <version>${jogl.version}</version>
+    </dependency>
+
+
   </dependencies>
+
+
 
 </project>
