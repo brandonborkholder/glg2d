@@ -5,12 +5,18 @@ import net.opengrabeso.glg2d.GLGraphics2D;
 import javax.swing.*;
 import java.awt.*;
 
-class Example {
-  public static JComponent createComponent() {
-    JPanel panel = new JPanel(new BorderLayout());
-    panel.setDoubleBuffered(false);
+class AWTExample extends JPanel implements AnExample {
+    @Override
+    public String getTitle() {
+        return "AWTExample";
+    }
 
-    panel.add(new JButton("Press me!"), BorderLayout.NORTH);
+    public AWTExample() {
+    super(new BorderLayout());
+    setDoubleBuffered(false);
+    setPreferredSize(new Dimension(300, 300));
+
+    add(new JButton("Press me!"), BorderLayout.NORTH);
 
     JProgressBar bar = new JProgressBar() {
       protected void paintComponent(java.awt.Graphics g) {
@@ -23,8 +29,8 @@ class Example {
       }
     };
     bar.setIndeterminate(true);
-    panel.add(bar, BorderLayout.SOUTH);
-    panel.add(new JSlider(SwingConstants.VERTICAL, 0, 10, 3), BorderLayout.EAST);
+    add(bar, BorderLayout.SOUTH);
+    add(new JSlider(SwingConstants.VERTICAL, 0, 10, 3), BorderLayout.EAST);
 
     ButtonGroup grp = new ButtonGroup();
     JRadioButton radio1 = new JRadioButton("FM");
@@ -35,13 +41,11 @@ class Example {
     JPanel panel2 = new JPanel(new GridLayout(0, 1));
     panel2.add(radio1);
     panel2.add(radio2);
-    
+
     JComboBox b = new JComboBox(new String[] {"3", "4"});
 
-    panel.add(b, BorderLayout.WEST);
+    add(b, BorderLayout.WEST);
 
-    panel.setBorder(BorderFactory.createTitledBorder("Border"));
-
-    return panel;
+    setBorder(BorderFactory.createTitledBorder("Border"));
   }
 }

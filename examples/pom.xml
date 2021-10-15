@@ -10,7 +10,7 @@
   <version>${projversion}</version>
   <modelVersion>4.0.0</modelVersion>
 
-  <artifactId>examples-jogl</artifactId>
+  <artifactId>examples</artifactId>
   <properties>
     <maven.deploy.skip>true</maven.deploy.skip>
   </properties>
@@ -18,19 +18,8 @@
   <dependencies>
     <dependency>
       <groupId>net.opengrabeso</groupId>
-      <artifactId>examples</artifactId>
+      <artifactId>glg2d</artifactId>
       <version>${projversion}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.jogamp.gluegen</groupId>
-      <artifactId>gluegen-rt-main</artifactId>
-      <version>${jogl.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.jogamp.jogl</groupId>
-      <artifactId>jogl-all-main</artifactId>
-      <version>${jogl.version}</version>
     </dependency>
   </dependencies>
 </project>
