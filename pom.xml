@@ -17,6 +17,7 @@
 
   <modules>
     <module>lib</module>
+    <module>examples</module>
     <module>examples-jogl</module>
     <module>examples-lwjgl</module>
   </modules>

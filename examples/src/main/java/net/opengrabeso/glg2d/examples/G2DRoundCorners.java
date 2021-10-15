@@ -1,7 +1,5 @@
 package net.opengrabeso.glg2d.examples;
 
-import net.opengrabeso.glg2d.GLG2DPanel;
-
 import java.awt.*;
 import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
@@ -11,24 +9,20 @@ import javax.swing.JFrame;
 public class G2DRoundCorners extends JFrame {
 
     private static final long serialVersionUID = 1L;
+    private final AFactory factory;
 
-    public G2DRoundCorners() {
+    public G2DRoundCorners(AFactory factory) {
+        this.factory = factory;
         setTitle("Graphics2D - Round corners bug repro");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     public void display() {
         JComponent comp = new CustomComponent();
-        setContentPane(new GLG2DPanel(comp));
+        setContentPane(factory.createPanel(comp));
         pack();
         setVisible(true);
     }
-
-    public static void main(String[] args) {
-        G2DRoundCorners main = new G2DRoundCorners();
-        main.display();
-    }
-
 
     static class CustomComponent extends JComponent {
 

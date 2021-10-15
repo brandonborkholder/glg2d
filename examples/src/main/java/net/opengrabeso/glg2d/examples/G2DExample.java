@@ -1,7 +1,5 @@
 package net.opengrabeso.glg2d.examples;
 
-import net.opengrabeso.glg2d.GLG2DPanel;
-
 import java.awt.*;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -11,24 +9,20 @@ import javax.swing.JFrame;
 public class G2DExample extends JFrame {
 
     private static final long serialVersionUID = 1L;
+    private final AFactory factory;
 
-    public G2DExample() {
+    public G2DExample(AFactory factory) {
+        this.factory = factory;
         setTitle("Graphics2D rendering example");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
 
     public void display() {
         JComponent comp = new CustomComponent();
-        setContentPane(new GLG2DPanel(comp));
+        setContentPane(factory.createPanel(comp));
         pack();
         setVisible(true);
     }
-
-    public static void main(String[] args) {
-        G2DExample main = new G2DExample();
-        main.display();
-    }
-
 
     static class CustomComponent extends JComponent {
 
