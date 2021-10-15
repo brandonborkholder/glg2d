@@ -18,7 +18,7 @@ public class SwingExampleFactory {
 
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
-        frame.setContentPane(new GLG2DPanel(component));
+        frame.setContentPane(component);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setPreferredSize(new Dimension(1024, 768));
         frame.pack();

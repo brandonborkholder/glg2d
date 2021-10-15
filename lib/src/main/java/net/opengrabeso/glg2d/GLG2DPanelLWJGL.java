@@ -8,6 +8,7 @@ import org.lwjgl.system.*;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.peer.ComponentPeer;
 import java.nio.*;
 
 import static org.lwjgl.glfw.Callbacks.*;
@@ -160,6 +161,13 @@ public class GLG2DPanelLWJGL {
                         component.setSize(dim.width, dim.height);
                         //component.onSizeChanged();
                         gl.glViewport(0, 0, dim.width, dim.height);
+                        //graphics2D.setClip(0, 0, dim.width, dim.height);
+
+                        ComponentPeer peer = new LWJGLComponentPeer();
+                        // peer is necessary for validate - otherwise validateTree is not called
+                        sun.awt.AWTAccessor.getComponentAccessor().setPeer(component, peer);
+                        component.invalidate();
+                        component.validate();
                     }
                 }
 
