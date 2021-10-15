@@ -15,10 +15,15 @@ import javax.swing.table.*;
 import javax.swing.tree.*;
 
 @SuppressWarnings("serial")
-public class UIDemo extends JPanel {
-
+public class UIDemo extends JPanel implements AnExample {
+    @Override
+    public String getTitle() {
+        return "UIDemo";
+    }
 
     public UIDemo() {
+        super(new BorderLayout());
+
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.add(new JScrollPane(createTreeComponent()), BorderLayout.NORTH);
         leftPanel.add(new JScrollPane(createTableComponent()), BorderLayout.CENTER);
@@ -52,9 +57,11 @@ public class UIDemo extends JPanel {
         rightSubPanel.add(rightSplit, BorderLayout.CENTER);
         rightSubPanel.add(createTabComponent(), BorderLayout.SOUTH);
 
-        setLayout(new BorderLayout());
         mainSplit.setDividerLocation(300);
         add(mainSplit, BorderLayout.CENTER);
+
+
+        setPreferredSize(new Dimension(1024, 768));
     }
 
     JComponent createTabComponent() {

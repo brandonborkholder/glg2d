@@ -3,8 +3,9 @@ package net.opengrabeso.glg2d.examples;
 import net.opengrabeso.glg2d.GLG2DPanel;
 
 import javax.swing.*;
+import java.awt.*;
 
-public class JoglExampleFactory {
+public class SwingExampleFactory {
     {
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
@@ -13,22 +14,15 @@ public class JoglExampleFactory {
     }
 
     public static void display(JComponent component) {
-
-        GLG2DPanel panel = new GLG2DPanel(component);
-        panel.setPreferredSize(component.getPreferredSize());
-        panel.setMinimumSize(component.getMinimumSize());
-
         JFrame frame = new JFrame(((AnExample)component).getTitle());
 
         JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 
         frame.setContentPane(new GLG2DPanel(component));
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setPreferredSize(component.getPreferredSize());
-        frame.setMinimumSize(component.getMinimumSize());
+        frame.setPreferredSize(new Dimension(1024, 768));
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
-
     }
 }

@@ -1,85 +1,69 @@
 package net.opengrabeso.glg2d.examples;
 
 import java.awt.*;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
+import javax.swing.*;
 
 // adapted from https://stackoverflow.com/a/6263897/16673
 
-public class G2DExample extends JFrame {
+public class G2DExample extends JComponent implements AnExample {
+    @Override
+    public String getTitle() {
+        return "G2DExample";
+    }
 
     private static final long serialVersionUID = 1L;
-    private final AFactory factory;
 
-    public G2DExample(AFactory factory) {
-        this.factory = factory;
-        setTitle("Graphics2D rendering example");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+    private final int margin = 10;
+
+    @Override
+    public Dimension getMinimumSize() {
+        return new Dimension(100, 100);
     }
 
-    public void display() {
-        JComponent comp = new CustomComponent();
-        setContentPane(factory.createPanel(comp));
-        pack();
-        setVisible(true);
+    @Override
+    public Dimension getPreferredSize() {
+        return new Dimension(400, 300);
     }
 
-    static class CustomComponent extends JComponent {
+    private Rectangle placeRect(Rectangle rect) {
+        Dimension dim = getSize();
 
-        private static final long serialVersionUID = 1L;
+        int wMax = dim.width - margin - rect.x;
+        int hMax = dim.height - margin - rect.y;
 
-        private final int margin = 10;
+        return new Rectangle(
+                rect.x,
+                rect.y,
+                Math.min(rect.width, wMax),
+                Math.min(rect.height, hMax)
+        );
+    }
 
-        @Override
-        public Dimension getMinimumSize() {
-            return new Dimension(100, 100);
+    @Override
+    public void paintComponent(Graphics g) {
+        int margin = 10;
+        Dimension dim = getSize();
+        super.paintComponent(g);
+        g.setColor(Color.red);
+        g.fillRect(margin, margin, dim.width - margin * 2, dim.height - margin * 2);
+
+        {
+            Rectangle rect = placeRect(new Rectangle(20, 20, 300, 300));
+            g.setColor(Color.yellow);
+            g.fillRoundRect(rect.x, rect.y, rect.width, rect.height, 100, 100);
         }
 
-        @Override
-        public Dimension getPreferredSize() {
-            return new Dimension(400, 300);
+        {
+            Rectangle rect = placeRect(new Rectangle(100, 100, 100, 100));
+            g.setColor(Color.green);
+            g.fillRoundRect(rect.x, rect.y, rect.width, rect.height, 20, 20);
         }
 
-        private Rectangle placeRect(Rectangle rect) {
-            Dimension dim = getSize();
+        {
+            Rectangle rect = placeRect(new Rectangle(300, 100, 200, 200));
+            g.setColor(Color.blue);
+            g.fillOval(rect.x, rect.y, rect.width, rect.height);
 
-            int wMax = dim.width - margin - rect.x;
-            int hMax = dim.height - margin - rect.y;
-
-            return new Rectangle(
-                    rect.x,
-                    rect.y,
-                    Math.min(rect.width, wMax),
-                    Math.min(rect.height, hMax)
-            );
-        }
-
-        @Override
-        public void paintComponent(Graphics g) {
-            int margin = 10;
-            Dimension dim = getSize();
-            super.paintComponent(g);
-            g.setColor(Color.red);
-            g.fillRect(margin, margin, dim.width - margin * 2, dim.height - margin * 2);
-
-            {
-                Rectangle rect = placeRect(new Rectangle(20, 20, 300, 300));
-                g.setColor(Color.yellow);
-                g.fillRoundRect(rect.x, rect.y, rect.width, rect.height, 100, 100);
-            }
-
-            {
-                Rectangle rect = placeRect(new Rectangle(100, 100, 100, 100));
-                g.setColor(Color.green);
-                g.fillRoundRect(rect.x, rect.y, rect.width, rect.height, 20, 20);
-            }
-
-            {
-                Rectangle rect = placeRect(new Rectangle(300, 100, 200, 200));
-                g.setColor(Color.blue);
-                g.fillOval(rect.x, rect.y, rect.width, rect.height);
-
-            }
         }
     }
 }
