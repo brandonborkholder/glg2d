@@ -17,6 +17,7 @@ package net.opengrabeso.glg2d.impl;
 
 import net.opengrabeso.glg2d.PathVisitor;
 
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 
 /**
@@ -55,6 +56,13 @@ public abstract class SimplePathVisitor implements PathVisitor {
 
     @Override
     public void quadTo(float[] previousVertex, float[] control) {
+        assert !Double.isNaN(previousVertex[0]);
+        assert !Double.isNaN(previousVertex[1]);
+
+        assert !Double.isNaN(control[0]);
+        assert !Double.isNaN(control[1]);
+        assert !Double.isNaN(control[2]);
+        assert !Double.isNaN(control[3]);
 
         // error estimation: distance of control points from the center point
         Point2D.Float midPoint = tPoint(previousVertex[0], previousVertex[1], control[2], control[3], 0.5f);
@@ -109,7 +117,13 @@ public abstract class SimplePathVisitor implements PathVisitor {
         float err1 = distance(control[0], control[1], midPoint1.x, midPoint1.y);
         float err2 = distance(control[2], control[3], midPoint2.x, midPoint2.y);
 
-        float err = Math.max(err1, err2);
+        double[] matrix = new double[4];
+
+        getGLG2D().getMatrixHelper().getTransform().getMatrix(matrix);
+        // scale is square root of 2x2 determinant
+        double scale = Math.sqrt(matrix[0] * matrix[3] - matrix[1] * matrix[2]);
+
+        float err = Math.max(err1, err2) * (float)scale;
 
         int steps = Math.round(err);
 

@@ -77,6 +77,8 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
 
     @Override
     public void moveTo(float[] vertex) {
+        assert !Double.isNaN(vertex[0]);
+        assert !Double.isNaN(vertex[1]);
         finishAndDrawLine();
 
         lastPoint = new float[]{vertex[0], vertex[1]};
@@ -85,6 +87,9 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
 
     @Override
     public void lineTo(float[] vertex) {
+        assert !Double.isNaN(vertex[0]);
+        assert !Double.isNaN(vertex[1]);
+
         // ignore 0-length lines
         if (lastPoint[0] == vertex[0] && lastPoint[1] == vertex[1]) {
             return;
@@ -349,8 +354,13 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
 
     protected float getIntersectionAlpha(float[] pt1, float[] v1, float[] pt2, float[] v2) {
         float t = (pt2[0] - pt1[0]) * v2[1] - (pt2[1] - pt1[1]) * v2[0];
-        t /= v1[0] * v2[1] - v1[1] * v2[0];
-        return t;
+        float denom = v1[0] * v2[1] - v1[1] * v2[0];
+        if (denom != 0) {
+            t /= denom;
+            return t;
+        } else {
+            return 0;
+        }
     }
 
     protected float[] lineOffset(float[] linePoint1, float[] linePoint2) {

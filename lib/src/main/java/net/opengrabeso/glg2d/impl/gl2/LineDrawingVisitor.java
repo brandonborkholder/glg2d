@@ -21,6 +21,7 @@ import java.awt.BasicStroke;
 import com.github.opengrabeso.jaagl.GL;
 import com.github.opengrabeso.jaagl.GL2;
 
+import net.opengrabeso.glg2d.GLGraphics2D;
 import net.opengrabeso.glg2d.impl.BasicStrokeLineVisitor;
 
 /**
@@ -30,10 +31,17 @@ import net.opengrabeso.glg2d.impl.BasicStrokeLineVisitor;
  */
 public class LineDrawingVisitor extends BasicStrokeLineVisitor {
     protected GL2 gl;
+    protected GLGraphics2D glg2d;
 
     @Override
-    public void setGLContext(GL context) {
+    public void setGLContext(GL context, GLGraphics2D g2d) {
         gl = context.getGL2();
+        glg2d = g2d;
+    }
+
+    @Override
+    public GLGraphics2D getGLG2D() {
+        return glg2d; // dummy implementation - non-shader implementation not much used anyway
     }
 
     @Override

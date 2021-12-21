@@ -22,6 +22,7 @@ import java.nio.FloatBuffer;
 import com.github.opengrabeso.jaagl.GL;
 import com.github.opengrabeso.jaagl.GL2;
 
+import net.opengrabeso.glg2d.GLGraphics2D;
 import net.opengrabeso.glg2d.VertexBuffer;
 import net.opengrabeso.glg2d.impl.SimplePathVisitor;
 
@@ -39,13 +40,21 @@ public class FastLineVisitor extends SimplePathVisitor {
 
     protected GL2 gl;
 
+    protected GLGraphics2D glg2d;
+
     protected BasicStroke stroke;
 
     protected float glLineWidth;
 
     @Override
-    public void setGLContext(GL context) {
+    public GLGraphics2D getGLG2D() {
+        return glg2d;
+    }
+
+    @Override
+    public void setGLContext(GL context, GLGraphics2D g2d) {
         gl = context.getGL2();
+        glg2d = g2d;
     }
 
     @Override

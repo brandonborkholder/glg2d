@@ -23,6 +23,7 @@ import java.nio.FloatBuffer;
 
 import com.github.opengrabeso.jaagl.GL;
 
+import net.opengrabeso.glg2d.GLGraphics2D;
 import net.opengrabeso.glg2d.PathVisitor;
 import net.opengrabeso.glg2d.VertexBuffer;
 
@@ -99,9 +100,14 @@ public class SimpleOrTesselatingVisitor extends SimplePathVisitor {
     }
 
     @Override
-    public void setGLContext(GL context) {
-        simpleFallback.setGLContext(context);
-        tesselatorFallback.setGLContext(context);
+    public void setGLContext(GL context, GLGraphics2D g2d) {
+        simpleFallback.setGLContext(context, g2d);
+        tesselatorFallback.setGLContext(context, g2d);
+    }
+
+    @Override
+    public GLGraphics2D getGLG2D() {
+        return tesselatorFallback.getGLG2D();
     }
 
     @Override

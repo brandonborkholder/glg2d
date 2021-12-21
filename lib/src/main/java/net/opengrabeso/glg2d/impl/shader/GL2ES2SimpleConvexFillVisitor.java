@@ -22,11 +22,13 @@ import java.nio.FloatBuffer;
 import com.github.opengrabeso.jaagl.GL;
 import com.github.opengrabeso.jaagl.GL2GL3;
 
+import net.opengrabeso.glg2d.GLGraphics2D;
 import net.opengrabeso.glg2d.VertexBuffer;
 import net.opengrabeso.glg2d.impl.SimplePathVisitor;
 
 public class GL2ES2SimpleConvexFillVisitor extends SimplePathVisitor implements ShaderPathVisitor {
     protected GL2GL3 gl;
+    protected GLGraphics2D glg2d;
     protected UniformBufferObject uniforms;
 
     protected VertexBuffer vBuffer = new VertexBuffer(1024);
@@ -42,19 +44,25 @@ public class GL2ES2SimpleConvexFillVisitor extends SimplePathVisitor implements 
     }
 
     @Override
-    public void setGLContext(GL glContext, UniformBufferObject uniforms) {
-        setGLContext(glContext);
+    public void setGLContext(GL glContext, GLGraphics2D g2D, UniformBufferObject uniforms) {
+        setGLContext(glContext, g2D);
 
         this.uniforms = uniforms;
     }
 
     @Override
-    public void setGLContext(GL context) {
+    public void setGLContext(GL context, GLGraphics2D g2d) {
         gl = context.getGL2GL3();
+        glg2d = g2d;
 
         if (!pipeline.isSetup()) {
             pipeline.setup(gl);
         }
+    }
+
+    @Override
+    public GLGraphics2D getGLG2D() {
+        return glg2d;
     }
 
     @Override
