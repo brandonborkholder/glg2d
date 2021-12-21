@@ -55,6 +55,13 @@ public abstract class SimplePathVisitor implements PathVisitor {
 
     @Override
     public void quadTo(float[] previousVertex, float[] control) {
+        assert !Double.isNaN(previousVertex[0]);
+        assert !Double.isNaN(previousVertex[1]);
+
+        assert !Double.isNaN(control[0]);
+        assert !Double.isNaN(control[1]);
+        assert !Double.isNaN(control[2]);
+        assert !Double.isNaN(control[3]);
 
         // error estimation: distance of control points from the center point
         Point2D.Float midPoint = tPoint(previousVertex[0], previousVertex[1], control[2], control[3], 0.5f);

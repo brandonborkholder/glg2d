@@ -81,6 +81,8 @@ public class VertexBuffer {
      * @param y The y coordinate
      */
     public void addVertex(float x, float y) {
+        assert !Double.isNaN(x);
+        assert !Double.isNaN(y);
         ensureCapacity(2);
         buffer.put(x);
         buffer.put(y);
