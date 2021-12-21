@@ -19,13 +19,20 @@ package net.opengrabeso.glg2d.impl.gl2;
 import com.github.opengrabeso.jaagl.GL;
 import com.github.opengrabeso.jaagl.GL2;
 
+import net.opengrabeso.glg2d.GLGraphics2D;
 import net.opengrabeso.glg2d.impl.AbstractTesselatorVisitor;
 
 public class GL2TesselatorVisitor extends AbstractTesselatorVisitor {
     protected GL2 gl;
+    protected GLGraphics2D glg2d;
 
     @Override
-    public void setGLContext(GL context) {
+    public GLGraphics2D getGLG2D() {
+        return glg2d;
+    }
+
+    @Override
+    public void setGLContext(GL context, GLGraphics2D g2d) {
         gl = context.getGL2();
     }
 

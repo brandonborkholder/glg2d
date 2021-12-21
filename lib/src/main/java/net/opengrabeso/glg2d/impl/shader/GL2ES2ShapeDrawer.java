@@ -48,10 +48,10 @@ public class GL2ES2ShapeDrawer extends AbstractShapeHelper {
             GL gl = g2d.getGL();
             UniformBufferObject uniforms = ((GLShaderGraphics2D) g2d).getUniformsObject();
 
-            lineVisitor.setGLContext(gl, uniforms);
-            simpleFillVisitor.setGLContext(gl, uniforms);
-            tesselatingVisitor.setGLContext(gl, uniforms);
-            complexFillVisitor.setGLContext(gl);
+            lineVisitor.setGLContext(gl, g2d, uniforms);
+            simpleFillVisitor.setGLContext(gl, g2d, uniforms);
+            tesselatingVisitor.setGLContext(gl, g2d, uniforms);
+            complexFillVisitor.setGLContext(gl, g2d);
         } else {
             throw new IllegalArgumentException(GLGraphics2D.class.getName() + " implementation must be instance of "
                     + GLShaderGraphics2D.class.getSimpleName());

@@ -35,11 +35,17 @@ import com.github.opengrabeso.jaagl.GL;
 public interface PathVisitor {
     /**
      * Sets the GL context to be used for the next drawing session.
-     *
-     * @param context The GL context
+     *  @param context The GL context
+     * @param g2d
      */
-    void setGLContext(GL context);
+    void setGLContext(GL context, GLGraphics2D g2d);
 
+
+    /**
+     * Current scale used for rendering - needed for a proper tesselation control
+     *
+     * @return*/
+    GLGraphics2D getGLG2D();
     /**
      * Sets the stroke to be used when drawing a path. It's not needed for
      * visitors that fill.
