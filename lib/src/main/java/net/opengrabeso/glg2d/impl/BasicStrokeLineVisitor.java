@@ -357,7 +357,7 @@ public abstract class BasicStrokeLineVisitor extends SimplePathVisitor {
         float denom = v1[0] * v2[1] - v1[1] * v2[0];
         if (denom != 0) {
             t /= denom;
-            return t;
+            return Math.max(-1, Math.min(t, 1));
         } else {
             return 0;
         }

@@ -32,31 +32,22 @@ public class G2DExampleCurve extends JComponent implements AnExample {
         super.paintComponent(g);
 
         Path2D.Double shape = new Path2D.Double();
-        float scale = 5;
+        float scale = 1.33f;
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        g2d.scale(scale, scale);
-        g2d.translate(-1200, -200);
+        g2d.scale(scale, scale * 1.2f);
+        g2d.translate(-320, -160);
         g2d.setStroke(new BasicStroke(2.0f / scale));
 
-        shape.moveTo(1227, 240);
-        shape.curveTo(1228.0, 241.0, 1228.0, 240.0, 1230.0, 240.0);
-        shape.curveTo(1232.0, 240.0, 1231.0, 240.0, 1233.0, 240.0);
-        shape.curveTo(1235.0, 240.0, 1234.0, 240.0, 1236.0, 240.0);
-        shape.curveTo(1238.0, 240.0, 1237.0, 240.0, 1239.0, 240.0);
-        shape.curveTo(1241.0, 240.0, 1240.0, 240.0, 1242.0, 240.0);
-        shape.curveTo(1244.0, 240.0, 1244.0, 241.0, 1245.0, 240.0);
-        shape.curveTo(1246.0, 239.0, 1246.0, 238.0, 1245.0, 237.0);
-        shape.curveTo(1244.0, 236.0, 1244.0, 237.0, 1242.0, 237.0);
-        shape.curveTo(1240.0, 237.0, 1240.0, 238.0, 1239.0, 237.0);
-        shape.curveTo(1238.0, 236.0, 1240.0, 235.0, 1239.0, 234.0);
-        shape.curveTo(1238.0, 233.0, 1237.0, 235.0, 1236.0, 234.0);
-        shape.curveTo(1235.0, 233.0, 1237.0, 232.0, 1236.0, 231.0);
-        shape.curveTo(1235.0, 230.0, 1235.0, 231.0, 1233.0, 231.0);
-        shape.curveTo(1231.0, 231.0, 1231.0, 230.0, 1230.0, 231.0);
-        shape.curveTo(1229.0, 232.0, 1231.0, 233.0, 1230.0, 234.0);
-        shape.curveTo(1229.0, 235.0, 1228.0, 233.0, 1227.0, 234.0);
-        shape.curveTo(1226.0, 235.0, 1227.0, 235.0, 1227.0, 237.0);
-        shape.curveTo(1227.0, 239.0, 1226.0, 239.0, 1227.0, 240.0);
+        shape.moveTo(354,189);
+        shape.curveTo(356.3333333333333,188.66666666666666,356.0,189.66666666666666,357.0,188.0);
+        shape.curveTo(358.0,186.33333333333334,357.6666666666667,186.0,357.0,184.0);
+        shape.curveTo(356.3333333333333,182.0,357.0,182.66666666666666,355.0,182.0);
+        shape.curveTo(353.0,181.33333333333334,352.6666666666667,181.0,351.0,182.0);
+        shape.curveTo(349.3333333333333,183.0,349.0,184.0,350.0,185.0);
+        shape.curveTo(351.0,186.0,353.6666666666667,184.66666666666666,354.0,185.0);
+        shape.curveTo(354.3333333333333,185.33333333333334,352.3333333333333,184.66666666666666,351.0,186.0);
+        shape.curveTo(349.6666666666667,187.33333333333334,349.0,188.0,350.0,189.0);
+        shape.curveTo(351.0,190.0,351.6666666666667,189.33333333333334,354.0,189.0);
 
         g2d.setColor(Color.BLACK);
         g2d.draw(shape);
