@@ -68,7 +68,7 @@ public abstract class SimplePathVisitor implements PathVisitor {
         Point2D.Float midPoint = tPoint(previousVertex[0], previousVertex[1], control[2], control[3], 0.5f);
         float err = distance(control[0], control[1], midPoint.x, midPoint.y);
 
-        int steps = Math.round(err);
+        int steps = (int)Math.ceil(err);
 
         float[] p = new float[2];
 
@@ -125,7 +125,7 @@ public abstract class SimplePathVisitor implements PathVisitor {
 
         float err = Math.max(err1, err2) * (float)scale;
 
-        int steps = Math.round(err);
+        int steps = (int)Math.ceil(err * 1.5);
 
         float xd, xdd, xddd, xdd_per_2, xddd_per_2, xddd_per_6;
         float yd, ydd, yddd, ydd_per_2, yddd_per_2, yddd_per_6;
